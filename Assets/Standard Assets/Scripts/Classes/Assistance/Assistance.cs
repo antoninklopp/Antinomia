@@ -117,6 +117,7 @@ public class Assistance : Carte {
 		 * A ce moment là on détruit le zoom qui avait été créé sur la carte. 
 		 * 
 		 */
+        base.OnMouseExit();
         //if (assistanceState == State.MAIN) {
         //    GetComponent<SpriteRenderer>().enabled = true;
         //    Destroy(BigCard);
