@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antinomia", "Antinomia.csproj", "{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antinomia.Plugins", "Antinomia.Plugins.csproj", "{19CA5E02-E462-8B74-AAD2-C40A5A11303C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antinomia.Editor.Plugins", "Antinomia.Editor.Plugins.csproj", "{C560B5FA-C14A-50BB-1831-49BF2B54AEFF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antinomia.Editor", "Antinomia.Editor.csproj", "{7A5D6233-F957-C8F7-910A-8F5DC54CF43B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19CA5E02-E462-8B74-AAD2-C40A5A11303C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19CA5E02-E462-8B74-AAD2-C40A5A11303C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19CA5E02-E462-8B74-AAD2-C40A5A11303C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19CA5E02-E462-8B74-AAD2-C40A5A11303C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C560B5FA-C14A-50BB-1831-49BF2B54AEFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C560B5FA-C14A-50BB-1831-49BF2B54AEFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C560B5FA-C14A-50BB-1831-49BF2B54AEFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C560B5FA-C14A-50BB-1831-49BF2B54AEFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A5D6233-F957-C8F7-910A-8F5DC54CF43B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A5D6233-F957-C8F7-910A-8F5DC54CF43B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A5D6233-F957-C8F7-910A-8F5DC54CF43B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A5D6233-F957-C8F7-910A-8F5DC54CF43B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

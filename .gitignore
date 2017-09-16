@@ -259,3 +259,20 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/Antinomia_Data
+/Antinomia_Data
+/Assets/Animations/Cartes
+/Assets/Art
+/Assets/GameSparks/Plugins
+/Assets/Lobby/Prefabs
+/Assets/Lobby/Sprites
+/Assets/NoPlugins
+/Assets/Prefabs
+/Assets/Resources
+/Assets/Scenes
+/Assets/Standard Assets/CrossPlatformInput/Prefabs
+/Assets/Standard Assets/CrossPlatformInput/Sprites
+/Assets/Standard Assets/Fonts
+/Library
+/ProjectSettings
+/Temp
