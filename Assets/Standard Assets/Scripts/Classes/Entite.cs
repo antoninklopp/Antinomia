@@ -350,7 +350,7 @@ public class Entite : Carte {
 
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         base.DisplayInfoCarteGameManager(this.shortCode,
-            Name + "\n" +
+            "<color=red>" + Name + "</color>" + "\n" +
             "STAT : " + STAT.ToString() + "\n" +
             "Nature : " + carteElement.ToString() + "\n" + 
             "Effets : " + AllEffetsStringToDisplay + "\n" + 
@@ -797,10 +797,9 @@ public class Entite : Carte {
 			 */
             if (!transform.parent.parent.parent.gameObject.GetComponent<Player>().isServer) {
                 // Command juste sur le client. 
-                Debug.Log("N'est pas le serveur");
+                // TODO : A changer, faire d'abord l'appel de la command puis l'appel RPC
                 CmdChangePosition(carteState);
             } else {
-                Debug.Log("This is RPC");
                 RpcChangePosition(carteState);
             }
         } else {
@@ -1056,12 +1055,21 @@ public class Entite : Carte {
         RpcChangeFromCardBase(); 
     }
 
+    [Command]
+    public void CmdMultiplierStat(int _multiplicateur) {
+        STAT *= _multiplicateur;
+        Debug.Log("Multiplication des valeurs de la carte1");
+        RpcChangeFromCardBase();
+        Debug.Log("Multiplication des valeurs de la carte2");
+    }
+
     [ClientRpc]
     void RpcChangeFromCardBase() {
         /*
          * Lorsqu'une carte change de la carte de base à cause d'un effet,
          * on met une sorte de filtre vert sur la carte pour l'indiquer. 
          */
+        Debug.Log("Changement de couleur de la carte"); 
         GetComponent<SpriteRenderer>().color = Color.green; 
     }
 

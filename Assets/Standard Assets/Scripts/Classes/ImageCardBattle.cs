@@ -34,9 +34,10 @@ public class ImageCardBattle : MonoBehaviour {
 				return; 
 			}
 		}
-        GetComponent<SpriteRenderer>().sprite = AllImages[0]; 
+        GetComponent<SpriteRenderer>().sprite = AllImages[0];
 
-		throw new Exception ("La face de la carte n'a pas été trouvée" + name); 
+        Debug.LogWarning("La face de la carte n'a pas été trouvée"); 
+		//throw new Exception ("La face de la carte n'a pas été trouvée" + name); 
 	}
 
 	public void setDosCarte(){

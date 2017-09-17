@@ -374,7 +374,7 @@ public class Sort : Carte {
 
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         base.DisplayInfoCarteGameManager(this.shortCode,
-            Name + "\n" +
+            "<color=red>" + Name + "</color>" + "\n" +
             "Niveau : " + Niveau.ToString() + "\n" +
             "Effets : " + AllEffetsStringToDisplay);
     }

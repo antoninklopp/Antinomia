@@ -367,7 +367,10 @@ public class Carte : NetworkBehaviour {
         }
     }
 
-
+    public void JouerEffetDeposeCarte() {
+        Debug.Log("Les effets sont en cours de traitement"); 
+        GererEffets(AllEffets);
+    }
 
     public virtual void UpdateNewPhase(Player.Phases _currentPhase) {
         /*
@@ -383,7 +386,7 @@ public class Carte : NetworkBehaviour {
         GererEffets(AllEffets, _currentPhase); 
     }
 
-    public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase) {
+    public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
         }
@@ -391,7 +394,7 @@ public class Carte : NetworkBehaviour {
             // On regarde les effets un par un. 
             // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
             bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase);
-
+            Debug.Log("<color=orange>" + effetOK.ToString() + "</Color>"); 
             if (effetOK) {
                 // Dans le cas où toutes les conditions sont réunies. 
                 GererActions(_allEffets[i].AllActionsEffet);
@@ -411,11 +414,11 @@ public class Carte : NetworkBehaviour {
          */
         bool effetOK = true;
         for (int j = 0; j < _conditions.Count; ++j) {
-            if (!_conditions[j].dependsOnPhase) {
-                // Si l'effet ne dépend pas d'une phase, il n'y pas de raison
-                break;
-            }
-            else if (_conditions[j].dependsOnPhase &&
+            //if (!_conditions[j].dependsOnPhase) {
+            //    // Si l'effet ne dépend pas d'une phase, il n'y pas de raison
+            //    break;
+            //}
+            if (_conditions[j].dependsOnPhase &&
                 _currentPhase != _conditions[j].PhaseCondition) {
                 // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
                 return false; 
@@ -430,7 +433,8 @@ public class Carte : NetworkBehaviour {
                 return false; 
             }
             else {
-                if (_conditions[j].ActionObligatoire) {
+                Debug.Log("<color=green>Verification de conditions </color>"); 
+                // if (_conditions[j].ActionObligatoire) {
                     // Dans le cas d'une action obligatoire. 
                     switch (_conditions[j].ConditionCondition) {
                         case Condition.ConditionEnum.NONE:
@@ -476,17 +480,17 @@ public class Carte : NetworkBehaviour {
                         default:
                             Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
                             break;
-                    }
+                    //}
                 }
-                else {
+                //else {
                     // Si l'action n'est pas obligatoire, on n'oblige pas le joueur à jouer cet effet à ce moment précis. 
                     // On fait donc un break et passe à l'effet suivant. 
-                    break;
-                }
+                 //   break;
+                //}
                 Debug.Log("<color=gree>effet est OK</color>");
             }
         }
-
+        Debug.Log(effetOK);
         return effetOK; 
 
     }
@@ -528,7 +532,21 @@ public class Carte : NetworkBehaviour {
                     DisplayMessage("On place cette carte dans le sanctuaire"); 
                     PlacerSanctuaire();
                     break;
-                    
+                case Action.ActionEnum.PUISSANCE_MULTIPLIE:
+                    // Multiplier la puissance des entités SUR LE CHAMP DE BATAILLE. 
+                    Debug.Log("Multiplication de la puissance"); 
+                    List<GameObject> CartesLocales = FindAllCartesLocal(); 
+                    for (int i = 0; i < CartesLocales.Count; ++i) {
+                        Debug.Log(3); 
+                        if (CartesLocales[i].GetComponent<Entite>() != null) {
+                            Debug.Log(CartesLocales[i].GetComponent<Entite>().Name);
+                            if (CartesLocales[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE) {
+                                Debug.Log(CartesLocales[i].GetComponent<Entite>().Name);
+                                CartesLocales[i].GetComponent<Entite>().CmdMultiplierStat(_actions[j].properIntAction); 
+                            }
+                        }
+                    }
+                    break; 
                 default:
                     Debug.LogWarning("Cet effet n'est pas géré");
                     break;
@@ -626,7 +644,7 @@ public class Carte : NetworkBehaviour {
     /// </returns>
     List<GameObject> FindAllCartesLocal() {
         List<GameObject> CartesLocal = new List<GameObject>(); 
-        GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("Carte");
+        GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
         for (int i = 0; i < AllCartes.Length; ++i) {
             if (AllCartes[i].GetComponent<Carte>().isFromLocalPlayer && 
                 ((AllCartes[i].GetComponent<Entite>().carteState == Entite.State.SANCTUAIRE)

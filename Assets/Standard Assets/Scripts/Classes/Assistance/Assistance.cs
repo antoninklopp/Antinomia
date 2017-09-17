@@ -109,8 +109,8 @@ public class Assistance : Carte {
 
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         base.DisplayInfoCarteGameManager(this.shortCode,
+            "<color=red>" + Name + "</color>" + "\n" +
             "Assistance " + "\n" +
-            Name + "\n" + 
             "Effets : " + AllEffetsStringToDisplay);
     }
 
@@ -206,12 +206,16 @@ public class Assistance : Carte {
 
         carteAffectee.SendMessage("DetruireCarte");
 
-        CmdPoserAssistance(); 
+        CmdPoserAssistance();
+
+        JouerEffetDeposeCarte();
 
         // On applique l'effet sur la carte. 
         // LierAssistance(carteAffectee);
 
         // Le sort a été joué. 
+        GetComponent<BoxCollider2D>().enabled = true; 
+
         clicked = 0;
     }
 

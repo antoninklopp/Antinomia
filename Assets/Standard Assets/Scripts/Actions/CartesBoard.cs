@@ -81,8 +81,6 @@ public class CartesBoard : NetworkBehaviour {
 		 * 
 		 */ 
 
-		print ("deposee ChampBataille");
-
 		// On change le parent de la carte. 
 		NewCard.transform.SetParent (transform);
 		// Puis on réorganise l'affichage.
