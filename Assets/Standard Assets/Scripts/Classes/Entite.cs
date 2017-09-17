@@ -67,6 +67,25 @@ public class Entite : Carte {
     public List<Effet> AllEffetsMalefique = new List<Effet>();
     public List<Effet> AllEffetsAstral = new List<Effet>();
 
+    /// <summary>
+    /// Reçu par la bdd Gamesparks "Malefique". C'est le string à décortiquer pour créer la liste d'effets maléfiques. 
+    /// </summary>
+    public string AllEffetsMalefiqueString = "";
+    /// <summary>
+    /// Reçu par la bdd Gamesparks "Astral". C'est le string à décortiquer pour créer la liste d'effets astrals. 
+    /// </summary>
+    public string AllEffetsAstralString = "";
+    /// <summary>
+    /// Reçu par la bdd Gamesparks "MalefiqueString". C'est le string à afficher "en français" pour que 
+    /// l'utilisateur comprenne l'effet maléfique en question. 
+    /// </summary>
+    public string AllEffetsMalefiqueStringToDisplay = "";
+    /// <summary>
+    /// Reçu par la bdd Gamesparks "AstralString". C'est le string à afficher "en français" pour que 
+    /// l'utilisateur comprenne l'effet maléfique en question. 
+    /// </summary>
+    public string AllEffetsAstralStringToDisplay = ""; 
+
     public Entite(string _Name, int _ID, int _STAT, int _CoutAKA, Element _carteElement,
         Ascendance _carteAscendance, Capacite _carteCapacite,
         EffetMalefique _carteEffetMalefique, EffetAstral _carteEffetAstral) {
@@ -173,15 +192,12 @@ public class Entite : Carte {
     // Appelé sur le serveur.
     void Update() {
 
-        if ((clicked && GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PREPARATION &&
-                (carteState == State.CHAMPBATAILLE || carteState == State.SANCTUAIRE))
-            || (clicked && (GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE1 ||
-                GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) && carteState == State.MAIN)) {
+        if (clicked) {
             // Si on a cliqué sur la carte. 
             // On ne peut la déplacer que pendant la phase de préparation. (depuis le sanctuaire ou le board)
             // On ne peut l'invoquer que pendant les phases principales. 
             Dragging();
-        }
+        } 
     }
 
     public override void checkIfLocalPlayerOnMousEnter() {
@@ -210,7 +226,7 @@ public class Entite : Carte {
     }
 
 
-    void OnMouseDown() {
+    public override void OnMouseDown() {
         /* lors d'un clique sur la carte. 
 		 * 
 		 * On commence le fait de pouvoir la bouger physiquement. 
@@ -259,7 +275,10 @@ public class Entite : Carte {
             if (!isFromLocalPlayer) {
                 return;
             }
-            if (!clicked) {
+            if (!clicked && (((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PREPARATION &&
+                    (carteState == State.CHAMPBATAILLE || carteState == State.SANCTUAIRE)))
+                    || ((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE1 ||
+                    GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) && carteState == State.MAIN))) {
                 GetComponent<SpriteRenderer>().enabled = true;
                 Destroy(BigCard);
                 clicked = !clicked;
@@ -332,8 +351,11 @@ public class Entite : Carte {
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         base.DisplayInfoCarteGameManager(this.shortCode,
             Name + "\n" +
-            "STAT" + STAT.ToString() + "\n" +
-            "Nature" + carteElement.ToString());
+            "STAT : " + STAT.ToString() + "\n" +
+            "Nature : " + carteElement.ToString() + "\n" + 
+            "Effets : " + AllEffetsStringToDisplay + "\n" + 
+            "Astral : "  + AllEffetsAstralStringToDisplay + "\n" +
+            "Malefique : " + AllEffetsMalefiqueStringToDisplay);
     }
 
     void ChangePosition(Player.Phases currentPhase) {
@@ -633,7 +655,9 @@ public class Entite : Carte {
         if (((Players[0].GetComponent<Player>().isLocalPlayer && Players[0].GetComponent<Player>().isServer) ||
             (Players[1].GetComponent<Player>().isLocalPlayer && Players[1].GetComponent<Player>().isServer)) && netId.Value != 0) {
             // Dans le cas d'une instantiation d'une carte sur le réseau.
-            RpcsetoID1(IDCardGame, oID, Name, shortCode, carteAscendance, carteElement, STAT, CoutAKA, coutElementaire);
+            RpcsetoID1(IDCardGame, oID, Name, shortCode, carteAscendance, carteElement, STAT, CoutAKA, coutElementaire, 
+                AllEffetsString, AllEffetsStringToDisplay, AllEffetsMalefiqueString, AllEffetsMalefiqueStringToDisplay, 
+                AllEffetsAstralString, AllEffetsAstralStringToDisplay);
             // Inutile normalement.
             // RpcChangeParent (); 
         }
@@ -712,7 +736,10 @@ public class Entite : Carte {
 
     [ClientRpc]
     void RpcsetoID1(int _ID, string _oID, string _Name, string _shortCode, Entite.Ascendance _ascendance, Entite.Element _element, int _STAT,
-                                    int _coutAKA, int _coutElementaire) {
+                                    int _coutAKA, int _coutElementaire, string _AllEffetsString, string _AllEffetsStringToDisplay, 
+                                    string _AllEffetsMalefiques, string _AllEffetsMalefiquesToDisplay, 
+                                    string _AllEffetsAstrals, string _AllEffetsAstralToDisplay) {
+
         // On peut peut-être tout faire passer par les arguments. 
         IDCardGame = _ID;
         oID = _oID;
@@ -725,7 +752,15 @@ public class Entite : Carte {
         STAT = _STAT;
         CoutAKA = _coutAKA;
         coutElementaire = _coutElementaire;
-        //OnStartAuthority (); 
+        AllEffetsAstralString = _AllEffetsAstrals;
+        AllEffetsAstralStringToDisplay = _AllEffetsAstralToDisplay;
+        AllEffetsString = _AllEffetsString;
+        AllEffetsStringToDisplay = _AllEffetsStringToDisplay;
+        AllEffetsMalefiqueString = _AllEffetsMalefiques;
+        AllEffetsMalefiqueStringToDisplay = _AllEffetsMalefiquesToDisplay;
+        stringToEffetList(_AllEffetsString);
+        stringToEffetAstral(_AllEffetsAstrals);
+        stringToEffetMalefique(_AllEffetsMalefiques); 
     }
 
 
@@ -738,6 +773,7 @@ public class Entite : Carte {
     void DetruireCarte() {
         /*
 		 * On change juste la carte de State pour pouvoir laisser au joueur la possibilité de la récupérer ensuite. 
+         * Et pouvoir l'afficher dans le cimetiere. 
 		 */
 
         if (GetComponent<EntiteAssocieeAssistance>() != null) {
@@ -1056,6 +1092,7 @@ public class Entite : Carte {
     }
 
     public override void UpdateNewPhase(Player.Phases _currentPhase) {
+        clicked = false;
         base.UpdateNewPhase(_currentPhase);
 
         GameManager.AscendanceTerrain _ascendanceTerrain = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain(); 
@@ -1068,6 +1105,32 @@ public class Entite : Carte {
             case GameManager.AscendanceTerrain.ASTRALE:
                 GererEffets(AllEffetsAstral, _currentPhase);
                 break; 
+        }
+    }
+
+    public void stringToEffetAstral(string allEffets) {
+        if (allEffets == "None") {
+            return; 
+        }
+        string[] AllEffetsStringList = allEffets.Split(':');
+
+        for (int i = 0; i < AllEffetsStringList.Length; ++i) {
+            Effet _effet = stringToEffet(AllEffetsStringList[i]);
+            AllEffetsAstral.Add(_effet);
+            Debug.Log("Effet créé");
+        }
+    }
+
+    public void stringToEffetMalefique(string allEffets) {
+        if (allEffets == "None") {
+            return; 
+        }
+        string[] AllEffetsStringList = allEffets.Split(':');
+
+        for (int i = 0; i < AllEffetsStringList.Length; ++i) {
+            Effet _effet = stringToEffet(AllEffetsStringList[i]);
+            AllEffetsMalefique.Add(_effet);
+            Debug.Log("Effet créé");
         }
     }
 

@@ -42,6 +42,8 @@ public class Condition {
     * LA DUREE DE L'EFFET EN NOMBRE DE TOURS EST GERE DANS ACTION. 
     *   
     * Si l'action est obligatoire, l'entier sera négatif. 
+    * 
+    * S'il n'y a aucune information de timing, l'effet se fait lorsque la carte est déposée sur le board. 
      */
 
     // Une ou plusieurs conditions peuvent être nécessaires pour effectuer un sort
@@ -56,7 +58,9 @@ public class Condition {
         CHOIX_ELEMENT, // Choix d'un element dans le cas où on veut changer l'élément d'une carte par exemple.
         CHOIX_ENTITE_NEUTRE_ADVERSAIRE, 
         CHOIX_ENTITE_NEUTRE_JOUEUR,
+        SACRIFIER_CARTE, 
         MORT, // Lors de la destruction de la carte. 
+        PAYER_AKA, // Payer un cout en AKA
         NONE
     };
 

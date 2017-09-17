@@ -11,7 +11,6 @@ public class Sort : Carte {
      
     public int Niveau;
     public string Condition;
-    public string Effet;
     public int CoutAKA;
 
 
@@ -33,7 +32,7 @@ public class Sort : Carte {
         Name = _Name;
         description = _description;
         Niveau = _Niveau;
-        Effet = _Effet;
+        AllEffetsString = _Effet;
         stringToEffetList(_Effet);
 
     }
@@ -78,7 +77,7 @@ public class Sort : Carte {
     }
 
 
-    void OnMouseDown() {
+    public override void OnMouseDown() {
         /*
          * Lors d'un clique sur la carte
          */ 
@@ -376,7 +375,8 @@ public class Sort : Carte {
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         base.DisplayInfoCarteGameManager(this.shortCode,
             Name + "\n" +
-            "Niveau" + Niveau.ToString());
+            "Niveau : " + Niveau.ToString() + "\n" +
+            "Effets : " + AllEffetsStringToDisplay);
     }
 
     public IEnumerator SetUpCard() {
@@ -393,7 +393,7 @@ public class Sort : Carte {
         if (((Players[0].GetComponent<Player>().isLocalPlayer && Players[0].GetComponent<Player>().isServer) ||
             (Players[1].GetComponent<Player>().isLocalPlayer && Players[1].GetComponent<Player>().isServer)) && netId.Value != 0) {
             // Dans le cas d'une instantiation d'une carte sur le réseau.
-            RpcsetoID1(IDCardGame, oID, Name, shortCode, Niveau, CoutAKA, Effet);
+            RpcsetoID1(IDCardGame, oID, Name, shortCode, Niveau, CoutAKA, AllEffetsString, AllEffetsStringToDisplay);
             // Inutile normalement.
             // RpcChangeParent (); 
         }
@@ -444,7 +444,7 @@ public class Sort : Carte {
 
     [ClientRpc]
     void RpcsetoID1(int _ID, string _oID, string _Name, string _shortCode, int _Niveau,
-                                    int _coutAKA, string _Effet) {
+                                    int _coutAKA, string _Effet, string _EffetToDisplay) {
         // On peut peut-être tout faire passer par les arguments. 
         IDCardGame = _ID;
         oID = _oID;
@@ -453,9 +453,15 @@ public class Sort : Carte {
         sortState = State.MAIN;
         Niveau = _Niveau;
         CoutAKA = _coutAKA;
-        Effet = _Effet;
+        AllEffetsString = _Effet;
+        AllEffetsStringToDisplay = _EffetToDisplay; 
         stringToEffetList(_Effet); 
         //OnStartAuthority (); 
+    }
+
+    public override void UpdateNewPhase(Player.Phases _currentPhase) {
+        base.UpdateNewPhase(_currentPhase);
+        clicked = 0; 
     }
 
 }

@@ -89,8 +89,6 @@ public class CartesBoard : NetworkBehaviour {
 		AllCreaturesChampBataille.Add(NewCard); 
 		CmdReordonnerCarte(); 
 
-		print ("deposer!");
-
         // Et on change le statut de la carte de main à board. 
         if (NewCard.GetComponent<CarteType>().thisCarteType == CarteType.Type.ENTITE) {
             NewCard.SendMessage("setState", "BOARD");

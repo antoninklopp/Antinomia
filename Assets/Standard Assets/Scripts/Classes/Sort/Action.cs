@@ -74,13 +74,33 @@ public class Action {
         /// </summary>
         ATTAQUE_OBLIGATOIRE,
         /// <summary>
-        /// Sacrifie la carte choisir dans la condition.
+        /// Sacrifie la carte choisie dans la condition.
         /// </summary>
         SACRIFIER_CARTE, 
         /// <summary>
         /// Placer la carte dans le sanctuaire si possible. 
         /// </summary>
         PLACER_SANCTUAIRE, 
+        /// <summary>
+        /// La carte peut attaquer directement l'adversaire. 
+        /// </summary>
+        ATTAQUE_DIRECTE,
+        /// <summary>
+        /// Cette carte ne peut pas attaquer. 
+        /// </summary>
+        ATTAQUE_IMPOSSIBLE,
+        /// <summary>
+        /// Le joueur doit révéler une carte. 
+        /// </summary>
+        REVELER_CARTE,
+        /// <summary>
+        /// L'adversaire doit révéler une carte. 
+        /// </summary>
+        REVELER_CARTE_ADVERSAIRE,
+        /// <summary>
+        /// Defausser une carte. 
+        /// </summary>
+        DEFAUSSER,
         NONE
     };
 

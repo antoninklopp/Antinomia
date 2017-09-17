@@ -51,8 +51,10 @@ public class GameManager : NetworkBehaviour {
 
     GameObject InfoCarteBattle; 
 
-#pragma warning disable CS0414 // Le champ 'GameManager.AKARemanent' est assigné, mais sa valeur n'est jamais utilisée
-	int AKARemanent = 0;
+    /// <summary>
+    /// AKA sur le tour, c'est à dire à son niveau maximum au début du tour. 
+    /// </summary>
+	int AKATour = 0;
 #pragma warning restore CS0414 // Le champ 'GameManager.AKARemanent' est assigné, mais sa valeur n'est jamais utilisée
     // On ne peut lancer qu'un sort par tour. 
     public int sortLance = 0; 
@@ -232,7 +234,7 @@ public class GameManager : NetworkBehaviour {
 		Phase = newPhase; 
 		string PhaseToString = " ";
 
-        SendNextPhaseAllCards(); 
+        SendNextPhaseAllCards(newPhase); 
 
 		switch (Phase) {
 		case Player.Phases.INITIATION:
@@ -269,21 +271,30 @@ public class GameManager : NetworkBehaviour {
 		CurrentPhase.GetComponent<Text> ().text = PhaseToString; 
 	}
 
-    void SendNextPhaseAllCards() {
+    void SendNextPhaseAllCards(Player.Phases currentPhase) {
         /*
          * Envoyer à toutes les cartes qu'on change de phase. 
          */
         GameObject[] AllEntites = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
         for (int i = 0; i < AllEntites.Length; ++i) {
-            if (AllEntites[i].GetComponent<Entite>().isFromLocalPlayer) {
-                AllEntites[i].SendMessage("UpdateNewPhase"); 
+            try {
+                if (AllEntites[i].GetComponent<Entite>().isFromLocalPlayer) {
+                    AllEntites[i].SendMessage("UpdateNewPhase", currentPhase);
+                }
+            } catch (NullReferenceException e) {
+                Debug.Log(e); 
             }
         }
 
-        GameObject[] AllAssistances = GameObject.FindGameObjectsWithTag("AssistanceJouee");
+        GameObject[] AllAssistances = GameObject.FindGameObjectsWithTag("Assistance");
         for (int i = 0; i < AllAssistances.Length; ++i) {
-            if (AllAssistances[i].GetComponent<Entite>().isFromLocalPlayer) {
-                AllAssistances[i].SendMessage("UpdateNewPhase");
+            try {
+                if (AllAssistances[i].GetComponent<Assistance>().isFromLocalPlayer &&
+                    AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.JOUEE) {
+                    AllAssistances[i].SendMessage("UpdateNewPhase", currentPhase);
+                }
+            } catch (NullReferenceException e) {
+                Debug.Log(e); 
             }
         }
     }
@@ -574,7 +585,8 @@ public class GameManager : NetworkBehaviour {
 		 * On met l'AKA des deux joueurs à jour. 
 		 * 
 		 */ 
-		int currentAKA = GameObject.FindGameObjectsWithTag ("BoardSanctuaire").Length; 
+		int currentAKA = GameObject.FindGameObjectsWithTag ("BoardSanctuaire").Length;
+        AKATour = currentAKA; 
 		NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
 		NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
 		FindLocalPlayer ().SendMessage ("setPlayerAKADebutTour", currentAKA); 

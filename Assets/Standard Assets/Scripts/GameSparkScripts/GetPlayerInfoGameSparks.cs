@@ -77,6 +77,15 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _carte.Name = data.GetString("name");
             _carte.carteAscendance = stringToAscendance(data.GetString("Element"));
             _carte.carteElement = stringToElement(data.GetString("Element"));
+            _carte.stringToEffetList(data.GetString("Effet"));
+            _carte.stringToEffetAstral(data.GetString("Astral"));
+            _carte.stringToEffetMalefique(data.GetString("Malefique"));
+            _carte.AllEffetsAstralStringToDisplay = data.GetString("AstralString");
+            _carte.AllEffetsMalefiqueStringToDisplay = data.GetString("MalefiqueString");
+            _carte.AllEffetsStringToDisplay = data.GetString("EffetString");
+            _carte.AllEffetsString = data.GetString("Effet");
+            _carte.AllEffetsAstralString = data.GetString("Astral");
+            _carte.AllEffetsMalefiqueString = data.GetString("Malefique"); 
             _carte.CoutAKA = data.GetInt("AKA").Value;
 
             if (data.GetString("oID") != null) {
@@ -105,9 +114,10 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _sort.Niveau = data.GetInt("Niveau").Value;
             //_sort.Effet = data.GetString("Effet");
             //_sort.Condition = data.GetString("Condition");
-            _sort.Effet = data.GetString("Effet");
             _sort.Condition = data.GetString("Condition"); 
             _sort.stringToEffetList(data.GetString("Effet"));
+            _sort.AllEffetsString = data.GetString("Effet");
+            _sort.AllEffetsStringToDisplay = data.GetString("EffetString"); 
 
             if (data.GetString("oID") != null) {
                 _sort.IDAllCards = data.GetInt("card_ID").Value;
@@ -119,8 +129,9 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _assistance.shortCode = data.GetString("shortCode");
             _assistance.Name = data.GetString("name");
             _assistance.STAT = data.GetInt("STAT").Value;
-            _assistance.EffetString = data.GetString("Effet");
             _assistance.stringToEffetList(data.GetString("Effet"));
+            _assistance.AllEffetsString = data.GetString("Effet");
+            _assistance.AllEffetsStringToDisplay = data.GetString("EffetString"); 
             if (data.GetString("oID") != null) {
                 _assistance.IDAllCards = data.GetInt("card_ID").Value;
                 _assistance.oID = data.GetString("oID");

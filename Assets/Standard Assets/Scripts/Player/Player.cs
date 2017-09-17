@@ -13,7 +13,6 @@ public class Player : NetworkBehaviour	 {
 	 * if (!isLocalPlayer)
 	 * 
 	 * Les Sync Var doivent être ici!
-	 * 
 	 * TODO; Réorganiser le code. 
 	 */ 
 

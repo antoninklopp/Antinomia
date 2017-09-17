@@ -30,7 +30,6 @@ public class Assistance : Carte {
     public State assistanceState = State.DECK; 
 
     public int STAT;
-    public string EffetString;
 
     private int clicked = 0;
 
@@ -61,7 +60,7 @@ public class Assistance : Carte {
         }
 	}
 
-    private void OnMouseDown() {
+    public override void OnMouseDown() {
         /*
          * Lors d'un click sur la carte. 
          */
@@ -89,7 +88,10 @@ public class Assistance : Carte {
             }
         }
 
-        if (clicked != 0) {
+        if (clicked != 0 && ((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PREPARATION &&
+                    (assistanceState == State.JOUEE))
+                    || ((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE1 ||
+                    GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) && assistanceState == State.MAIN))) {
             clicked = 1;
             canGoBig = false;
             ChangePosition();
@@ -108,7 +110,8 @@ public class Assistance : Carte {
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         base.DisplayInfoCarteGameManager(this.shortCode,
             "Assistance " + "\n" +
-            Name + "\n");
+            Name + "\n" + 
+            "Effets : " + AllEffetsStringToDisplay);
     }
 
     public override void OnMouseExit() {
@@ -246,6 +249,8 @@ public class Assistance : Carte {
         Main.SendMessage("ReordonnerCarte");
 
         GetComponent<ImageCardBattle>().setImage(shortCode);
+
+        GetComponent<BoxCollider2D>().enabled = true; 
     }
 
     [Command]
@@ -314,7 +319,7 @@ public class Assistance : Carte {
         if (((Players[0].GetComponent<Player>().isLocalPlayer && Players[0].GetComponent<Player>().isServer) ||
             (Players[1].GetComponent<Player>().isLocalPlayer && Players[1].GetComponent<Player>().isServer)) && netId.Value != 0) {
             // Dans le cas d'une instantiation d'une carte sur le réseau.
-            RpcsetoID(IDCardGame, oID, Name, shortCode, STAT, EffetString);
+            RpcsetoID(IDCardGame, oID, Name, shortCode, STAT, AllEffetsString, AllEffetsStringToDisplay);
             // Inutile normalement.
             // RpcChangeParent (); 
         }
@@ -366,14 +371,15 @@ public class Assistance : Carte {
 
     [ClientRpc]
     public void RpcsetoID(int _IDCardGame, string _oID, string _Name, string _shortCode,
-        int _STAT, string _EffetString) {
+        int _STAT, string _EffetString, string _EffetsToDisplay) {
         IDCardGame = _IDCardGame;
         oID = _oID;
         Name = _Name;
         shortCode = _shortCode;
         STAT = _STAT;
-        EffetString = _EffetString;
-        assistanceState = State.MAIN; 
+        AllEffetsString = _EffetString;
+        assistanceState = State.MAIN;
+        AllEffetsStringToDisplay = _EffetsToDisplay; 
 
         stringToEffetList(_EffetString);
 
@@ -414,5 +420,9 @@ public class Assistance : Carte {
         ChampBataille.SendMessage("CmdReordonnerCarte");
     }
 
+    public override void UpdateNewPhase(Player.Phases _currentPhase) {
+        base.UpdateNewPhase(_currentPhase);
+        clicked = 0;
+    }
 
 }

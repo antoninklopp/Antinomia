@@ -48,14 +48,13 @@ public class Carte : NetworkBehaviour {
     public GameObject Cimetiere; 
 
     [HideInInspector]
-    public bool isFromLocalPlayer;
+    public bool isFromLocalPlayer = false;
     [HideInInspector]
     public bool canGoBig = true;
 
     [HideInInspector]
     // Definition de la carte à l'écran. 
     public float localScaleCard;
-
 
     public Sprite Cible;
 
@@ -71,6 +70,16 @@ public class Carte : NetworkBehaviour {
 
     // La liste de tous les effets de la carte. 
     public List<Effet> AllEffets = new List<Effet>();
+    /// <summary>
+    /// Reçu par la bdd Gamesparks "Effet". C'est le string à décortiquer pour créer la liste d'effets. 
+    /// </summary>
+    public string AllEffetsString = ""; 
+    /// <summary>
+    /// Reçu par la bdd GameSparks "EffetString". C'est le string à afficher "en français" pour que 
+    /// l'utilisateur comprenne l'effet en question. 
+    /// </summary>
+    public string AllEffetsStringToDisplay = ""; 
+
 
     // Use this for initialization
     public virtual void Start () {
@@ -173,6 +182,12 @@ public class Carte : NetworkBehaviour {
 
     public virtual void OnMouseExit() {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().HideInfoCarte();
+    }
+
+    public virtual void OnMouseDown() {
+        if (!isFromLocalPlayer) {
+            return; 
+        }
     }
 
     public virtual void checkIfLocalPlayerOnMousEnter() {
@@ -314,6 +329,9 @@ public class Carte : NetworkBehaviour {
     }
 
     public void stringToEffetList(string allEffets) {
+        if (allEffets == "None"){
+            return; 
+        }
         string[] AllEffetsStringList = allEffets.Split(':');
 
         for (int i = 0; i < AllEffetsStringList.Length; ++i) {
@@ -379,7 +397,7 @@ public class Carte : NetworkBehaviour {
                 GererActions(_allEffets[i].AllActionsEffet);
             }
             else {
-                Debug.Log("L'effet n'a pas pu être joué, pour diverses raisons. ");
+                Debug.Log("<color=orange>L'effet n'a pas pu être joué, pour diverses raisons. </color>");
             }
         }
     }
@@ -456,7 +474,7 @@ public class Carte : NetworkBehaviour {
                             }
                             break;
                         default:
-                            Debug.LogWarning("Cette capacité n'est pas encore gérée par le code");
+                            Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
                             break;
                     }
                 }
@@ -465,7 +483,7 @@ public class Carte : NetworkBehaviour {
                     // On fait donc un break et passe à l'effet suivant. 
                     break;
                 }
-                Debug.Log("effet est OK");
+                Debug.Log("<color=gree>effet est OK</color>");
             }
         }
 
