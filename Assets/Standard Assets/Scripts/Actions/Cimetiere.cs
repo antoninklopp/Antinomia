@@ -49,18 +49,16 @@ public class Cimetiere : NetworkBehaviour {
 		 * 
 		 */ 
 
-		print ("deposee ChampBataille");
-
 		// On change le parent de la carte. 
 		NewCard.transform.SetParent (transform);
 		// Puis on réorganise l'affichage.
 		AllCreaturesCimetiere.Add(NewCard); 
-		CmdReordonnerCarte(); 
+		CmdReordonnerCarte();
 
-		print ("deposer!"); 
-
-		// Et on change le statut de la carte de main à board. 
-		NewCard.SendMessage("setState", "CIMETIERE"); 
-		NewCard.SendMessage ("setClicked", false); 
+        // Et on change le statut de la carte de main à cimetière. 
+        if (NewCard.GetComponent<Entite>() != null) {
+            NewCard.SendMessage("setState", "CIMETIERE");
+            NewCard.SendMessage("setClicked", false);
+        }
 	}
 }

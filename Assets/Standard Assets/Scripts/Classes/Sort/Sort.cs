@@ -54,7 +54,8 @@ public class Sort : Carte {
         MAIN, // La carte est dans la main
         JOUE, // La carte a été jouée.
         BIGCARD, // La carte est zoomée. 
-        ADVERSAIRE // La carte est à l'adversaire
+        ADVERSAIRE, // La carte est à l'adversaire
+        CIMETIERE
     };
 
     public State sortState = State.MAIN; 
@@ -84,6 +85,10 @@ public class Sort : Carte {
 
         if (!isFromLocalPlayer) {
             return; 
+        }
+
+        if (sortState == State.CIMETIERE) {
+            return;
         }
 
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
@@ -295,7 +300,7 @@ public class Sort : Carte {
                     // TODO : A implémenter lors de l'implémentation des terrains. 
                     break; 
             }
-            Destroy(gameObject); 
+            CmdDetruireCarte(); 
             return true; 
         }
 
@@ -333,7 +338,7 @@ public class Sort : Carte {
          */ 
          if (AllEffets.Count == 0) {
             // Si le sort n'effectue plus d'effets on le détruit. 
-            Destroy(gameObject); 
+            CmdDetruireCarte(); 
          }
 
          for (int i = 0; i < AllEffets.Count; ++i) {
@@ -374,9 +379,7 @@ public class Sort : Carte {
 
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         base.DisplayInfoCarteGameManager(this.shortCode,
-            "<color=red>" + Name + "</color>" + "\n" +
-            "Niveau : " + Niveau.ToString() + "\n" +
-            "Effets : " + AllEffetsStringToDisplay);
+            GetInfoCarte());
     }
 
     public IEnumerator SetUpCard() {
@@ -462,6 +465,39 @@ public class Sort : Carte {
     public override void UpdateNewPhase(Player.Phases _currentPhase) {
         base.UpdateNewPhase(_currentPhase);
         clicked = 0; 
+    }
+
+    /// <summary>
+    /// Destruction d'une carte sort. 
+    /// </summary>
+    /// <remarks>peut-être à inclure dans la classe parent "Carte"</remarks>
+    [Command]
+    void CmdDetruireCarte() {
+
+        RpcDetruireCarte();
+    }
+
+    [ClientRpc]
+    void RpcDetruireCarte() {
+        clicked = 0; 
+
+        ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
+        Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
+        Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
+        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+
+        gameObject.tag = "Cimetiere";
+        Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
+        Sanctuaire.SendMessage("ReordonnerCarte");
+        ChampBataille.SendMessage("CmdReordonnerCarte");
+
+        sortState = State.CIMETIERE; 
+    }
+
+    public override string GetInfoCarte() {
+        return "<color=red>" + Name + "</color>" + "\n" +
+            "Niveau : " + Niveau.ToString() + "\n" +
+            "Effets : " + AllEffetsStringToDisplay; 
     }
 
 }

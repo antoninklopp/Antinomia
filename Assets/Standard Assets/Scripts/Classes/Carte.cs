@@ -187,6 +187,12 @@ public class Carte : NetworkBehaviour {
     public virtual void OnMouseDown() {
         if (!isFromLocalPlayer) {
             return; 
+        } 
+        if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused 
+            && !GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().IPausedTheGame) {
+            // Pas d'interaction possible, si le joueur n'a pas mis le jeu en pause, mais qu'il est en pause. 
+            DisplayMessage("Votre adversaire a mis le jeu en pause");
+            return; 
         }
     }
 
@@ -501,7 +507,6 @@ public class Carte : NetworkBehaviour {
         // On doit maintenant gérer les effets.
         for (int j = 0; j < _actions.Count; ++j) {
             switch (_actions[j].ActionAction) {
-
                 case Action.ActionEnum.ATTAQUE_OBLIGATOIRE:
                     Debug.LogWarning("Cet effet ne peut pas être joué ici. A vérifier.");
                     break;
@@ -509,19 +514,21 @@ public class Carte : NetworkBehaviour {
                     /*
                      * Il faut d'abord choisir une carte puis changer sa position.
                      */
+                    DisplayMessage("Choisissez une carte et changez sa position"); 
                     break;
                 case Action.ActionEnum.DETRUIRE:
                     /*
                      * Il faut d'abord choisir une carte puis la détruire.
                      */
+                    DisplayMessage("Choisissez uen carte et détruisez la"); 
                     break;
                 case Action.ActionEnum.GAIN_AKA_UN_TOUR:
                     FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
                     DisplayMessage("Ajout de " + _actions[j].intAction.ToString() + "AKA à ce tour"); 
                     break;
                 case Action.ActionEnum.PIOCHER_CARTE:
-                    FindLocalPlayer().GetComponent<Player>().PiocherNouvelleCarte();
-                    DisplayMessage("Pioche une carte"); 
+                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction);
+                    DisplayMessage("Pioche " + _actions[j].properIntAction.ToString() +  " carte"); 
                     break;
                 case Action.ActionEnum.SACRIFIER_CARTE:
                     // Sacrifier cette carte. 
@@ -541,12 +548,11 @@ public class Carte : NetworkBehaviour {
                         if (CartesLocales[i].GetComponent<Entite>() != null) {
                             Debug.Log(CartesLocales[i].GetComponent<Entite>().Name);
                             if (CartesLocales[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE) {
-                                Debug.Log(CartesLocales[i].GetComponent<Entite>().Name);
                                 CartesLocales[i].GetComponent<Entite>().CmdMultiplierStat(_actions[j].properIntAction); 
                             }
                         }
                     }
-                    break; 
+                    break;
                 default:
                     Debug.LogWarning("Cet effet n'est pas géré");
                     break;
@@ -699,5 +705,12 @@ public class Carte : NetworkBehaviour {
          */ 
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().DisplayMessage(Message);
     }
+
+    /// <summary>
+    /// Récupérer les informations essentielles sur la carte.
+    /// </summary>
+    public virtual string GetInfoCarte() {
+        return ""; 
+    } 
 
 }

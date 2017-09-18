@@ -69,6 +69,12 @@ public class Condition {
 
     public enum Reaction {
         CARTE_DETRUITE,
+        NOUVELLE_CARTE_BOARD, // Lors de l'arrivée d'une nouvelle carte sur le board.
+        /// <summary>
+        /// Lorsque la carte est présente sur le board. L'effet est actif quand elle arrive, 
+        /// quand elle est présente et disparaît une fois qu'elle en disparait. 
+        /// </summary>
+        PRESENCE_CARTE_BOARD,
         NONE
 
 

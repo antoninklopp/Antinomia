@@ -720,4 +720,15 @@ public class Player : NetworkBehaviour	 {
 		GameObject.FindGameObjectWithTag ("GameManager").transform.Find ("ShowCards").gameObject.SendMessage ("RpcShowCardsToOtherPlayer", allCards); 
 	}
 
+    [Command]
+    public void CmdSetGameToPause(bool gameIsPaused) {
+        // GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused = gameIsPaused;
+        RpcSetGameToPause(gameIsPaused); 
+    }
+
+    [ClientRpc]
+    public void RpcSetGameToPause(bool gameIsPaused) {
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GameIsSetToPause(gameIsPaused); 
+    }
+
 }

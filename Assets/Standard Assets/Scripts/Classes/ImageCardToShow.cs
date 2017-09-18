@@ -32,7 +32,8 @@ public class ImageCardToShow : MonoBehaviour {
 				return; 
 			}
 		}
-		throw new Exception ("La face de la carte n'a pas été trouvée" + name); 
+        GetComponent<Image>().sprite = AllImages[0];
+        Debug.LogWarning ("La face de la carte n'a pas été trouvée" + name); 
 	}
 
 	public void setOnIntListener(int _intCarte){

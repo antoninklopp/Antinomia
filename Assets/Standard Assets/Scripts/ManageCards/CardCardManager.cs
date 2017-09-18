@@ -47,13 +47,13 @@ public class CardCardManager : MonoBehaviour {
 		 */
         if (CarteScript != null) {
             CarteZoom.GetComponent<CarteZoom>().updateInfo(CarteScript.Name, CarteScript.shortCode,
-                CarteScript.Name);
+                CarteScript.GetInfoCarte());
         } else if (SortScript != null) {
             CarteZoom.GetComponent<CarteZoom>().updateInfo(SortScript.Name, SortScript.shortCode,
-                SortScript.Name); 
+                SortScript.GetInfoCarte()); 
         } else if (AssistanceScript != null) {
             CarteZoom.GetComponent<CarteZoom>().updateInfo(AssistanceScript.Name, AssistanceScript.shortCode,
-                AssistanceScript.Name);
+                AssistanceScript.GetInfoCarte());
         }
 	}
 }

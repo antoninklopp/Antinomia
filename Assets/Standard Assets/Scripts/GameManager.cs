@@ -95,7 +95,16 @@ public class GameManager : NetworkBehaviour {
     private GameObject CartesCimetiere;
     private GameObject CarteBaseCimetiere;
 
-    private GameObject EffetParticuleTerrain; 
+    private GameObject EffetParticuleTerrain;
+    
+    [HideInInspector]
+    public bool gameIsPaused = false;
+    public bool IPausedTheGame = false; 
+    public Sprite Pause;
+    public Sprite Play;
+
+    private GameObject DisplayInfo;
+    private GameObject PauseButton; 
 
 	// Use this for initialization
 	void Start () {
@@ -116,7 +125,10 @@ public class GameManager : NetworkBehaviour {
         EffetParticuleTerrain = GameObject.Find("EffetParticuleTerrain");
         EffetParticuleTerrain.SetActive(false);
         InfoCarteBattle = GameObject.Find("InfoCarte");
-        InfoCarteBattle.SetActive(false); 
+        InfoCarteBattle.SetActive(false);
+        DisplayInfo = GameObject.Find("DisplayInfo");
+        PauseButton = GameObject.Find("PauseButton");
+        DisplayInfo.SetActive(false); 
         StartCoroutine(PiocheDebut (6)); 
 	}
 	
@@ -234,7 +246,7 @@ public class GameManager : NetworkBehaviour {
 		Phase = newPhase; 
 		string PhaseToString = " ";
 
-        SendNextPhaseAllCards(newPhase); 
+        // SendNextPhaseAllCards(newPhase); 
 
 		switch (Phase) {
 		case Player.Phases.INITIATION:
@@ -586,6 +598,7 @@ public class GameManager : NetworkBehaviour {
 		 * 
 		 */ 
 		int currentAKA = GameObject.FindGameObjectsWithTag ("BoardSanctuaire").Length;
+        Debug.Log(currentAKA); 
         AKATour = currentAKA; 
 		NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
 		NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
@@ -727,5 +740,54 @@ public class GameManager : NetworkBehaviour {
 
     public void HideInfoCarte() {
         InfoCarteBattle.SetActive(false); 
+    }
+
+
+    /// <summary>
+    /// Permet au joueur de mettre le jeu en pause afin de pouvoir réagir à une action de l'autre joueur. 
+    /// </summary>
+    public void PauseGame() {
+        if (gameIsPaused) {
+            gameIsPaused = false;
+            // PauseButton.GetComponent<Image>().sprite = Play; 
+        } else {
+            gameIsPaused = true;
+            // PauseButton.GetComponent<Image>().sprite = Pause;
+        }
+        FindLocalPlayer().GetComponent<Player>().CmdSetGameToPause(gameIsPaused);
+        Debug.Log("GameIsSetToPause"); 
+
+    }
+
+    public void GameIsSetToPause(bool gamePaused) {
+        // Update le sprite du bouton pause. 
+        Debug.Log("Valeur du jeu : " + gameIsPaused.ToString());
+        Debug.Log("Valeur reçue par le serveur : " + gamePaused.ToString()); 
+        if (gameIsPaused == gamePaused) {
+            // Dans ce cas c'est ce joueur qui a demandé à ce que le jeu soit mis en pause. 
+            // On le laisse donc faire son action.
+            IPausedTheGame = gameIsPaused;
+        } else {
+            gameIsPaused = gamePaused; 
+            DisplayInfo.SetActive(true); 
+            if (gameIsPaused) {
+                DisplayInfo.GetComponent<Text>().text = "Le jeu a été stoppé par votre adversaire."; 
+            } else {
+                DisplayInfo.GetComponent<Text>().text = "La partie a repris.";
+                StartCoroutine(DeactivateDisplayInfo());
+            }
+        }
+
+        if (gamePaused) {
+            PauseButton.GetComponent<Image>().sprite = Pause;
+        } else {
+            PauseButton.GetComponent<Image>().sprite = Play;
+        }
+        Debug.Log("game Is Actually paused.");
+    }
+
+    private IEnumerator DeactivateDisplayInfo() {
+        yield return new WaitForSeconds(2f);
+        DisplayInfo.SetActive(false); 
     }
 }

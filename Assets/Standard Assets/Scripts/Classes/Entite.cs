@@ -235,11 +235,17 @@ public class Entite : Carte {
 		 * TODO: Implémenter également un drag and drop. 
 		 */
 
+        base.OnMouseDown(); 
+
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
 
         ResetLocalScale();
+
+        if (carteState == State.CIMETIERE) {
+            return;
+        }
 
         if (GameObject.Find("GameManager").GetComponent<GameManager>().Tour != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On ne peut pas interagir avec ses cartes si ce n'est pas son tour!
@@ -323,8 +329,6 @@ public class Entite : Carte {
     void OnMouseDrag() {
 
 
-
-
     }
 
     void OnMouseUp() {
@@ -350,12 +354,7 @@ public class Entite : Carte {
 
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         base.DisplayInfoCarteGameManager(this.shortCode,
-            "<color=red>" + Name + "</color>" + "\n" +
-            "STAT : " + STAT.ToString() + "\n" +
-            "Nature : " + carteElement.ToString() + "\n" + 
-            "Effets : " + AllEffetsStringToDisplay + "\n" + 
-            "Astral : "  + AllEffetsAstralStringToDisplay + "\n" +
-            "Malefique : " + AllEffetsMalefiqueStringToDisplay);
+            GetInfoCarte());
     }
 
     void ChangePosition(Player.Phases currentPhase) {
@@ -1140,6 +1139,30 @@ public class Entite : Carte {
             AllEffetsMalefique.Add(_effet);
             Debug.Log("Effet créé");
         }
+    }
+
+    public override string GetInfoCarte() {
+        string stringToReturn = "<color=red>" + Name + "</color>" + "\n" +
+            "STAT : " + STAT.ToString() + "\n"; 
+        if (carteElement == Element.AUCUN) {
+            stringToReturn += "Ascendance : " + carteAscendance + "\n"; 
+        } else {
+            stringToReturn += "Ascendance : ELEMENTAIRE" + "\n" +
+                "Element : " + carteElement + "\n"; 
+        }
+
+        if (AllEffetsStringToDisplay != "None") {
+            stringToReturn += "Effets : " + AllEffetsStringToDisplay + "\n"; 
+        } 
+        if (AllEffetsAstralStringToDisplay != "None") {
+            stringToReturn += "Astral : " + AllEffetsAstralStringToDisplay + "\n";
+        }
+        if (AllEffetsMalefiqueStringToDisplay != "None") {
+            stringToReturn += "Malefique : " + AllEffetsMalefiqueStringToDisplay;
+        }
+
+
+        return stringToReturn;
     }
 
 }

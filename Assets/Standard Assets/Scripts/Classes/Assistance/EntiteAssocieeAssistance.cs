@@ -17,9 +17,9 @@ public class EntiteAssocieeAssistance : MonoBehaviour {
 	}
 
     private void OnMouseEnter() {
-        AssistanceAssociee.GetComponent<Assistance>().CreateBigCard();
-        AssistanceAssociee.GetComponent<Assistance>().setBigCardPosition(
-            new Vector2(transform.position.x + 3, transform.position.y)); 
+        //AssistanceAssociee.GetComponent<Assistance>().CreateBigCard();
+        //AssistanceAssociee.GetComponent<Assistance>().setBigCardPosition(
+        //    new Vector2(transform.position.x + 3, transform.position.y)); 
     }
 
     private void OnMouseExit() {
