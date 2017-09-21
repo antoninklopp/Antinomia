@@ -117,7 +117,13 @@ public class Entite : Carte {
     // Track si l'utilisateur a cliqué sur la carte ou pas. 
     public bool clicked = false;
 
-    public bool hasAttacked;
+    /// <summary>
+    /// Valeur permettant de savoir si un joueur a attaqué. 
+    /// -1: Le joueur ne pourra JAMAIS attaquer. 
+    /// 0 : Le joueur n'a pas encore attaqué à ce tour mais pourra attaquer. 
+    /// 1 : Le joueur a attaqué à ce tour et ne peut donc plus attaquer à ce tour. 
+    /// </summary>
+    public int hasAttacked;
 
     // On a besoin de cette information pour pouvoir savoir si on touche la carte dans le cadre d'une phase. 
     public Player.PhasesCapacites CurrentPhaseCapacite = Player.PhasesCapacites.NONE;
@@ -304,10 +310,14 @@ public class Entite : Carte {
 			 * Lors du deuxième clique on sélectionne l'unité à attaquer. 
 			 */
             Debug.Log("Ceci est une phase de combats");
-            if (hasAttacked) {
+            if (hasAttacked == 1) {
                 GameObject.Find("GameManager").SendMessage("DisplayMessage", "Cette carte ne peut pas/plus attaquer");
+                return; 
+            } else if (hasAttacked == -1) {
+                DisplayMessage("Cette carte ne peut pas attaquer"); 
+                return; 
             }
-            if (isFromLocalPlayer && !hasAttacked) {
+            if (isFromLocalPlayer && hasAttacked == 0) {
                 // pour pouvoir attaquer il faut que la carte n'ait pas déjà attaqué. 
                 if (carteState != State.CHAMPBATAILLE) {
                     GameObject.Find("GameManager").SendMessage("DisplayMessage", "Une carte qui attaque doit etre sur le champ de bataille");
@@ -385,10 +395,12 @@ public class Entite : Carte {
                     // Si la carte est déposée sur le board, depuis la main.
                     // On vérifie qu'il y a moins de 5 cartes sur le board.
                     MoveToChampBataille(currentPhase);
+                    ProposerMettreJeuEnPause(); 
                 } else if (transform.position.y < yMaxSanctuaire && transform.position.y > yMinSanctuaire) {
                     // Si la carte est déposée sur le board. 
                     // On vérifie qu'il y a moins de 2 cartes sur le sanctuaire.
                     MoveToSanctuaire(currentPhase);
+                    ProposerMettreJeuEnPause(); 
                 }
                 // Si la carte n'est pas déposée, elle retrouve sa position grâce à la main qui est répordonnée.
                 Main.SendMessage("ReordonnerCarte");
@@ -410,13 +422,8 @@ public class Entite : Carte {
                 ChampBataille.SendMessage("CmdReordonnerCarte");
                 break;
         }
-
-        if (!transform.parent.parent.parent.gameObject.GetComponent<Player>().isServer) {
-            // Command juste sur le client. 
-            CmdChangePosition(carteState);
-        } else {
-            RpcChangePosition(carteState);
-        }
+        
+        CmdChangePosition(carteState);
     }
 
     void MoveToSanctuaire(Player.Phases currentPhase) {
@@ -609,12 +616,17 @@ public class Entite : Carte {
                 ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
                 Main.SendMessage("ReordonnerCarte");
                 gameObject.tag = "BoardSanctuaire";
+                // On offre au joueur adverse la possibilité de réagir. 
+                StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposeToPauseGame()); 
                 break;
             case State.SANCTUAIRE:
                 Main.SendMessage("DeleteCard", gameObject);
                 Sanctuaire.SendMessage("CmdCarteDeposee", gameObject);
                 Sanctuaire.SendMessage("ReordonnerCarte");
                 gameObject.tag = "BoardSanctuaire";
+
+                // On offre au joueur adverse la possibilité de réagir. 
+                StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposeToPauseGame());
                 break;
             case State.CIMETIERE:
                 Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
@@ -629,17 +641,6 @@ public class Entite : Carte {
         /*
 		 * Regarder quelle carte en touche une autre, lors d'une attaque. 
 		 */
-    }
-
-    void MortCarte() {
-        /*
-		 * TODO:
-		 * Mort de la carte lorsque la carte a 0 points de vie. 
-		 * Effets de particule? 
-		 * 
-		 * 
-		 */
-
 
     }
 
@@ -794,13 +795,7 @@ public class Entite : Carte {
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
 			 * 
 			 */
-            if (!transform.parent.parent.parent.gameObject.GetComponent<Player>().isServer) {
-                // Command juste sur le client. 
-                // TODO : A changer, faire d'abord l'appel de la command puis l'appel RPC
-                CmdChangePosition(carteState);
-            } else {
-                RpcChangePosition(carteState);
-            }
+            CmdChangePosition(carteState);
         } else {
             // Si on est pas sur le player local. 
             Debug.Log("N'est pas le local Player");
@@ -926,11 +921,16 @@ public class Entite : Carte {
         /*
 		 * A chaque début de tour, toutes les cartes peuvent de nouveau attaquer. 
 		 */
-        hasAttacked = false;
+        if (hasAttacked == -1) {
+            return;
+        }
+        else {
+            hasAttacked = 0;
+        }
     }
 
     void setHasAttacked(bool newHasAttacked = true) {
-        hasAttacked = newHasAttacked;
+        hasAttacked = 1;
     }
 
     GameObject[] GetAllCardsPlayed() {
@@ -1163,6 +1163,13 @@ public class Entite : Carte {
 
 
         return stringToReturn;
+    }
+
+    /// <summary>
+    /// Cette fonction est appelée après un effet qui permet à un joueur de changer la position d'une carte. 
+    /// </summary>
+    public void ChangerPosition() {
+        clicked = true; 
     }
 
 }

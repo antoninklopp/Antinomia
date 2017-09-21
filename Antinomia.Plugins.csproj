@@ -131,6 +131,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Assistance\EntiteAssocieeAssistance.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Capacite.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Carte.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\CarteDebut.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\CarteType.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Creature.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Deck.cs" />

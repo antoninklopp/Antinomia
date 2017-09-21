@@ -258,7 +258,7 @@ public class Assistance : Carte {
          * Lier l'assistance à une entité. 
          */ 
          // On regarde d'abord si la carteAffectee a attaqué à ce tour. 
-         if (carteAffectee.GetComponent<Entite>().hasAttacked) {
+         if (carteAffectee.GetComponent<Entite>().hasAttacked == 1) {
             DisplayMessage("Impossible de lier une assistance à une carte ayant déjà attaqué"); 
             return; 
          } else {
@@ -271,7 +271,7 @@ public class Assistance : Carte {
     }
 
     void DelierAssistance(GameObject carteAffectee) {
-        if (carteAffectee.GetComponent<Entite>().hasAttacked) {
+        if (carteAffectee.GetComponent<Entite>().hasAttacked == 1) {
             DisplayMessage("Impossible de lier une assistance à une carte ayant déjà attaqué");
             return;
         }
@@ -304,7 +304,9 @@ public class Assistance : Carte {
 
         GetComponent<ImageCardBattle>().setImage(shortCode);
 
-        GetComponent<BoxCollider2D>().enabled = true; 
+        GetComponent<BoxCollider2D>().enabled = true;
+
+        ProposerMettreJeuEnPause(); 
     }
 
     /// <summary>
@@ -330,6 +332,8 @@ public class Assistance : Carte {
         GetComponent<ImageCardBattle>().setImage(shortCode);
 
         GetComponent<SpriteRenderer>().color = Color.white;
+
+        ProposerMettreJeuEnPause(); 
     }
 
     /// <summary>

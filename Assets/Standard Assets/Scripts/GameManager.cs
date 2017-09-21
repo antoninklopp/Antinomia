@@ -104,7 +104,16 @@ public class GameManager : NetworkBehaviour {
     public Sprite Play;
 
     private GameObject DisplayInfo;
-    private GameObject PauseButton; 
+    private GameObject PauseButton;
+
+    private GameObject ChoixCartesDebut;
+    private GameObject CarteDebutPrefab; 
+    /// <summary>
+    /// Si l'int est à 0, il n'a pas encore été set
+    /// à 1, il est false. 
+    /// à 2, il est true. 
+    /// </summary>
+    int choixDebut = 0; 
 
 	// Use this for initialization
 	void Start () {
@@ -128,8 +137,13 @@ public class GameManager : NetworkBehaviour {
         InfoCarteBattle.SetActive(false);
         DisplayInfo = GameObject.Find("DisplayInfo");
         PauseButton = GameObject.Find("PauseButton");
-        DisplayInfo.SetActive(false); 
-        StartCoroutine(PiocheDebut (6)); 
+        DisplayInfo.SetActive(false);
+        PauseButton.SetActive(false);
+        ChoixCartesDebut = GameObject.Find("ChoixCartesDebut");
+        CarteDebutPrefab = ChoixCartesDebut.transform.Find("ChoixCartesDebutFond").Find("CarteDebut").gameObject;
+        ChoixCartesDebut.SetActive(false);
+        StartCoroutine(MontrerCartesAChoisirDebut()); 
+        // StartCoroutine(PiocheDebut (6)); 
 	}
 	
 	// Update is called once per frame
@@ -249,38 +263,42 @@ public class GameManager : NetworkBehaviour {
         // SendNextPhaseAllCards(newPhase); 
 
 		switch (Phase) {
-		case Player.Phases.INITIATION:
-			PhaseToString = "Initiation"; 
-			ChangeAKAJoueur ();
-            // On reset le nombre de sorts lancés à chaque début de tour.    
-            sortLance = 0; 
-			//CalculAKA (); 
-			nombreInvocationsSanctuaire = 0; 
-			// Après le calcul on passe directement à la phase suivante. 
-			Debug.Log("PHASE d'INITIATION");
-            //GoToNextPhase(); 
-            updateAllSorts(); 
-			break;
-		case Player.Phases.PIOCHE:
-			PhaseToString ="Pioche"; 
-			break;
-		case Player.Phases.PREPARATION:
-			PhaseToString ="Preparation"; 
-			break; 
-		case Player.Phases.PRINCIPALE1:
-			PhaseToString ="Principale1"; 
-			break; 
-		case Player.Phases.PRINCIPALE2:
-			PhaseToString ="Principale2"; 
-			break; 
-		case Player.Phases.COMBAT:
-			PhaseToString ="Combat";
-			break; 
-		case Player.Phases.FINALE:
-			PhaseToString ="Finale";
-			break; 
+		    case Player.Phases.INITIATION:
+			    PhaseToString = "Initiation"; 
+			    ChangeAKAJoueur ();
+                // On reset le nombre de sorts lancés à chaque début de tour.    
+                sortLance = 0; 
+			    //CalculAKA (); 
+			    nombreInvocationsSanctuaire = 0; 
+			    // Après le calcul on passe directement à la phase suivante. 
+			    Debug.Log("PHASE d'INITIATION");
+                //GoToNextPhase(); 
+                updateAllSorts(); 
+			    break;
+		    case Player.Phases.PIOCHE:
+			    PhaseToString ="Pioche";
+			    break;
+		    case Player.Phases.PREPARATION:
+			    PhaseToString ="Preparation";
+                break; 
+		    case Player.Phases.PRINCIPALE1:
+			    PhaseToString ="Principale1";
+                break; 
+		    case Player.Phases.PRINCIPALE2:
+			    PhaseToString ="Principale2";
+                break; 
+		    case Player.Phases.COMBAT:
+			    PhaseToString ="Combat";
+                break; 
+		    case Player.Phases.FINALE:
+			    PhaseToString ="Finale";
+                break; 
 		}
-		CurrentPhase.GetComponent<Text> ().text = PhaseToString; 
+		CurrentPhase.GetComponent<Text> ().text = PhaseToString;
+        // On ne peut pas réagir à la FIN de la phase d'initiation <=> au début de la phase de pioche. 
+        if ((Tour != FindLocalPlayerID()) && (Phase != Player.Phases.PIOCHE)) {
+            StartCoroutine(ProposeToPauseGame()); 
+        }
 	}
 
     void SendNextPhaseAllCards(Player.Phases currentPhase) {
@@ -469,6 +487,7 @@ public class GameManager : NetworkBehaviour {
 		 * 1. Ecrire sur l'écran détruire les cartes. Noircir l'écran. 
 		 * 2. Permettre au joueur de détruire les cartes. 
 		 * 
+         * INITULISEE
 		 */ 
 
 		Capacite_Effet.GetComponent<Text> ().text = "Detruire les cartes souhaitées"; 
@@ -767,6 +786,11 @@ public class GameManager : NetworkBehaviour {
             // Dans ce cas c'est ce joueur qui a demandé à ce que le jeu soit mis en pause. 
             // On le laisse donc faire son action.
             IPausedTheGame = gameIsPaused;
+            if (gameIsPaused) {
+
+            } else {
+                PauseButton.SetActive(false); 
+            }
         } else {
             gameIsPaused = gamePaused; 
             DisplayInfo.SetActive(true); 
@@ -775,6 +799,7 @@ public class GameManager : NetworkBehaviour {
             } else {
                 DisplayInfo.GetComponent<Text>().text = "La partie a repris.";
                 StartCoroutine(DeactivateDisplayInfo());
+                PauseButton.SetActive(false);
             }
         }
 
@@ -789,5 +814,108 @@ public class GameManager : NetworkBehaviour {
     private IEnumerator DeactivateDisplayInfo() {
         yield return new WaitForSeconds(2f);
         DisplayInfo.SetActive(false); 
+    }
+
+    public IEnumerator ProposeToPauseGame(int playerID=0) {
+        /*
+         * Après une action, on propose au joueur adverse de mettre le jeu en pause. 
+         * Si le playerID reste à 0, c'est que le choix du joueur qui peut mettre le jeu
+         * en pause est géré par un autre élément. Exemple: Lors d'un changement de phase, 
+         * c'est déjà géré dans la fonction du gameManager. 
+         * 
+         * Sinon, l'ID passée en paramètre est celle proposée par le joueur qui appelle la fonction. 
+         * La proposition du bouton pause est donc uniquement pour celui qui n'a pas fait l'action
+         */
+        if ((FindLocalPlayerID() != playerID) || (playerID == 0)) {
+            PauseButton.SetActive(true);
+            yield return new WaitForSeconds(2f);
+            if (!gameIsPaused) {
+                PauseButton.SetActive(false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Permettre au joueur de choisir s'il veut garder sa première pioche, sa deuxième, sa troisième...
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator MontrerCartesAChoisirDebut(int nombreCartes=6) {
+        yield return new WaitForSeconds(0.5f);
+        if (nombreCartes == 6) {
+            yield return FindLocalPlayer().GetComponent<Player>().CreateDeck();
+        } else {
+            FindLocalPlayer().GetComponent<Player>().MelangerDeck(); 
+        }
+
+        ChoixCartesDebut.SetActive(true);
+        CarteDebutPrefab.SetActive(true); 
+        // On récupère les cartes du dessus du deck. 
+        List<GameObject> _cartesDebut = FindLocalPlayer().GetComponent<Player>().RecupererCartesDessusDeck(6);
+
+        Transform ParentCartesDebut = ChoixCartesDebut.transform.Find("ChoixCartesDebutFond");
+
+        // On détruit toutes les cartes déjà display piochées auparavant. 
+        if (ParentCartesDebut.childCount != 1) {
+            for (int i = 0; i < ParentCartesDebut.childCount; ++i) {
+                if (ParentCartesDebut.GetChild(i).gameObject != CarteDebutPrefab) {
+                    Destroy(ParentCartesDebut.GetChild(i).gameObject); 
+                }
+            }
+        }
+
+        for (int i = 0; i < nombreCartes; ++i) {
+            GameObject newCarte = Instantiate(CarteDebutPrefab);
+            newCarte.transform.SetParent(ParentCartesDebut, false);
+            // Si ça ne marche pas, il FAUT différencier, sort, entité, et assistance. 
+            switch (_cartesDebut[i].GetComponent<CarteType>().thisCarteType) {
+                case CarteType.Type.ASSISTANCE:
+                    newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Carte>().shortCode,
+                    _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
+                    break; 
+                 case CarteType.Type.ENTITE:
+                    newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Entite>().shortCode,
+                    _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
+                    break;
+                 case CarteType.Type.SORT:
+                    newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Sort>().shortCode,
+                    _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
+                    break;
+            }
+        }
+
+        CarteDebutPrefab.SetActive(false);
+
+        StartCoroutine(WaitForResponseCartesDebut(nombreCartes)); 
+    }
+
+    public IEnumerator WaitForResponseCartesDebut(int nombreCartes) {
+        Debug.Log("ChoixDebut" + choixDebut.ToString()); 
+        while (choixDebut == 0) {
+            yield return new WaitForSeconds(0.5f); 
+        }
+
+        if (choixDebut == 1) {
+            choixDebut = 0; 
+            StartCoroutine(MontrerCartesAChoisirDebut(nombreCartes - 1));
+        }
+        else {
+            choixDebut = 0; 
+            for (int i = 0; i < nombreCartes; ++i) {
+                Debug.Log("JE PIOCHE AU DEBUT DANS LA COROUTINE");
+                Debug.Log("LA CARTE " + i.ToString());
+                yield return FindLocalPlayer().GetComponent<Player>().PiocherCarteRoutine();
+                yield return new WaitForSeconds(0.5f);
+            }
+
+            ChoixCartesDebut.SetActive(false);
+        }
+    }
+
+    public void ChoixDebutOK() {
+        choixDebut = 2; 
+    }
+
+    public void ChoixDebutNotOK() {
+        choixDebut = 1; 
     }
 }

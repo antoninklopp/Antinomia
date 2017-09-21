@@ -81,7 +81,9 @@ public class Sort : Carte {
     public override void OnMouseDown() {
         /*
          * Lors d'un clique sur la carte
-         */ 
+         */
+
+        base.OnMouseDown(); 
 
         if (!isFromLocalPlayer) {
             return; 

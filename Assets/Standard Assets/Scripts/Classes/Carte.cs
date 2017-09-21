@@ -58,16 +58,6 @@ public class Carte : NetworkBehaviour {
 
     public Sprite Cible;
 
-
-
-    //// Ce dictionnaire contient la liste des conditions pour effectuer le sort
-    //// et des entiers associés. 
-    //public List<Condition> AllConditions = new List<Condition>();
-
-    //// Ce dictionnaire contient la liste des effets du sort
-    //// avec l'entier associé. 
-    //public List<Action> AllActions = new List<Action>();
-
     // La liste de tous les effets de la carte. 
     public List<Effet> AllEffets = new List<Effet>();
     /// <summary>
@@ -78,8 +68,9 @@ public class Carte : NetworkBehaviour {
     /// Reçu par la bdd GameSparks "EffetString". C'est le string à afficher "en français" pour que 
     /// l'utilisateur comprenne l'effet en question. 
     /// </summary>
-    public string AllEffetsStringToDisplay = ""; 
+    public string AllEffetsStringToDisplay = "";
 
+    private List<GameObject> CartesChoisiesPourEffets = new List<GameObject>(); 
 
     // Use this for initialization
     public virtual void Start () {
@@ -466,7 +457,7 @@ public class Carte : NetworkBehaviour {
                             ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"));
                             break;
                         case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
-
+                            ShowCardsForChoiceAllCartesDeuxJoueurs(); 
                             break;
                         case Condition.ConditionEnum.DEFAUSSER:
                             ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"));
@@ -502,7 +493,10 @@ public class Carte : NetworkBehaviour {
     }
 
 
-
+    /// <summary>
+    /// Gérer les actions d'un effet. 
+    /// </summary>
+    /// <param name="_actions">Liste des actions à appliquer.</param>
     public void GererActions(List<Action> _actions) {
         // On doit maintenant gérer les effets.
         for (int j = 0; j < _actions.Count; ++j) {
@@ -513,14 +507,29 @@ public class Carte : NetworkBehaviour {
                 case Action.ActionEnum.CHANGER_POSITION:
                     /*
                      * Il faut d'abord choisir une carte puis changer sa position.
+                     * La carte aura été choisie précédemment. 
                      */
-                    DisplayMessage("Choisissez une carte et changez sa position"); 
+
+                    DisplayMessage("Choisissez une carte et changez sa position");
+                    WaitForCardsChosen(); 
+                    if (CartesChoisiesPourEffets.Count != 1) {
+                        throw new Exception("Erreur dans la transmission des cartes. Cet effet ne permet pas encore" +
+                            "de gérer plusieurs changements de position. "); 
+                    } else {
+                        CartesChoisiesPourEffets[0].GetComponent<Entite>().ChangerPosition();
+                        Debug.Log("L'effet changement de position a été autorisé"); 
+                    }
                     break;
                 case Action.ActionEnum.DETRUIRE:
                     /*
                      * Il faut d'abord choisir une carte puis la détruire.
                      */
-                    DisplayMessage("Choisissez uen carte et détruisez la"); 
+                    DisplayMessage("Choisissez uen carte et détruisez la");
+                    WaitForCardsChosen(); 
+                    for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
+                        // On détruit toutes les cartes une par une. 
+                        CartesChoisiesPourEffets[i].SendMessage("DetruireCarte");
+                    }
                     break;
                 case Action.ActionEnum.GAIN_AKA_UN_TOUR:
                     FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
@@ -553,6 +562,10 @@ public class Carte : NetworkBehaviour {
                         }
                     }
                     break;
+                case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
+                    GetComponent<Entite>().hasAttacked = -1;
+                    DisplayMessage("Cette entité ne peut pas attaquer"); 
+                    break; 
                 default:
                     Debug.LogWarning("Cet effet n'est pas géré");
                     break;
@@ -599,6 +612,7 @@ public class Carte : NetworkBehaviour {
         for (int i = 0; i < AllIDCartesChoosen.Count; ++i) {
             _allObjectsChoosen.Add(FindCardWithID(AllIDCartesChoosen[i])); 
         }
+        CartesChoisiesPourEffets = _allObjectsChoosen; 
     }
 
     GameObject FindCardWithID(int _ID_) {
@@ -618,7 +632,7 @@ public class Carte : NetworkBehaviour {
 
 
     /// <summary>
-    /// 
+    /// Montrer au joueur les cartes qu'il peut choisir à partir d'un objet parent (Transform). 
     /// </summary>
     void ShowCardsForChoice(Transform _parent) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
@@ -636,6 +650,16 @@ public class Carte : NetworkBehaviour {
         }
         for (int k = 0; k < FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").childCount; ++k) {
             AllCardsToChoose.Add(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
+        }
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
+            AllCardsToChoose, gameObject);
+    }
+
+    void ShowCardsForChoiceAllCartesDeuxJoueurs() {
+        List<GameObject> AllCardsToChoose = new List<GameObject>();
+        GameObject[] AllCardsBoardSanctuaire = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
+        for (int i = 0; i < AllCardsBoardSanctuaire.Length; ++i) {
+            AllCardsToChoose.Add(AllCardsBoardSanctuaire[i]); 
         }
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject);
@@ -712,5 +736,20 @@ public class Carte : NetworkBehaviour {
     public virtual string GetInfoCarte() {
         return ""; 
     } 
+
+    /// <summary>
+    /// Cette coroutine permet d'attendre des cartes choisies pour qu'on éxécute un effet.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator WaitForCardsChosen() {
+        CartesChoisiesPourEffets = null; 
+        while (CartesChoisiesPourEffets == null) {
+            yield return new WaitForSeconds(0.2f); 
+        }
+    }
+
+    public void ProposerMettreJeuEnPause() {
+        StartCoroutine(GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame()); 
+    }
 
 }

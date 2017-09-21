@@ -255,8 +255,7 @@ public class Player : NetworkBehaviour	 {
 		 * 
 		 * On attend une seconde pour récupérer les infos du serveur, sinon l'objet est vide. 
 		 */ 
-
-		Debug.Log ("LE DECK COMMENCE A ETRE CREE"); 
+         
 		if (PlayerPrefs.GetInt ("ChoixDeck") == 0) {
 			yield return playerInfo.WaitForPlayerCards (CartePrefab); 
 			CardDeck = playerInfo.GetAllCardsAsDeck (CartePrefab);
@@ -264,12 +263,11 @@ public class Player : NetworkBehaviour	 {
 			yield return playerInfo.WaitForPlayerDecks (CartePrefab, PlayerPrefs.GetInt("ChoixDeck")); 
 			CardDeck = playerInfo.GetDeck (CartePrefab, PlayerPrefs.GetInt("ChoixDeck"));
 		}
-		//yield return new WaitForSeconds (0.3f); 
+
 		MelangerDeck ();
-        Debug.Log("LE DECK A ETE CREE"); 
 	}
 
-	void MelangerDeck(){
+	public void MelangerDeck(){
 		/*
 		 * Melange des cartes dans le deck. 
 		 */ 
@@ -286,11 +284,21 @@ public class Player : NetworkBehaviour	 {
 			CardDeck.Cartes.Remove (CardDeck.Cartes [random]); 
 			index++; 
 		}
-
+        
 		CardDeck = DeckRandom; 
-
-
 	}
+
+    /// <summary>
+    /// Permet de récupérer les X premières cartes du haut du deck. 
+    /// </summary>
+    /// <param name="nombre">nombre de cartes à récupérer</param>
+    public List<GameObject> RecupererCartesDessusDeck(int nombre) {
+        List<GameObject> _liste = new List<GameObject>(); 
+        for (int i = 0; i < nombre; ++i) {
+            _liste.Add(CardDeck.Cartes[i]); 
+        }
+        return _liste;
+    }
 
 	[Command]
 	void CmdPiocherNouvelleCarte1(string oID){
