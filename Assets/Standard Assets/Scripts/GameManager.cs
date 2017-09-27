@@ -113,7 +113,13 @@ public class GameManager : NetworkBehaviour {
     /// à 1, il est false. 
     /// à 2, il est true. 
     /// </summary>
-    int choixDebut = 0; 
+    int choixDebut = 0;
+
+    GameObject ProposerEffet;
+    /// <summary>
+    /// Lien dans le GameManager de l'objet qui a demandé à execute un effet. (clic droit sur la carte). 
+    /// </summary>
+    GameObject ObjetDemandeEffet; 
 
 	// Use this for initialization
 	void Start () {
@@ -142,6 +148,8 @@ public class GameManager : NetworkBehaviour {
         ChoixCartesDebut = GameObject.Find("ChoixCartesDebut");
         CarteDebutPrefab = ChoixCartesDebut.transform.Find("ChoixCartesDebutFond").Find("CarteDebut").gameObject;
         ChoixCartesDebut.SetActive(false);
+        ProposerEffet = GameObject.Find("ProposerEffet");
+        ProposerEffet.SetActive(false); 
         StartCoroutine(MontrerCartesAChoisirDebut()); 
         // StartCoroutine(PiocheDebut (6)); 
 	}
@@ -411,11 +419,18 @@ public class GameManager : NetworkBehaviour {
 		Debug.Log (OtherPlayerEntity.tag); 
 
 		if (OtherPlayerEntity.tag == "Player") {
-			/*
+            /*
 			 * Si l'entité attaquée est directement le joueur adverse. 
 			 * L'objet envoyé est le joueur adverse. 
-			 */ 
-			OtherPlayerEntity.SendMessage ("AttackPlayer", MyPlayerEntity.GetComponent<Entite> ().STAT); 
+             * Il faut vérifier que le joueur n'ait pas de carte sur son champ de bataille. 
+			 */
+            if ((FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").childCount == 0) 
+                ||( MyPlayerEntity.GetComponent<Entite>().attaqueDirecte)){
+                OtherPlayerEntity.SendMessage("AttackPlayer", MyPlayerEntity.GetComponent<Entite>().STAT);
+            } else {
+                DisplayMessage("Cette carte ne peut pas attaquer le joueur directement");
+                return; 
+            }
 		} else if (OtherPlayerEntity.tag == "Assistance") {
             /*
              * Si l'entité attaquée est une assistance. 
@@ -724,7 +739,9 @@ public class GameManager : NetworkBehaviour {
          * Blanches dans le cas d'un effet astral, 
          * Pas d'effet si le terrain n'a pas d'effet.
          * 
-         */ 
+         */
+
+        GameManager.AscendanceTerrain previousAscendance = ascendanceTerrain; 
 
         if (_ascendance == Entite.Ascendance.MALEFIQUE) {
             ascendanceTerrain = AscendanceTerrain.MALEFIQUE; 
@@ -741,6 +758,11 @@ public class GameManager : NetworkBehaviour {
         } else {
             ascendanceTerrain = AscendanceTerrain.NONE;
             EffetParticuleTerrain.SetActive(false); 
+        }
+
+        GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
+        for (int i = 0; i < AllCartes.Length; ++i) {
+            AllCartes[i].GetComponent<Entite>().updateChangementAscendaceTerrain(ascendanceTerrain, previousAscendance); 
         }
 
     }
@@ -918,4 +940,19 @@ public class GameManager : NetworkBehaviour {
     public void ChoixDebutNotOK() {
         choixDebut = 1; 
     }
+
+    public void ProposerEffetJoueur(string effetsToDisplay, GameObject ObjectAsking) {
+        /**
+         * Proposer au joueur de jouer un effet. 
+         */
+        ProposerEffet.SetActive(true);
+        ProposerEffet.transform.Find("EffetProposeText").GetComponent<Text>().text = effetsToDisplay;
+        ObjetDemandeEffet = ObjectAsking; 
+    }
+
+    public void ReponseEffetPropose(int reponse) {
+        ObjetDemandeEffet.SendMessage("ReponseEffet", reponse);
+        ProposerEffet.SetActive(false); 
+    }
+
 }

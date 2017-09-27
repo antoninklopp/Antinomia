@@ -193,10 +193,8 @@ public class Entite : Carte {
         //}
     }
 
-
-    //[ServerCallback]
-    // Appelé sur le serveur.
-    void Update() {
+    public override void Update() {
+        base.Update(); 
 
         if (clicked) {
             // Si on a cliqué sur la carte. 
@@ -529,6 +527,9 @@ public class Entite : Carte {
                         CmdChangeAscendanceTerrain(carteAscendance);
                     }
                 }
+                // On regarde les effets de la carte. 
+                Debug.Log("<color=purple>Effets de la carte</color>"); 
+                GererEffets(AllEffets, debut:true);
             } else if (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2) {
                 // Si la phase en cours est la phase principale et la carte ne vient pas de la main, on fait return, 
                 // Car on ne peut pas bouger de cartes pendant les phases principales
@@ -673,6 +674,7 @@ public class Entite : Carte {
         // l'ID de la carte a la même valeur que l'ID réseau donnée par unity.
         IDCardGame = (int)netId.Value;
 
+        Debug.Log("<color=red>Cette carte " + Name + "a autorité" + hasAuthority.ToString() + "</color>"); 
         if (hasAuthority) {
             // C'est à dire que la carte vient du local Player. 
             for (int i = 0; i < Players.Length; ++i) {
@@ -703,6 +705,11 @@ public class Entite : Carte {
         StartCoroutine(setImageCarte());
 
         isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
+
+        ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
+        Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
+        Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
+        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
     }
 
     IEnumerator SetCardOnClient(string ID) {
@@ -1143,7 +1150,7 @@ public class Entite : Carte {
 
     public override string GetInfoCarte() {
         string stringToReturn = "<color=red>" + Name + "</color>" + "\n" +
-            "STAT : " + STAT.ToString() + "\n"; 
+            "STAT : " + STAT.ToString() + "\n" + "AKA : " + CoutAKA.ToString() + "\n"; 
         if (carteElement == Element.AUCUN) {
             stringToReturn += "Ascendance : " + carteAscendance + "\n"; 
         } else {
@@ -1170,6 +1177,59 @@ public class Entite : Carte {
     /// </summary>
     public void ChangerPosition() {
         clicked = true; 
+    }
+
+    /// <summary>
+    /// Regarde si une carte peut jouer un de ses effets.
+    /// </summary>
+    public override int CheckForEffet() {
+        // Il faut que l'entité soit dans le main ou dans le sanctuaire pour pouvoir utiliser son effet. 
+        int isEffetPlayable = -1; 
+        Debug.Log("On check 2 "); 
+        if (carteState == State.CHAMPBATAILLE || carteState == State.SANCTUAIRE) {
+            // On vérifie les effets que le joueur peut jouer, lors de son tour ou lors du tour de son adversaire uniquement.
+            // Pas les effets en réponse à des actions. 
+            for (int i = 0; i < AllEffets.Count; ++i) {
+                for (int j = 0; j < AllEffets[i].AllConditionsEffet.Count; ++j) {
+                    if (AllEffets[i].AllConditionsEffet[j].TourCondition != Condition.Tour.NONE) {
+                        Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
+                        isEffetPlayable = i; 
+                    } else {
+                        Debug.Log("<color=red>" + AllEffets[i].AllConditionsEffet[j].TourCondition.ToString() + "</color>"); 
+                    }
+                }
+            }
+        }
+
+        return isEffetPlayable;
+    }
+
+    public override void ProposerEffets(int effetPropose) {
+        base.ProposerEffets(effetPropose);
+    }
+
+    /// <summary>
+    /// Update les effets lorsque le terrain change d'ascendance.
+    /// </summary>
+    /// <param name="_ascendance">la nouvelle ascendance du terrain. </param>
+    public void updateChangementAscendaceTerrain(GameManager.AscendanceTerrain _ascendance, 
+                                                    GameManager.AscendanceTerrain _previousAscendance=GameManager.AscendanceTerrain.NONE) {
+        switch (_ascendance) {
+            case GameManager.AscendanceTerrain.MALEFIQUE:
+                GererEffets(AllEffetsMalefique); 
+                break;
+            case GameManager.AscendanceTerrain.ASTRALE:
+                GererEffets(AllEffetsAstral);
+                break;
+            case GameManager.AscendanceTerrain.NONE:
+                if (_previousAscendance == GameManager.AscendanceTerrain.ASTRALE) {
+                    AnnulerEffets(AllEffetsAstral); 
+                } else {
+                    AnnulerEffets(AllEffetsMalefique); 
+                }
+                break; 
+        }
+
     }
 
 }

@@ -70,7 +70,20 @@ public class Carte : NetworkBehaviour {
     /// </summary>
     public string AllEffetsStringToDisplay = "";
 
-    private List<GameObject> CartesChoisiesPourEffets = new List<GameObject>(); 
+    private List<GameObject> CartesChoisiesPourEffets = new List<GameObject>();
+
+    /// <summary>
+    /// Lorsque le joueur a fait un clic droit sur la carte, on lui propose les effets possibles de la carte.
+    /// S'il accepte de jouer l'effet, reponseDemandeEffet = 2; sinon 1; pas de reponse = 0
+    /// Cette variable permet aussi de savoir si le joueur a déjà executé l'effet de sa carte. 
+    /// Dans le cas où la carte n'a le droit de le jouer qu'une fois par tour. 
+    /// </summary>
+    int reponseDemandeEffet = 0;
+
+    // La carte peut-elle attaquer directement le joueur adverse? 
+    public bool attaqueDirecte = false; 
+
+
 
     // Use this for initialization
     public virtual void Start () {
@@ -78,8 +91,8 @@ public class Carte : NetworkBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
-		
+	public virtual void Update () {
+
 	}
 
     public GameObject FindLocalPlayer() {
@@ -173,6 +186,12 @@ public class Carte : NetworkBehaviour {
 
     public virtual void OnMouseExit() {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().HideInfoCarte();
+    }
+
+    public void OnMouseOver() {
+        if (Input.GetMouseButtonDown(1)) {
+            RightClickOnCarte();
+        }
     }
 
     public virtual void OnMouseDown() {
@@ -383,14 +402,20 @@ public class Carte : NetworkBehaviour {
         GererEffets(AllEffets, _currentPhase); 
     }
 
-    public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION) {
+    /// <summary>
+    /// Gerer les effets d'une carte
+    /// </summary>
+    /// <param name="_allEffets">Liste des effets à effectier</param>
+    /// <param name="_currentPhase">Phase lors dans laquelle on se trouve</param>
+    /// <param name="debut">true, si on la carte vient d'être posée</param>
+    public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
         }
         for (int i = 0; i < _allEffets.Count; ++i) {
             // On regarde les effets un par un. 
             // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
-            bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase);
+            bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut);
             Debug.Log("<color=orange>" + effetOK.ToString() + "</Color>"); 
             if (effetOK) {
                 // Dans le cas où toutes les conditions sont réunies. 
@@ -402,8 +427,27 @@ public class Carte : NetworkBehaviour {
         }
     }
 
+    /// <summary>
+    /// Lors qu'une carte est détruite, ou que le terrain change d'ascendance, il faut annuler les effets qui
+    /// avaient lieu précedemment . 
+    /// </summary>
+    /// <param name="_allEffets">Liste des effets à annuler.</param>
+    public void AnnulerEffets(List<Effet> _allEffets) {
+
+
+
+    }
+
+    /// <summary>
+    /// Gerer les conditions avant d'executer les actions d'un effet. 
+    /// </summary>
+    /// <param name="_conditions">Liste des conditions à vérifier</param>
+    /// <param name="_currentPhase">Phase dans laquelle on se trouve</param>
+    /// <param name="estMort">Si la carte vient d'être détruite</param>
+    /// <param name="debut">Si la carte vient d'être posée</param>
+    /// <returns>true, si toutes les conditions sont remplies</returns>
     public bool GererConditions(List<Condition> _conditions, Player.Phases _currentPhase=Player.Phases.INITIATION, 
-                                    bool estMort=false) {
+                                    bool estMort=false, bool debut=false) {
         /*
          * Regarde si toutes les conditions sont ok pour un effet. 
          * Retourne true si c'est le cas, false sinon
@@ -427,6 +471,10 @@ public class Carte : NetworkBehaviour {
                   && (FindLocalPlayer().GetComponent<Player>().PlayerID ==
                   GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour)) {
                 // La condition de tour n'est pas remplie, on passe donc à l'effet suivant. 
+                return false; 
+            }
+            else if (debut && (_conditions[j].intCondition > 100)) {
+                // L'effet dépend donc d'une phase. 
                 return false; 
             }
             else {
@@ -511,33 +559,25 @@ public class Carte : NetworkBehaviour {
                      */
 
                     DisplayMessage("Choisissez une carte et changez sa position");
-                    WaitForCardsChosen(); 
-                    if (CartesChoisiesPourEffets.Count != 1) {
-                        throw new Exception("Erreur dans la transmission des cartes. Cet effet ne permet pas encore" +
-                            "de gérer plusieurs changements de position. "); 
-                    } else {
-                        CartesChoisiesPourEffets[0].GetComponent<Entite>().ChangerPosition();
-                        Debug.Log("L'effet changement de position a été autorisé"); 
-                    }
+                    StartCoroutine(ChangerPositionEffet()); 
+                    
                     break;
                 case Action.ActionEnum.DETRUIRE:
                     /*
                      * Il faut d'abord choisir une carte puis la détruire.
                      */
                     DisplayMessage("Choisissez uen carte et détruisez la");
-                    WaitForCardsChosen(); 
-                    for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
-                        // On détruit toutes les cartes une par une. 
-                        CartesChoisiesPourEffets[i].SendMessage("DetruireCarte");
-                    }
+                    StartCoroutine(DetruireEffet()); 
+                    
                     break;
                 case Action.ActionEnum.GAIN_AKA_UN_TOUR:
                     FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
                     DisplayMessage("Ajout de " + _actions[j].intAction.ToString() + "AKA à ce tour"); 
                     break;
                 case Action.ActionEnum.PIOCHER_CARTE:
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction);
-                    DisplayMessage("Pioche " + _actions[j].properIntAction.ToString() +  " carte"); 
+                    StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction));
+                    DisplayMessage("Pioche " + _actions[j].properIntAction.ToString() +  " carte");
+                    Debug.Log("<color=purple> Piocher une carte </color>"); 
                     break;
                 case Action.ActionEnum.SACRIFIER_CARTE:
                     // Sacrifier cette carte. 
@@ -565,6 +605,25 @@ public class Carte : NetworkBehaviour {
                 case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
                     GetComponent<Entite>().hasAttacked = -1;
                     DisplayMessage("Cette entité ne peut pas attaquer"); 
+                    break;
+                case Action.ActionEnum.DEFAUSSER:
+                    // On propose de défausser. 
+                    // Il faut d'abord choisir une carte de la main du joueur. 
+                    ShowCardsForChoice(Main.transform);
+                    StartCoroutine(DefausserEffet()); 
+                    break;
+                case Action.ActionEnum.REVELER_CARTE:
+                    // Le joueur révèle une carte de sa main.
+                    StartCoroutine(RevelerCarteEffet(_actions[j].properIntAction));
+                    break;
+                case Action.ActionEnum.REVELER_CARTE_ADVERSAIRE:
+                    // L'adversaire doit révéler une carte. 
+                    Debug.Log("<color=purple>Reveler carte adversaire</color>"); 
+                    FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame, 
+                        "RevelerCarteEffet", _actions[j].properIntAction, FindLocalPlayer().GetComponent<Player>().PlayerID); 
+                    break;
+                case Action.ActionEnum.ATTAQUE_DIRECTE:
+                    attaqueDirecte = true; 
                     break; 
                 default:
                     Debug.LogWarning("Cet effet n'est pas géré");
@@ -607,7 +666,7 @@ public class Carte : NetworkBehaviour {
         // La méthode est donc override dans la classe entité. 
     }
 
-    void CartesChoisies(List<int> AllIDCartesChoosen) {
+    public void CartesChoisies(List<int> AllIDCartesChoosen) {
         List<GameObject> _allObjectsChoosen = new List<GameObject>();
         for (int i = 0; i < AllIDCartesChoosen.Count; ++i) {
             _allObjectsChoosen.Add(FindCardWithID(AllIDCartesChoosen[i])); 
@@ -618,12 +677,37 @@ public class Carte : NetworkBehaviour {
     GameObject FindCardWithID(int _ID_) {
         /*
 		 * Trouver la carte avec la bonne ID. 
+         * Doit être la même méthode que dans player (à relier). 
 		 */
-        GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
-        for (int i = 0; i < AllCartes.Length; ++i) {
+        CarteType[] AllCartesType = FindObjectsOfType(typeof(CarteType)) as CarteType[];
+        List<GameObject> AllCartes = new List<GameObject>();
+
+        for (int i = 0; i < AllCartesType.Length; ++i) {
+            GameObject NewCarte = AllCartesType[i].gameObject;
+            if (NewCarte.GetComponent<CarteType>().instanciee) {
+                AllCartes.Add(NewCarte);
+            }
+        }
+
+        Debug.Log("AllCartes" + AllCartes.Count.ToString());
+        for (int i = 0; i < AllCartes.Count; ++i) {
             // On cherche la carte avec le bon ID
-            if (AllCartes[i].GetComponent<Entite>().IDCardGame == _ID_) {
-                return AllCartes[i];
+            switch (AllCartes[i].GetComponent<CarteType>().thisCarteType) {
+                case CarteType.Type.ASSISTANCE:
+                    if (AllCartes[i].GetComponent<Assistance>().IDCardGame == _ID_) {
+                        return AllCartes[i];
+                    }
+                    break;
+                case CarteType.Type.SORT:
+                    if (AllCartes[i].GetComponent<Sort>().IDCardGame == _ID_) {
+                        return AllCartes[i];
+                    }
+                    break;
+                case CarteType.Type.ENTITE:
+                    if (AllCartes[i].GetComponent<Entite>().IDCardGame == _ID_) {
+                        return AllCartes[i];
+                    }
+                    break;
             }
         }
         throw new Exception("La carte n'a pas été trouvée");
@@ -750,6 +834,117 @@ public class Carte : NetworkBehaviour {
 
     public void ProposerMettreJeuEnPause() {
         StartCoroutine(GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame()); 
+    }
+
+    /// <summary>
+    /// Lorsqu'on détecte un clic droit, on permet au joueur de jouer l'effet de la carte. 
+    /// </summary>
+    public void RightClickOnCarte() {
+#if (!UNITY_ANDROID || !UNITY_IOS)
+        // Dans le cas d'un clic droit. 
+        Debug.Log("On check" + Name);
+        int effetPropose = CheckForEffet(); 
+        if (effetPropose != -1) {
+            ProposerEffets(effetPropose);
+        }
+#endif
+    }
+
+    public virtual int CheckForEffet() {
+        return -1; 
+
+
+    }
+
+    public virtual void ProposerEffets(int effetPropose) {
+        // Proposer au joueur de pouvoir jouer un effet. 
+        string toDisplay = ""; 
+        for (int j = 0; j < AllEffets[effetPropose].AllActionsEffet.Count; ++j) {
+            Debug.Log("<color=green>" + AllEffets[effetPropose].AllActionsEffet[j].ActionAction.ToString() + "</color>"); 
+            toDisplay += AllEffets[effetPropose].AllActionsEffet[j].ActionAction.ToString(); 
+        }
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposerEffetJoueur(toDisplay, gameObject);
+        StartCoroutine(WaitForResponseEffetPropose(effetPropose)); 
+    }
+
+    private IEnumerator WaitForResponseEffetPropose(int effetPropose) {
+        while (reponseDemandeEffet == 0) {
+            yield return new WaitForSeconds(0.2f); 
+        }
+        if (reponseDemandeEffet == 1) {
+            Debug.Log("<color=orange>Reponse Pas Ok</color>"); 
+        } else {
+            Debug.Log("<color=orange> Reponse OK </color>");
+            GererActions(AllEffets[effetPropose].AllActionsEffet); 
+        }
+        // L'effet a été joué à ce tour.
+        reponseDemandeEffet = -1; 
+    }
+
+    private void ReponseEffet(int response) {
+        reponseDemandeEffet = response; 
+    }
+
+    private IEnumerator ChangerPositionEffet() {
+
+        yield return WaitForCardsChosen();
+        if (CartesChoisiesPourEffets.Count != 1) {
+            throw new Exception("Erreur dans la transmission des cartes. Cet effet ne permet pas encore" +
+                "de gérer plusieurs changements de position. ");
+        }
+        else {
+            CartesChoisiesPourEffets[0].GetComponent<Entite>().ChangerPosition();
+            Debug.Log("L'effet changement de position a été autorisé");
+        }
+        CartesChoisiesPourEffets = null; 
+    }
+
+    private IEnumerator DetruireEffet() {
+        yield return WaitForCardsChosen(); 
+        for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
+            // On détruit toutes les cartes une par une. 
+            CartesChoisiesPourEffets[i].SendMessage("DetruireCarte");
+        }
+        CartesChoisiesPourEffets = null; 
+    }
+
+    private IEnumerator DefausserEffet() {
+        yield return WaitForCardsChosen(); 
+        for (int i = 0; i < CartesChoisiesPourEffets.Count;  ++i) {
+            // On détruit les cartes choisies 
+            CartesChoisiesPourEffets[i].SendMessage("DetruireCarte"); 
+        }
+        CartesChoisiesPourEffets = null; 
+    }
+
+    /// <summary>
+    /// Révéler des cartes à son adversaire. 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator RevelerCarteEffet(int nombreCartes) {
+
+        Debug.Log("On revele une carte à l'adversaire. ");
+        ShowCardsForChoice(Main.transform);
+        
+        yield return WaitForCardsChosen();
+        string[] AllCartesChoisiesString = new string[CartesChoisiesPourEffets.Count];
+        for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
+            string stringCartei = ""; 
+            switch (CartesChoisiesPourEffets[i].GetComponent<CarteType>().thisCarteType) {
+                case CarteType.Type.ENTITE:
+                    stringCartei = CartesChoisiesPourEffets[i].GetComponent<Entite>().shortCode;
+                    break;
+                case CarteType.Type.ASSISTANCE:
+                    stringCartei = CartesChoisiesPourEffets[i].GetComponent<Assistance>().shortCode;
+                    break;
+                case CarteType.Type.SORT:
+                    stringCartei = CartesChoisiesPourEffets[i].GetComponent<Sort>().shortCode;
+                    break;
+            }
+            AllCartesChoisiesString[i] = stringCartei;
+        }
+        FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString); 
+        CartesChoisiesPourEffets = null; 
     }
 
 }

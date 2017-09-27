@@ -16,7 +16,9 @@ public class CarteType : NetworkBehaviour {
         AUCUN
     };
 
-    public Type thisCarteType = Type.AUCUN; 
+    public Type thisCarteType = Type.AUCUN;
+    // True si la carte a été instanciée
+    public bool instanciee = false; 
 
     // Use this for initialization
     void Start () {
@@ -62,6 +64,8 @@ public class CarteType : NetworkBehaviour {
         if (thisCarteType == Type.AUCUN) {
             yield break; 
         }
+
+        instanciee = true; 
 
         switch (thisCarteType) {
             case Type.SORT:

@@ -19,9 +19,6 @@ public class ShowCards : NetworkBehaviour {
 	private List<GameObject> AllCardsToReturn = new List<GameObject>(); 
 	private List<GameObject> AllCardsGiven; 
 
-	//[SyncVar(hook="ShowCardsToOtherPlayer")]
-	// private SyncListString AllCardsToShowOther = new SyncListString(); 
-
 	private List<string> AllCardsToShowOther = new List<string> ();
 
     // Toutes les cartes à retourner avec les ID en game des cartes
@@ -126,21 +123,14 @@ public class ShowCards : NetworkBehaviour {
         if (ObjectAsking == null){
             FindLocalPlayer().GetComponent<Player>().CmdSendCards (newList);
         } else {
+            Debug.Log("Object Asking" + ObjectAsking.GetComponent<Entite>().Name); 
             ObjectAsking.SendMessage("CartesChoisies", AllCardsToReturnID); 
         }
         StartCoroutine(FinShowCards(0f, AllCardsToShow)); 
-		AllCardsToShowOther = new List<string> (); 
+		AllCardsToShowOther = new List<string> ();
+
+        ObjectAsking = null; 
 	}
-
-
-
-//	// Appelé par la syncVar
-//	public void ShowCardsToOtherPlayer(SyncListString newListString){
-//		AllCardsToShowOther = newListString; 
-//		Debug.Log ("CARTES QUE J4AI CHOISIES"); 
-//		//FinShowCards (0.1f, AllCardsToShow); 
-//		StartCoroutine(ShowAllCardsChosen()); 
-//	}
 
 
 	IEnumerator ShowAllCardsChosen(){

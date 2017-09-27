@@ -71,7 +71,8 @@ public class Sort : Carte {
         }
     }
 
-    private void Update() {
+    public override void Update() {
+        base.Update();
         if (clicked != 0) {
             Dragging(); 
         } 
@@ -325,7 +326,7 @@ public class Sort : Carte {
             }
             else {
                 FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(_carte.IDCardGame,
-                    "CmdAddStat", _intToAdd);
+                    "CmdAddStat", _intToAdd, FindLocalPlayer().GetComponent<Player>().PlayerID);
             }
         }
     }
@@ -445,6 +446,11 @@ public class Sort : Carte {
         StartCoroutine(setImageCarte());
 
         isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
+
+        ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
+        Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
+        Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
+        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
     }
 
     [ClientRpc]

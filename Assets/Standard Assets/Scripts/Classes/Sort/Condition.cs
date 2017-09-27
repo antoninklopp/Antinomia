@@ -25,9 +25,10 @@ public class Condition {
     *      7 : Phase Finale
     *      
     * avec a: le tour lors duquel ce timing s'effectue. 
-    *      0 : les tours des deux joueurs
-    *      1 : le tour du joueur local
-    *      2 : le tour de l'autre joueur
+    *      0 : Le tour n'a pas d'importance. 
+    *      1 : les tours des deux joueurs
+    *      2 : le tour du joueur local
+    *      3 : le tour de l'autre joueur
     *      
     * avec bb : Un autre effet de timing avec 
     *      1 : Lorsque la carte est détruite. 
@@ -65,6 +66,9 @@ public class Condition {
     };
 
     public ConditionEnum ConditionCondition; 
+    /// <summary>
+    /// Entier transmis par la base de données. A décortiquer. 
+    /// </summary>
     public int intCondition;
 
     public enum Reaction {
@@ -82,6 +86,7 @@ public class Condition {
     }
 
     public enum Tour {
+        NONE,
         TOUR_DEUX_JOUEURS,
         TOUR_LOCAL,
         TOUR_NOT_LOCAL
@@ -90,8 +95,11 @@ public class Condition {
     public bool dependsOnPhase = false;
     public Player.Phases PhaseCondition;
     public Reaction ReactionCondition = Reaction.NONE;
-    public Tour TourCondition = Tour.TOUR_DEUX_JOUEURS;
+    public Tour TourCondition = Tour.NONE;
     // Cet entier correspond à xx
+    /// <summary>
+    /// Entier propre à la condition corresponde à xx
+    /// </summary>
     public int properIntCondition = 0;
     // Cet entier correspond à y
     public int nombreDeTours = 0;
@@ -125,17 +133,14 @@ public class Condition {
         if (_intConditionAbs < 100) {
             properIntCondition = _intConditionAbs;
         }
-        else if (_intConditionAbs < Mathf.Pow(10, 4)) {
-            properIntCondition = _intConditionAbs % 100;
-        }
         else if (_intConditionAbs < Mathf.Pow(10, 3)) {
             properIntCondition = _intConditionAbs % 100;
-            TourCondition = (Tour)(_intConditionAbs / Mathf.Pow(10, 2) - 1);
+            TourCondition = (Tour)(_intConditionAbs / Mathf.Pow(10, 2));
         }
         else if (_intConditionAbs < Mathf.Pow(10, 4)) {
             properIntCondition = _intConditionAbs % 100;
             if ((int)(_intConditionAbs / Mathf.Pow(10, 2)) % 10 != 0) {
-                TourCondition = (Tour)((int)(_intConditionAbs / Mathf.Pow(10, 2)) - 1);
+                TourCondition = (Tour)((int)(_intConditionAbs / Mathf.Pow(10, 2)));
             }
             dependsOnPhase = true;
             PhaseCondition = (Player.Phases)((int)(_intConditionAbs / Mathf.Pow(10, 3)) - 1);
@@ -143,7 +148,7 @@ public class Condition {
         else {
             properIntCondition = _intConditionAbs % 100;
             if ((int)(_intConditionAbs / Mathf.Pow(10, 2)) % 10 != 0) {
-                TourCondition = (Tour)((int)(_intConditionAbs / Mathf.Pow(10, 2)) - 1);
+                TourCondition = (Tour)((int)(_intConditionAbs / Mathf.Pow(10, 2)));
             }
             if ((int)(_intConditionAbs / Mathf.Pow(10, 3)) % 10 != 0) {
                 dependsOnPhase = true;

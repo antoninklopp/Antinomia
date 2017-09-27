@@ -90,11 +90,11 @@ public class Action {
         /// </summary>
         ATTAQUE_IMPOSSIBLE,
         /// <summary>
-        /// Le joueur doit révéler une carte. 
+        /// Le joueur doit révéler une carte (de sa main). 
         /// </summary>
         REVELER_CARTE,
         /// <summary>
-        /// L'adversaire doit révéler une carte. 
+        /// L'adversaire doit révéler une carte (de sa main). 
         /// </summary>
         REVELER_CARTE_ADVERSAIRE,
         /// <summary>

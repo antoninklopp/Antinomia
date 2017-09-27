@@ -37,33 +37,6 @@ public class MainJoueur : NetworkBehaviour {
 	{
 		ClientScene.RegisterPrefab(CartePrefab);
 	}
-
-//	public void TirerCarte(){
-//		GameObject NouvelleCarte = Instantiate (CartePrefab); 
-//		NouvelleCarte.transform.SetParent (transform); 
-//		CartesMains.Add (NouvelleCarte);  
-//		CmdSpawnCard (NouvelleCarte); 
-//		//if (isServer)
-//		//else if (isClient)
-//		//	NetworkServer.SpawnWithClientAuthority (NouvelleCarte, base.connectionToClient); 
-//		ReordonnerCarte ();
-//	}
- 
-//	[Command]
-//	public void CmdSpawnCard(GameObject NouvelleCarte){
-//		print ("carte spawned 2 "); 
-//		NouvelleCarte.transform.position = new Vector3 (0, 0, 0); 
-//		NetworkServer.Spawn (NouvelleCarte);
-//		RpcSpawnCard (NouvelleCarte); 
-//		print ("carte spawned"); 
-//	}
-//
-//	[ClientRpc]
-//	public void RpcSpawnCard(GameObject NouvelleCarte){
-//		NouvelleCarte.transform.position = new Vector3 (0, 0, 0); 
-//		print ("---------------------  RPC --------------------- "); 
-//		//NetworkServer.Spawn (NouvelleCarte);
-//	}
 		
 	void ReordonnerCarte(){
 		/*

@@ -498,8 +498,14 @@ public class Player : NetworkBehaviour	 {
 		LaCarteSurLeServeur.SendMessage ("DetruireCarte"); 
 	}
 
+    /// <summary>
+    /// Envoi d'une méthode qui doit être éxecutée par l'autre joueur. 
+    /// </summary>
+    /// <param name="ID">l'ID de la carte dans le partie</param>
+    /// <param name="voidName">Le string de la méthode à utiliser</param>
+    /// <param name="_intToUse">l'entier demandé par la méthode</param>
     [Command]
-    public void CmdEnvoiMethodToServerCarteWithIntParameter(int ID, string voidName, int _intToUse) {
+    public void CmdEnvoiMethodToServerCarteWithIntParameter(int ID, string voidName, int _intToUse, int playerID) {
         /*
          * Lorsqu'on veut appliquer un effet sur une carte qui n'appartient pas au joueur, 
          * il faut passer par la carte sur le serveur, 
@@ -512,20 +518,68 @@ public class Player : NetworkBehaviour	 {
          * 
          */
         Debug.Log("Execute sur le serveur.");
-        GameObject LaCarteSurLeServeur = FindCardWithID(ID);
-        LaCarteSurLeServeur.SendMessage(voidName, _intToUse); 
+        // GameObject LaCarteSurLeServeur = FindCardWithID(ID);
+        // LaCarteSurLeServeur.SendMessage(voidName, _intToUse); 
     }
 
-	GameObject FindCardWithID(int _ID_){
-		/*
-		 * Trouver la carte avec la bonne ID. 
-		 */ 
-		GameObject[] AllCartes = GameObject.FindGameObjectsWithTag ("BoardSanctuaire"); 
-		for (int i = 0; i < AllCartes.Length; ++i) {
-			// On cherche la carte avec le bon ID
-			if (AllCartes [i].GetComponent<Entite> ().IDCardGame == _ID_) {
-				return AllCartes [i]; 
-			}
+    [ClientRpc]
+    public void RpcEnvoiMethodToServerCarteWithIntParameter(int ID, string voidName, int _intToUse, int playerID) {
+        if (playerID == this.PlayerID) {
+            // Le but est d'envoyer une méthode à l'autre joueur!
+            return; 
+        }
+        GameObject LaCarteSurLeServeur = FindCardWithID(ID);
+        LaCarteSurLeServeur.SendMessage(voidName, _intToUse);
+        Debug.Log("La méthode " + voidName + " a été éxecutée sur le serveur"); 
+    }
+
+
+    GameObject FindCardWithID(int _ID_){
+    /*
+		* Trouver la carte avec la bonne ID. 
+		*/
+    //GameObject[] AllCartes = GameObject.FindGameObjectsWithTag ("BoardSanctuaire");
+    //      GameObject[] AllCartesBis = GameObject.FindGameObjectsWithTag("Carte");
+    // On cherche toutes les cartes avec 
+
+    //for (int i = AllCartes.Length; i < AllCartes.Length + AllCartesBis.Length; ++i) {
+    //    AllCartes[i] = AllCartesBis[i - AllCartes.Length]; 
+    //}
+
+
+        CarteType[] AllCartesType = FindObjectsOfType(typeof(CarteType)) as CarteType[];
+        List<GameObject> AllCartes = new List<GameObject>(); 
+
+        for (int i = 0; i < AllCartesType.Length; ++i) {
+            GameObject NewCarte = AllCartesType[i].gameObject; 
+            if (NewCarte.GetComponent<CarteType>().instanciee) {
+                AllCartes.Add(NewCarte); 
+            }
+        }
+
+        Debug.Log("AllCartes" + AllCartes.Count.ToString());
+        for (int i = 0; i < AllCartes.Count; ++i) {
+            // On cherche la carte avec le bon ID
+            switch (AllCartes[i].GetComponent<CarteType>().thisCarteType) {
+                case CarteType.Type.ASSISTANCE:
+                    if (AllCartes[i].GetComponent<Assistance>().IDCardGame == _ID_) {
+                        Debug.Log("<color=red>" + AllCartes[i].GetComponent<Assistance>().Name + "</color>"); 
+                        return AllCartes[i];
+                    }
+                    break;
+                case CarteType.Type.SORT:
+                    if (AllCartes[i].GetComponent<Sort>().IDCardGame == _ID_) {
+                        Debug.Log("<color=red>" + AllCartes[i].GetComponent<Sort>().Name + "</color>");
+                        return AllCartes[i];
+                    }
+                    break;
+                case CarteType.Type.ENTITE:
+                    if (AllCartes[i].GetComponent<Entite>().IDCardGame == _ID_) {
+                        Debug.Log("<color=red>" + AllCartes[i].GetComponent<Entite>().Name + "</color>");
+                        return AllCartes[i];
+                    }
+                    break;
+            }
 		}
 		throw new Exception ("La carte n'a pas été trouvée"); 
 		// return null; 
