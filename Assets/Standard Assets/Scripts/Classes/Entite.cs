@@ -7,6 +7,10 @@ using UnityEngine.UI;
 using GameSparks;
 using GameSparks.Core; 
 
+/// <summary>
+/// Hérite de la classe Carte. 
+/// Décrit une carte entité.
+/// </summary>
 public class Entite : Carte {
     /*
 	 * Classe carte décrivant toutes les spécificités d'une carte.
@@ -135,6 +139,7 @@ public class Entite : Carte {
         return carteState;
     }
 
+
     public void setState(string newState) {
         switch (newState) {
             case "MAIN":
@@ -229,7 +234,9 @@ public class Entite : Carte {
         //}
     }
 
-
+    /// <summary>
+    /// Lors d'un clique sur la carte
+    /// </summary>
     public override void OnMouseDown() {
         /* lors d'un clique sur la carte. 
 		 * 
@@ -1105,9 +1112,9 @@ public class Entite : Carte {
         CmdChangePosition(State.SANCTUAIRE); 
     }
 
-    public override void UpdateNewPhase(Player.Phases _currentPhase) {
+    public override void UpdateNewPhase(Player.Phases _currentPhase, int tour) {
         clicked = false;
-        base.UpdateNewPhase(_currentPhase);
+        base.UpdateNewPhase(_currentPhase, tour);
 
         GameManager.AscendanceTerrain _ascendanceTerrain = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain(); 
         switch (_ascendanceTerrain) {
@@ -1190,13 +1197,15 @@ public class Entite : Carte {
             // On vérifie les effets que le joueur peut jouer, lors de son tour ou lors du tour de son adversaire uniquement.
             // Pas les effets en réponse à des actions. 
             for (int i = 0; i < AllEffets.Count; ++i) {
-                for (int j = 0; j < AllEffets[i].AllConditionsEffet.Count; ++j) {
-                    if (AllEffets[i].AllConditionsEffet[j].TourCondition != Condition.Tour.NONE) {
+                if (AllEffets[i].AllConditionsEffet[0].TourCondition != Condition.Tour.NONE) {
+                    // S'il vérifie les conditions
+                    if (GererConditions(AllEffets[i].AllConditionsEffet)) {
+                        // Si l'effet n'a pas déjà été joué à ce tour. 
                         Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
-                        isEffetPlayable = i; 
-                    } else {
-                        Debug.Log("<color=red>" + AllEffets[i].AllConditionsEffet[j].TourCondition.ToString() + "</color>"); 
-                    }
+                        isEffetPlayable = i;
+                    } 
+                } else {
+                    Debug.Log("<color=red>" + AllEffets[i].AllConditionsEffet[0].TourCondition.ToString() + "</color>"); 
                 }
             }
         }
@@ -1230,6 +1239,35 @@ public class Entite : Carte {
                 break; 
         }
 
+    }
+
+    protected override void updateEffetActive(int nombreEffet, int effetListNumber = 0) {
+        base.updateEffetActive(nombreEffet, effetListNumber);
+        switch (effetListNumber) {
+            case 1:
+                // Dans le cas où il y a plusieurs conditions, on écrit toujours toutes les variables de timing dans l'int
+                // du premier
+                AllEffetsAstral[nombreEffet].AllConditionsEffet[0].setSortUtilisePourCeTour();
+                break;
+            case 2:
+                // Dans le cas où il y a plusieurs conditions, on écrit toujours toutes les variables de timing dans l'int
+                // du premier
+                AllEffetsMalefique[nombreEffet].AllConditionsEffet[0].setSortUtilisePourCeTour();
+                break;
+        }
+    }
+
+    protected override void updateNewTurnEffetUtilise(bool tourJoueurLocal) {
+        base.updateNewTurnEffetUtilise(tourJoueurLocal);
+
+        // Dans la classe entité on met aussi à jour les effets astraux et maléfiques. 
+        for (int i = 0; i < AllEffetsAstral.Count; ++i) {
+            AllEffetsAstral[i].AllConditionsEffet[0].updateUtilisePourCeTour(tourJoueurLocal);
+        }
+
+        for (int i = 0; i < AllEffetsMalefique.Count; ++i) {
+            AllEffetsMalefique[i].AllConditionsEffet[0].updateUtilisePourCeTour(tourJoueurLocal);
+        }
     }
 
 }

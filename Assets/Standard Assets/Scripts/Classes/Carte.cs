@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System; 
 
+/// <summary>
+/// Classe de base dont héritent toutes les cartes qui en sont dérivées. 
+/// Contient les attributs de base communs à toutes les cartes. 
+/// </summary>
 public class Carte : NetworkBehaviour {
     /*
      * Parent des cartes de base : entite, sort, assistance.  
@@ -95,6 +99,10 @@ public class Carte : NetworkBehaviour {
 
 	}
 
+    /// <summary>
+    /// Recuperer l'objet correspondant au joueur local
+    /// </summary>
+    /// <returns>Joueur local</returns>
     public GameObject FindLocalPlayer() {
         /*
 		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
@@ -108,6 +116,10 @@ public class Carte : NetworkBehaviour {
         }
     }
 
+    /// <summary>
+    /// Recuperer l'objet correspondant au joueur qui n'est pas le joueur local. 
+    /// </summary>
+    /// <returns>Joueur not local</returns>
     public GameObject FindNotLocalPlayer() {
         /*
 		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
@@ -121,6 +133,10 @@ public class Carte : NetworkBehaviour {
         }
     }
 
+    /// <summary>
+    /// Deplacer la carte. 
+    /// La carte suit la souris. 
+    /// </summary>
     public void Dragging() {
         /*
 		 * Déplacement de la carte qui suit la souris. 
@@ -131,6 +147,10 @@ public class Carte : NetworkBehaviour {
         transform.position = mouseWorldPoint;
     }
 
+    /// <summary>
+    /// Mettre la bonne image sur l'objet carte. 
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator setImageCarte() {
         /*
 		 * On attend un délai le temps que l'information soit arrivée sur le réseau. 
@@ -147,6 +167,9 @@ public class Carte : NetworkBehaviour {
         }
     }
 
+    /// <summary>
+    /// Méthode appelée lorsque la souris entre en contact avec la carte. 
+    /// </summary>
     public void OnMouseEnter() {
         /*
 		 * Lorsque la souris rencontre la carte (sans clique). 
@@ -213,6 +236,11 @@ public class Carte : NetworkBehaviour {
          */ 
     }
 
+    /// <summary>
+    /// Lorsque le zoom sur la carte est détruit on fait un effet de dézoom sur la carte normal. 
+    /// NON UTILISE DANS LES CHOIX D'AFFICHAGE COURANTS
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator AnimationFinBigCard() {
         /*
 		 * Petite animation de fin lors de la sortie de la souris de la carte. 
@@ -232,6 +260,11 @@ public class Carte : NetworkBehaviour {
         transform.localScale = new Vector3(localScaleCard, localScaleCard, 1f);
     }
 
+    /// <summary>
+    /// Crée une carte zoom. 
+    /// NON UTILISE DANS LES CHOIX D'AFFICHAGE COURANTS
+    /// </summary>
+    /// <param name="messageToDisplay"></param>
     public virtual void CreateBigCard(string messageToDisplay="") {
         /*
 		 * Création du zoom sur la carte. Lorsque la souris passe sur la carte. 
@@ -259,6 +292,11 @@ public class Carte : NetworkBehaviour {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCarteInfo(shortCode, messageToDisplay); 
     }
 
+    /// <summary>
+    /// Trouver tous éléments sur le champ de bataille correspondant à un certain élément. 
+    /// </summary>
+    /// <param name="_element"></param>
+    /// <returns>Liste d'objet dont l'élément est égal à l'élément demandé</returns>
     public List<GameObject> FindAllEntiteChampBatailleElement(Entite.Element _element) {
         /*
          * Renvoie toutes les cartes jouées sur le champ de bataille qui sont d'élément _element. 
@@ -275,6 +313,12 @@ public class Carte : NetworkBehaviour {
         return AllEntiteElement;
     }
 
+    /// <summary>
+    /// Convertit un string correspondant à la condition et un correspondant à l'entier associé en une condition. 
+    /// </summary>
+    /// <param name="stringCondition">String qui doit correspondre à un enum de Condition.ConditionEnum</param>
+    /// <param name="IntCondition">Entier associé à la condition</param>
+    /// <returns>Condition associée</returns>
     public Condition stringToCondition(string stringCondition, string IntCondition) {
         /*
          * renvoie la condition sort associée au string.
@@ -287,11 +331,14 @@ public class Carte : NetworkBehaviour {
 
     }
 
+    /// <summary>
+    /// Transforme le string donné par la base de données gamesparks 
+    /// en un ensemble de conditions nécessaires pour effectuer un effet de la carte
+    /// </summary>
+    /// <param name="allConditions">string envoyé par la base de données. </param>
+    /// <returns>Une liste de conditions. </returns>
     public List<Condition> stringToConditionList(string allConditions) {
-        /*
-         * Transforme le string donné par la base de données gamesparks 
-         * en un ensemble de conditions nécessaires pour effectuer un sort
-         */
+
         // On split la chaine de caractères reçue en entrée
 
         List<Condition> AllConditions = new List<Condition>();
@@ -310,11 +357,13 @@ public class Carte : NetworkBehaviour {
         return AllConditions;
     }
 
+    /// <summary>
+    /// Transforme le string donné par la base de données gamesparks
+    /// en un ensemble d'actions effectués par la carte. 
+    /// </summary>
+    /// <param name="allConditions">string envoyé par la base de données. </param>
+    /// <returns>Une liste d'actions. </returns>
     public List<Action> stringToActionList(string allEffets) {
-        /*
-        * Transforme le string donné par la base de données gamesparks 
-        * en un ensemble d'effets effectués par le sort. 
-        */
 
         List<Action> AllActions = new List<Action>();
 
@@ -336,6 +385,12 @@ public class Carte : NetworkBehaviour {
         return AllActions;
     }
 
+    /// <summary>
+    /// Convertit un string correspondant à la condition et un correspondant à l'entier associé en une action. 
+    /// </summary>
+    /// <param name="stringCondition">String qui doit correspondre à un enum de Action.ActionEnum</param>
+    /// <param name="IntCondition">Entier associé à l'action</param>
+    /// <returns>Action associée</returns>
     public Action stringToAction(string stringEffet, string IntEffet) {
         /*
          * Renvoie l'effet associé au string. 
@@ -344,6 +399,11 @@ public class Carte : NetworkBehaviour {
             int.Parse(IntEffet));
     }
 
+    /// <summary>
+    /// Transforme le string reçu par la base de données en une liste d'effets. 
+    /// Ecrit directement dans la variable allEffets.
+    /// </summary>
+    /// <param name="allEffets">String reçu par la base de données. </param>
     public void stringToEffetList(string allEffets) {
         if (allEffets == "None"){
             return; 
@@ -357,6 +417,12 @@ public class Carte : NetworkBehaviour {
         }
     }
 
+    /// <summary>
+    /// Transform le string reçu par la base de données en un effet qui est constitué d'une liste de conditions 
+    /// et d'une liste d'actions. 
+    /// </summary>
+    /// <param name="_effetString">le string à transformer</param>
+    /// <returns>UN effet</returns>
     public Effet stringToEffet(string _effetString) {
         Effet newEffet = new Effet();
         string ConditionList = _effetString.Split('!')[0];
@@ -368,10 +434,19 @@ public class Carte : NetworkBehaviour {
         return newEffet; 
     }
 
+    /// <summary>
+    /// Changer la position de la carte zoomée
+    /// NON UTILISE DANS LES CHOIX D'AFFICHAGE COURANTS
+    /// </summary>
+    /// <param name="position">la nouvelle position de la carte</param>
     public void setBigCardPosition(Vector2 position) {
         BigCard.transform.position = position; 
     }
 
+    /// <summary>
+    /// Detruire la carte zoomée
+    /// NON UTILISE DANS LES CHOIX D'AFFICHAGE COURANTS
+    /// </summary>
     public void DestroyBigCard() {
         GetComponent<SpriteRenderer>().enabled = true;
         Destroy(BigCard);
@@ -383,23 +458,35 @@ public class Carte : NetworkBehaviour {
         }
     }
 
+    /// <summary>
+    /// Lorsque la carte arrive sur le board ou sur le sanctuaire, 
+    /// on regarde si elle n'a pas des effets à jouer. 
+    /// Si c'est le cas, ils sont joués. 
+    /// </summary>
     public void JouerEffetDeposeCarte() {
         Debug.Log("Les effets sont en cours de traitement"); 
         GererEffets(AllEffets);
     }
 
-    public virtual void UpdateNewPhase(Player.Phases _currentPhase) {
-        /*
-         * A chaque nouvelle phase on vérifie que la carte n'a pas quelque chose à jouer à ce tour. 
-         * 
-         * Dans ses capacités. 
-         */
+    /// <summary>
+    /// A chaque nouvelle phase on vérifie que la carte n'a pas quelque chose à jouer à ce tour. 
+    /// </summary>
+    /// <param name="_currentPhase">Le nom de la phase en cours</param>
+    /// <param name="tour">L'entier du tour en cours. </param>
+    public virtual void UpdateNewPhase(Player.Phases _currentPhase, int tour) {
+
         // A mettre dans entité uniquement. 
         GameManager.AscendanceTerrain currentAscendance = 
             GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain();
 
+        bool isTourLocalPlayer = (FindLocalPlayer().GetComponent<Player>().PlayerID == tour); 
+        if (_currentPhase == Player.Phases.INITIATION) {
+            updateNewTurnEffetUtilise(isTourLocalPlayer);
+        }
+
         // Gestion "des effets normaux"
-        GererEffets(AllEffets, _currentPhase); 
+        GererEffets(AllEffets, _currentPhase, nouveauTour:true);
+        
     }
 
     /// <summary>
@@ -408,14 +495,15 @@ public class Carte : NetworkBehaviour {
     /// <param name="_allEffets">Liste des effets à effectier</param>
     /// <param name="_currentPhase">Phase lors dans laquelle on se trouve</param>
     /// <param name="debut">true, si on la carte vient d'être posée</param>
-    public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false) {
+    public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false, 
+        bool nouveauTour=false) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
         }
         for (int i = 0; i < _allEffets.Count; ++i) {
             // On regarde les effets un par un. 
             // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
-            bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut);
+            bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut, nouveauTour:nouveauTour);
             Debug.Log("<color=orange>" + effetOK.ToString() + "</Color>"); 
             if (effetOK) {
                 // Dans le cas où toutes les conditions sont réunies. 
@@ -445,9 +533,10 @@ public class Carte : NetworkBehaviour {
     /// <param name="_currentPhase">Phase dans laquelle on se trouve</param>
     /// <param name="estMort">Si la carte vient d'être détruite</param>
     /// <param name="debut">Si la carte vient d'être posée</param>
+    /// <param name="nouveauTour">true lorsque la fonction est appelée lors du passage à un nouveau tour</param>
     /// <returns>true, si toutes les conditions sont remplies</returns>
     public bool GererConditions(List<Condition> _conditions, Player.Phases _currentPhase=Player.Phases.INITIATION, 
-                                    bool estMort=false, bool debut=false) {
+                                    bool estMort=false, bool debut=false, bool nouveauTour=false) {
         /*
          * Regarde si toutes les conditions sont ok pour un effet. 
          * Retourne true si c'est le cas, false sinon
@@ -475,7 +564,14 @@ public class Carte : NetworkBehaviour {
             }
             else if (debut && (_conditions[j].intCondition > 100)) {
                 // L'effet dépend donc d'une phase. 
+                Debug.Log("Cette effet dépend d'une phase particulière."); 
                 return false; 
+            } else if (nouveauTour && !_conditions[j].dependsOnPhase) {
+                // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
+                return false; 
+            } else if (_conditions[j].utilisePourCeTour) {
+                DisplayMessage("Cet effet a déjà été utilisé pour ce tour. ");
+                return false;
             }
             else {
                 Debug.Log("<color=green>Verification de conditions </color>"); 
@@ -545,7 +641,9 @@ public class Carte : NetworkBehaviour {
     /// Gérer les actions d'un effet. 
     /// </summary>
     /// <param name="_actions">Liste des actions à appliquer.</param>
-    public void GererActions(List<Action> _actions) {
+    /// <param name="effetListNumber">Utile pour mettre à jour, si un effet a été utilisé ou pas dans les conditions. 
+    /// Si égal à 0, on est dans la liste d'effets normale, si = 1, effets astraux, si = à2, effets maléfiques</param> 
+    public void GererActions(List<Action> _actions, int effetListNumber=0) {
         // On doit maintenant gérer les effets.
         for (int j = 0; j < _actions.Count; ++j) {
             switch (_actions[j].ActionAction) {
@@ -615,6 +713,7 @@ public class Carte : NetworkBehaviour {
                 case Action.ActionEnum.REVELER_CARTE:
                     // Le joueur révèle une carte de sa main.
                     StartCoroutine(RevelerCarteEffet(_actions[j].properIntAction));
+
                     break;
                 case Action.ActionEnum.REVELER_CARTE_ADVERSAIRE:
                     // L'adversaire doit révéler une carte. 
@@ -629,6 +728,7 @@ public class Carte : NetworkBehaviour {
                     Debug.LogWarning("Cet effet n'est pas géré");
                     break;
             }
+            updateEffetActive(j, effetListNumber); 
         }
     }
 
@@ -656,16 +756,29 @@ public class Carte : NetworkBehaviour {
          }
     }
 
+    /// <summary>
+    /// EFFET: Sacrifier une carte entité.
+    /// Override dans la classe entité
+    /// </summary>
     public virtual void SacrifierCarteEntite() {
         // Les seules cartes que l'on peut sacrifier sont des entités. 
         // La méthode est donc override dans la classe entité. 
     }
 
+    /// <summary>
+    /// EFFET: Placer une carte dans le sanctuaire. 
+    /// Override dans la classe entité.
+    /// </summary>
     public virtual void PlacerSanctuaire() {
         // Les seuls cartes quel'on peut sacrifier sont des entités. 
         // La méthode est donc override dans la classe entité. 
     }
-
+    
+    /// <summary>
+    /// Lorsqu'il faut choisir des cartes pour un effet, cette méthode est appelée 
+    /// pour stocker les cartes choisies dans la variable CartesChoisiesPourEffet. 
+    /// </summary>
+    /// <param name="AllIDCartesChoosen">Liste des IDCardGame des cartes choisies.</param>
     public void CartesChoisies(List<int> AllIDCartesChoosen) {
         List<GameObject> _allObjectsChoosen = new List<GameObject>();
         for (int i = 0; i < AllIDCartesChoosen.Count; ++i) {
@@ -674,6 +787,11 @@ public class Carte : NetworkBehaviour {
         CartesChoisiesPourEffets = _allObjectsChoosen; 
     }
 
+    /// <summary>
+    /// Récupérer un objet Carte grâce à son IDCardGame. 
+    /// </summary>
+    /// <param name="_ID_">IDCardGame de la carte recherchée</param>
+    /// <returns>la carte si elle a été trouvée, crée une exception sinon. </returns>
     GameObject FindCardWithID(int _ID_) {
         /*
 		 * Trouver la carte avec la bonne ID. 
@@ -727,6 +845,9 @@ public class Carte : NetworkBehaviour {
             AllCardsToChoose, gameObject);
     }
 
+    /// <summary>
+    /// Montrer au joueur les cartes qu'il peut choisir sur les champs de bataille des deux joueurs. 
+    /// </summary>
     void ShowCardsForChoiceChampBatailleDeuxJoueurs() {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         for (int k = 0; k < FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").childCount; ++k) {
@@ -739,6 +860,10 @@ public class Carte : NetworkBehaviour {
             AllCardsToChoose, gameObject);
     }
 
+    /// <summary>
+    /// Montrer au joueur les cartes qu'il peut choisir parmi toutes les cartes (sur le champ de bataille
+    /// ou sur la sanctuaire) des deux joueurs. 
+    /// </summary>
     void ShowCardsForChoiceAllCartesDeuxJoueurs() {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         GameObject[] AllCardsBoardSanctuaire = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
@@ -804,13 +929,13 @@ public class Carte : NetworkBehaviour {
         return CartesLocal;
     }
 
-
+    /// <summary>
+    /// Permet de montrer un message sur l'écran, 
+    /// notamment pour informer le joueur d'un effet qui vient de se passer
+    /// tant qu'il n'en a pas la preuve visuelle.
+    /// </summary>
+    /// <param name="Message">Le messafe à afficher</param>
     public void DisplayMessage(string Message) {
-        /*
-         * Permet de montrer un message sur l'écran, 
-         * notamment pour informer le joueur d'un effet qui vient de se passer
-         * tant qu'il n'en a pas la preuve visuelle. 
-         */ 
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().DisplayMessage(Message);
     }
 
@@ -832,6 +957,9 @@ public class Carte : NetworkBehaviour {
         }
     }
 
+    /// <summary>
+    /// Propose à l'autre joueur de mettre le jeu en pause. 
+    /// </summary>
     public void ProposerMettreJeuEnPause() {
         StartCoroutine(GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame()); 
     }
@@ -850,12 +978,22 @@ public class Carte : NetworkBehaviour {
 #endif
     }
 
+    /// <summary>
+    /// Regarde si une carte peut jouer un de ses effets.
+    /// </summary>
+    /// <returns>Le numérode l'effet en question. -1 sinon. </returns>
     public virtual int CheckForEffet() {
         return -1; 
 
 
     }
 
+    /// <summary>
+    /// Proposer au joueur de jouer des effets. 
+    /// TODO: Pour l'instant on ne peut proposer qu'un seul effet. Il faut pouvoir choisir entre plusieurs effets, si
+    /// le joueur peut potentiellement en jouer plusieurs. 
+    /// </summary>
+    /// <param name="effetPropose">Numero de l'effet proposé</param>
     public virtual void ProposerEffets(int effetPropose) {
         // Proposer au joueur de pouvoir jouer un effet. 
         string toDisplay = ""; 
@@ -867,6 +1005,11 @@ public class Carte : NetworkBehaviour {
         StartCoroutine(WaitForResponseEffetPropose(effetPropose)); 
     }
 
+    /// <summary>
+    /// Attendre la réponse du joueur après qu'on lui ait proposé de jouer un effet.
+    /// </summary>
+    /// <param name="effetPropose">Numéro de l'effet proposé</param>
+    /// <returns></returns>
     private IEnumerator WaitForResponseEffetPropose(int effetPropose) {
         while (reponseDemandeEffet == 0) {
             yield return new WaitForSeconds(0.2f); 
@@ -885,6 +1028,11 @@ public class Carte : NetworkBehaviour {
         reponseDemandeEffet = response; 
     }
 
+    /// <summary>
+    /// EFFET: Changer la position d'une entité. 
+    /// TODO: Gérer le changement de position de plusieurs entités. 
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator ChangerPositionEffet() {
 
         yield return WaitForCardsChosen();
@@ -899,6 +1047,10 @@ public class Carte : NetworkBehaviour {
         CartesChoisiesPourEffets = null; 
     }
 
+    /// <summary>
+    /// EFFET: Détruire une ou plusieurs cartes. 
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator DetruireEffet() {
         yield return WaitForCardsChosen(); 
         for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
@@ -908,6 +1060,10 @@ public class Carte : NetworkBehaviour {
         CartesChoisiesPourEffets = null; 
     }
 
+    /// <summary>
+    /// EFFET: Defausser une ou plusieurs cartes.
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator DefausserEffet() {
         yield return WaitForCardsChosen(); 
         for (int i = 0; i < CartesChoisiesPourEffets.Count;  ++i) {
@@ -945,6 +1101,30 @@ public class Carte : NetworkBehaviour {
         }
         FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString); 
         CartesChoisiesPourEffets = null; 
+    }
+
+    /// <summary>
+    /// Certains effets ne pouvant être utilisés qu'une fois par tour, 
+    /// on doit écrire dans les conditions qu'ils on déjà été utilisés. 
+    /// </summary>
+    protected virtual void updateEffetActive(int nombreEffet, int effetListNumber=0) {
+        switch (effetListNumber) {
+            case 0:
+                // Dans le cas où il y a plusieurs conditions, on écrit toujours toutes les variables de timing dans l'int
+                // du premier
+                AllEffets[nombreEffet].AllConditionsEffet[0].setSortUtilisePourCeTour();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Lors de chaque nouveau tour on regarde si les effets peuvent être réinitialisés. 
+    /// </summary>
+    /// <param name="tourJoueurLocal">true, si c'est le tour du joueur local</param>
+    protected virtual void updateNewTurnEffetUtilise(bool tourJoueurLocal) {
+        for (int i = 0; i < AllEffets.Count; ++i) {
+            AllEffets[i].AllConditionsEffet[0].updateUtilisePourCeTour(tourJoueurLocal); 
+        }
     }
 
 }

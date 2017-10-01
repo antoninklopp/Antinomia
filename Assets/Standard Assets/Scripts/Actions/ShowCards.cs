@@ -34,7 +34,12 @@ public class ShowCards : NetworkBehaviour {
 	private string[] newList;
 
     // un objet peut demander une carte, après la demande c'est à lui qu'on revoit l'objet sélectionné. 
-    GameObject ObjectAsking; 
+    GameObject ObjectAsking;
+
+    /// <summary>
+    /// true si le joueur a local a un effet en cours. 
+    /// </summary>
+    private bool effetEnCours; 
 
 	// Use this for initialization
 	void Start () {
@@ -52,6 +57,9 @@ public class ShowCards : NetworkBehaviour {
 		 * On crée toutes les images à partir de la carte. 
 		 * 
 		 */
+
+        effetEnCours = true; 
+
         ObjectAsking = _ObjectAsking;
 		FiniButton.SetActive (true); 
 		AllCardsGiven = _AllCardsGiven; 
@@ -70,7 +78,7 @@ public class ShowCards : NetworkBehaviour {
 			GameObject newCarte = Instantiate(CartePrefab); 
 			// Ensuite on met leur position avec une demi carte entre chaque carte. 
 			newCarte.transform.SetParent(transform); 
-			newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
+			// newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
 			AllCardsToShow.Add (newCarte); 
 		}
 		for (int i = 0; i < AllCardsToShow.Count; ++i) {
@@ -129,10 +137,15 @@ public class ShowCards : NetworkBehaviour {
         StartCoroutine(FinShowCards(0f, AllCardsToShow)); 
 		AllCardsToShowOther = new List<string> ();
 
-        ObjectAsking = null; 
+        ObjectAsking = null;
+
+        effetEnCours = false; 
 	}
 
-
+    /// <summary>
+    /// Montrer les cartes choisies par un joueur lors d'un effet à un autre joueur. 
+    /// </summary>
+    /// <returns></returns>
 	IEnumerator ShowAllCardsChosen(){
 		/*
 		 * Montrer les cartes choisies par l'autre joueur. 
@@ -158,7 +171,7 @@ public class ShowCards : NetworkBehaviour {
 			GameObject newCarte = Instantiate(CartePrefab); 
 			// Ensuite on met leur position avec une demi carte entre chaque carte. 
 			newCarte.transform.SetParent(transform); 
-			newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
+			// newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
 			AllCardsToShow.Add (newCarte); 
 			Debug.Log ("J'ai instancié la carte"); 
 		}
@@ -168,8 +181,11 @@ public class ShowCards : NetworkBehaviour {
 			AllCardsToShow [i].SendMessage ("setOnIntListener", i);
 		}
 
-		Debug.Log ("Cartes OK"); 
-		StartCoroutine (FinShowCards (3f, AllCardsToShow)); 
+		Debug.Log ("Cartes OK");
+        if (!effetEnCours) {
+            // S'il y n'y a pas d'effete en cours, on arête de montrer les cartes. 
+            StartCoroutine(FinShowCards(3f, AllCardsToShow));
+        } 
 	}
 
 	IEnumerator FinShowCards(float nbSeconds, List<GameObject> AllCardsToDestroy){
@@ -186,29 +202,34 @@ public class ShowCards : NetworkBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Appelée pas le GameManager dans un [ClientRpc] pour montrer les cartes choisies par un joueur à l'autre.
+    /// </summary>
+    /// <param name="allCards"></param>
+    public void RpcShowCardsToOtherPlayer(string[] allCards) {
+        AllCardsToShowOther = new List<string>();
+        for (int i = 0; i < allCards.Length; ++i) {
+            Debug.Log(allCards[i]);
+            AllCardsToShowOther.Add(allCards[i]);
+        }
+        //AllCardsToShowOther = newListSync; 
+        Debug.Log("CARTES QUE J4AI CHOISIES");
+        //FinShowCards (0.1f, AllCardsToShow); 
+        StartCoroutine(ShowAllCardsChosen());
+    }
 
-	public void RpcShowCardsToOtherPlayer(string[] allCards){
-		AllCardsToShowOther = new List<string> (); 
-		for (int i = 0; i < allCards.Length; ++i) {
-			Debug.Log (allCards [i]); 
-			AllCardsToShowOther.Add (allCards [i]);
-		}
-		//AllCardsToShowOther = newListSync; 
-		Debug.Log ("CARTES QUE J4AI CHOISIES"); 
-		//FinShowCards (0.1f, AllCardsToShow); 
-		StartCoroutine(ShowAllCardsChosen()); 
-	}
-
-	GameObject FindLocalPlayer(){
-		/*
+    GameObject FindLocalPlayer() {
+        /*
 		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
-		 */ 
-		GameObject[] Players = GameObject.FindGameObjectsWithTag ("Player"); 
-		if (Players [0].GetComponent<Player> ().isLocalPlayer) {
-			return Players [0]; 
-		} else {
-			return Players [1]; 
-		}
-	}
+		 */
+        GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
+        if (Players[0].GetComponent<Player>().isLocalPlayer) {
+            return Players[0];
+        }
+        else {
+            return Players[1];
+        }
+    }
+
 }
 

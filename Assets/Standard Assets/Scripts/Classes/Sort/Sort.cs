@@ -470,8 +470,8 @@ public class Sort : Carte {
         //OnStartAuthority (); 
     }
 
-    public override void UpdateNewPhase(Player.Phases _currentPhase) {
-        base.UpdateNewPhase(_currentPhase);
+    public override void UpdateNewPhase(Player.Phases _currentPhase, int tour) {
+        base.UpdateNewPhase(_currentPhase, tour);
         clicked = 0; 
     }
 

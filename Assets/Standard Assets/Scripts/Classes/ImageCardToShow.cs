@@ -72,8 +72,7 @@ public class ImageCardToShow : MonoBehaviour {
 	}
 
 	public void OnMouseDown(){
-		// Clique sur la carte. 
-		Debug.Log("MERDEEEEE"); 
+		// Clic sur la carte. 
 		CreateTarget();
 		SendCarteToManager (); 
 	}

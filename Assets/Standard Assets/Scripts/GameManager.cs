@@ -217,7 +217,6 @@ public class GameManager : NetworkBehaviour {
 
 			break; 
 		}
-		//setNamePhaseUI (Phase);
 
 	}
 
@@ -268,7 +267,7 @@ public class GameManager : NetworkBehaviour {
 		Phase = newPhase; 
 		string PhaseToString = " ";
 
-        // SendNextPhaseAllCards(newPhase); 
+        SendNextPhaseAllCards(newPhase); 
 
 		switch (Phase) {
 		    case Player.Phases.INITIATION:
@@ -317,7 +316,7 @@ public class GameManager : NetworkBehaviour {
         for (int i = 0; i < AllEntites.Length; ++i) {
             try {
                 if (AllEntites[i].GetComponent<Entite>().isFromLocalPlayer) {
-                    AllEntites[i].SendMessage("UpdateNewPhase", currentPhase);
+                    AllEntites[i].GetComponent<Entite>().UpdateNewPhase(currentPhase, Tour);
                 }
             } catch (NullReferenceException e) {
                 Debug.Log(e); 

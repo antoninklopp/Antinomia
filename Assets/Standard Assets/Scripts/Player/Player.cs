@@ -245,7 +245,11 @@ public class Player : NetworkBehaviour	 {
 		CardDeck.Cartes.Remove (CardDeck.Cartes [0]);
 	}
 
-
+    /// <summary>
+    /// Creation du deck. 
+    /// Appelle aussi la fonction qui mélange le deck. 
+    /// </summary>
+    /// <returns></returns>
 	public IEnumerator CreateDeck(){
 		/*
 		 * Création du deck au début de la partie.
@@ -418,6 +422,10 @@ public class Player : NetworkBehaviour	 {
 		ChangementTour (newTour); 
 	}
 
+    /// <summary>
+    /// Afficher le nom des deux joueurs. 
+    /// </summary>
+    /// <returns></returns>
 	IEnumerator SetNames(){
 		/*
 		 * Mettre les noms des joueurs
@@ -481,6 +489,10 @@ public class Player : NetworkBehaviour	 {
 		CmdDetruireCarte (ID); 
 	}
 
+    /// <summary>
+    /// Envoyer une carte au cimetiere. 
+    /// </summary>
+    /// <param name="ID">ID de la carte à détruire</param>
 	[Command]
 	void CmdDetruireCarte(int ID){
 		/*
@@ -520,12 +532,14 @@ public class Player : NetworkBehaviour	 {
         Debug.Log("Execute sur le serveur.");
         // GameObject LaCarteSurLeServeur = FindCardWithID(ID);
         // LaCarteSurLeServeur.SendMessage(voidName, _intToUse); 
+        RpcEnvoiMethodToServerCarteWithIntParameter(ID, voidName, _intToUse, playerID); 
     }
 
     [ClientRpc]
     public void RpcEnvoiMethodToServerCarteWithIntParameter(int ID, string voidName, int _intToUse, int playerID) {
-        if (playerID == this.PlayerID) {
+        if (isLocalPlayer) {
             // Le but est d'envoyer une méthode à l'autre joueur!
+            // Donc pas au joueur local!
             return; 
         }
         GameObject LaCarteSurLeServeur = FindCardWithID(ID);
@@ -533,18 +547,15 @@ public class Player : NetworkBehaviour	 {
         Debug.Log("La méthode " + voidName + " a été éxecutée sur le serveur"); 
     }
 
-
+    /// <summary>
+    /// Trouver la carte à l'aide de son ID card game. 
+    /// </summary>
+    /// <param name="_ID_"></param>
+    /// <returns></returns>
     GameObject FindCardWithID(int _ID_){
-    /*
+        /*
 		* Trouver la carte avec la bonne ID. 
 		*/
-    //GameObject[] AllCartes = GameObject.FindGameObjectsWithTag ("BoardSanctuaire");
-    //      GameObject[] AllCartesBis = GameObject.FindGameObjectsWithTag("Carte");
-    // On cherche toutes les cartes avec 
-
-    //for (int i = AllCartes.Length; i < AllCartes.Length + AllCartesBis.Length; ++i) {
-    //    AllCartes[i] = AllCartesBis[i - AllCartes.Length]; 
-    //}
 
 
         CarteType[] AllCartesType = FindObjectsOfType(typeof(CarteType)) as CarteType[];
@@ -585,7 +596,10 @@ public class Player : NetworkBehaviour	 {
 		// return null; 
 	}
 
-
+    /// <summary>
+    /// Rajouter des points de vie au joueur. 
+    /// </summary>
+    /// <param name="puissance">nombre de points de vie à rajouter au joueur. </param>
 	public void HealPlayer(int puissance){
 		/*
 		 * Par un effet ou une capacité, le joueur peut se faire "soigner", 
@@ -599,6 +613,10 @@ public class Player : NetworkBehaviour	 {
 		//GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ().setPlayerPVUI (PlayerID, PlayerPV); 
 	}
 
+    /// <summary>
+    /// Attaquer le joueur directement. 
+    /// </summary>
+    /// <param name="puissance">Nombre de PV enlevés au joueur</param>
 	public void AttackPlayer(int puissance){
 		/*
 		 * Le joueur peut être directement attaqué si l'autre joueur n'a aucune autre carte 

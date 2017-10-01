@@ -518,9 +518,10 @@ public class Assistance : Carte {
         assistanceState = State.CIMETIERE; 
     }
 
-    public override void UpdateNewPhase(Player.Phases _currentPhase) {
-        base.UpdateNewPhase(_currentPhase);
+    public override void UpdateNewPhase(Player.Phases _currentPhase, int tour) {
+        base.UpdateNewPhase(_currentPhase, tour);
         clicked = 0;
+
     }
 
     public override string GetInfoCarte() {

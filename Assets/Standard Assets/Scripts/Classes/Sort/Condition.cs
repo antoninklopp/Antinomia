@@ -49,19 +49,61 @@ public class Condition {
 
     // Une ou plusieurs conditions peuvent être nécessaires pour effectuer un sort
     public enum ConditionEnum {
-        CHOIX_ENTITE_TERRAIN, // Choix d'une entité sur le terrain
-        CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR, // Choix d'une entité sur le champ de bataille du joueur
-        CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE, // Choix d'une entite sur le champ de bataille de l'adversaire
-        CHOIX_ENTITE_CHAMP_BATAILLE, // Choix d'une entite sur un des deux champ de bataille. 
-        DEFAUSSER, // Defausser une ou plusieurs cartes de sa main.  
-        CARTES_CIMETIERE, // Avoir au moins x cartes dans le cimetière
-        DELTA, // Avoir x cartes de moins que l'adversaire. 
-        CHOIX_ELEMENT, // Choix d'un element dans le cas où on veut changer l'élément d'une carte par exemple.
+        /// <summary>
+        /// Choix d'une entité sur le terrain
+        /// </summary>
+        CHOIX_ENTITE_TERRAIN,
+        /// <summary>
+        /// Choix d'une entité sur le champ de bataille du joueur
+        /// </summary>
+        CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR,
+        /// <summary>
+        /// Choix d'une entite sur le champ de bataille de l'adversaire
+        /// </summary>
+        CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE,
+        /// <summary>
+        /// Choix d'une entite sur un des deux champ de bataille. 
+        /// </summary>
+        CHOIX_ENTITE_CHAMP_BATAILLE,
+        /// <summary>
+        /// Defausser une ou plusieurs cartes de sa main.  
+        /// </summary>
+        DEFAUSSER,
+        /// <summary>
+        /// Avoir au moins x cartes dans le cimetière
+        /// </summary>
+        CARTES_CIMETIERE,
+        /// <summary>
+        ///  Avoir x cartes de moins que l'adversaire. 
+        /// </summary>
+        DELTA,
+        /// <summary>
+        /// Choix d'un element dans le cas où on veut changer l'élément d'une carte par exemple.
+        /// </summary>
+        CHOIX_ELEMENT, 
+        /// <summary>
+        /// Choisir une entité neutre de l'adversaire
+        /// </summary>
         CHOIX_ENTITE_NEUTRE_ADVERSAIRE, 
+        /// <summary>
+        /// Choisir une entité neutre du joueur
+        /// </summary>
         CHOIX_ENTITE_NEUTRE_JOUEUR,
+        /// <summary>
+        /// Sacrifier une carte
+        /// </summary>
         SACRIFIER_CARTE, 
-        MORT, // Lors de la destruction de la carte. 
-        PAYER_AKA, // Payer un cout en AKA
+        /// <summary>
+        /// Lors de la destruction de la carte
+        /// </summary>
+        MORT,
+        /// <summary>
+        /// Payer un cout en AKA
+        /// </summary>
+        PAYER_AKA, 
+        /// <summary>
+        /// Aucune condition nécessaire
+        /// </summary>
         NONE
     };
 
@@ -158,6 +200,29 @@ public class Condition {
         }
     }
 
+    /// <summary>
+    /// Si le joueur a été utilisé à ce tour. 
+    /// </summary>
+    public void setSortUtilisePourCeTour() {
+        if (TourCondition != Tour.NONE) {
+            utilisePourCeTour = true;
+        }
+    }
+
+    /// <summary>
+    /// A chaque fin de tour, on appelle cette fonction pour remettre ou pas, 
+    /// la variable utilisePourCeTour à false, dans le cas où le sort pourra
+    /// être réutilisé plus tard. 
+    /// </summary>
+    /// <param name="isTourJoueurLocal">true, si c'est le prochain tour est celui du joueur local</param>
+    public void updateUtilisePourCeTour(bool isTourJoueurLocal) {
+        if (TourCondition == Tour.TOUR_DEUX_JOUEURS) {
+            utilisePourCeTour = false; 
+        } else if (((TourCondition == Tour.TOUR_LOCAL) && (isTourJoueurLocal)) ||
+                        ((TourCondition == Tour.TOUR_NOT_LOCAL) && (!isTourJoueurLocal))){
+            utilisePourCeTour = false; 
+        } 
+    }
 
 
 }
