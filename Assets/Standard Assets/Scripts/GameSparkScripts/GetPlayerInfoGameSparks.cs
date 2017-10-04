@@ -95,14 +95,14 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
                  * Elle recherche la carte dans la metaCollection et dans ce cas il n'y a pas de oID.
                  * Mais elle n'est plus nécessaire une fois la carte jouée et instanciée. 
                  */ 
-                Debug.Log(data.GetInt("card_ID").Value);
+                //Debug.Log(data.GetInt("card_ID").Value);
                 _carte.oID = data.GetString("oID");
                 _carte.IDAllCards = data.GetInt("card_ID").Value;
             }
             if (ID != "") {
                 // L'oID de la carte peut être utile dans le cas où on aurait changé des élements sur la carte 
                 // et qu'on voudrait récupérer les infos de base. 
-                Debug.Log("On set l'OID de la carte" + ID);
+                //Debug.Log("On set l'OID de la carte" + ID);
                 _carte.oID = ID;
             }
         }
@@ -241,6 +241,11 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		finish = false; 
 	}
 
+    /// <summary>
+    /// Recuperer tous les decks. 
+    /// </summary>
+    /// <param name="CardPrefab"></param>
+    /// <returns></returns>
 	public List<Deck> GetAllDecks(GameObject CardPrefab){
 		/*
 		 * METHODE A UTILISER.
@@ -250,6 +255,12 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		return allDecks; 
 	}
 
+    /// <summary>
+    /// Recuperer tout un deck. 
+    /// </summary>
+    /// <param name="CardPrefab">Le prehfab de la carte à utilier pour instantier les objets. INUTILISE PAR LA FONCTION</param>
+    /// <param name="number">Le numéro du deck. </param>
+    /// <returns></returns>
 	public Deck GetDeck(GameObject CardPrefab, int number){
 		/*
 		 * Pour l'instant on récupère tous les decks mais c'est pas la peine.
@@ -258,6 +269,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		//StartCoroutine (WaitForPlayerDecks (CardPrefab)); 
 		return allDecks [0]; 
 	}
+
 
 	public void GetCardByIDSparks(string ID, GameObject CardToInstantiate){
 		/*
@@ -289,15 +301,21 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 			});
 	}
 
+    /// <summary>
+    /// Recupérer une carte et attendre que ses infos sur le serveur soient mises à jour. 
+    /// </summary>
+    /// <param name="ID">ID de la carte dans la base de données gamesparks</param>
+    /// <param name="CardToInstantiate">Le prefab de la carte à instantier. </param>
+    /// <returns></returns>
 	public IEnumerator WaitForCardoID(string ID, GameObject CardToInstantiate){
 		cardoIDOk = false; 
 		GetCardByIDSparks (ID, CardToInstantiate); 
 		while (!finish) {
 			yield return new WaitForSeconds (0.05f); 	
 		}
-        Debug.Log("La carte a été récupérée. "); 
 		finish = false;
-		cardoIDOk = true; 
+		cardoIDOk = true;
+        Debug.Log("<color=green> LA CARTE EST RECUPEREE ICI </color>"); 
 	}
 
 	public void StartCardByoID(string ID, GameObject CardToInstantiate){
@@ -309,11 +327,15 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 	}
 
 	public GameObject GetCardoID(){
-        Debug.Log("Card dans GetPlayerInfo avant appel");
-        Debug.Log(CardoID); 
 		return CardoID; 
 	}
 
+    /// <summary>
+    /// Ajouter ue carte dans un deck. 
+    /// </summary>
+    /// <param name="IDAllCards">ID de la carte par rapport aux cartes du joueur, dans la RuntimeCollection
+    /// La base de données a besoin de cette information pour ne pas ajouter deux fois la même carte dans un même deck. </param>
+    /// <param name="deckNumber">Numero du deck du joueur dans lequel il veut ajouter la carte</param>
 	public void AddCardToDeck(int IDAllCards, int deckNumber){
 		/*
 		 * Ajouter une carte à un deck dans la base de données. 
@@ -332,6 +354,11 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		}); 
 	}
 
+    /// <summary>
+    /// Enlever une carte d'un dek. 
+    /// </summary>
+    /// <param name="IDAllCards">ID de la carte par rapports aux carte du joueur, dans la RuntimeCollection</param>
+    /// <param name="deckNumber">Le numéro du deck duquel la carte va être enlevée. </param>
 	public void RemoveCardFromDeck(int IDAllCards, int deckNumber){
 		/*
 		 * Enlever une carte d'un deck.

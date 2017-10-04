@@ -83,8 +83,6 @@ public class CarteType : NetworkBehaviour {
             default:
                 throw new Exception("Cette carte n'a pas de type");
         }
-
-        Debug.Log(thisCarteType); 
     }
 
     [ClientRpc]

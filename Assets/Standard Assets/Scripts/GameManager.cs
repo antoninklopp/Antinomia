@@ -631,7 +631,7 @@ public class GameManager : NetworkBehaviour {
 		 * 
 		 */ 
 		int currentAKA = GameObject.FindGameObjectsWithTag ("BoardSanctuaire").Length;
-        Debug.Log(currentAKA); 
+        // Debug.Log(currentAKA); 
         AKATour = currentAKA; 
 		NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
 		NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
@@ -909,8 +909,12 @@ public class GameManager : NetworkBehaviour {
         StartCoroutine(WaitForResponseCartesDebut(nombreCartes)); 
     }
 
+    /// <summary>
+    /// Attendre la réponse du joueur après qu'on lui proposait de piocher la main qu'on lui montre ou de repiocher. 
+    /// </summary>
+    /// <param name="nombreCartes">Le nombre de cartes à piocher</param>
+    /// <returns>None</returns>
     public IEnumerator WaitForResponseCartesDebut(int nombreCartes) {
-        Debug.Log("ChoixDebut" + choixDebut.ToString()); 
         while (choixDebut == 0) {
             yield return new WaitForSeconds(0.5f); 
         }
@@ -922,24 +926,33 @@ public class GameManager : NetworkBehaviour {
         else {
             choixDebut = 0; 
             for (int i = 0; i < nombreCartes; ++i) {
-                Debug.Log("JE PIOCHE AU DEBUT DANS LA COROUTINE");
-                Debug.Log("LA CARTE " + i.ToString());
                 yield return FindLocalPlayer().GetComponent<Player>().PiocherCarteRoutine();
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.2f);
             }
 
             ChoixCartesDebut.SetActive(false);
         }
     }
 
+    /// <summary>
+    /// Si le joueur accepte sa main de départ. 
+    /// </summary>
     public void ChoixDebutOK() {
         choixDebut = 2; 
     }
 
+    /// <summary>
+    /// Si le joueur préfère repiocher. 
+    /// </summary>
     public void ChoixDebutNotOK() {
         choixDebut = 1; 
     }
 
+    /// <summary>
+    /// Proposer au joueur de jouer un effet. 
+    /// </summary>
+    /// <param name="effetsToDisplay">Les effets à afficher</param>
+    /// <param name="ObjectAsking">L'objet (la carte) qui a "proposé" de faire l'effet.</param>
     public void ProposerEffetJoueur(string effetsToDisplay, GameObject ObjectAsking) {
         /**
          * Proposer au joueur de jouer un effet. 
@@ -949,6 +962,10 @@ public class GameManager : NetworkBehaviour {
         ObjetDemandeEffet = ObjectAsking; 
     }
 
+    /// <summary>
+    /// Reponse du joueur par rapport à l'effet proposé. 
+    /// </summary>
+    /// <param name="reponse">2, si le joueur accepte, 1 sinon</param>
     public void ReponseEffetPropose(int reponse) {
         ObjetDemandeEffet.SendMessage("ReponseEffet", reponse);
         ProposerEffet.SetActive(false); 

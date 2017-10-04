@@ -1,23 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking; 
+using UnityEngine.Networking;
 
+/// <summary>
+/// Ce type de carte peut être invoqué sur votre champ de bataille en sacrifiant une entité de votre champ de bataille. 
+/// Elle n’est pas considérée comme une entité et ne procure pas d’Aka rémanent.
+/// Tant que vous contrôlez sur votre champ de bataille un nombre d’entités inférieur ou égal au nombre d'assistances que vous contrôlez, 
+/// envoyez au cimetière une assistance de votre choix. Une assistance ne peut pas attaquer mais peut l’être.
+/// Durant l’une de vos phases principales, vous pouvez lier ou délier à une assistance une entité 
+/// de votre champ de bataille qui n’a pas attaqué ce tour.Une entité liée ne peut pas déclarer d'attaque. 
+/// Une assistance ne peut pas être ciblée par une attaque tant que l’entité qui lui est liée est sur le champ de bataille.
+/// Une assistance ne peut être liée qu’à une entité à la fois.
+/// </summary>
 public class Assistance : Carte {
-    /*
-     * 
-     * Ce type de carte peut être invoqué sur votre champ de bataille en sacrifiant une entité de votre champ de bataille. 
-     * Elle n’est pas considérée comme une entité et ne procure pas d’Aka rémanent. 
-     * Tant que vous contrôlez sur votre champ de bataille un nombre d’entités inférieur ou égal au nombre d'assistances que vous contrôlez, 
-     * envoyez au cimetière une assistance de votre choix. Une assistance ne peut pas attaquer mais peut l’être. 
-     * Durant l’une de vos phases principales, vous pouvez lier ou délier à une assistance une entité 
-     * de votre champ de bataille qui n’a pas attaqué ce tour. Une entité liée ne peut pas déclarer d'attaque. 
-     * Une assistance ne peut pas être ciblée par une attaque tant que l’entité qui lui est liée est sur le champ de bataille. 
-     * Une assistance ne peut être liée qu’à une entité à la fois.
-     * 
-     */
 
-
+    /// <summary>
+    /// Etats possibles de l'assistance. 
+    /// </summary>
     public enum State {
         MAIN,
         ASSOCIE_A_CARTE,
@@ -27,17 +27,37 @@ public class Assistance : Carte {
         BIGCARD
         };
 
+    /// <summary>
+    /// Etat courant de l'assistance. 
+    /// </summary>
     public State assistanceState = State.DECK;
 
+    /// <summary>
+    /// Carte à laquelle l'assistance est liée. (string)
+    /// </summary>
     public string carteLiee = "";
+
+    /// <summary>
+    /// Carte à laquelle l'assistance est liée (int IDCardGame)
+    /// </summary>
     public int carteLieeID = 0; 
 
+    /// <summary>
+    /// STAT de l'assistance
+    /// </summary>
     public int STAT;
+
 
     private int clicked = 0;
 
+    /// <summary>
+    /// Carte Ciblee par un effet de l'assistance.
+    /// </summary>
     public GameObject CarteCiblee; 
 
+    /// <summary>
+    /// Initialisation de la classe Assistance. 
+    /// </summary>
     public Assistance() {
 
     }
@@ -64,6 +84,9 @@ public class Assistance : Carte {
         }
 	}
 
+    /// <summary>
+    /// Lors d'un clic sur la carte
+    /// </summary>
     public override void OnMouseDown() {
         /*
          * Lors d'un click sur la carte. 
@@ -110,6 +133,7 @@ public class Assistance : Carte {
         }
     }
 
+
     public override void CreateBigCard(string messageToDisplay = "") {
         base.CreateBigCard("Assistance " + "\n" + 
             Name + "\n");
@@ -148,14 +172,14 @@ public class Assistance : Carte {
         //}
     }
 
+    /// <summary>
+    /// Lors du deuxième clique du joueur, après que la carte ait été bougée. 
+    /// Contrairement à une carte entité, 
+    /// il n'y a que deux pissibilité:
+    /// soit le joueur reclique sur sa main et repose la carte, 
+    /// soit le joueur clique autre part et la carte est jouée.
+    /// </summary>
     void ChangePosition() {
-        /*
-         * Lors du deuxième clique du joueur, après que la carte ait été bougée. 
-         * Contrairement à une carte entité, 
-         * il n'y a que deux pissibilité:
-         * soit le joueur reclique sur sa main et repose la carte, 
-         * soit le joueur clique autre part et la carte est jouée. 
-         */
         Debug.Log("Changer La Position");
         if (Mathf.Abs(transform.position.y - Main.transform.position.y) < 1) {
             // Si le joueur reclique sur sa main, la carte est reposée. 
@@ -166,10 +190,13 @@ public class Assistance : Carte {
         }
     }
 
+    /// <summary>
+    /// Jouer l'assistance. 
+    /// En deux temps, d'abord le joueur clique autre part que dans sa main pour indiquer
+    /// qu'il veut jouer l'assistance. 
+    /// Il choisit ensuite la carte à détruire pour pouvoir la poser (conformément aux règles). 
+    /// </summary>
     void JouerAssistance() {
-        /*
-         * Jouer la carte sort
-         */
 
         if (clicked == 1) {
             // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
@@ -253,11 +280,12 @@ public class Assistance : Carte {
     }
 
 
-
+    /// <summary>
+    /// Lier l'assistance à une entité. 
+    /// </summary>
+    /// <param name="carteAffectee"></param>
     void LierAssistance(GameObject carteAffectee) {
-        /*
-         * Lier l'assistance à une entité. 
-         */ 
+
          // On regarde d'abord si la carteAffectee a attaqué à ce tour. 
          if (carteAffectee.GetComponent<Entite>().hasAttacked == 1) {
             DisplayMessage("Impossible de lier une assistance à une carte ayant déjà attaqué"); 
@@ -268,9 +296,14 @@ public class Assistance : Carte {
 
             carteLiee = carteAffectee.GetComponent<Entite>().Name;
             carteLieeID = carteAffectee.GetComponent<Entite>().IDCardGame;
-        }
+         }
+
     }
 
+    /// <summary>
+    /// Delier l'assistance d'une entité. 
+    /// </summary>
+    /// <param name="carteAffectee"></param>
     void DelierAssistance(GameObject carteAffectee) {
         if (carteAffectee.GetComponent<Entite>().hasAttacked == 1) {
             DisplayMessage("Impossible de lier une assistance à une carte ayant déjà attaqué");
@@ -285,15 +318,21 @@ public class Assistance : Carte {
         }
     }
 
+    /// <summary>
+    /// Poser d'une assistance sur le terrain. 
+    /// Fonction faite sur le serveur. 
+    /// </summary>
     [Command]
     void CmdPoserAssistance() {
-        /*
-         * Pose d'une assistance sur le terrain. 
-         */
+
         RpcPoserAssistance(); 
 
     }
 
+    /// <summary>
+    /// Poser l'assistance. 
+    /// Fonction appelée sur tous les clients. 
+    /// </summary>
     [ClientRpc]
     void RpcPoserAssistance() {
 
@@ -375,6 +414,9 @@ public class Assistance : Carte {
         GetComponent<SpriteRenderer>().color = Color.red; 
     }
     
+    /// <summary>
+    /// Detruire l'assistance. 
+    /// </summary>
     void EntiteDetruite() {
         /*
          * On joue l'assistance lorsque l'entité est détruite. 
@@ -382,27 +424,11 @@ public class Assistance : Carte {
         DetruireCarte(); 
     }
 
-    //[Command]
-    //void CmdEntiteDetruite() {
-    //    RpcEntiteDetruite();
-    //}
-
-    //[ClientRpc]
-    //void RpcEntiteDetruite() {
-    //    /*
-    //     * Lorsqu'une entité est détruite, son assistance associée prend sa place. 
-    //     */ 
-    //    assistanceState = State.JOUEE;
-    //    GetComponent<BoxCollider2D>().enabled = true;
-    //    transform.localScale = new Vector3(localScaleCard, localScaleCard, localScaleCard);
-
-    //    ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
-    //    ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
-
-
-    //}
-
-
+    /// <summary>
+    /// Appelée lorsque la carte est instanciée sur le serveur. 
+    /// Permet de transmettre toutes les infos depuis l'objet carte sur le serveur, jusqu'aux cartes sur les clients. 
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator SetUpCard() {
 
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
@@ -413,13 +439,15 @@ public class Assistance : Carte {
             RpcsetoID(IDCardGame, oID, Name, shortCode, STAT, AllEffetsString, AllEffetsStringToDisplay);
             // Inutile normalement.
             // RpcChangeParent (); 
+        } else {
+            yield break; 
         }
 
         // Ici il faut attendre les infos, et pas attendre un temps fini. 
         yield return new WaitForSeconds(0.1f);
 
         if (assistanceState != State.MAIN) {
-            yield break;
+            Debug.Log("<color=purple> Probleme ici, la carte aurait avoir le State Main</color>"); 
         }
 
         // Debug.Log(netId.ToString() + hasAuthority.ToString());
@@ -465,6 +493,18 @@ public class Assistance : Carte {
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
     }
 
+    /// <summary>
+    /// Fonction appelée sur tous les clients. 
+    /// Transmettre les infos importantes de la carte. 
+    /// </summary>
+    /// <param name="_IDCardGame">Attribut de la carte. Numero d'identification de la carte dans la partie</param>
+    /// <param name="_oID">Attribut de la carte. Numero d'identification de la carte dans la META COLLECTION.</param>
+    /// <param name="_Name">Attribut de la carte.</param>
+    /// <param name="_shortCode">Attribut de la carte.</param>
+    /// <param name="_STAT">Attribut de la carte.</param>
+    /// <param name="_EffetString">Attribut de la carte. On parle ici des effets sous la forme à "décortiquer" et pas la forme 
+    /// "compréhensible"</param>
+    /// <param name="_EffetsToDisplay">Attribut de la carte. Forme compréhensible. </param>
     [ClientRpc]
     public void RpcsetoID(int _IDCardGame, string _oID, string _Name, string _shortCode,
         int _STAT, string _EffetString, string _EffetsToDisplay) {
@@ -481,6 +521,9 @@ public class Assistance : Carte {
 
     }
 
+    /// <summary>
+    /// Detruire la carte.
+    /// </summary>
     void DetruireCarte() {
         
         if (transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer) {
@@ -496,12 +539,20 @@ public class Assistance : Carte {
         }
     }
 
+    /// <summary>
+    /// Detruire la carte. 
+    /// Serveur. 
+    /// </summary>
     [Command]
     void CmdDetruireCarte() {
 
         RpcDetruireCarte(); 
     }
 
+    /// <summary>
+    /// Detruire la carte. 
+    /// Appelé sur tous les clients. 
+    /// </summary>
     [ClientRpc]
     void RpcDetruireCarte() {
 
@@ -518,12 +569,21 @@ public class Assistance : Carte {
         assistanceState = State.CIMETIERE; 
     }
 
+    /// <summary>
+    /// Update de la carte lors d'un changement de phase. 
+    /// </summary>
+    /// <param name="_currentPhase">La nouvelle phase</param>
+    /// <param name="tour">Le nouveau tour</param>
     public override void UpdateNewPhase(Player.Phases _currentPhase, int tour) {
         base.UpdateNewPhase(_currentPhase, tour);
         clicked = 0;
 
     }
 
+    /// <summary>
+    /// Recupérer les infos de l'assistance. 
+    /// </summary>
+    /// <returns>Un string contenant les infos essentielles à la carte. </returns>
     public override string GetInfoCarte() {
         return "<color=red>" + Name + "</color>" + "\n" +
                 "Assistance " + "\n" +

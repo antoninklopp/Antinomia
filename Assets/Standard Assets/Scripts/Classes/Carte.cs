@@ -8,7 +8,7 @@ using System;
 /// Classe de base dont héritent toutes les cartes qui en sont dérivées. 
 /// Contient les attributs de base communs à toutes les cartes. 
 /// </summary>
-public class Carte : NetworkBehaviour {
+public class Carte : NetworkBehaviourAntinomia {
     /*
      * Parent des cartes de base : entite, sort, assistance.  
      * 
@@ -84,37 +84,24 @@ public class Carte : NetworkBehaviour {
     /// </summary>
     int reponseDemandeEffet = 0;
 
-    // La carte peut-elle attaquer directement le joueur adverse? 
+    /// <summary>
+    /// La carte peut-elle attaquer directement le joueur adverse? 
+    /// </summary>
+    [HideInInspector]
     public bool attaqueDirecte = false; 
 
 
 
     // Use this for initialization
-    public virtual void Start () {
+    public override void Start () {
+        
         Cible = Resources.Load<Sprite>("AutresSprites/hit");
     }
 	
 	// Update is called once per frame
-	public virtual void Update () {
+	public override void Update () {
 
 	}
-
-    /// <summary>
-    /// Recuperer l'objet correspondant au joueur local
-    /// </summary>
-    /// <returns>Joueur local</returns>
-    public GameObject FindLocalPlayer() {
-        /*
-		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
-		 */
-        GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
-        if (Players[0].GetComponent<Player>().isLocalPlayer) {
-            return Players[0];
-        }
-        else {
-            return Players[1];
-        }
-    }
 
     /// <summary>
     /// Recuperer l'objet correspondant au joueur qui n'est pas le joueur local. 
@@ -378,7 +365,7 @@ public class Carte : NetworkBehaviour {
             for (int i = 0; i < AllActionsStringList.Length; i += 2) {
                 Action sort = stringToAction(AllActionsStringList[i], AllActionsStringList[i + 1]);
                 AllActions.Add(sort);
-                Debug.Log("Effet 1 : " + stringToAction(AllActionsStringList[i], AllActionsStringList[i + 1]).ActionAction);
+                //Debug.Log("Effet 1 : " + stringToAction(AllActionsStringList[i], AllActionsStringList[i + 1]).ActionAction);
             }
         }
 
@@ -413,7 +400,6 @@ public class Carte : NetworkBehaviour {
         for (int i = 0; i < AllEffetsStringList.Length; ++i) {
             Effet _effet = stringToEffet(AllEffetsStringList[i]);
             AllEffets.Add(_effet);
-            Debug.Log("Effet créé");
         }
     }
 
@@ -642,7 +628,7 @@ public class Carte : NetworkBehaviour {
     /// </summary>
     /// <param name="_actions">Liste des actions à appliquer.</param>
     /// <param name="effetListNumber">Utile pour mettre à jour, si un effet a été utilisé ou pas dans les conditions. 
-    /// Si égal à 0, on est dans la liste d'effets normale, si = 1, effets astraux, si = à2, effets maléfiques</param> 
+    /// Si égal à 0, on est dans la liste d'effets normale, si = 1, effets astraux, si = à 2, effets maléfiques</param> 
     public void GererActions(List<Action> _actions, int effetListNumber=0) {
         // On doit maintenant gérer les effets.
         for (int j = 0; j < _actions.Count; ++j) {
@@ -655,10 +641,8 @@ public class Carte : NetworkBehaviour {
                      * Il faut d'abord choisir une carte puis changer sa position.
                      * La carte aura été choisie précédemment. 
                      */
-
                     DisplayMessage("Choisissez une carte et changez sa position");
                     StartCoroutine(ChangerPositionEffet()); 
-                    
                     break;
                 case Action.ActionEnum.DETRUIRE:
                     /*
@@ -785,51 +769,6 @@ public class Carte : NetworkBehaviour {
             _allObjectsChoosen.Add(FindCardWithID(AllIDCartesChoosen[i])); 
         }
         CartesChoisiesPourEffets = _allObjectsChoosen; 
-    }
-
-    /// <summary>
-    /// Récupérer un objet Carte grâce à son IDCardGame. 
-    /// </summary>
-    /// <param name="_ID_">IDCardGame de la carte recherchée</param>
-    /// <returns>la carte si elle a été trouvée, crée une exception sinon. </returns>
-    GameObject FindCardWithID(int _ID_) {
-        /*
-		 * Trouver la carte avec la bonne ID. 
-         * Doit être la même méthode que dans player (à relier). 
-		 */
-        CarteType[] AllCartesType = FindObjectsOfType(typeof(CarteType)) as CarteType[];
-        List<GameObject> AllCartes = new List<GameObject>();
-
-        for (int i = 0; i < AllCartesType.Length; ++i) {
-            GameObject NewCarte = AllCartesType[i].gameObject;
-            if (NewCarte.GetComponent<CarteType>().instanciee) {
-                AllCartes.Add(NewCarte);
-            }
-        }
-
-        Debug.Log("AllCartes" + AllCartes.Count.ToString());
-        for (int i = 0; i < AllCartes.Count; ++i) {
-            // On cherche la carte avec le bon ID
-            switch (AllCartes[i].GetComponent<CarteType>().thisCarteType) {
-                case CarteType.Type.ASSISTANCE:
-                    if (AllCartes[i].GetComponent<Assistance>().IDCardGame == _ID_) {
-                        return AllCartes[i];
-                    }
-                    break;
-                case CarteType.Type.SORT:
-                    if (AllCartes[i].GetComponent<Sort>().IDCardGame == _ID_) {
-                        return AllCartes[i];
-                    }
-                    break;
-                case CarteType.Type.ENTITE:
-                    if (AllCartes[i].GetComponent<Entite>().IDCardGame == _ID_) {
-                        return AllCartes[i];
-                    }
-                    break;
-            }
-        }
-        throw new Exception("La carte n'a pas été trouvée");
-        // return null; 
     }
 
 

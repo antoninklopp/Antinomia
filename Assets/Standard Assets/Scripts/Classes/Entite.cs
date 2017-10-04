@@ -668,12 +668,14 @@ public class Entite : Carte {
                 AllEffetsAstralString, AllEffetsAstralStringToDisplay);
             // Inutile normalement.
             // RpcChangeParent (); 
+        } else {
+            yield break; 
         }
 
         yield return new WaitForSeconds(0.1f);
 
         if (carteState != State.MAIN) {
-            yield break;
+            Debug.Log("<color=purple>Probleme pas de state Main, et pas sorti </color>"); 
         }
 
         Debug.Log(netId.ToString() + hasAuthority.ToString());
@@ -1138,7 +1140,6 @@ public class Entite : Carte {
         for (int i = 0; i < AllEffetsStringList.Length; ++i) {
             Effet _effet = stringToEffet(AllEffetsStringList[i]);
             AllEffetsAstral.Add(_effet);
-            Debug.Log("Effet créé");
         }
     }
 
@@ -1151,7 +1152,6 @@ public class Entite : Carte {
         for (int i = 0; i < AllEffetsStringList.Length; ++i) {
             Effet _effet = stringToEffet(AllEffetsStringList[i]);
             AllEffetsMalefique.Add(_effet);
-            Debug.Log("Effet créé");
         }
     }
 

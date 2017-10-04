@@ -124,6 +124,8 @@
     <Compile Include="Assets\Standard Assets\Scripts\Actions\Sanctuaire.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Actions\ShowCards.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Actions\TirerCarte.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\BehaviourAntinomia\MonoBehaviourAntinomia.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\BehaviourAntinomia\NetworkBehaviourAntinomia.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ChoixDeck\GameManagerChoixDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ChoixGame\ChoixGameManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Assistance\Assistance.cs" />
@@ -141,6 +143,8 @@
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Action.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Condition.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Effet.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\EffetInPile.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\PileAppelEffet.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Sort.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\Controller.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\DataBaseHandler.cs" />

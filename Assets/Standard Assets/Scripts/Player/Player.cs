@@ -216,24 +216,22 @@ public class Player : NetworkBehaviour	 {
 	public IEnumerator PiocherCarteRoutine(){
         // Comme on ne peut instancier que des objets de type prefab référencié (ici c'est l'objet public carte prefab). 
         // Normalement, comme on a créé le deck à partir du prefab, ça devrait fonctionner. 
-        string oID = " "; 
+        string oID = " ";
+
+        int nombreDeCartesMain = transform.Find("MainJoueur").Find("CartesMainJoueur").childCount; 
         if (CardDeck.Cartes.Count != 0) {
             if (CardDeck.Cartes[0].GetComponent<CarteType>().thisCarteType == CarteType.Type.ENTITE) {
                 oID = CardDeck.Cartes[0].GetComponent<Entite>().oID;
-                Debug.Log("C'est une entité");
             }
             else if (CardDeck.Cartes[0].GetComponent<CarteType>().thisCarteType == CarteType.Type.SORT) {
                 oID = CardDeck.Cartes[0].GetComponent<Sort>().oID;
-                Debug.Log("C'est un sort");
             }
             else if (CardDeck.Cartes[0].GetComponent<CarteType>().thisCarteType == CarteType.Type.ASSISTANCE) {
                 oID = CardDeck.Cartes[0].GetComponent<Assistance>().oID;
-                Debug.Log("C'est une assistance");
             } else { 
                 throw new Exception("Aucune OID n'a été donnée à la carte"); 
             }
-            Debug.Log("OID avant routine" + oID.ToString());
-            Debug.Log("PiocherRoutine"); 
+            TestConnection(); 
             CmdPiocherNouvelleCarte1(oID);
         } else {
             Debug.Log(CardDeck.Cartes.Count); 
@@ -243,7 +241,34 @@ public class Player : NetworkBehaviour	 {
 		CmdPiocherNouvelleCarte2 (oID); 
 		cartesPiochees.Add (CardDeck.Cartes [0]); 
 		CardDeck.Cartes.Remove (CardDeck.Cartes [0]);
+
+        // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
+        yield return new WaitForSeconds(0.1f); 
+        // L'objet a été détruit donc c'est bon.
+        if (ObjectInfo == null) {
+            Debug.Log("C'est ok");
+        } else {
+            yield return RepiocherCarte(15); 
+        }
 	}
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="nombreTests"></param>
+    /// <returns></returns>
+    IEnumerator RepiocherCarte(int nombreTests) {
+        Debug.Log("On tente de repiocher la carte"); 
+        CmdPiocherNouvelleCarte2("fbhkbh");
+        yield return new WaitForSeconds(0.1f); 
+        if (ObjectInfo != null) {
+            if (nombreTests > 0) {
+                StartCoroutine(RepiocherCarte(nombreTests - 1)); 
+            } else {
+                Debug.Log("En attendant encore la carte n'a quand même pas pu être récupérée. "); 
+            }
+        }
+    }
 
     /// <summary>
     /// Creation du deck. 
@@ -308,22 +333,19 @@ public class Player : NetworkBehaviour	 {
 	void CmdPiocherNouvelleCarte1(string oID){
 		ObjectInfo = new GameObject();
 		GetPlayerInfoGameSparks playerInfo = ObjectInfo.AddComponent<GetPlayerInfoGameSparks> ();
-        Debug.Log("oID CmdPiocherNouvelleCarte" + oID.ToString()); 
 		playerInfo.StartCardByoID(oID, CartePrefab); 
-		//CardToInstantiate = playerInfo.GetCardoID(); 
-		// bool isCardOK = false; 
-		// On attend de récupérer l'objet
-		// isCardOK = playerInfo.cardoIDOk; 
 	}
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="oID">ID de la carte dans la metaCollection</param>
 	[Command]
 	void CmdPiocherNouvelleCarte2(string oID){
 		GameObject CardToInstantiate = ObjectInfo.GetComponent<GetPlayerInfoGameSparks>().GetCardoID(); 
-		Debug.Log ("Carte instantiée");
-        Debug.Log(CardToInstantiate);
-        //CardToInstantiate.GetComponent<Carte> ().IDCardGame = cardID; 
-        //cardID++;
+        Debug.Log("Carte instanciee" + CardToInstantiate);
 
+        Debug.Log("<color=green> ON PIOCHE LA CARTE ICI </color>"); 
         try {
             GameObject NouvelleCarte = Instantiate(CardToInstantiate) as GameObject;
             // On enlève la carte du deck. 
@@ -332,20 +354,19 @@ public class Player : NetworkBehaviour	 {
                 NouvelleCarte.GetComponent<Entite>().setState("MAIN");
             }
 		    NouvelleCarte.transform.SetParent (transform.Find("MainJoueur").Find("CartesMainJoueur")); 
-		    // Après avoir mis la nouvelle carte sur le serveur, on lui indique à quel joueur elle appartient. 
-		    // NouvelleCarte.GetComponent<Carte>().isFromLocalPlayer = true;  //TODO : Cette fonction met toutes les cartes du serveur à true. 
 		    // On crée la nouvelle carte sur le serveur. 
 		    NetworkServer.SpawnWithClientAuthority(NouvelleCarte, connectionToClient);
 		    // Il faut réordonner les cartes. 
 		    transform.Find("MainJoueur").Find("CartesMainJoueur").SendMessage("ReordonnerCarte");
-                //StartCoroutine(NouvelleCarteRPCRoutine (ID), NouvelleCarte);
+            //StartCoroutine(NouvelleCarteRPCRoutine (ID), NouvelleCarte);
 
+            Destroy(ObjectInfo);
         } catch (ArgumentException e) {
+            // Ici la carte n'est pas arrivée "à temps" à l'objet. Il faut donc rappeler cette fonction
             Debug.LogWarning(e);
-            Debug.Log("La carte n'a pas pu êyre instanciée");
+            Debug.Log("La carte n'a pas pu être instanciée");
         }
         Destroy(CardToInstantiate); 
-		Destroy (ObjectInfo); 
 	}
 
 	void ChangeUIPhase(Phases newPhase){
@@ -809,6 +830,112 @@ public class Player : NetworkBehaviour	 {
     [ClientRpc]
     public void RpcSetGameToPause(bool gameIsPaused) {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GameIsSetToPause(gameIsPaused); 
+    }
+    
+
+    /// ////////////////////////////////////////////////////////////////////////////////////////////
+    ///                       TEST DU RESEAU                                                     //
+    /// ///////////////////////////////////////////////////////////////////////////////////////////
+
+    string testStatus = "Testing network connection capabilities.";
+    string testMessage = "Test in progress";
+    string shouldEnableNatMessage = "";
+    bool doneTesting = false;
+    bool probingPublicIP = false;
+    int serverPort = 9999;
+    bool useNat = false;
+    float timer = 0.0f;
+    ConnectionTesterStatus connectionTestResult = ConnectionTesterStatus.Undetermined;
+
+    void TestConnection() {
+        // Start/Poll the connection test, report the results in a label and
+        // react to the results accordingly
+        connectionTestResult = Network.TestConnection();
+        switch (connectionTestResult) {
+            case ConnectionTesterStatus.Error:
+                testMessage = "Problem determining NAT capabilities";
+                doneTesting = true;
+                break;
+
+            case ConnectionTesterStatus.Undetermined:
+                testMessage = "Undetermined NAT capabilities";
+                doneTesting = false;
+                break;
+
+            case ConnectionTesterStatus.PublicIPIsConnectable:
+                testMessage = "Directly connectable public IP address.";
+                useNat = false;
+                doneTesting = true;
+                break;
+
+            // This case is a bit special as we now need to check if we can
+            // circumvent the blocking by using NAT punchthrough
+            case ConnectionTesterStatus.PublicIPPortBlocked:
+                testMessage = "Non-connectable public IP address (port " +
+                    serverPort + " blocked), running a server is impossible.";
+                useNat = false;
+                // If no NAT punchthrough test has been performed on this public
+                // IP, force a test
+                if (!probingPublicIP) {
+                    connectionTestResult = Network.TestConnectionNAT();
+                    probingPublicIP = true;
+                    testStatus = "Testing if blocked public IP can be circumvented";
+                    timer = Time.time + 10;
+                }
+                // NAT punchthrough test was performed but we still get blocked
+                else if (Time.time > timer) {
+                    probingPublicIP = false;        // reset
+                    useNat = true;
+                    doneTesting = true;
+                }
+                break;
+
+            case ConnectionTesterStatus.PublicIPNoServerStarted:
+                testMessage = "Public IP address but server not initialized, " +
+                    "it must be started to check server accessibility. Restart " +
+                    "connection test when ready.";
+                break;
+
+            case ConnectionTesterStatus.LimitedNATPunchthroughPortRestricted:
+                testMessage = "Limited NAT punchthrough capabilities. Cannot " +
+                    "connect to all types of NAT servers. Running a server " +
+                    "is ill advised as not everyone can connect.";
+                useNat = true;
+                doneTesting = true;
+                break;
+
+            case ConnectionTesterStatus.LimitedNATPunchthroughSymmetric:
+                testMessage = "Limited NAT punchthrough capabilities. Cannot " +
+                    "connect to all types of NAT servers. Running a server " +
+                    "is ill advised as not everyone can connect.";
+                useNat = true;
+                doneTesting = true;
+                break;
+
+            case ConnectionTesterStatus.NATpunchthroughAddressRestrictedCone:
+            case ConnectionTesterStatus.NATpunchthroughFullCone:
+                testMessage = "NAT punchthrough capable. Can connect to all " +
+                    "servers and receive connections from all clients. Enabling " +
+                    "NAT punchthrough functionality.";
+                useNat = true;
+                doneTesting = true;
+                break;
+
+            default:
+                testMessage = "Error in test routine, got " + connectionTestResult;
+                break;
+        }
+
+        if (doneTesting) {
+            if (useNat)
+                shouldEnableNatMessage = "When starting a server the NAT " +
+                    "punchthrough feature should be enabled (useNat parameter)";
+            else
+                shouldEnableNatMessage = "NAT punchthrough not needed";
+            testStatus = "Done testing";
+        }
+
+        // Debug.Log("<color=red>" + testMessage + "</color>"); 
     }
 
 }
