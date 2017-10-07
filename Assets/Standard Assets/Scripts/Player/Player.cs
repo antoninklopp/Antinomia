@@ -6,7 +6,10 @@ using UnityEngine.UI;
 using System; 
 using UnityEngine.SceneManagement;
 
-public class Player : NetworkBehaviour	 {
+/// <summary>
+/// Classe représentant l'objet "joueur". 
+/// </summary>
+public class Player : NetworkBehaviourAntinomia	 {
 	/*
 	 * TODO: Toutes les commandes de spawn doivent passer par player 
 	 * avec à chaque fois 
@@ -43,31 +46,7 @@ public class Player : NetworkBehaviour	 {
 	[HideInInspector]
 	public enum Phases{INITIATION, PIOCHE, PREPARATION, PRINCIPALE1, COMBAT, PRINCIPALE2, FINALE}; 
 
-	[HideInInspector]
-	// Copier-coller des capacités de la classe carte. 
-	public enum PhasesCapacites{
-		// Toutes les capacités possibles d'une entité. 
-		PIOCHE, // Faire piocher une carte (TODO: implémenter le fait de pouvoir en piocher plusieurs)
-		DEFAUSSER, // faire défausser une ou des cartes d'une main
-		POSITION, // Modifier la position d'une entité
-		NOMBRE_ATTAQUE,  // Modifier le nombre d'attaque
-		VEROUILLER, // verouiller la position d'une entité
-		DETRUIRE, // Détruire des entités. 
-		MODIFIER_PUISSANCE, // Modifier la puissance d'autres entités
-		DEGATS, // Infliger des dégâts au joueur adverse
-		REVELER, // Révéler des cartes de la main d'un ou plusieurs joueurs. 
-		RENVOYER, // Renvoyer des entités à la main. 
-		CHANGEMENT_FAIBLESSE, // Changement des faiblesses face aux autres natures. 
-		ANNULER_OBLIGATION, // Annuler l'obligation de d'abord attaquer les entités avant le joueur. 
-		OBLIGER_ATTAQUE, // Obliger les autres entités à l'attaquer. 
-		DETRUIRE_ASSISTANCE, // Détruire une/des assistances/cartes
-		CONTROLE, // Prendre le contrôle d'une/plusieurs entités. 
-		MODIFIER_AKA, // modifier l'AKA rémanent et/ou courant. 
-		MODIFIER_NOMBRE_INVOCATION, // Modifier le nombre d'invocations élémentaires limite par tour. 
-		MODIFIER_LIMITE_SORTS, //Modifier le nombre limite de sorts par tour. 
-		EMPECHER_CHOIX_UNITE, // Empecher une/des unités d'être choisies. 
-		NONE // Aucune Capacité
-	}
+
 
 	[SyncVar(hook="ChangementPhase")]
 	/*
@@ -81,15 +60,12 @@ public class Player : NetworkBehaviour	 {
 	Phases Phase = Phases.INITIATION; 
 	Phases myPhase = Phases.INITIATION; 
 
+    /// <summary>
+    /// Le tour en cours. 
+    /// Il est égal à l'ID du joueur dont c'est le tour. 
+    /// </summary>
 	[SyncVar(hook="ChangementTour")]
-	int Tour; 
-
-	// En règle général, il n'y pas de phases de capacité.
-#pragma warning disable CS0414 // Le champ 'Player.PhaseCapacite' est assigné, mais sa valeur n'est jamais utilisée
-	PhasesCapacites PhaseCapacite = PhasesCapacites.NONE; 
-#pragma warning restore CS0414 // Le champ 'Player.PhaseCapacite' est assigné, mais sa valeur n'est jamais utilisée
-
-
+	int Tour;
 
 	bool phaseChange = true; 
 
@@ -99,8 +75,14 @@ public class Player : NetworkBehaviour	 {
     [SyncVar(hook="OnName")]
     string PlayerName = " ";
 
+    /// <summary>
+    /// Le prefab de la pile d'effets. 
+    /// </summary>
+    public GameObject PilePrefab;
+
     // Use this for initialization
-    void Start() {
+    public override void Start() {
+        base.Start(); 
         Local = isLocalPlayer;
 
         /*
@@ -131,7 +113,8 @@ public class Player : NetworkBehaviour	 {
     }
 
     // Update is called once per frame
-    void Update () {
+    public override void Update () {
+        base.Update(); 
 		if (!isLocalPlayer)
 		{
 			return;
@@ -506,6 +489,10 @@ public class Player : NetworkBehaviour	 {
         PlayerName = Name; 
     }
 
+    /// <summary>
+    /// Detruire une carte. 
+    /// </summary>
+    /// <param name="ID">ID de la carte à détruire. </param>
 	void DetruireCarte(int ID){
 		CmdDetruireCarte (ID); 
 	}
@@ -526,10 +513,24 @@ public class Player : NetworkBehaviour	 {
 		 * qui peut lui detruire la carte sur le réseau en lui envoyant la commande
 		 * 
 		 */ 
-		Debug.Log ("Execute sur le serveur"); 
-		GameObject LaCarteSurLeServeur = FindCardWithID (ID); 
-		LaCarteSurLeServeur.SendMessage ("DetruireCarte"); 
+		Debug.Log ("Execute sur le serveur");
+        RpcDetruireCarte(ID); 
 	}
+
+    /// <summary>
+    /// Detruire la carte sur le client. 
+    /// </summary>
+    /// <param name="ID">IDCardGame de la carte</param>
+    [ClientRpc]
+    void RpcDetruireCarte(int ID) {
+        // Si cette méthode a été appelée c'est pour être éxécutée sur une carte qui n'était pas du joueur local.
+        
+        if (!isLocalPlayer) {
+            GameObject LaCarteSurLeServeur = FindCardWithID(ID);
+            LaCarteSurLeServeur.SendMessage("DetruireCarte");
+        }
+
+    }
 
     /// <summary>
     /// Envoi d'une méthode qui doit être éxecutée par l'autre joueur. 
@@ -567,55 +568,6 @@ public class Player : NetworkBehaviour	 {
         LaCarteSurLeServeur.SendMessage(voidName, _intToUse);
         Debug.Log("La méthode " + voidName + " a été éxecutée sur le serveur"); 
     }
-
-    /// <summary>
-    /// Trouver la carte à l'aide de son ID card game. 
-    /// </summary>
-    /// <param name="_ID_"></param>
-    /// <returns></returns>
-    GameObject FindCardWithID(int _ID_){
-        /*
-		* Trouver la carte avec la bonne ID. 
-		*/
-
-
-        CarteType[] AllCartesType = FindObjectsOfType(typeof(CarteType)) as CarteType[];
-        List<GameObject> AllCartes = new List<GameObject>(); 
-
-        for (int i = 0; i < AllCartesType.Length; ++i) {
-            GameObject NewCarte = AllCartesType[i].gameObject; 
-            if (NewCarte.GetComponent<CarteType>().instanciee) {
-                AllCartes.Add(NewCarte); 
-            }
-        }
-
-        Debug.Log("AllCartes" + AllCartes.Count.ToString());
-        for (int i = 0; i < AllCartes.Count; ++i) {
-            // On cherche la carte avec le bon ID
-            switch (AllCartes[i].GetComponent<CarteType>().thisCarteType) {
-                case CarteType.Type.ASSISTANCE:
-                    if (AllCartes[i].GetComponent<Assistance>().IDCardGame == _ID_) {
-                        Debug.Log("<color=red>" + AllCartes[i].GetComponent<Assistance>().Name + "</color>"); 
-                        return AllCartes[i];
-                    }
-                    break;
-                case CarteType.Type.SORT:
-                    if (AllCartes[i].GetComponent<Sort>().IDCardGame == _ID_) {
-                        Debug.Log("<color=red>" + AllCartes[i].GetComponent<Sort>().Name + "</color>");
-                        return AllCartes[i];
-                    }
-                    break;
-                case CarteType.Type.ENTITE:
-                    if (AllCartes[i].GetComponent<Entite>().IDCardGame == _ID_) {
-                        Debug.Log("<color=red>" + AllCartes[i].GetComponent<Entite>().Name + "</color>");
-                        return AllCartes[i];
-                    }
-                    break;
-            }
-		}
-		throw new Exception ("La carte n'a pas été trouvée"); 
-		// return null; 
-	}
 
     /// <summary>
     /// Rajouter des points de vie au joueur. 
@@ -681,27 +633,6 @@ public class Player : NetworkBehaviour	 {
 	void CmdSetOtherPlayerLife(int newPV){
 		Debug.Log ("Salut je suis le joueur 1"); 
 		FindPlayerWithID (1).GetComponent<Player>().CmdSetPlayerPV(newPV); 
-	}
-
-	GameObject FindNotLocalPlayer(){
-		/*
-		 * Trouve le joueur qui n'est pas local. 
-		 */ 
-		GameObject[] Players = GameObject.FindGameObjectsWithTag ("Player"); 
-		if (Players [0].GetComponent<Player>().isLocalPlayer) {
-			return Players [1]; 
-		} else {
-			return Players [0]; 
-		}
-	}
-
-	GameObject FindLocalPlayer(){
-		GameObject[] Players = GameObject.FindGameObjectsWithTag ("Player"); 
-		if (Players [0].GetComponent<Player>().isLocalPlayer) {
-			return Players [0]; 
-		} else {
-			return Players [1]; 
-		}
 	}
 
 	GameObject FindPlayerWithID(int ID){
@@ -804,32 +735,64 @@ public class Player : NetworkBehaviour	 {
 		SceneManager.LoadScene ("MainMenu"); 
 	}
 
-	// --------- Montrer des cartes au joueur. 
-	[Command]
+    /// <summary>
+    /// Montrer des cartes (souvent choisies lors d'un effet à un l'autre joueur)
+    /// Execute sur le serveur. 
+    /// </summary>
+    /// <param name="allCards">La liste des shortCodes des cartes à montrer. </param>
+    [Command]
 	public void CmdSendCards(string[] allCards){
-		//newListSync = new SyncListString (); 
-		//		for (int i = 0; i < allCards.Length; ++i) {
-		//			Debug.Log (allCards [i]); 
-		//			newListSync.Add (allCards [i]);
-		//		}
-		//		AllCardsToShowOther = newListSync;  
 		RpcShowCardsToOtherPlayer (allCards); 
 	}
 
+    /// <summary>
+    /// Montrer des cartes (souvent choisies lors d'un effet à un l'autre joueur)
+    /// Execute sur les clients
+    /// </summary>
+    /// <param name="allCards">La liste des shortCodes des cartes à montrer. </param>
 	[ClientRpc]
 	public void RpcShowCardsToOtherPlayer (string[] allCards){
-		GameObject.FindGameObjectWithTag ("GameManager").transform.Find ("ShowCards").gameObject.SendMessage ("RpcShowCardsToOtherPlayer", allCards); 
-	}
+		GameObject.FindGameObjectWithTag ("GameManager").transform.Find ("ShowCards").
+            gameObject.SendMessage ("RpcShowCardsToOtherPlayer", allCards);
+    }
 
+    /// <summary>
+    /// Mettre le jeu en pause. 
+    /// Execute sur le serveur.
+    /// </summary>
+    /// <param name="gameIsPaused"></param>
     [Command]
     public void CmdSetGameToPause(bool gameIsPaused) {
         // GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused = gameIsPaused;
         RpcSetGameToPause(gameIsPaused); 
     }
 
+    /// <summary>
+    /// Mettre le jeu en pause.
+    /// Execute sur le client.
+    /// </summary>
+    /// <param name="gameIsPaused"></param>
     [ClientRpc]
     public void RpcSetGameToPause(bool gameIsPaused) {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GameIsSetToPause(gameIsPaused); 
+    }
+
+    /// <summary>
+    /// Creer une nouvelle pile d'effet. 
+    /// </summary>
+    [Command]
+    public void CmdCreerPile() {
+        GameObject NouvellePile = Instantiate(PilePrefab); 
+        NetworkServer.SpawnWithClientAuthority(NouvellePile, connectionToClient);
+    }
+
+    /// <summary>
+    /// Detruire la pile une fois que tous les effets ont été executés. 
+    /// </summary>
+    /// <param name="Pile">La pile à détruire</param>
+    [Command]
+    public void CmdDetruirePile(GameObject Pile) {
+        NetworkServer.Destroy(Pile); 
     }
     
 

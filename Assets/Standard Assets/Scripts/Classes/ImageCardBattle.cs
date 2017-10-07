@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI; 
 using System; 
 
+/// <summary>
+/// Version objet de l'image de la carte.
+/// </summary>
 public class ImageCardBattle : MonoBehaviour {
 	/*
 	 * Ceci est la version Objet et non UI. 
@@ -13,7 +16,9 @@ public class ImageCardBattle : MonoBehaviour {
 	private Sprite[] AllImages; 
 	public Sprite DosCarte; 
 
-	// Use this for initialization
+	/// <summary>
+    /// Lorsque la carte est spawn, on récupère toutes les images de carte. 
+    /// </summary>
 	void Start () {
 		AllImages = Resources.LoadAll<Sprite> ("Cartes");
 	}
@@ -23,6 +28,10 @@ public class ImageCardBattle : MonoBehaviour {
 
 	}
 
+    /// <summary>
+    /// Mettre à jour l'image de la carte. 
+    /// </summary>
+    /// <param name="name">shortCode de la carte</param>
 	public void setImage(string name){
 		/*
 		 * Changer l'image
@@ -36,10 +45,14 @@ public class ImageCardBattle : MonoBehaviour {
 		}
         GetComponent<SpriteRenderer>().sprite = AllImages[0];
 
+        Debug.Log(name); 
         Debug.LogWarning("La face de la carte n'a pas été trouvée"); 
 		//throw new Exception ("La face de la carte n'a pas été trouvée" + name); 
 	}
 
+    /// <summary>
+    /// Si la carte est une carte adverse, l'image de la carte est le dos de carte. 
+    /// </summary>
 	public void setDosCarte(){
 		/*
 		 * Dos de la carte

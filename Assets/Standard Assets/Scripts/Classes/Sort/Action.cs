@@ -101,6 +101,14 @@ public class Action {
         /// Defausser une carte. 
         /// </summary>
         DEFAUSSER,
+        /// <summary>
+        /// Attaque d'une carte adverse
+        /// </summary>
+        ATTAQUE, 
+        /// <summary>
+        /// Attaque du joueur adverse
+        /// </summary>
+        ATTAQUE_JOUEUR_ADVERSE, 
         NONE
     };
 

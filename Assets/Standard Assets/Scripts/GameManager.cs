@@ -9,18 +9,26 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 #endif
 
-public class GameManager : NetworkBehaviour {
-	/*
-	 * Manager de tous les éléments UI.
-	 * 
-	 */ 
 
+
+/// <summary>
+/// Classe qui manage tous les éléments de UI 
+/// ainsi que beaucoup de choix de cartes et les attaques. 
+/// </summary>
+public class GameManager : NetworkBehaviourAntinomia {
+
+    /// <summary>
+    /// Ascendance du terrain. Enum. 
+    /// </summary>
     public enum AscendanceTerrain {
         MALEFIQUE, 
         ASTRALE, 
         NONE
     };
 
+    /// <summary>
+    /// Ascendance courante du terrain.
+    /// </summary>
     public AscendanceTerrain ascendanceTerrain = AscendanceTerrain.NONE; 
 
 	// On update automatiquement le numéro de BUILD après chaque BUILD
@@ -67,6 +75,7 @@ public class GameManager : NetworkBehaviour {
 	// Dans ce cas, le clique sur une carte aura une signification différente. 
 	// On garde aussi en mémoire la carte qui fait le choix
 	public bool choixCartes = false; 
+
 	[HideInInspector]
 	public GameObject CarteChoix; 
 	public List<GameObject> CartesChoisies; 
@@ -74,37 +83,79 @@ public class GameManager : NetworkBehaviour {
 	/*
 	 * Lors de l'attaque. 
 	 */ 
+     /// <summary>
+     /// Carte qui attaque
+     /// </summary>
 	GameObject MyPlayerEntity; 
+    /// <summary>
+    /// Carte qui est attaquée
+    /// </summary>
 	GameObject OtherPlayerEntity; 
 
-	bool syncPhase = true; 
+	bool syncPhase = true;
 
-	// Sert à visualiser le fait qu'une carte est sélectionnée. 
-	public GameObject HitPrefab;
+    /// <summary>
+    /// Sert à visualiser le fait qu'une carte est sélectionnée. 
+    /// </summary>
+    public GameObject HitPrefab;
 
+    /// <summary>
+    /// Nombre d'invocations dans le sanctuaire pour le tour en cours. Doit toujours être inférieur ou = 1; 
+    /// </summary>
 	public int nombreInvocationsSanctuaire = 0; 
 
 	GameObject ShowCards;
 
-    // Cette variable permet de savoir si un sort est en train d'être jouer.
-    // Si c'est le cas cette variable sera mise à jour par une carte sort. 
-    // Et sera récupérée lors d'un clic sur une carte. 
+    /// <summary>
+    ///  Cette variable permet de savoir si un sort est en train d'être jouer.
+    /// Si c'est le cas cette variable sera mise à jour par une carte sort. 
+    /// Et sera récupérée lors d'un clic sur une carte. 
+    /// </summary>
     [HideInInspector]
     public GameObject SortEnCours = null;
 
+    /// <summary>
+    /// Représentation du cimetière qui peut être ouverte lors d'un clic joueur, s'il
+    /// veut voir les cartes de son cimetière ou du cimetière de l'autre joueur. 
+    /// </summary>
     private GameObject CartesCimetiere;
+    /// <summary>
+    /// Le prefab de la carte du cimetière.
+    /// </summary>
     private GameObject CarteBaseCimetiere;
 
+    /// <summary>
+    /// Effet de particule sur le terrain, qui matérialise l'ascendance du terrain. 
+    /// </summary>
     private GameObject EffetParticuleTerrain;
     
+    /// <summary>
+    /// true si le jeu est en pause, false sinon
+    /// </summary>
     [HideInInspector]
     public bool gameIsPaused = false;
+    /// <summary>
+    /// true si le joueur local a mis le jeu en pause, false sinon
+    /// </summary>
     public bool IPausedTheGame = false; 
+    /// <summary>
+    /// Le sprite représentant le bouton pause
+    /// </summary>
     public Sprite Pause;
+    /// <summary>
+    /// Le sprite représentant le bouton Play
+    /// </summary>
     public Sprite Play;
 
+    /// <summary>
+    /// L'objet text qui permet de montrer des effets au milieu de l'écran
+    /// </summary>
     private GameObject DisplayInfo;
+    /// <summary>
+    /// Le bouton pause. 
+    /// </summary>
     private GameObject PauseButton;
+   
 
     private GameObject ChoixCartesDebut;
     private GameObject CarteDebutPrefab; 
@@ -122,7 +173,9 @@ public class GameManager : NetworkBehaviour {
     GameObject ObjetDemandeEffet; 
 
 	// Use this for initialization
-	void Start () {
+	public override void Start () {
+        base.Start(); 
+
 		NomJoueur1 = GameObject.Find ("NomJoueur1"); 
 		NomJoueur2 = GameObject.Find ("NomJoueur2"); 
 		//SetNames (); 
@@ -155,11 +208,11 @@ public class GameManager : NetworkBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		if (syncPhase) {
-			//StartCoroutine (CoroutineDebugPhase ()); 
-		}
-	}
+	//void Update () {
+	//	if (syncPhase) {
+	//		//StartCoroutine (CoroutineDebugPhase ()); 
+	//	}
+	//}
 
 	IEnumerator CoroutineDebugPhase(){
 		syncPhase = false; 
@@ -169,7 +222,9 @@ public class GameManager : NetworkBehaviour {
 		syncPhase = true; 
 	}
 
-
+    /// <summary>
+    /// Passage à la nouvelle phase lors du clic sur le bouton de passage à la nouvelle phase. 
+    /// </summary>
 	public void GoToNextPhase(){
 		/*
 		 * Lors d'un appui sur le bouton continuer, on passe à la phase suivante. 
@@ -192,6 +247,9 @@ public class GameManager : NetworkBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Methode appelée lorsqu'on passe à une nouvelle phase. 
+    /// </summary>
 	void StartNewPhase(){
 		switch (Phase){
 		case Player.Phases.INITIATION:
@@ -220,6 +278,10 @@ public class GameManager : NetworkBehaviour {
 
 	}
 
+    /// <summary>
+    /// Lorsqu'une carte attaque, elle ne peut plus attaquer pour le tour. 
+    /// A la fin de chaque tour, on remet "les compteurs à 0". 
+    /// </summary>
 	void AllCardsNoAttack(){
 		/*
 		 * Comme on début un nouveau tour, toutes les cartes peuvent à nouveau attaquer. 
@@ -245,6 +307,9 @@ public class GameManager : NetworkBehaviour {
 		AKA.GetComponent<Text> ().text = "AKA : " + newAKA.ToString (); 
 	}
 
+    /// <summary>
+    /// Pioche d'une carte
+    /// </summary>
 	void Pioche(){
 		/*
 		 * Pioche d'une carte lors de la phase de pioche. 
@@ -259,7 +324,12 @@ public class GameManager : NetworkBehaviour {
 		//GameObject.Find ("CartesMainJoueur1").SendMessage ("TirerCarte");
 	}
 
-
+    /// <summary>
+    /// Appelé lors du changement de phase. 
+    /// Permet de mettre à jour l'information en haut à gauche de l'écran ainsi que
+    /// de mettre à jour plusieurs choses slon les phases, comme l'AKA par exemple. 
+    /// </summary>
+    /// <param name="newPhase"></param>
 	void setNamePhaseUI(Player.Phases newPhase){
 		/*
 		 * La phase courante est écrite en haut à gauche de l'écran.
@@ -308,6 +378,11 @@ public class GameManager : NetworkBehaviour {
         }
 	}
 
+    /// <summary>
+    /// Envoyer à toutes les cartes, le fait que l'on passe à une autre phase, 
+    /// afin qu'on puisse détecter s'il certaines cartes peuvent jouer des effets lors de cette nouvelle phase notamment. 
+    /// </summary>
+    /// <param name="currentPhase">La nouvelle phase de jeu.</param>
     void SendNextPhaseAllCards(Player.Phases currentPhase) {
         /*
          * Envoyer à toutes les cartes qu'on change de phase. 
@@ -345,31 +420,11 @@ public class GameManager : NetworkBehaviour {
 
 	}
 
-	GameObject FindLocalPlayer(){
-		/*
-		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
-		 */ 
-		GameObject[] Players = GameObject.FindGameObjectsWithTag ("Player"); 
-		if (Players [0].GetComponent<Player> ().isLocalPlayer) {
-			return Players [0]; 
-		} else {
-			return Players [1]; 
-		}
-	}
-
-	GameObject FindNotLocalPlayer(){
-		/*
-		 * Trouver le joueur qui n'est pas local, pour lui faire envoyer les fonctions [Command]
-		 */ 
-		GameObject[] Players = GameObject.FindGameObjectsWithTag ("Player"); 
-		if (!Players [0].GetComponent<Player> ().isLocalPlayer) {
-			return Players [0]; 
-		} else {
-			return Players [1]; 
-		}
-	}
-
-	int FindLocalPlayerID(){
+    /// <summary>
+    /// Trouver l'ID du joueur qui n'est pas local. 
+    /// </summary>
+    /// <returns>Nn entier contenant 1 ou 2. </returns>
+	private static int FindLocalPlayerID(){
 		/*
 		 * Mettre le résultat de cette fonction dans une variable?? 
 		 * 
@@ -384,7 +439,10 @@ public class GameManager : NetworkBehaviour {
 		return 0; 
 	}
 
-
+    /// <summary>
+    /// Choix de la carte qui attaque. 
+    /// </summary>
+    /// <param name="MyPlayer">La carte qui attaque</param>
 	void AttackMyPlayer(GameObject MyPlayer){
 		/*
 		 * Choix de la première carte d'attaque, celle du joueur
@@ -395,6 +453,10 @@ public class GameManager : NetworkBehaviour {
 		Instantiate (HitPrefab, MyPlayer.transform.position, MyPlayer.transform.rotation); 
 	}
 
+    /// <summary>
+    /// Choix de la carte A attaquer. 
+    /// </summary>
+    /// <param name="OtherPlayer">La carte attaquée</param>
 	void AttackOtherPlayer(GameObject OtherPlayer){
 		/*
 		 * Choix de la carte à attaquer, celle de l'adversaire. 
@@ -404,6 +466,9 @@ public class GameManager : NetworkBehaviour {
 		Attack (); 
 	}
 
+    /// <summary>
+    /// Attaque d'ue carte, une assistance ou même directement du joueur par une autre carte.
+    /// </summary>
 	void Attack(){
 		/*
 		 * On compare les forces des entités dans cette fonction. 
@@ -546,6 +611,11 @@ public class GameManager : NetworkBehaviour {
 		CartesChoisies.Add (Carte); 
 	}
 
+    /// <summary>
+    /// Pioche de cartes au début du jeu.
+    /// </summary>
+    /// <param name="nombreCartes"></param>
+    /// <returns></returns>
 	public IEnumerator PiocheDebut(int nombreCartes){
 		/*
 		 * Pioche au début de la partie. 
@@ -560,6 +630,11 @@ public class GameManager : NetworkBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Piocher plusieurs cartes. 
+    /// </summary>
+    /// <param name="nombreCartes">nombre de cartes à piocher</param>
+    /// <returns></returns>
     public IEnumerator PiocheMultiple(int nombreCartes) {
         /*
          * Pioche de plusieurs Cartes. 
@@ -573,13 +648,15 @@ public class GameManager : NetworkBehaviour {
         }
     }
 
-	public void setPlayerPVUI(int IDJoueur, int PV){
-		/*
-		 * Mettre à joueur les points de vie du joueur sur l'écran. 
-		 * 
-		 * Si le joueur a l'ID 1 c'est qu'il est le serveur. 
-		 * Sinon c'est le client. 
-		 */ 
+    /// <summary>
+    /// Mettre à joueur les points de vie du joueur sur l'écran. 
+    /// 
+    /// Si le joueur a l'ID 1 c'est qu'il est le serveur. 
+    /// Sinon c'est le client. 
+    /// </summary>
+    /// <param name="IDJoueur">ID du joueur</param>
+    /// <param name="PV">PV du joueur à mettre à jour</param>
+    public void setPlayerPVUI(int IDJoueur, int PV){
 		if (FindLocalPlayer ().GetComponent<Player> ().isServer) {
 			// Si le joueur local est le server. 
 			if (IDJoueur == 1) {
@@ -770,6 +847,11 @@ public class GameManager : NetworkBehaviour {
         return ascendanceTerrain; 
     }
 
+    /// <summary>
+    /// Montrer les infos d'une carte.
+    /// </summary>
+    /// <param name="shortCode">shortCode de la carte</param>
+    /// <param name="Info">l'Info à montrer</param>
     public void ShowCarteInfo(string shortCode, string Info) {
         /*
          * Afficher les informations liées à la carte. 
@@ -778,6 +860,9 @@ public class GameManager : NetworkBehaviour {
         InfoCarteBattle.GetComponent<InfoCarteBattle>().SetInfoCarte(shortCode, Info);
     }
 
+    /// <summary>
+    /// Cacher le panneau qui montre les infos de la carte.
+    /// </summary>
     public void HideInfoCarte() {
         InfoCarteBattle.SetActive(false); 
     }
@@ -798,7 +883,11 @@ public class GameManager : NetworkBehaviour {
         Debug.Log("GameIsSetToPause"); 
 
     }
-
+    
+    /// <summary>
+    /// Montrer que le jeu a été mis en pause, ou au contraire le désactiver en fonction du paramètre. 
+    /// </summary>
+    /// <param name="gamePaused"></param>
     public void GameIsSetToPause(bool gamePaused) {
         // Update le sprite du bouton pause. 
         Debug.Log("Valeur du jeu : " + gameIsPaused.ToString());
@@ -832,26 +921,53 @@ public class GameManager : NetworkBehaviour {
         Debug.Log("game Is Actually paused.");
     }
 
-    private IEnumerator DeactivateDisplayInfo() {
-        yield return new WaitForSeconds(2f);
-        DisplayInfo.SetActive(false); 
+    /// <summary>
+    /// Desactiver l'objet DisplayInfo qui permet d'afficher des Informations au milieu de l'écran
+    /// </summary>
+    /// <param name="time">Temps après lequel le texte disparait</param>
+    /// <returns></returns>
+    private IEnumerator DeactivateDisplayInfo(float time=2f) {
+        yield return new WaitForSeconds(time);
+        DisplayInfo.SetActive(false);
     }
 
-    public IEnumerator ProposeToPauseGame(int playerID=0) {
-        /*
-         * Après une action, on propose au joueur adverse de mettre le jeu en pause. 
-         * Si le playerID reste à 0, c'est que le choix du joueur qui peut mettre le jeu
-         * en pause est géré par un autre élément. Exemple: Lors d'un changement de phase, 
-         * c'est déjà géré dans la fonction du gameManager. 
-         * 
-         * Sinon, l'ID passée en paramètre est celle proposée par le joueur qui appelle la fonction. 
-         * La proposition du bouton pause est donc uniquement pour celui qui n'a pas fait l'action
-         */
+    /// <summary>
+    /// Montrer une information au centre de l'écran. 
+    /// Et non sur le côté comme lors dans la méthode DisplayMessage. 
+    /// </summary>
+    public void DisplayInfoToPlayer(string message) {
+        DisplayInfo.SetActive(true);
+        DisplayInfo.GetComponent<Text>().text = message;
+        DeactivateDisplayInfo(); 
+    }
+
+    /// <summary>
+    /// Après une action, on propose au joueur adverse de mettre le jeu en pause. 
+    /// Si le playerID reste à 0, c'est que le choix du joueur qui peut mettre le jeu
+    /// en pause est géré par un autre élément.Exemple: Lors d'un changement de phase, 
+    /// c'est déjà géré dans la fonction du gameManager. 
+    /// 
+    /// Sinon, l'ID passée en paramètre est celle proposée par le joueur qui appelle la fonction. 
+    /// La proposition du bouton pause est donc uniquement pour celui qui n'a pas fait l'action
+    /// </summary>
+    /// <param name="playerID"></param>
+    /// <param name="message">Lorsque le jeu est mis en pause, on peut vouloir afficher un message au joueur</param>
+    /// <returns></returns>
+    public IEnumerator ProposeToPauseGame(int playerID=0, string message="") {
         if ((FindLocalPlayerID() != playerID) || (playerID == 0)) {
             PauseButton.SetActive(true);
+            if (message != ""){
+                // Si un message est fourni lors de l'appel, on l'affiche
+                DisplayInfoToPlayer(message); 
+            }
             yield return new WaitForSeconds(2f);
             if (!gameIsPaused) {
                 PauseButton.SetActive(false);
+                //On regarde s'il y a une pile d'effet en cours. 
+                if (GameObject.FindGameObjectWithTag("Pile") != null) {
+                    Debug.Log("L'autre joueur n'a pas mis le jeu en pause, on défait la pile");
+                    GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile(); 
+                }
             }
         }
     }

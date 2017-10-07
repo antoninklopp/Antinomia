@@ -129,9 +129,6 @@ public class Entite : Carte {
     /// </summary>
     public int hasAttacked;
 
-    // On a besoin de cette information pour pouvoir savoir si on touche la carte dans le cadre d'une phase. 
-    public Player.PhasesCapacites CurrentPhaseCapacite = Player.PhasesCapacites.NONE;
-
 
     // Définition de la récupération de ces éléments.
 
@@ -786,6 +783,10 @@ public class Entite : Carte {
         Debug.Log(ObjectInfo.GetComponent<Entite>().Name);
     }
 
+    /// <summary>
+    /// Detruire une carte. 
+    /// On change son state, pour l'envoyer au cimetière. 
+    /// </summary>
     void DetruireCarte() {
         /*
 		 * On change juste la carte de State pour pouvoir laisser au joueur la possibilité de la récupérer ensuite. 
@@ -809,14 +810,13 @@ public class Entite : Carte {
         if (transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer) {
             /*
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
-			 * 
 			 */
             CmdChangePosition(carteState);
         } else {
             // Si on est pas sur le player local. 
             Debug.Log("N'est pas le local Player");
             GameObject LocalPlayer = FindLocalPlayer();
-            LocalPlayer.SendMessage("DetruireCarte", gameObject.GetComponent<Entite>().IDCardGame);
+            LocalPlayer.SendMessage("DetruireCarte", IDCardGame);
         }
 
         if ((carteAscendance == Ascendance.MALEFIQUE) || (carteAscendance == Ascendance.ASTRALE)) {

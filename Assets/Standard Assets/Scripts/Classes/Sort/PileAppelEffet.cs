@@ -31,7 +31,14 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <summary>
     /// Prefab de l'objet décrivant UN effet.
     /// </summary>
-    public GameObject EffetInPilePrefab; 
+    public GameObject EffetInPilePrefab;
+
+    bool effetTermine = false; 
+
+    public override void Start() {
+        base.Start();
+        
+    }
 
     /// <summary>
     /// Initialisation de la pile d'effets. 
@@ -54,15 +61,17 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     public void AjouterEffetALaPile(GameObject ObjetEffet, List<GameObject> ObjetCible, 
                                         int numeroEffet, int numeroListeEffet=0) {
 
+        Debug.Log("On ajoute un effet à la pile dans effetInPile"); 
+
         int IDObjetEffet = GetObjetIDCardGame(ObjetEffet);
-        List<int> ListeIDCardGameCible = new List<int>(); 
+        int[] ListeIDCardGameCible = new int[ObjetCible.Count]; 
         for (int i = 0; i < ObjetCible.Count; ++i) {
-            ListeIDCardGameCible.Add(GetObjetIDCardGame(ObjetCible[i])); 
+            ListeIDCardGameCible[i] = GetObjetIDCardGame(ObjetCible[i]); 
         }
 
         // Un joueur ne pourra ajouter qu'un effet de ses propres cartes! 
         int playerID = FindLocalPlayer().GetComponent<Player>().PlayerID;
-
+        
         CmdAjouterEffetALaPile(IDObjetEffet, ListeIDCardGameCible, numeroEffet, numeroListeEffet, playerID);
     }
 
@@ -75,7 +84,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="numeroListeEffet">Le numero de la liste d'effets</param>
     /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
     [Command]
-    void CmdAjouterEffetALaPile(int IDObjetEffet, List<int> ListeObjetsCible, int numeroEffet,
+    void CmdAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
         RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
     }
@@ -90,28 +99,74 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="numeroListeEffet">Le numero de la liste d'effets</param>
     /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
     [ClientRpc]
-    void RpcAjouterEffetALaPile(int IDObjetEffet, List<int> ListeObjetsCible, int numeroEffet,
+    void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
 
         GameObject NouveauEffetInPile = Instantiate(EffetInPilePrefab);
-        Effet effetJoue = GetEffetFromCarte(FindCardWithID(IDObjetEffet), numeroEffet, numeroListeEffet); 
-        NouveauEffetInPile.GetComponent<EffetInPile>().CreerEffetInPile(IDObjetEffet, effetJoue, ListeObjetsCible);
+        Effet effetJoue = GetEffetFromCarte(FindCardWithID(IDObjetEffet), numeroEffet, numeroListeEffet);
+
+        List<int> ListeObjetsCibleInt = new List<int>(); 
+        for (int i = 0; i < ListeObjetsCible.Length; ++i) {
+            ListeObjetsCibleInt.Add(ListeObjetsCible[i]); 
+        }
+
+        NouveauEffetInPile.GetComponent<EffetInPile>().CreerEffetInPile(IDObjetEffet, effetJoue, ListeObjetsCibleInt, numeroEffet, 
+                                                                              numeroListeEffet);
         pileEffets.Add(NouveauEffetInPile);
         CartesAssociees.Add(IDObjetEffet); 
     }
 
     /// <summary>
+    /// Informer le joueur adverse de l'ajout d'un effet à la pile.
+    /// </summary>
+    void InformerAjoutEffetPile(string Phrase) {
+        StartCoroutine(getGameManager().GetComponent<GameManager>().ProposeToPauseGame()); 
+    }
+
+    /// <summary>
+    /// Defaire la pile d'effets. 
+    /// </summary>
+    public void DefaireLaPile() {
+        StartCoroutine(JouerLesEffets()); 
+    }
+
+    /// <summary>
     /// Quand tous les joueurs ont joué leurs effets successifs. 
     /// </summary>
-    public void JouerLesEffets() {
-        for (int i = CartesAssociees.Count; i >= 0; ++i) {
-            GameObject CarteAppel = FindCardWithID(CartesAssociees[i]); 
-            //if (CarteAppel.GetComponent<Carte>().isFromLocalPlayer) {
-            //    CarteAppel.GetComponent<Carte>().GererActions(pileEffets[i].AllActionsEffet); 
-            //} else {
-
-            //}
+    private IEnumerator JouerLesEffets() {
+        for (int i = CartesAssociees.Count - 1; i >= 0; --i) {
+            effetTermine = false; 
+            CmdJouerEffetPile(i, FindLocalPlayer().GetComponent<Player>().PlayerID);
+            while (!effetTermine) {
+                yield return new WaitForSeconds(0.1f);
+            }
         }
+
+        // Detruire l'objet pile. 
+        FindLocalPlayer().GetComponent<Player>().CmdDetruirePile(gameObject); 
+    }
+
+    /// <summary>
+    /// Jouer un effet dans la pile.
+    /// Execute sur le serveur. 
+    /// </summary>
+    /// <param name="effetI"></param>
+    /// <param name="_PlayerID"></param>
+    [Command]
+    private void CmdJouerEffetPile(int effetI, int _PlayerID) {
+        RpcJouerEffetPile(effetI, _PlayerID); 
+    }
+
+    /// <summary>
+    /// Jouer un effet dans la pile. 
+    /// Execute sur les clients. 
+    /// </summary>
+    /// <param name="effetI"></param>
+    /// <param name="_PlayerID"></param>
+    [ClientRpc]
+    private void RpcJouerEffetPile(int effetI, int _PlayerID) {
+        Debug.Log("On joue l'effet"); 
+        StartCoroutine(pileEffets[effetI].GetComponent<EffetInPile>().JouerEffet(_PlayerID)); 
     }
 
     /// <summary>
@@ -120,6 +175,13 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     public void DroitDeReponseAutreJoueur() {
 
 
+    }
+
+    /// <summary>
+    /// Quand l'effet est termine on met effetTermine à true pour pouvoir faire l'effet Suivant.
+    /// </summary>
+    void EffetTermine() {
+        effetTermine = true; 
     }
 
     

@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking; 
 
+/// <summary>
+/// Gestion des cartes sur le Champ de Bataille. 
+/// 
+/// Il peut y avoir au maximum 5 cartes sur le board
+/// </summary>
 public class CartesBoard : NetworkBehaviour {
 
 	/*
@@ -21,16 +26,9 @@ public class CartesBoard : NetworkBehaviour {
 	// Savoir quelle carte est en train d'être touchée. 
 	public bool carteCurrentlyClicked; 
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
+    /// <summary>
+    /// Poser une nouvelle carte sur le champ de bataille. 
+    /// </summary>
 	public void PoserCarteChampBataille(){//Carte CarteAPoser){
 		GameObject NouvelleCarte = Instantiate (CartePrefab); 
 		NouvelleCarte.transform.SetParent (transform); 
@@ -38,12 +36,15 @@ public class CartesBoard : NetworkBehaviour {
 		CmdReordonnerCarte ();
 	}
 
+    /// <summary>
+    /// Reordonner les cartes sur le champ de bataille. 
+    /// </summary>
 	void CmdReordonnerCarte(){
 		/*
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.
 		 */ 
-		print ("Reordonner ChampBataille");
+		Debug.Log ("Reordonner ChampBataille");
 
 		AllCreaturesChampBataille = new List<GameObject> (); 
 		foreach (Transform child in transform) {
@@ -94,6 +95,10 @@ public class CartesBoard : NetworkBehaviour {
         }
 	}
 
+    /// <summary>
+    /// Récupérer le nombre de cartes sur le champ de bataille.
+    /// </summary>
+    /// <returns>Nombre de cartes sur le champ de bataille.</returns>
 	public int getNumberCardsChampBataille(){
 		/*
 		 * Récupérer le nombre de cartes actuellement présentes sur le board

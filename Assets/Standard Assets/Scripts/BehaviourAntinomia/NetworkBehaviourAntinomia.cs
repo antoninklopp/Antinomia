@@ -63,7 +63,7 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
             }
         }
 
-        throw new Exception("La carte n'a pas été trouvée");
+        return null; 
     }
 
     /// <summary>
@@ -129,6 +129,31 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
                 return Carte.GetComponent<Sort>().AllEffets[numeroEffet];
             default:
                 throw new Exception("Ce type de carte n'existe pas");
+        }
+    }
+
+    /// <summary>
+    /// Récupérer l'objet GameManager
+    /// </summary>
+    /// <returns></returns>
+    protected GameObject getGameManager() {
+        return GameObject.FindGameObjectWithTag("GameManager");
+    }
+
+    /// <summary>
+    /// Recupérer le GameObject du joueur qui n'est pas le joueur local.
+    /// </summary>
+    /// <returns>L'objet Player qui n'est pas celui du joueur local</returns>
+    protected GameObject FindNotLocalPlayer() {
+        /*
+		 * Trouver le joueur qui n'est pas local, pour lui faire envoyer les fonctions [Command]
+		 */
+        GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
+        if (!Players[0].GetComponent<Player>().isLocalPlayer) {
+            return Players[0];
+        }
+        else {
+            return Players[1];
         }
     }
 

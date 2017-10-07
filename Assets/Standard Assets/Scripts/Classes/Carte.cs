@@ -85,12 +85,20 @@ public class Carte : NetworkBehaviourAntinomia {
     int reponseDemandeEffet = 0;
 
     /// <summary>
+    /// Quand une pile se délie, les effets des cartes sont executes. 
+    /// Dans le cas où cette carte execute un effet, elle peut executer une action, 
+    /// cette variable est la pour s'assurer que tous les effets ont bien été tous executes, 
+    /// avant de rendre la main à la pile. 
+    /// </summary>
+    int nombreEffets = 0; 
+
+    /// <summary>
     /// La carte peut-elle attaquer directement le joueur adverse? 
     /// </summary>
     [HideInInspector]
     public bool attaqueDirecte = false; 
 
-
+    
 
     // Use this for initialization
     public override void Start () {
@@ -102,23 +110,6 @@ public class Carte : NetworkBehaviourAntinomia {
 	public override void Update () {
 
 	}
-
-    /// <summary>
-    /// Recuperer l'objet correspondant au joueur qui n'est pas le joueur local. 
-    /// </summary>
-    /// <returns>Joueur not local</returns>
-    public GameObject FindNotLocalPlayer() {
-        /*
-		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
-		 */
-        GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
-        if (!Players[0].GetComponent<Player>().isLocalPlayer) {
-            return Players[0];
-        }
-        else {
-            return Players[1];
-        }
-    }
 
     /// <summary>
     /// Deplacer la carte. 
@@ -481,19 +472,22 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="_allEffets">Liste des effets à effectier</param>
     /// <param name="_currentPhase">Phase lors dans laquelle on se trouve</param>
     /// <param name="debut">true, si on la carte vient d'être posée</param>
+    /// <param name="Cible">Si c'est un sort qui appelle la méthode, il peut déjà avoir une cible</param>
+    /// <param name="nouveauTour">true si on vient de passer à un nouveau tour</param>
     public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false, 
-        bool nouveauTour=false) {
+        bool nouveauTour=false, GameObject Cible=null) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
         }
         for (int i = 0; i < _allEffets.Count; ++i) {
             // On regarde les effets un par un. 
             // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
-            bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut, nouveauTour:nouveauTour);
+            bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut, nouveauTour:nouveauTour,
+                                               Cible:Cible);
             Debug.Log("<color=orange>" + effetOK.ToString() + "</Color>"); 
             if (effetOK) {
                 // Dans le cas où toutes les conditions sont réunies. 
-                GererActions(_allEffets[i].AllActionsEffet);
+                GererActions(_allEffets[i].AllActionsEffet, CibleDejaChoisie:!(Cible==null));
             }
             else {
                 Debug.Log("<color=orange>L'effet n'a pas pu être joué, pour diverses raisons. </color>");
@@ -521,8 +515,9 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="debut">Si la carte vient d'être posée</param>
     /// <param name="nouveauTour">true lorsque la fonction est appelée lors du passage à un nouveau tour</param>
     /// <returns>true, si toutes les conditions sont remplies</returns>
-    public bool GererConditions(List<Condition> _conditions, Player.Phases _currentPhase=Player.Phases.INITIATION, 
-                                    bool estMort=false, bool debut=false, bool nouveauTour=false) {
+    /// <param name="Cible">Si c'est un sort qui appelle la méthode, il peut déjà avoir une cible</param>
+    public bool GererConditions(List<Condition> _conditions, Player.Phases _currentPhase = Player.Phases.INITIATION,
+                                    bool estMort = false, bool debut = false, bool nouveauTour = false, GameObject Cible=null) {
         /*
          * Regarde si toutes les conditions sont ok pour un effet. 
          * Retourne true si c'est le cas, false sinon
@@ -537,7 +532,7 @@ public class Carte : NetworkBehaviourAntinomia {
             if (_conditions[j].dependsOnPhase &&
                 _currentPhase != _conditions[j].PhaseCondition) {
                 // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
-                return false; 
+                return false;
             }
             else if (((_conditions[j].TourCondition == Condition.Tour.TOUR_LOCAL) && (
                   GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour !=
@@ -546,79 +541,93 @@ public class Carte : NetworkBehaviourAntinomia {
                   && (FindLocalPlayer().GetComponent<Player>().PlayerID ==
                   GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour)) {
                 // La condition de tour n'est pas remplie, on passe donc à l'effet suivant. 
-                return false; 
+                return false;
             }
             else if (debut && (_conditions[j].intCondition > 100)) {
                 // L'effet dépend donc d'une phase. 
-                Debug.Log("Cette effet dépend d'une phase particulière."); 
-                return false; 
-            } else if (nouveauTour && !_conditions[j].dependsOnPhase) {
-                // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
-                return false; 
-            } else if (_conditions[j].utilisePourCeTour) {
-                DisplayMessage("Cet effet a déjà été utilisé pour ce tour. ");
+                Debug.Log("Cette effet dépend d'une phase particulière.");
                 return false;
             }
+            else if (nouveauTour && !_conditions[j].dependsOnPhase) {
+                // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
+                return false;
+            }
+            else if (_conditions[j].utilisePourCeTour) {
+                DisplayMessage("Cet effet a déjà été utilisé pour ce tour. ");
+                return false;
+            } else if (estMort && (_conditions[j].ConditionCondition != Condition.ConditionEnum.MORT)) {
+                // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditiosn lors de
+                // la mort d'une carte. 
+                return false; 
+            }
             else {
-                Debug.Log("<color=green>Verification de conditions </color>"); 
+                Debug.Log("<color=green>Verification de conditions </color>");
                 // if (_conditions[j].ActionObligatoire) {
-                    // Dans le cas d'une action obligatoire. 
-                    switch (_conditions[j].ConditionCondition) {
-                        case Condition.ConditionEnum.NONE:
-                            // Dans le cas où il n'y a aucune condition. 
-                            return true; 
-                        case Condition.ConditionEnum.CARTES_CIMETIERE:
-                            if (FindLocalPlayer().transform.Find("Cimetiere").
-                                Find("CartesCimetiere").gameObject.GetComponent<Cimetiere>().NombreDeCartesDansCimetiere() <
-                                _conditions[j].properIntCondition) {
-                                return false; 
-                            }
-                            break;
-                        case Condition.ConditionEnum.CHOIX_ELEMENT:
-                            // Permettre au joueur de choisir un élément.
-                            break;
-                        case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
+                // Dans le cas d'une action obligatoire. 
+                switch (_conditions[j].ConditionCondition) {
+                    case Condition.ConditionEnum.NONE:
+                        // Dans le cas où il n'y a aucune condition. 
+                        return true;
+                    case Condition.ConditionEnum.CARTES_CIMETIERE:
+                        if (FindLocalPlayer().transform.Find("Cimetiere").
+                            Find("CartesCimetiere").gameObject.GetComponent<Cimetiere>().NombreDeCartesDansCimetiere() <
+                            _conditions[j].properIntCondition) {
+                            return false;
+                        }
+                        break;
+                    case Condition.ConditionEnum.CHOIX_ELEMENT:
+                        // Permettre au joueur de choisir un élément.
+                        break;
+                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
+                        if (checkCibleNull(Cible)) { 
                             ShowCardsForChoiceChampBatailleDeuxJoueurs();
-                            break;
-                        case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
+                        }
+                        break;
+                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
+                        if (checkCibleNull(Cible)) {
                             ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"));
-                            break;
-                        case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
+                        }
+                        break;
+                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
+                        if (checkCibleNull(Cible)) {
                             ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"));
-                            break;
-                        case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
-                            ShowCardsForChoiceAllCartesDeuxJoueurs(); 
-                            break;
-                        case Condition.ConditionEnum.DEFAUSSER:
-                            ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"));
-                            break;
-                        case Condition.ConditionEnum.DELTA:
-                            // La condition delta est par rapport à TOUTES les cartes du terrain. 
-                            if (_conditions[j].properIntCondition + FindAllCartesLocal().Count >
-                                FindAllNotLocalCartes().Count) {
-                                return false; 
-                            }
-                            break;
-                        case Condition.ConditionEnum.MORT:
-                            if (!estMort) {
-                                return false;
-                            }
-                            break;
-                        default:
-                            Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
-                            break;
-                    //}
+                        }
+                        break;
+                    case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
+                        if (checkCibleNull(Cible)) {
+                            ShowCardsForChoiceAllCartesDeuxJoueurs();
+                        }
+                        break;
+                    case Condition.ConditionEnum.DEFAUSSER:
+                        ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"));
+                        break;
+                    case Condition.ConditionEnum.DELTA:
+                        // La condition delta est par rapport à TOUTES les cartes du terrain. 
+                        if (_conditions[j].properIntCondition + FindAllCartesLocal().Count >
+                            FindAllNotLocalCartes().Count) {
+                            return false;
+                        }
+                        break;
+                    case Condition.ConditionEnum.MORT:
+                        if (!estMort) {
+                            return false;
+                        }
+                        break;
+                    default:
+                        Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
+                        break;
+                        //}
                 }
                 //else {
-                    // Si l'action n'est pas obligatoire, on n'oblige pas le joueur à jouer cet effet à ce moment précis. 
-                    // On fait donc un break et passe à l'effet suivant. 
-                 //   break;
+                // Si l'action n'est pas obligatoire, on n'oblige pas le joueur à jouer cet effet à ce moment précis. 
+                // On fait donc un break et passe à l'effet suivant. 
+                //   break;
                 //}
                 Debug.Log("<color=gree>effet est OK</color>");
             }
         }
         Debug.Log(effetOK);
-        return effetOK; 
+        return effetOK;
 
     }
 
@@ -629,7 +638,12 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="_actions">Liste des actions à appliquer.</param>
     /// <param name="effetListNumber">Utile pour mettre à jour, si un effet a été utilisé ou pas dans les conditions. 
     /// Si égal à 0, on est dans la liste d'effets normale, si = 1, effets astraux, si = à 2, effets maléfiques</param> 
-    public void GererActions(List<Action> _actions, int effetListNumber=0) {
+    /// <param name="numeroEffet">Le numero de l'effet dans la liste des effets.</param>
+    /// <param name="jouerEffet">Si  true, alors on est en train de défaire la pile d'effet. On execute donc vraiment les effets
+    /// Sinon on les ajoute juste à la pile. </param>
+    /// <param name="CibleDejaChoisie">true si les paramètres ont été choisis en amont, par exemple pour un sort</param>
+    public void GererActions(List<Action> _actions, int numeroEffet=0, int effetListNumber=0, bool jouerEffet=false, 
+                                    bool CibleDejaChoisie=false) {
         // On doit maintenant gérer les effets.
         for (int j = 0; j < _actions.Count; ++j) {
             switch (_actions[j].ActionAction) {
@@ -648,8 +662,12 @@ public class Carte : NetworkBehaviourAntinomia {
                     /*
                      * Il faut d'abord choisir une carte puis la détruire.
                      */
-                    DisplayMessage("Choisissez uen carte et détruisez la");
-                    StartCoroutine(DetruireEffet()); 
+                    DisplayMessage("Choisissez une carte et détruisez la");
+                    if (jouerEffet) {
+                        StartCoroutine(DetruireEffet(CibleDejaChoisie));
+                    } else {
+                        StartCoroutine(InformerDetruireEffet(numeroEffet, CibleDejaChoisie, effetListNumber)); 
+                    }
                     
                     break;
                 case Action.ActionEnum.GAIN_AKA_UN_TOUR:
@@ -663,8 +681,12 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Action.ActionEnum.SACRIFIER_CARTE:
                     // Sacrifier cette carte. 
-                    DisplayMessage("<color=orange>Sacrifice de cette carte</color>"); 
-                    SacrifierCarteEntite();
+                    DisplayMessage("<color=orange>Sacrifice de cette carte</color>");
+                    if (jouerEffet) {
+                        SacrifierCarteEntite();
+                    } else {
+                        InformerSacrifierCarteEntite(); 
+                    }
                     break;
                 case Action.ActionEnum.PLACER_SANCTUAIRE:
                     DisplayMessage("On place cette carte dans le sanctuaire"); 
@@ -712,7 +734,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     Debug.LogWarning("Cet effet n'est pas géré");
                     break;
             }
-            updateEffetActive(j, effetListNumber); 
+            updateEffetActive(numeroEffet, effetListNumber); 
         }
     }
 
@@ -720,10 +742,6 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Gérer les effets à la mort de la carte.
     /// </summary>
     public void GererEffetsMort() {
-        /*
-         * Gérer les effets à la mort de la carte. 
-         * 
-         */
 
         bool effetOK = false; 
 
@@ -731,7 +749,7 @@ public class Carte : NetworkBehaviourAntinomia {
             effetOK = false; 
             for (int j = 0; j < AllEffets[i].AllConditionsEffet.Count; ++j) {
                 if (AllEffets[i].AllConditionsEffet[j].ConditionCondition == Condition.ConditionEnum.MORT) {
-                    effetOK = GererConditions(AllEffets[i].AllConditionsEffet, estMort: false); 
+                    effetOK = GererConditions(AllEffets[i].AllConditionsEffet, estMort: true); 
                 }
             }
             if (effetOK) {
@@ -741,12 +759,39 @@ public class Carte : NetworkBehaviourAntinomia {
     }
 
     /// <summary>
+    /// Coroutine pour gérer les effets lorsqu'une pile d'effets se defait. 
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator GererActionsCoroutine(List<Action> _actionsCarte, int numeroEffet, int effetListNumber, 
+                                                List<GameObject> Cibles=null) {
+        // nombreEffets = _actionsCarte.Count;
+        Debug.Log("On gère les actions");
+        CartesChoisiesPourEffets = Cibles;
+
+        GererActions(_actionsCarte, numeroEffet, effetListNumber, jouerEffet:true, CibleDejaChoisie:true);
+
+        yield break; 
+        //while (nombreEffets != 0) {
+        //    yield return new WaitForSeconds(0.05f); 
+        //}
+    }
+
+    /// <summary>
     /// EFFET: Sacrifier une carte entité.
     /// Override dans la classe entité
     /// </summary>
     public virtual void SacrifierCarteEntite() {
         // Les seules cartes que l'on peut sacrifier sont des entités. 
         // La méthode est donc override dans la classe entité. 
+    }
+
+    /// <summary>
+    /// EFFET: Informer que le joueur va sacrifier une entite
+    /// Override dans la classe entité. 
+    /// </summary>
+    public virtual void InformerSacrifierCarteEntite() {
+
+
     }
 
     /// <summary>
@@ -972,9 +1017,13 @@ public class Carte : NetworkBehaviourAntinomia {
     /// TODO: Gérer le changement de position de plusieurs entités. 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator ChangerPositionEffet() {
+    private IEnumerator ChangerPositionEffet(bool CibleDejaChoisie = false) {
 
-        yield return WaitForCardsChosen();
+        if (!CibleDejaChoisie) {
+            // Si les cibles n'ont pas déjà été choisies
+            yield return WaitForCardsChosen();
+        }
+
         if (CartesChoisiesPourEffets.Count != 1) {
             throw new Exception("Erreur dans la transmission des cartes. Cet effet ne permet pas encore" +
                 "de gérer plusieurs changements de position. ");
@@ -990,21 +1039,53 @@ public class Carte : NetworkBehaviourAntinomia {
     /// EFFET: Détruire une ou plusieurs cartes. 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator DetruireEffet() {
-        yield return WaitForCardsChosen(); 
+    /// <param name="CibleDejaChoisie">true si les cartes sur lesquelles s'applique l'effet ont déjà été choisies
+    /// précedemment</param>
+    private IEnumerator DetruireEffet(bool CibleDejaChoisie=false) {
+        Debug.Log("DetruireEffet");
+        
+        if (!CibleDejaChoisie) {
+            // Si les cibles n'ont pas déjà été choisies
+            yield return WaitForCardsChosen();
+        }
+
         for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
             // On détruit toutes les cartes une par une. 
+            Debug.Log("Je détruis la carte"); 
             CartesChoisiesPourEffets[i].SendMessage("DetruireCarte");
         }
+
         CartesChoisiesPourEffets = null; 
+    }
+
+    /// <summary>
+    /// EFFET: Ajout de l'effet détruire dans la pile d'effet.
+    /// On informe l'autre joueur qu'on a joué cet effet.  
+    /// </summary>
+    /// <param name="CibleDejaChoisie">true si les cartes sur lesquelles s'applique l'effet ont déjà été choisies
+    /// précedemment</param>
+    /// <param name="numeroEffet">numéro de l'effet dans la liste des effets</param>
+    /// <param name="numeroListEffet">numero de la liste des effets (facultatif)</param>
+    /// <returns></returns>
+    private IEnumerator InformerDetruireEffet(int numeroEffet, bool CibleDejaChoisie = false, int numeroListEffet = 0) {
+        Debug.Log("On va détruire des cartes");
+        Debug.Log(CibleDejaChoisie);
+        if (!CibleDejaChoisie) {
+            yield return WaitForCardsChosen(); 
+        }
+        Debug.Log("Nombre de cartes choisies : " + CartesChoisiesPourEffets.Count.ToString());
+        MettreEffetDansLaPile(CartesChoisiesPourEffets, numeroEffet, numeroListEffet); 
     }
 
     /// <summary>
     /// EFFET: Defausser une ou plusieurs cartes.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator DefausserEffet() {
-        yield return WaitForCardsChosen(); 
+    private IEnumerator DefausserEffet(bool CibleDejaChoisie = false) {
+        if (!CibleDejaChoisie) {
+            // Si les cibles n'ont pas déjà été choisies
+            yield return WaitForCardsChosen();
+        }
         for (int i = 0; i < CartesChoisiesPourEffets.Count;  ++i) {
             // On détruit les cartes choisies 
             CartesChoisiesPourEffets[i].SendMessage("DetruireCarte"); 
@@ -1064,6 +1145,69 @@ public class Carte : NetworkBehaviourAntinomia {
         for (int i = 0; i < AllEffets.Count; ++i) {
             AllEffets[i].AllConditionsEffet[0].updateUtilisePourCeTour(tourJoueurLocal); 
         }
+    }
+
+    /// <summary>
+    /// Rajouter un effet dans la pile.
+    /// Crée la pile si elle n'existe pas. 
+    /// </summary>
+    /// <param name="Cibles">Les Cibles de l'effet</param>
+    /// <param name="numeroEffet">La position de l'effet dans la liste d'effets</param>
+    /// <param name="numeroListEffet">Le numero de la liste d'effets</param>
+    protected void MettreEffetDansLaPile(List<GameObject> Cibles, int numeroEffet, int numeroListEffet=0) {
+        Debug.Log("Effet dans la pile"); 
+        GameObject Pile = GameObject.FindGameObjectWithTag("Pile"); 
+        if (Pile == null) {
+            // C'est le premier effet de la pile, il faut donc instancier la pile. 
+            FindLocalPlayer().GetComponent<Player>().CmdCreerPile();
+            StartCoroutine(MettreEffetDansLaPileRoutine(Cibles, numeroEffet, numeroListEffet));
+        } else {
+            // La pile existe déjà, on peut rajouter à la pile. 
+            Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(gameObject, Cibles, numeroEffet, numeroListEffet);
+            Debug.Log("Un effet a été ajouté à la pile"); 
+        }
+
+    }
+
+    /// <summary>
+    /// Rajouter un effet dans la pile.
+    /// Ceci est le premier effet ajouté à la pile. 
+    /// </summary>
+    /// <param name="Cibles">Les Cibles de l'effet</param>
+    /// <param name="numeroEffet">La position de l'effet dans la liste d'effets</param>
+    /// <param name="numeroListEffet">Le numero de la liste d'effets</param>
+    protected IEnumerator MettreEffetDansLaPileRoutine(List<GameObject> Cibles, int numeroEffet, int numeroListEffet = 0) {
+        Debug.Log("Effet dans la pile"); 
+        GameObject Pile = null; 
+        for (int i = 0; i < 5 && Pile == null; ++i) {
+            yield return new WaitForSeconds(0.1f);
+            Pile = GameObject.FindGameObjectWithTag("Pile");
+        }
+
+        Debug.Log("Pile créée"); 
+        if (Pile == null) {
+            throw new Exception("La pile ne s'est pas créée"); 
+        }
+
+        Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(gameObject, Cibles, numeroEffet, numeroListEffet);
+        Debug.Log("Un effet a été ajouté à la pile"); 
+    }
+
+    /// <summary>
+    /// Lorsqu'on appelle la méthode GérerEffet, elle peut être appelée par un sort qui a déjà choisi sa cible. 
+    /// true si la Cible est null, false sinon
+    /// Dans le cas où la cible n'est pas nulle, on l'ajoute dans les cartes choisies. 
+    /// </summary>
+    /// <returns>true si la Cible est null, false sinon</returns>
+    private bool checkCibleNull(GameObject Cible) {
+        if (Cible == null) {
+            return true; 
+        } else {
+            CartesChoisiesPourEffets = new List<GameObject>();
+            CartesChoisiesPourEffets.Add(Cible);
+            return false; 
+        }
+
     }
 
 }

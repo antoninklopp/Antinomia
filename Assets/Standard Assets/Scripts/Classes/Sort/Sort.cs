@@ -4,11 +4,16 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System; 
 
+/// <summary>
+/// Classe pour modéliser un sort. 
+/// Hérite de la classe carte. 
+/// </summary>
 public class Sort : Carte {
-    /*
-	 * Le sort hérite de carte. 
-	 */
-     
+
+     /// <summary>
+     /// Niveau du sort. 
+     /// Pour pouvoir être joué, un sort doit avoir un niveau inférieur ou égal à l'AKA rémanent calculé au début du tour.
+     /// </summary>
     public int Niveau;
     public string Condition;
     public int CoutAKA;
@@ -18,16 +23,24 @@ public class Sort : Carte {
         /*
          * 
          */
-         
+
 
     }
 
+    /// <summary>
+    /// Création d'un sort. 
+    /// On essaiera d'instancier les sorts avec cette définition de classe pour pouvoir 
+    /// appliquer les méthodes sur les string des effets et des conditions.
+    /// </summary>
+    /// <param name="_shortCode"></param>
+    /// <param name="_Name"></param>
+    /// <param name="_description"></param>
+    /// <param name="_Niveau"></param>
+    /// <param name="_Condition"></param>
+    /// <param name="_Effet"></param>
     public Sort(string _shortCode, string _Name, string _description, int _Niveau, string _Condition, 
         string _Effet) {
-        /*
-         * On essaiera d'instancier les sorts avec cette définition de classe pour pouvoir 
-         * appliquer les méthodes sur les string des effets et des conditions. 
-         */
+
         shortCode = _shortCode;
         Name = _Name;
         description = _description;
@@ -49,17 +62,44 @@ public class Sort : Carte {
 #pragma warning restore CS0169 // Le champ 'Sort.CarteCibleeRayCast' n'est jamais utilisé
     GameObject CarteCiblee;
 
+    /// <summary>
+    /// "Etat de la carte"
+    /// </summary>
     public enum State {
-        DECK, // La carte est dans le deck. 
-        MAIN, // La carte est dans la main
-        JOUE, // La carte a été jouée.
-        BIGCARD, // La carte est zoomée. 
-        ADVERSAIRE, // La carte est à l'adversaire
+        /// <summary>
+        /// La carte est dans le deck. 
+        /// </summary>
+        DECK,
+        /// <summary>
+        /// La carte est dans la main
+        /// </summary>
+        MAIN,
+        /// <summary>
+        /// La carte a été jouée.
+        /// </summary>
+        JOUE,
+        /// <summary>
+        /// La carte est zoomée. 
+        /// </summary>
+        BIGCARD,
+        /// <summary>
+        /// La carte est à l'adversaire
+        /// </summary>
+        ADVERSAIRE, 
+        /// <summary>
+        /// La carte est au cimetière.
+        /// </summary>
         CIMETIERE
     };
 
+    /// <summary>
+    /// Etat courant de la carte. 
+    /// </summary>
     public State sortState = State.MAIN; 
     
+    /// <summary>
+    /// Appelé lors du spawn du sort. 
+    /// </summary>
     public override void Start() {
         base.Start(); 
         localScaleCard = Mathf.Abs(transform.localScale.x);
@@ -79,9 +119,12 @@ public class Sort : Carte {
     }
 
 
+    /// <summary>
+    /// Lors d'un clic sur la carte. 
+    /// </summary>
     public override void OnMouseDown() {
         /*
-         * Lors d'un clique sur la carte
+         * Lors d'un clic sur la carte
          */
 
         base.OnMouseDown(); 
@@ -147,6 +190,11 @@ public class Sort : Carte {
         //}
     }
 
+    /// <summary>
+    /// Changer la position du sort, 
+    /// Appelé lors d'un clic sur la carte. 
+    /// Vérifie si la carte va être rejouée ou remise dans la main. 
+    /// </summary>
     void ChangePosition() {
         /*
          * Lors du deuxième clique du joueur, après que la carte ait été bougée. 
@@ -164,12 +212,13 @@ public class Sort : Carte {
         }
     }
 
+    /// <summary>
+    /// Jouer le sort. 
+    /// </summary>
     void JouerSort() {
         /*
          * Jouer la carte sort
          */
-        Debug.Log("Clicked" + clicked.ToString());
-        Debug.Log(coutCarte); 
         if (coutCarte <= FindLocalPlayer().GetComponent<Player>().PlayerAKA && clicked == 1) {
             // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
             Destroy(GetComponent<BoxCollider2D>()); 
@@ -198,6 +247,12 @@ public class Sort : Carte {
         }
     }
 
+    /// <summary>
+    /// Après qu'on ait jouer le sort, 
+    /// Si le sort a effet sur une ou plusieurs cartes en particulier, on devra cliquer sur ces cartes. 
+    /// Et ces cartes appellent ensuite cette fonction.
+    /// </summary>
+    /// <param name="carteAffectee"></param>
     void RecupererCarteJouerSort(GameObject carteAffectee) {
         /*
          * Cette fonction sera appelée par la carte sur laquelle le joueur aura cliqué après avoir cliqué sur le sort. 
@@ -221,7 +276,9 @@ public class Sort : Carte {
         GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = null;
 
         // On applique l'effet sur la carte. 
-        ApplyEffectOnCarte(carteAffectee);
+        // ApplyEffectOnCarte(carteAffectee);
+
+        GererEffets(AllEffets, Cible:CarteCiblee); 
 
         // Le sort a été joué. 
         clicked = 0;
@@ -229,9 +286,16 @@ public class Sort : Carte {
         Destroy(GetComponent<SpriteRenderer>()); 
     }
 
+    /// <summary>
+    /// Appliquer un effet sur une carte.
+    /// NE DOIT PAS ETRE UTILISE dans la version actuelle du jeu. 
+    /// </summary>
+    /// <param name="Cible">Carte cible du sort</param>
     void ApplyEffectOnCarte(GameObject Cible) {
         /*
          * Envoyer à la carte l'effet appliqué. 
+         * 
+         * NE DOIT PAS ETRE UTILISE
          */ 
          // Gestion de l'effet 1
         switch (AllEffets[0].AllActionsEffet[0].ActionAction) {
@@ -267,9 +331,10 @@ public class Sort : Carte {
          * 
          * return false dans le cas où l'effet ne target pas tout le monde 
          * true sinon
+         * 
+         * NE DOIT PAS ETRE UTILISE
          */
         // Gestion de l'effet1
-        Debug.Log(AllEffets.Count);
          if (!AllEffets[0].AllActionsEffet[0].isEffetTargetAll()) {
             return false; 
         } else {
@@ -312,7 +377,7 @@ public class Sort : Carte {
     void ChangeEffetPuissance(Entite.Element _element, int _intToAdd) {
         /*
          * Changer la puissance de toutes les cartes d'un certain élément. 
-         * 
+         * A AJOUTER DANS GERER ACTIONS. 
          */ 
         // La puissance de toutes les entités air sur le champ de bataille augmente de intEffet. 
         List<GameObject> carteElement = FindAllEntiteChampBatailleElement(_element);
@@ -331,12 +396,14 @@ public class Sort : Carte {
         }
     }
 
+    /// <summary>
+    /// Comme un sort peut durer plusieurs tours, 
+    /// on updatera le sort à chaque tour afin de rendre par exemple un element d'origine à sa carte si celui-ci a été modifié. 
+    /// A appeler à chaque début de tour.
+    /// </summary>
     void updateSortNewTurn() {
         /*
-         * Comme un sort peut durer plusieurs tours, 
-         * on updatera le sort à chaque tour afin de rendre par exemple un element d'origine à sa carte si celui-ci a été modifié. 
-         * 
-         * A appeler à chaque début de tour. 
+
          * 
          */ 
          if (AllEffets.Count == 0) {
@@ -385,6 +452,10 @@ public class Sort : Carte {
             GetInfoCarte());
     }
 
+    /// <summary>
+    /// Appelé lors de l'instanciation de la carte sur le serveur. 
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator SetUpCard() {
         /*
 		 * On attend de savoir si le state de la carte est Main ou pas. 
@@ -453,6 +524,17 @@ public class Sort : Carte {
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
     }
 
+    /// <summary>
+    /// Transmission d'informations sur les principales informations du sort.
+    /// </summary>
+    /// <param name="_ID">IDCardGame de la carte</param>
+    /// <param name="_oID">oID de la carte (Meta Collection)</param>
+    /// <param name="_Name">Nom de la carte</param>
+    /// <param name="_shortCode">shortCode de la carte</param>
+    /// <param name="_Niveau">Niveau du sort</param>
+    /// <param name="_coutAKA">cout du Sort (inutile)</param>
+    /// <param name="_Effet">Effets du sort (string à décortiquer)</param>
+    /// <param name="_EffetToDisplay">Effets du sort (string compréhensible, à afficher)</param>
     [ClientRpc]
     void RpcsetoID1(int _ID, string _oID, string _Name, string _shortCode, int _Niveau,
                                     int _coutAKA, string _Effet, string _EffetToDisplay) {
@@ -470,6 +552,7 @@ public class Sort : Carte {
         //OnStartAuthority (); 
     }
 
+
     public override void UpdateNewPhase(Player.Phases _currentPhase, int tour) {
         base.UpdateNewPhase(_currentPhase, tour);
         clicked = 0; 
@@ -485,6 +568,10 @@ public class Sort : Carte {
         RpcDetruireCarte();
     }
 
+    /// <summary>
+    /// Detruire une carte.
+    /// Execute sur les clients. 
+    /// </summary>
     [ClientRpc]
     void RpcDetruireCarte() {
         clicked = 0; 
@@ -502,6 +589,10 @@ public class Sort : Carte {
         sortState = State.CIMETIERE; 
     }
 
+    /// <summary>
+    /// Recupere les informations essentielles du sort. 
+    /// </summary>
+    /// <returns></returns>
     public override string GetInfoCarte() {
         return "<color=red>" + Name + "</color>" + "\n" +
             "Niveau : " + Niveau.ToString() + "\n" +
