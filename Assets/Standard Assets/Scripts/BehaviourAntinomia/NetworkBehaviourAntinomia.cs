@@ -89,6 +89,10 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
     /// <param name="Carte">La carte</param>
     /// <returns></returns>
     public int GetObjetIDCardGame(GameObject Carte) {
+        if (Carte.GetComponent<Player>() != null) {
+            // Utilise lors de l'attaque directe sur un joueur.
+            return -1; 
+        }
         switch (Carte.GetComponent<CarteType>().thisCarteType) {
             case CarteType.Type.ENTITE:
                 return Carte.GetComponent<Entite>().IDCardGame;
@@ -154,6 +158,34 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
         }
         else {
             return Players[1];
+        }
+    }
+
+    /// <summary>
+    /// Faire un log dans la console unity et dans la console Antinomia.
+    /// </summary>
+    /// <param name="message">Message du log (string)</param>
+    protected void AntinomiaLog(string message) {
+        getGameManager().GetComponent<GameManager>().Log(message); 
+    }
+
+    /// <summary>
+    /// Faire un log dans la console unity et dans la console Antinomia. 
+    /// </summary>
+    /// <param name="message">Message du log (int)</param>
+    protected void AntinomiaLog(int message) {
+        getGameManager().GetComponent<GameManager>().Log(message.ToString());
+    }
+
+    /// <summary>
+    /// Faire un log dans la console unity et dans la console Antinomia. 
+    /// </summary>
+    /// <param name="message">Message du log (GameObject)</param>
+    protected void AntinomiaLog(GameObject message) {
+        try {
+            getGameManager().GetComponent<GameManager>().Log(message.ToString());
+        } catch (NullReferenceException) {
+            Debug.Log("Impossoble de faire le log"); 
         }
     }
 

@@ -170,7 +170,13 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Lien dans le GameManager de l'objet qui a demandé à execute un effet. (clic droit sur la carte). 
     /// </summary>
-    GameObject ObjetDemandeEffet; 
+    GameObject ObjetDemandeEffet;
+
+    /// <summary>
+    /// La console de développement. 
+    /// </summary>
+    private GameObject Console; 
+
 
 	// Use this for initialization
 	public override void Start () {
@@ -202,7 +208,8 @@ public class GameManager : NetworkBehaviourAntinomia {
         CarteDebutPrefab = ChoixCartesDebut.transform.Find("ChoixCartesDebutFond").Find("CarteDebut").gameObject;
         ChoixCartesDebut.SetActive(false);
         ProposerEffet = GameObject.Find("ProposerEffet");
-        ProposerEffet.SetActive(false); 
+        ProposerEffet.SetActive(false);
+        Console = GameObject.Find("Console");
         StartCoroutine(MontrerCartesAChoisirDebut()); 
         // StartCoroutine(PiocheDebut (6)); 
 	}
@@ -374,7 +381,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 		CurrentPhase.GetComponent<Text> ().text = PhaseToString;
         // On ne peut pas réagir à la FIN de la phase d'initiation <=> au début de la phase de pioche. 
         if ((Tour != FindLocalPlayerID()) && (Phase != Player.Phases.PIOCHE)) {
-            StartCoroutine(ProposeToPauseGame()); 
+            // StartCoroutine(ProposeToPauseGame()); 
         }
 	}
 
@@ -469,95 +476,151 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Attaque d'ue carte, une assistance ou même directement du joueur par une autre carte.
     /// </summary>
-	void Attack(){
-		/*
+	public void Attack(bool JouerEffet=false, GameObject _MyPlayerEntity=null, GameObject _OtherPlayerEntity=null){
+        /*
 		 * On compare les forces des entités dans cette fonction. 
 		 * 
 		 * Et on inflige les points de dégâts aux deux entités. 
-		 */ 
+		 */
+
+        Debug.Log(_MyPlayerEntity);
+        Debug.Log(_OtherPlayerEntity); 
+        if (_MyPlayerEntity != null && _OtherPlayerEntity != null) {
+            /*
+             * Lorsqu'on défait la pile d'effets, on envoie directement les deux objets qui attaquent et qui sont attaqués. 
+             * Ils overrident les objets de base. 
+             */
+            MyPlayerEntity = _MyPlayerEntity;
+            OtherPlayerEntity = _OtherPlayerEntity;
+            Debug.Log("On a override tout ça."); 
+        }
+
+        Debug.Log(MyPlayerEntity); 
 
 		Entite.Ascendance AscendanceMyEntity = MyPlayerEntity.GetComponent<Entite> ().carteAscendance; 
 		Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().carteElement; 
 		int multiplicateurDegatsMy = 1;
 
-		Debug.Log (OtherPlayerEntity.tag); 
+		Debug.Log (OtherPlayerEntity.tag);
 
-		if (OtherPlayerEntity.tag == "Player") {
+        if (OtherPlayerEntity.tag == "Player") {
             /*
 			 * Si l'entité attaquée est directement le joueur adverse. 
 			 * L'objet envoyé est le joueur adverse. 
              * Il faut vérifier que le joueur n'ait pas de carte sur son champ de bataille. 
 			 */
-            if ((FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").childCount == 0) 
-                ||( MyPlayerEntity.GetComponent<Entite>().attaqueDirecte)){
-                OtherPlayerEntity.SendMessage("AttackPlayer", MyPlayerEntity.GetComponent<Entite>().STAT);
-            } else {
-                DisplayMessage("Cette carte ne peut pas attaquer le joueur directement");
-                return; 
+            if ((FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").childCount == 0)
+                || (MyPlayerEntity.GetComponent<Entite>().attaqueDirecte)) {
+                if (!JouerEffet) {
+                    AjouterEffetAttaquePile();
+                    return; 
+                }
+                else {
+                    Debug.Log("Le joueur adverse a été attaqué"); 
+                    OtherPlayerEntity.SendMessage("AttackPlayer", MyPlayerEntity.GetComponent<Entite>().STAT);
+                }
             }
-		} else if (OtherPlayerEntity.tag == "Assistance") {
+            else {
+                DisplayMessage("Cette carte ne peut pas attaquer le joueur directement");
+                return;
+            }
+        }
+        else if (OtherPlayerEntity.tag == "Assistance") {
             /*
              * Si l'entité attaquée est une assistance. 
              */
-            OtherPlayerEntity.SendMessage("DetruireCarte");
-
-        } else {
-			/*
+            if (JouerEffet) {
+                OtherPlayerEntity.SendMessage("DetruireCarte");
+            }
+            else {
+                AjouterEffetAttaquePile();
+                return; 
+            }
+        }
+        else {
+            /*
 			 * Si l'entité attaquée est une carte du joueur adverse.  
-			 */ 
-			Entite.Ascendance AscendanceOtherEntity = OtherPlayerEntity.GetComponent<Entite> ().carteAscendance;
-			Entite.Element ElementOther = OtherPlayerEntity.GetComponent<Entite> ().carteElement; 
-			int multiplicateurDegatsOther = 1; 
+			 */
 
-			// On regarde d'abord les ascendances des deux entités. 
-			if (AscendanceMyEntity == Entite.Ascendance.NEUTRE || AscendanceOtherEntity == Entite.Ascendance.NEUTRE) {
-				// Si un des elements est neutre, l'autre n'est ni fort ni faible face à lui. 
-			} else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity != Entite.Ascendance.ELEMENTAIRE) {
-				multiplicateurDegatsMy = 2;
-			} else if (AscendanceMyEntity != Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
-				multiplicateurDegatsOther = 2; 
-			} else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
-				// SI les deux sont élémentaires
-			
-				// vérifier ici les condition aux limites avec les derniers éléments à chaque fois. 
-				if (ElementMy - ElementOther == 1) {
-					multiplicateurDegatsOther = 2;
-				} else if (ElementOther - ElementMy == 1) {
-					multiplicateurDegatsMy = 2; 
-				}
-			}
+            if (JouerEffet) {
+                Entite.Ascendance AscendanceOtherEntity = OtherPlayerEntity.GetComponent<Entite>().carteAscendance;
+                Entite.Element ElementOther = OtherPlayerEntity.GetComponent<Entite>().carteElement;
+                int multiplicateurDegatsOther = 1;
 
-			Debug.Log ("Il vient d'y avoir une attaque"); 
-			int attackMy = MyPlayerEntity.GetComponent<Entite> ().STAT * multiplicateurDegatsMy; 
-			int attackOther = OtherPlayerEntity.GetComponent<Entite> ().STAT * multiplicateurDegatsOther; 
-			Debug.Log ("Attaque faite au personnage 1 : " + attackOther.ToString ()); 
-			Debug.Log ("Attaque faite au personnage 2 : " + attackMy.ToString ()); 
+                // On regarde d'abord les ascendances des deux entités. 
+                if (AscendanceMyEntity == Entite.Ascendance.NEUTRE || AscendanceOtherEntity == Entite.Ascendance.NEUTRE) {
+                    // Si un des elements est neutre, l'autre n'est ni fort ni faible face à lui. 
+                }
+                else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity != Entite.Ascendance.ELEMENTAIRE) {
+                    multiplicateurDegatsMy = 2;
+                }
+                else if (AscendanceMyEntity != Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
+                    multiplicateurDegatsOther = 2;
+                }
+                else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
+                    // SI les deux sont élémentaires
 
-			// On Détruit la carte la plus faible, ou les deux dans un cas d'égalité
-			if (multiplicateurDegatsMy * MyPlayerEntity.GetComponent<Entite> ().STAT ==
-			   multiplicateurDegatsOther * OtherPlayerEntity.GetComponent<Entite> ().STAT) {
-				// Cas d'égalité
-				MyPlayerEntity.SendMessage ("DetruireCarte"); 
-				OtherPlayerEntity.SendMessage ("DetruireCarte"); 
-			} else if (multiplicateurDegatsMy * MyPlayerEntity.GetComponent<Entite> ().STAT >
-			          multiplicateurDegatsOther * OtherPlayerEntity.GetComponent<Entite> ().STAT) {
-				// La carte du joueur local est plus forte. 
-				OtherPlayerEntity.SendMessage ("DetruireCarte"); 
-			} else {
-				// La carte de l'autre joueur est plus forte. 
-				MyPlayerEntity.SendMessage ("DetruireCarte"); 
-			}
-		}
+                    // vérifier ici les condition aux limites avec les derniers éléments à chaque fois. 
+                    if (ElementMy - ElementOther == 1) {
+                        multiplicateurDegatsOther = 2;
+                    }
+                    else if (ElementOther - ElementMy == 1) {
+                        multiplicateurDegatsMy = 2;
+                    }
+                }
 
-		// Notre entité a attaqué. 
-		MyPlayerEntity.SendMessage ("setHasAttacked", true); 
+                Debug.Log("Il vient d'y avoir une attaque");
+                int attackMy = MyPlayerEntity.GetComponent<Entite>().STAT * multiplicateurDegatsMy;
+                int attackOther = OtherPlayerEntity.GetComponent<Entite>().STAT * multiplicateurDegatsOther;
+                Debug.Log("Attaque faite au personnage 1 : " + attackOther.ToString());
+                Debug.Log("Attaque faite au personnage 2 : " + attackMy.ToString());
 
-		// On redétruit la fleche rouge. 
-		Destroy (GameObject.FindGameObjectWithTag ("Marque"));
-			
-		MyPlayerEntity = null; 
-		OtherPlayerEntity = null; 
+                // On Détruit la carte la plus faible, ou les deux dans un cas d'égalité
+                if (multiplicateurDegatsMy * MyPlayerEntity.GetComponent<Entite>().STAT ==
+                   multiplicateurDegatsOther * OtherPlayerEntity.GetComponent<Entite>().STAT) {
+                    // Cas d'égalité
+                    MyPlayerEntity.SendMessage("DetruireCarte");
+                    OtherPlayerEntity.SendMessage("DetruireCarte");
+                }
+                else if (multiplicateurDegatsMy * MyPlayerEntity.GetComponent<Entite>().STAT >
+                        multiplicateurDegatsOther * OtherPlayerEntity.GetComponent<Entite>().STAT) {
+                    // La carte du joueur local est plus forte. 
+                    OtherPlayerEntity.SendMessage("DetruireCarte");
+                }
+                else {
+                    // La carte de l'autre joueur est plus forte. 
+                    MyPlayerEntity.SendMessage("DetruireCarte");
+                }
+            }
+            else {
+                AjouterEffetAttaquePile();
+                return; 
+            }
+        }
+
+        // Notre entité a attaqué. 
+        MyPlayerEntity.SendMessage("setHasAttacked", true);
+
+        MyPlayerEntity = null;
+        OtherPlayerEntity = null;
 	}
+
+    private void AjouterEffetAttaquePile() {
+        // On prévient qu'on va jouer l'effet. 
+        List<GameObject> Cibles = new List<GameObject>();
+        // On ajoute le joueur adverse à la liste des cibles. 
+        // Il faudra bien faire un cas séparé lors de la recherche de l'ID lorsqu'on défait la pile.
+        Cibles.Add(OtherPlayerEntity);
+        MettreEffetDansLaPile(MyPlayerEntity, Cibles, -1);
+
+        MyPlayerEntity = null;
+        OtherPlayerEntity = null;
+
+        // On redétruit la fleche rouge. 
+        Destroy(GameObject.FindGameObjectWithTag("Marque"));
+
+        return;
+    }
 
 	void Detruire(){
 		/*
@@ -801,6 +864,9 @@ public class GameManager : NetworkBehaviourAntinomia {
         CarteBaseCimetiere.SetActive(false);
     }
 
+    /// <summary>
+    /// Cacher le cimetiere.
+    /// </summary>
     void HideCemetery() {
         /*
          * Cacher le cimetiere
@@ -929,6 +995,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     private IEnumerator DeactivateDisplayInfo(float time=2f) {
         yield return new WaitForSeconds(time);
         DisplayInfo.SetActive(false);
+        AntinomiaLog("On désactive les infos"); 
     }
 
     /// <summary>
@@ -958,14 +1025,17 @@ public class GameManager : NetworkBehaviourAntinomia {
             PauseButton.SetActive(true);
             if (message != ""){
                 // Si un message est fourni lors de l'appel, on l'affiche
-                DisplayInfoToPlayer(message); 
+                DisplayInfoToPlayer(message);
+                //DeactivateDisplayInfo(10f); 
             }
-            yield return new WaitForSeconds(2f);
+            // Temps d'attente. 
+            AntinomiaLog("Attente"); 
+            yield return new WaitForSeconds(5f);
             if (!gameIsPaused) {
                 PauseButton.SetActive(false);
                 //On regarde s'il y a une pile d'effet en cours. 
                 if (GameObject.FindGameObjectWithTag("Pile") != null) {
-                    Debug.Log("L'autre joueur n'a pas mis le jeu en pause, on défait la pile");
+                    AntinomiaLog("Je n'ai pas mis en pause, je défais la pile");
                     GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile(); 
                 }
             }
@@ -1085,6 +1155,78 @@ public class GameManager : NetworkBehaviourAntinomia {
     public void ReponseEffetPropose(int reponse) {
         ObjetDemandeEffet.SendMessage("ReponseEffet", reponse);
         ProposerEffet.SetActive(false); 
+    }
+
+
+    /// <summary>
+    /// Rajouter un effet dans la pile.
+    /// Crée la pile si elle n'existe pas. 
+    /// </summary>
+    /// <param name="ObjetEffet">Objet qui attaque</param>
+    /// <param name="Cibles">Les Cibles de l'effet</param>
+    /// <param name="numeroEffet">La position de l'effet dans la liste d'effets</param>
+    /// <param name="numeroListEffet">Le numero de la liste d'effets</param>
+    protected void MettreEffetDansLaPile(GameObject ObjetEffet, List<GameObject> Cibles, int numeroEffet, int numeroListEffet = 0) {
+        Debug.Log("Effet dans la pile");
+        GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
+        if (Pile == null) {
+            // C'est le premier effet de la pile, il faut donc instancier la pile. 
+            FindLocalPlayer().GetComponent<Player>().CmdCreerPile();
+            StartCoroutine(MettreEffetDansLaPileRoutine(ObjetEffet, Cibles, numeroEffet, numeroListEffet));
+        }
+        else {
+            // La pile existe déjà, on peut rajouter à la pile. 
+            Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(ObjetEffet, Cibles, numeroEffet, numeroListEffet);
+            Debug.Log("Un effet a été ajouté à la pile");
+        }
+
+    }
+
+    /// <summary>
+    /// Rajouter un effet dans la pile.
+    /// Ceci est le premier effet ajouté à la pile. 
+    /// </summary>
+    /// <param name="ObjetEffet">Objet qui attaque</param>
+    /// <param name="Cibles">Les Cibles de l'effet</param>
+    /// <param name="numeroEffet">La position de l'effet dans la liste d'effets</param>
+    /// <param name="numeroListEffet">Le numero de la liste d'effets</param>
+    protected IEnumerator MettreEffetDansLaPileRoutine(GameObject ObjetEffet, 
+                                        List<GameObject> Cibles, int numeroEffet, int numeroListEffet = 0) {
+        Debug.Log("Effet dans la pile");
+        GameObject Pile = null;
+        for (int i = 0; i < 5 && Pile == null; ++i) {
+            yield return new WaitForSeconds(0.1f);
+            Pile = GameObject.FindGameObjectWithTag("Pile");
+        }
+
+        Debug.Log("Pile créée");
+        if (Pile == null) {
+            throw new Exception("La pile ne s'est pas créée");
+        }
+
+        Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(ObjetEffet, Cibles, numeroEffet, numeroListEffet);
+        Debug.Log("Un effet a été ajouté à la pile");
+    }
+
+    /// <summary>
+    /// Ouvrir la console
+    /// </summary>
+    public void OpenConsole() {
+        if (Console.GetComponent<AntinomiaConsole>().state) {
+            // Si la console est active on la désactive.
+            Console.GetComponent<AntinomiaConsole>().DeactivateConsole(); 
+        } else {
+            // Sinon on l'active. 
+            Console.GetComponent<AntinomiaConsole>().ActivateConsole();
+        }
+    }
+
+    /// <summary>
+    /// Add a log into the console. 
+    /// </summary>
+    public void Log(string log) {
+        Debug.Log(log);
+        Console.GetComponent<AntinomiaConsole>().AddStringToConsole(log); 
     }
 
 }

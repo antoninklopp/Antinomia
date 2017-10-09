@@ -17,6 +17,13 @@ using System;
 /// diverses réponses, 
 /// 
 /// 
+/// NOTE : Il n'y a que quelques effet qui peuvent être faits par toutes les cartes:
+/// Attaquer une autre carte ou un joueur : -1
+/// Déplacement vers le board : -2
+/// Deplacemet vers le sanctuaire : -3
+/// Le nombre sera celui du numéro de l'effet, le numéro de la liste sera 0. 
+/// 
+/// 
 /// </summary>
 public class EffetInPile : NetworkBehaviourAntinomia {
 
@@ -87,7 +94,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// 1 pour les effets astraux
     /// 2 pour les effets maléfiques </param>
     public void CreerEffetInPile(int _IDCardGame, Effet effet, List<int> _IDCardGameCibleEffet, int _numeroEffet, 
-                                    int numeroListEffet) {
+                                    int numeroListEffet, int playerID) {
         effetJoue = effet;
         IDObjectCardGame = _IDCardGame;
         IDCardGameCibleEffet = _IDCardGameCibleEffet; 
@@ -96,11 +103,13 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         EffetListNumber = numeroListEffet;
         numeroEffet = _numeroEffet; 
         etatEffet = 1;
+        setPlayerIDAssociee(playerID);
+        ObjetEffet = FindCardWithID(_IDCardGame); 
 
-        if (PlayerIDAssocie != FindLocalPlayer().GetComponent<Player>().PlayerID) {
-            // Si on est sur le joueur qui n'a pas demandé l'effet, on propose à l'autre joueur de répondre à l'effet. 
-            transform.parent.gameObject.SendMessage("InformerAjoutEffetPile", PhraseDecritEffet);
-        }
+        PhraseDecritEffet = CreerPhraseDecritEffet();
+
+        Debug.Log("Voici l'IDCardGame de l'objet qui crée l'effet : " + _IDCardGame.ToString()); 
+
     }
 
     public void setPlayerIDAssociee(int _playerID) {
@@ -111,49 +120,55 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// Créer la phrase qui décrit l'effet pour pouvoir la transmettre à l'autre joueur. 
     /// Pour l'instant sous forme de phrase, cette information devra être visuelle.
     /// </summary>
-    private void CreerPhraseDecritEffet() {
-        PhraseDecritEffet = ""; 
-
-        // QUI JOUE L'EFFET
-        switch (ObjetEffet.GetComponent<CarteType>().thisCarteType) {
-            case CarteType.Type.ENTITE:
-                PhraseDecritEffet += ObjetEffet.GetComponent<Entite>().Name; 
-                break;
-            case CarteType.Type.ASSISTANCE:
-                PhraseDecritEffet += ObjetEffet.GetComponent<Assistance>().Name;
-                break;
-            case CarteType.Type.SORT:
-                PhraseDecritEffet += ObjetEffet.GetComponent<Sort>().Name;
-                break;
-            default:
-                throw new Exception("Ce type de carte n'existe pas"); 
+    public string CreerPhraseDecritEffet() {
+        string phraseDecritEffet = "";
+        Debug.Log(ObjetEffet); 
+        try {
+            // QUI JOUE L'EFFET
+            switch (ObjetEffet.GetComponent<CarteType>().thisCarteType) {
+                case CarteType.Type.ENTITE:
+                    phraseDecritEffet += ObjetEffet.GetComponent<Entite>().Name;
+                    break;
+                case CarteType.Type.ASSISTANCE:
+                    phraseDecritEffet += ObjetEffet.GetComponent<Assistance>().Name;
+                    break;
+                case CarteType.Type.SORT:
+                    phraseDecritEffet += ObjetEffet.GetComponent<Sort>().Name;
+                    break;
+                default:
+                    throw new Exception("Ce type de carte n'existe pas");
+            }
+        } catch (NullReferenceException e) {
+            Debug.LogWarning(e); 
         }
 
         // QUEL EST L'EFFET
         for (int i = 0; i < effetJoue.AllActionsEffet.Count; ++i) {
-            PhraseDecritEffet += effetJoue.AllActionsEffet[i].ActionAction.ToString() + " " +
+            phraseDecritEffet += effetJoue.AllActionsEffet[i].ActionAction.ToString() + " " +
                 effetJoue.AllActionsEffet[i].properIntAction + " ; "; 
         }
 
         // A
-        PhraseDecritEffet += " A "; 
+        phraseDecritEffet += " A "; 
 
         // SUR QUI A-T-IL EFFET?
         for (int i = 0; i < CibleEffet.Count; ++i) {
             switch (CibleEffet[i].GetComponent<CarteType>().thisCarteType) {
                 case CarteType.Type.ENTITE:
-                    PhraseDecritEffet += CibleEffet[i].GetComponent<Entite>().Name;
+                    phraseDecritEffet += CibleEffet[i].GetComponent<Entite>().Name;
                     break;
                 case CarteType.Type.ASSISTANCE:
-                    PhraseDecritEffet += CibleEffet[i].GetComponent<Assistance>().Name;
+                    phraseDecritEffet += CibleEffet[i].GetComponent<Assistance>().Name;
                     break;
                 case CarteType.Type.SORT:
-                    PhraseDecritEffet += CibleEffet[i].GetComponent<Sort>().Name;
+                    phraseDecritEffet += CibleEffet[i].GetComponent<Sort>().Name;
                     break;
                 default:
                     throw new Exception("Ce type de carte n'existe pas");
             }
         }
+
+        return phraseDecritEffet; 
     }
 
     /// <summary>
@@ -162,17 +177,41 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// </summary>
     /// <returns>NONE</returns>
     public IEnumerator JouerEffet(int playerID) {
-        if (playerID == FindLocalPlayer().GetComponent<Player>().PlayerID) {
+        // On vérifie que c'est bien le joueur qui a créé l'effet qui le joue. 
+        Debug.Log(PlayerIDAssocie);
+        Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID); 
+        if (PlayerIDAssocie == FindLocalPlayer().GetComponent<Player>().PlayerID) {
             Debug.Log("On joue l'effet depuis chez ce joueur");
             if (FindCardWithID(IDObjectCardGame) != null) {
                 Debug.Log("Depuis cette carte");
+
                 // On recrée la liste des cibles
                 for (int i = 0; i < IDCardGameCibleEffet.Count; ++i) {
                     Debug.Log(i);
-                    CibleEffet.Add(FindCardWithID(IDCardGameCibleEffet[i]));
+                    if (IDCardGameCibleEffet[i] != -1) {
+                        // -1 est l'identifiant du joueur adverse. 
+                        CibleEffet.Add(FindCardWithID(IDCardGameCibleEffet[i]));
+                        break; 
+                    } else {
+                        CibleEffet.Add(FindNotLocalPlayer()); 
+                    }
                 }
 
                 GameObject thisCarte = FindCardWithID(IDObjectCardGame);
+                switch (numeroEffet) {
+                    // On vérifie d'abord que l'effet ne soit pas un effet "spécial"
+                    case -1:
+                        // Attaque d'un entité. 
+                        if (CibleEffet.Count != 1) {
+                            Debug.Log("Nombre d'attaques " + CibleEffet.Count.ToString());
+                            Debug.LogWarning("Pas le bon nombre d'attaques");
+                        }
+                        Debug.Log(thisCarte); 
+                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, thisCarte, CibleEffet[0]);
+                        yield return new WaitForSeconds(0.5f);
+                        yield break; 
+                }
+
                 switch (thisCarte.GetComponent<CarteType>().thisCarteType) {
                     case CarteType.Type.ENTITE:
                         yield return thisCarte.GetComponent<Entite>().GererActionsCoroutine(effetJoue.AllActionsEffet, numeroEffet,

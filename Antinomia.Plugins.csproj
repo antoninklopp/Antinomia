@@ -146,6 +146,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\EffetInPile.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\PileAppelEffet.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Sort.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Console\AntinomiaConsole.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\Controller.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\DataBaseHandler.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\DataBaseLogin.cs" />

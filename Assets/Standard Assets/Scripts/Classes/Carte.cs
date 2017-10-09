@@ -646,6 +646,8 @@ public class Carte : NetworkBehaviourAntinomia {
                                     bool CibleDejaChoisie=false) {
         // On doit maintenant gérer les effets.
         for (int j = 0; j < _actions.Count; ++j) {
+            // On est obliger de regarder la condition jouerEffet à l'intérieur du switch parce que 
+            // certaines méthodes se font uniquement par cartes spécifiques. 
             switch (_actions[j].ActionAction) {
                 case Action.ActionEnum.ATTAQUE_OBLIGATOIRE:
                     Debug.LogWarning("Cet effet ne peut pas être joué ici. A vérifier.");
@@ -656,7 +658,11 @@ public class Carte : NetworkBehaviourAntinomia {
                      * La carte aura été choisie précédemment. 
                      */
                     DisplayMessage("Choisissez une carte et changez sa position");
-                    StartCoroutine(ChangerPositionEffet()); 
+                    if (jouerEffet) {
+                        StartCoroutine(ChangerPositionEffet(CibleDejaChoisie));
+                    } else {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    }
                     break;
                 case Action.ActionEnum.DETRUIRE:
                     /*
@@ -666,13 +672,16 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         StartCoroutine(DetruireEffet(CibleDejaChoisie));
                     } else {
-                        StartCoroutine(InformerDetruireEffet(numeroEffet, CibleDejaChoisie, effetListNumber)); 
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber)); 
                     }
-                    
                     break;
                 case Action.ActionEnum.GAIN_AKA_UN_TOUR:
-                    FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
-                    DisplayMessage("Ajout de " + _actions[j].intAction.ToString() + "AKA à ce tour"); 
+                    if (jouerEffet) {
+                        FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
+                        DisplayMessage("Ajout de " + _actions[j].intAction.ToString() + "AKA à ce tour");
+                    } else {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    }
                     break;
                 case Action.ActionEnum.PIOCHER_CARTE:
                     StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction));
@@ -689,8 +698,12 @@ public class Carte : NetworkBehaviourAntinomia {
                     }
                     break;
                 case Action.ActionEnum.PLACER_SANCTUAIRE:
-                    DisplayMessage("On place cette carte dans le sanctuaire"); 
-                    PlacerSanctuaire();
+                    if (jouerEffet) {
+                        DisplayMessage("On place cette carte dans le sanctuaire");
+                        PlacerSanctuaire();
+                    } else {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    }
                     break;
                 case Action.ActionEnum.PUISSANCE_MULTIPLIE:
                     // Multiplier la puissance des entités SUR LE CHAMP DE BATAILLE. 
@@ -707,8 +720,12 @@ public class Carte : NetworkBehaviourAntinomia {
                     }
                     break;
                 case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
-                    GetComponent<Entite>().hasAttacked = -1;
-                    DisplayMessage("Cette entité ne peut pas attaquer"); 
+                    if (jouerEffet) {
+                        GetComponent<Entite>().hasAttacked = -1;
+                        DisplayMessage("Cette entité ne peut pas attaquer");
+                    } else {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    }
                     break;
                 case Action.ActionEnum.DEFAUSSER:
                     // On propose de défausser. 
@@ -719,7 +736,6 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.REVELER_CARTE:
                     // Le joueur révèle une carte de sa main.
                     StartCoroutine(RevelerCarteEffet(_actions[j].properIntAction));
-
                     break;
                 case Action.ActionEnum.REVELER_CARTE_ADVERSAIRE:
                     // L'adversaire doit révéler une carte. 
@@ -1051,7 +1067,8 @@ public class Carte : NetworkBehaviourAntinomia {
 
         for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
             // On détruit toutes les cartes une par une. 
-            Debug.Log("Je détruis la carte"); 
+            Debug.Log("Je détruis la carte");
+            Debug.Log(CartesChoisiesPourEffets[i].GetComponent<Entite>().Name); 
             CartesChoisiesPourEffets[i].SendMessage("DetruireCarte");
         }
 
@@ -1067,8 +1084,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">numéro de l'effet dans la liste des effets</param>
     /// <param name="numeroListEffet">numero de la liste des effets (facultatif)</param>
     /// <returns></returns>
-    private IEnumerator InformerDetruireEffet(int numeroEffet, bool CibleDejaChoisie = false, int numeroListEffet = 0) {
-        Debug.Log("On va détruire des cartes");
+    private IEnumerator MettreEffetDansLaPileFromActions(int numeroEffet, bool CibleDejaChoisie = false, int numeroListEffet = 0) {
         Debug.Log(CibleDejaChoisie);
         if (!CibleDejaChoisie) {
             yield return WaitForCardsChosen(); 

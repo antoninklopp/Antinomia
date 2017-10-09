@@ -28,6 +28,11 @@ public class Player : NetworkBehaviourAntinomia	 {
     public GameObject SortPrefab; 
 	bool cardOk = true; 
 
+    /// <summary>
+    /// ID du joueur
+    /// Le serveur aura toujours l'ID 1, 
+    /// le client aura toujours l'ID 2. 
+    /// </summary>
 	public int PlayerID = 0; 
 	public bool Local; 
 
@@ -526,7 +531,9 @@ public class Player : NetworkBehaviourAntinomia	 {
         // Si cette méthode a été appelée c'est pour être éxécutée sur une carte qui n'était pas du joueur local.
         
         if (!isLocalPlayer) {
+            AntinomiaLog("Detruire carte sur le client"); 
             GameObject LaCarteSurLeServeur = FindCardWithID(ID);
+            AntinomiaLog(ID); 
             LaCarteSurLeServeur.SendMessage("DetruireCarte");
         }
 
@@ -584,6 +591,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 		CmdSetPlayerPV (PlayerPV); 
 		Debug.Log ("UN HEAL"); 
 		//GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ().setPlayerPVUI (PlayerID, PlayerPV); 
+
 	}
 
     /// <summary>
@@ -794,7 +802,32 @@ public class Player : NetworkBehaviourAntinomia	 {
     public void CmdDetruirePile(GameObject Pile) {
         NetworkServer.Destroy(Pile); 
     }
-    
+
+    [Command]
+    public void CmdJouerEffet() {
+        RpcJouerEffet(PlayerID); 
+    }
+
+    [ClientRpc]
+    public void RpcJouerEffet(int playerID) {
+        if (PlayerID != playerID) {
+            GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile(); 
+        }
+    }
+
+    [Command]
+    public void CmdAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
+                                      int numeroListeEffet, int PlayerID) {
+        RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
+    }
+
+    [ClientRpc]
+    public void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
+                                      int numeroListeEffet, int PlayerID) {
+        GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible,
+                                                                    numeroEffet, numeroListeEffet, PlayerID); 
+    }
+
 
     /// ////////////////////////////////////////////////////////////////////////////////////////////
     ///                       TEST DU RESEAU                                                     //
