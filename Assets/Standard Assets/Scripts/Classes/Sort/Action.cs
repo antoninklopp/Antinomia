@@ -1,19 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System; 
+using System;
 
+/// <summary>
+/// Classe répertoriant les actions possibles lors de l'instanciation d'un sort. 
+/// Elle comprend l'action
+/// et l'entier associé à l'action.
+/// 
+/// entier yyxx
+/// 
+/// avec yy nombre de tours.
+/// et xx l'entier symbolisant le changement tel qu'un changement de puissance.
+/// </summary>
 public class Action {
-    /*
-    * Classe répertoriant les actions possibles lors de l'instanciation d'un sort. 
-    * Elle comprend l'action
-    * et l'entier associé à l'action. 
-    * 
-    * entier yyxx
-    * 
-    * avec yy nombre de tours. 
-    *  et  xx l'entier symbolisant le changement tel qu'un changement de puissance. 
-    */
 
     // Le sort peut avoir un ou plusieurs effets
     public enum ActionEnum {
@@ -112,16 +112,31 @@ public class Action {
         NONE
     };
 
+    /// <summary>
+    /// Action 
+    /// </summary>
     public ActionEnum ActionAction;
-    // Cet entier comprend toutes les informations. 
+    
+    /// <summary>
+    /// Int envoyé par la base de données, à "décortiquer". 
+    /// </summary>
     public int intAction;
 
+    /// <summary>
+    /// Int propre à l'action, tel qu'un nombre de points de dégâts.
+    /// </summary>
     public int properIntAction; 
-    public int nombreDeTours; 
 
-    // Cette liste d'effets serait pas mal à mettre dans un document XML s'il y a beaucoup beaucoup d'effets. 
-    // Notamment pour savoir si l'effet a un timer ou sa target.
-    // Liste des effets avec un timer, c'est-ç-dire qui ont un effets sur plusieurs tours. 
+    /// <summary>
+    /// Nombre de tours que dure l'action. 
+    /// </summary>
+    public int nombreDeTours;
+
+    /// <summary> 
+    /// Cette liste d'effets serait pas mal à mettre dans un document XML s'il y a beaucoup beaucoup d'effets. 
+    /// Notamment pour savoir si l'effet a un timer ou sa target.
+    /// Liste des effets avec un timer, c'est-ç-dire qui ont un effets sur plusieurs tours.
+    /// </summary> 
     List<ActionEnum> EffetsTimer = new List<ActionEnum> { ActionEnum.NATURE_EAU,
                                                           ActionEnum.NATURE_AIR,
                                                           ActionEnum.NATURE_FEU,
@@ -129,7 +144,9 @@ public class Action {
                                                           ActionEnum.TERRAIN_ASTRAL,
                                                           ActionEnum.TERRAIN_MALEFIQUE};
 
-    // Si un effet est dans TargetAll, c'est que l'effet a un effet sur tout le terrain.
+    /// <summary>
+    /// Si un effet est dans TargetAll, c'est que l'effet a un effet sur tout le terrain.
+    /// </summary>
     List<ActionEnum> TargetAll = new List<ActionEnum> { ActionEnum.PIOCHER_CARTE,
                                         ActionEnum.TERRAIN_ASTRAL,
                                         ActionEnum.TERRAIN_MALEFIQUE,
@@ -148,7 +165,10 @@ public class Action {
 
     }
 
-
+    /// <summary>
+    /// L'action dure-t-elle plusieurs tours? 
+    /// </summary>
+    /// <returns>true, si l'action dure plus d'un tour, false sinon.</returns>
     public bool isEffetWithTimer() {
         /*
          * Renvoie true si l'effet a un "timer", c'est-à-dire si l'effet dure plusieurs tours
@@ -161,6 +181,10 @@ public class Action {
         return false;
     }
 
+    /// <summary>
+    /// L'action a-t-elle un effet sur toutes les cartes? 
+    /// </summary>
+    /// <returns>true, si l'action a un effet sur toutes les cartes, false sinon.</returns>
     public bool isEffetTargetAll() {
         /*
          * Renvoie true si l'effet target tout le terrain
@@ -172,6 +196,10 @@ public class Action {
         return false;
     }
 
+    /// <summary>
+    /// Decortiquer l'entier envoyé par la base de données.
+    /// Afin de pouvoir le "comprendre". 
+    /// </summary>
     public void understandInt() {
         if (intAction < 100) {
             properIntAction = intAction; 

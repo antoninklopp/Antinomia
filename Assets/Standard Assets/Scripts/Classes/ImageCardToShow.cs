@@ -4,22 +4,45 @@ using UnityEngine;
 using UnityEngine.UI; 
 using System; 
 
+/// <summary>
+/// Image de la carte sur un GameObject UI. 
+/// </summary>
 public class ImageCardToShow : MonoBehaviour {
 	/*
 	 * Composant attaché à l'image à montrer lorsque le joueur doit choisir des cartes à montrer à l'autre joueur par exemple. 
 	 */
 
+    /// <summary>
+    /// Tous les sprites des Images. Recherche des sprites dans le dossier Resources.
+    /// </summary>
 	private Sprite[] AllImages; 
-	public GameObject Croix; 
-	private int intCarte = 0; 
-	private bool isTargeted = false; 
-	private GameObject CroixCreated; 
+
+    /// <summary>
+    /// Prefab de la croix à créer lors d'un choix.
+    /// </summary>
+	public GameObject Croix;
+
+    private int intCarte = 0; 
+
+    /// <summary>
+    /// True si la carte est choisie lors d'un choix quelconque. 
+    /// </summary>
+	private bool isTargeted = false;
+
+    /// <summary>
+    /// Cible créée lors d'un choix. 
+    /// </summary>
+    private GameObject CroixCreated; 
 
 	// Use this for initialization
 	void Start () {
 		AllImages = Resources.LoadAll<Sprite> ("Cartes"); 
 	}
 
+    /// <summary>
+    /// Afficher l'image de la carte
+    /// </summary>
+    /// <param name="name">shortCode de la carte</param>
 	public void setImage(string name){
 		/*
 		 * Changer l'image
@@ -41,6 +64,9 @@ public class ImageCardToShow : MonoBehaviour {
 		intCarte = _intCarte; 
 	}
 
+    /// <summary>
+    /// Créer une croix pour pouvoir choisir la carte, pour un choix quelconque. 
+    /// </summary>
 	public void CreateTarget(){
 		/*
 		 * Pour faire voir au joueur qu'il a choisi cette carte, 
@@ -60,6 +86,10 @@ public class ImageCardToShow : MonoBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Envoyer la carte au gameManager afin de pouvoir récupérer la liste des
+    /// cartes choisies pour un effet. 
+    /// </summary>
 	public void SendCarteToManager(){
 		/*
 		 * Dire que la carte est choisie ou qu'elle n'est finalement plus choisie. 
@@ -71,14 +101,12 @@ public class ImageCardToShow : MonoBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Clic sur la carte
+    /// </summary>
 	public void OnMouseDown(){
 		// Clic sur la carte. 
 		CreateTarget();
 		SendCarteToManager (); 
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 }

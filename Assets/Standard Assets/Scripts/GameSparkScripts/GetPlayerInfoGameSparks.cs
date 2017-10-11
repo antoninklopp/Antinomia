@@ -4,6 +4,9 @@ using UnityEngine;
 using GameSparks.Core; 
 using System; 
 
+/// <summary>
+/// Classe qui sert à récupérer les informations de la base de données.
+/// </summary>
 public class GetPlayerInfoGameSparks : MonoBehaviour {
 	/*
 	 * Récupérer toutes les informations reliées au cartes du joueur sur la base de données. 
@@ -26,13 +29,34 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 	 * 
 	 */ 
 
+    /// <summary>
+    /// Permet de stocker un deck du joueur. 
+    /// </summary>
 	List<GameObject> deck = new List<GameObject> (); 
+
+    /// <summary>
+    /// Permet de stocker tous les decks du joueur. 
+    /// </summary>
 	List<Deck> allDecks = new List<Deck> (); 
+
+    /// <summary>
+    /// Variable qui permet de vérifier si les informations sont bien arrivées depuis la base de données.
+    /// Tru si c'est la cas
+    /// False sinon. 
+    /// </summary>
 	bool finish = false; 
 
+    /// <summary>
+    /// Une carte spécifique récupérée par la base de données. 
+    /// </summary>
 	GameObject CardoID; 
 	public bool cardoIDOk; 
 
+    /// <summary>
+    /// Récupérer les cartes du joueur. 
+    /// </summary>
+    /// <param name="CardToInstantiate">L'objet spécifique sur lequel mettre l'information (carte du manager, de la battle
+    /// du choix de la main... )</param>
 	public void LoadPlayerCards(GameObject CardToInstantiate){
 		/*
 		 * Récupérer les cartes du deck du joueur. 
@@ -62,6 +86,14 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		}); 
 	}
 
+    /// <summary>
+    /// Prend en entrée l'information reçu par la base de données sous forme de GS Data
+    /// Et attache à un objet un script contenant cette information. 
+    /// Puis ajoute la carte à un deck.
+    /// </summary>
+    /// <param name="newCarte">L'objet sur lequel mettre l'information</param>
+    /// <param name="data">L'information</param>
+    /// <param name="ID"></param>
     void GSDataToCard(GameObject newCarte, GSData data, string ID="") {
         if (newCarte.GetComponent<CarteType>() != null) {
             newCarte.GetComponent<CarteType>().setTypeFromString(data.GetString("type"));
@@ -144,6 +176,10 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
         deck.Add(newCarte);
     }
 
+    /// <summary>
+    /// Ajouter une carte random aux cartes du joueur sur la base de données. 
+    /// Utile lors de l'ouverture d'un paquet de carte par exemple. 
+    /// </summary>
 	public void addCardRandom(){
 		/*
 		 * Ajouter une carte Random
@@ -162,6 +198,11 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 			}); 
 	}
 
+    /// <summary>
+    /// Attendre la réception des infos. 
+    /// </summary>
+    /// <param name="CardPrefab">Carte à instancier</param>
+    /// <returns>None</returns>
 	public IEnumerator WaitForPlayerCards(GameObject CardPrefab){
 		Debug.Log ("WaitForPlayerCards"); 
 		LoadPlayerCards (CardPrefab); 
@@ -172,6 +213,12 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		finish = false; 
 	}
 
+    /// <summary>
+    /// Récupérer toutes les cartes d'un joueur sous la forme d'un deck. 
+    /// On ne fait que récupérer l'objet après avoir appelé LoadPlayerDecks
+    /// </summary>
+    /// <param name="CardPrefab">Prefab de la carte à instancier dans le deck.</param>
+    /// <returns>Deck contenant tooutes les cartes du joueur</returns>
 	public List<GameObject> GetAllCards(GameObject CardPrefab){
 		/*
 		 * METHODE A UTILISER.
@@ -181,17 +228,29 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		return deck; 
 	}
 
+    /// <summary>
+    /// Récuperer toutes les cartes en tant que deck.
+    /// On ne fait que récupérer l'objet après avoir appelé LoadPlayerDecks
+    /// </summary>
+    /// <param name="CardPrefab"></param>
+    /// <returns></returns>
 	public Deck GetAllCardsAsDeck(GameObject CardPrefab){
 		/*
 		 * Récupère toutes les cartes mais renvoie un deck avec le nombre 0 comme attribut. 
+         * METHODE A FUSIONNER AVEC GETALLCARDS. 
 		 */ 
+
 		finish = false; 
-		//StartCoroutine (WaitForPlayerCards (CardPrefab)); 
 		Deck newDeck = new Deck (deck, 0); 
 		return newDeck; 
 	}
 
 
+    /// <summary>
+    /// Recupérer tous les decks d'un joueur. 
+    /// </summary>
+    /// <param name="CardToInstantiate">Prefab de la carte à instancier</param>
+    /// <param name="deckNumber">Numéro du deck à récupérer, si égal à 0, on récupère toutes les cartes.</param>
 	public void LoadPlayerDecks(GameObject CardToInstantiate, int deckNumber){
 
 		new GameSparks.Api.Requests.LogEventRequest ()
@@ -204,18 +263,21 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 					// On récupère une liste des cartes du joueur
 					List<GSData> dataList = response.ScriptData.GetGSDataList ("decks"); 
                     
+                    // Iteration sur chaque deck. 
 					for (int j = 0; j < dataList.Count; j++){
 						List<GameObject> CartesDeck = new List<GameObject>(); 
 						int numeroDeck = 0; 
-						//GSData data = dataList [j].GetGSData ("decks");
+
 						numeroDeck = dataList[j].GetInt("number").Value; 
 						List<GSData> Cartes = dataList[j].GetGSDataList("cards"); 
-						//Deck newDeck = new Deck();
+
+                        // Iteration sur chaque carte du deck. 
 						for (int i = 0; i < Cartes.Count; ++i) {
 							GSData data = Cartes[i]; 
 							GameObject newCarte = Instantiate (CardToInstantiate);
                             DestroyComposants(newCarte); 
                             GSDataToCard(newCarte, data); 
+
                             // On crée la carte inactive. 
                             newCarte.SetActive(false); 
 							CartesDeck.Add (newCarte); 
@@ -229,10 +291,15 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 					Debug.Log ("Not Received"); 
 				}
 			}); 
-
-
 	}
 
+    /// <summary>
+    /// Attendre les decks du joueur. 
+    /// Attendre la transmission des données. 
+    /// </summary>
+    /// <param name="CardPrefab"></param>
+    /// <param name="deckNumber"></param>
+    /// <returns></returns>
 	public IEnumerator WaitForPlayerDecks(GameObject CardPrefab, int deckNumber=0){
 		LoadPlayerDecks (CardPrefab, deckNumber); 
 		while (!finish) {
@@ -270,7 +337,11 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		return allDecks [0]; 
 	}
 
-
+    /// <summary>
+    /// Recuperer une carte grâce à son ID dans la metaCollection. 
+    /// </summary>
+    /// <param name="ID">ID de la carte dans la metaCollection</param>
+    /// <param name="CardToInstantiate">Prefab de l'objet à instancier</param>
 	public void GetCardByIDSparks(string ID, GameObject CardToInstantiate){
 		/*
 		 * Méthode utile lors du spawn de la carte sur le serveur, 
@@ -308,16 +379,33 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
     /// <param name="CardToInstantiate">Le prefab de la carte à instantier. </param>
     /// <returns></returns>
 	public IEnumerator WaitForCardoID(string ID, GameObject CardToInstantiate){
-		cardoIDOk = false; 
+#if UNITY_EDITOR
+        int time = 0; 
+#endif
+        cardoIDOk = false; 
 		GetCardByIDSparks (ID, CardToInstantiate); 
 		while (!finish) {
-			yield return new WaitForSeconds (0.05f); 	
-		}
-		finish = false;
+			yield return new WaitForSeconds (0.05f);
+#if UNITY_EDITOR
+            time++;
+#endif
+        }
+        finish = false;
 		cardoIDOk = true;
-        Debug.Log("<color=green> LA CARTE EST RECUPEREE ICI </color>"); 
-	}
+        Debug.Log("<color=green> LA CARTE EST RECUPEREE ICI </color>");
 
+#if UNITY_EDITOR
+        WriteOutputFile write = new WriteOutputFile();
+        // write.WriteFileTestFunction("WaitForCardoID", time);
+#endif
+
+    }
+
+    /// <summary>
+    /// Demarre la coroutine WaitForCardoID. 
+    /// </summary>
+    /// <param name="ID"></param>
+    /// <param name="CardToInstantiate"></param>
 	public void StartCardByoID(string ID, GameObject CardToInstantiate){
 		/*
 		 * Récupérer une carte grâce à son oID unique dans la metaCollection, 
@@ -387,6 +475,11 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 	*	======================================================================================================
 	*/
 
+    /// <summary>
+    /// Transforme un string en un enum Entite.Element. 
+    /// </summary>
+    /// <param name="ElementString">Le string de la base de données.</param>
+    /// <returns>Un Element de Entite.Element</returns>
 	public static Entite.Element stringToElement(string ElementString){
 		/*
 		 * Transformer le string récupéré en un carte.Element. 
@@ -470,6 +563,12 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 
 	}
 
+    /// <summary>
+    /// Detruire les composants inutilisés. 
+    /// Le prefab a tous les composants attachés au départ pour pouvoir l'instancier sur le réseau avec tous les composants. 
+    /// Ici on rajoute un script donc on détruit tous les composants. 
+    /// </summary>
+    /// <param name="newCarte"></param>
     public void DestroyComposants(GameObject newCarte) {
         if (newCarte.GetComponent<Entite>() != null) {
             Destroy(newCarte.GetComponent<Entite>());
@@ -481,6 +580,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             Destroy(newCarte.GetComponent<Assistance>());
         }
     }
+    
 
 
 }

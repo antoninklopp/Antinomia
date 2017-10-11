@@ -175,6 +175,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Player\PlayerChoice.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ReadData\ReadXMLData.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Shop\GameManagerShop.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Tests\WriteOutputFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\GameSparks\Plugins\GameSparks.Api.XML" />
@@ -188,6 +189,7 @@
     <None Include="Assets\GameSparks\link.xml" />
     <None Include="Assets\Lobby\Documentation.txt" />
     <None Include="Assets\Lobby\Instruction.txt" />
+    <None Include="Assets\Resources\WaitForCardoID.txt" />
     <None Include="Assets\Resources\informations.xml" />
     <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
     <None Include="Assets\Standard Assets\Fonts\OpenSans\License!.txt" />

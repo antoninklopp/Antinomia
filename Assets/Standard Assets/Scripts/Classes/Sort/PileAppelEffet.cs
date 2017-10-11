@@ -163,6 +163,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     private IEnumerator JouerLesEffets() {
 
         if (hasAuthority) {
+            AntinomiaLog("J'ai autorité sur la pile");
             for (int i = CartesAssociees.Count - 1; i >= 0; --i) {
                 effetTermine = false;
                 CmdJouerEffetPile(i, FindLocalPlayer().GetComponent<Player>().PlayerID);
@@ -177,6 +178,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         } else {
             // Si le dernier effet est chez quelqu'un qui n'a pas instancier la pile
             // On doit envoyer l'information à l'autre joueur de défaire la pile. 
+            AntinomiaLog("Je n'ai pas autorité je passe à l'autre joueur."); 
             FindLocalPlayer().GetComponent<Player>().CmdJouerEffet(); 
         }
     }

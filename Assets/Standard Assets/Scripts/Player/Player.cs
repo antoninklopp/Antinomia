@@ -219,7 +219,8 @@ public class Player : NetworkBehaviourAntinomia	 {
             } else { 
                 throw new Exception("Aucune OID n'a été donnée à la carte"); 
             }
-            TestConnection(); 
+            // TestConnection(); 
+            Debug.Log("On pioche une carte"); 
             CmdPiocherNouvelleCarte1(oID);
         } else {
             Debug.Log(CardDeck.Cartes.Count); 
@@ -231,14 +232,34 @@ public class Player : NetworkBehaviourAntinomia	 {
 		CardDeck.Cartes.Remove (CardDeck.Cartes [0]);
 
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
-        yield return new WaitForSeconds(0.1f); 
+        yield return new WaitForSeconds(0.1f);
         // L'objet a été détruit donc c'est bon.
-        if (ObjectInfo == null) {
-            Debug.Log("C'est ok");
-        } else {
-            yield return RepiocherCarte(15); 
-        }
+        CmdTestIfObjectInfoDestroyed(15); 
 	}
+
+    [Command]
+    void CmdTestIfObjectInfoDestroyed(int nombreEssais) {
+        if(ObjectInfo != null) {
+            Debug.Log("<color=red>L'Object Info n'a pas été détruit</color>");
+            RpcTestIfObjectInfoDestroyed(false, nombreEssais); 
+        } else {
+            Debug.Log("<color=red>L'Object Info a été détruit</color>");
+            RpcTestIfObjectInfoDestroyed(true, nombreEssais); 
+        }
+    }
+
+    [ClientRpc]
+    void RpcTestIfObjectInfoDestroyed(bool destroyed, int nombreEssais) {
+        if (!isLocalPlayer) {
+            return;
+        } 
+        if (destroyed) {
+            AntinomiaLog("La carte a bien été créée"); 
+        } else {
+            StartCoroutine(RepiocherCarte(--nombreEssais));
+            AntinomiaLog("On retente de piocher"); 
+        }
+    }
 
     /// <summary>
     /// 
@@ -249,12 +270,10 @@ public class Player : NetworkBehaviourAntinomia	 {
         Debug.Log("On tente de repiocher la carte"); 
         CmdPiocherNouvelleCarte2("fbhkbh");
         yield return new WaitForSeconds(0.1f); 
-        if (ObjectInfo != null) {
-            if (nombreTests > 0) {
-                StartCoroutine(RepiocherCarte(nombreTests - 1)); 
-            } else {
-                Debug.Log("En attendant encore la carte n'a quand même pas pu être récupérée. "); 
-            }
+        if (nombreTests > 0) {
+            CmdTestIfObjectInfoDestroyed(nombreTests);
+        } else {
+            AntinomiaLog("En attendant encore la carte n'a quand même pas pu être récupérée. "); 
         }
     }
 
@@ -357,9 +376,12 @@ public class Player : NetworkBehaviourAntinomia	 {
         Destroy(CardToInstantiate); 
 	}
 
+
+
 	void ChangeUIPhase(Phases newPhase){
 		/*
 		 * Changer la variable synchronisée de la phase, côté client et serveur. 
+         * 
 		 */  
 
 		if (!isLocalPlayer) {
@@ -529,14 +551,12 @@ public class Player : NetworkBehaviourAntinomia	 {
     [ClientRpc]
     void RpcDetruireCarte(int ID) {
         // Si cette méthode a été appelée c'est pour être éxécutée sur une carte qui n'était pas du joueur local.
-        
         if (!isLocalPlayer) {
             AntinomiaLog("Detruire carte sur le client"); 
             GameObject LaCarteSurLeServeur = FindCardWithID(ID);
             AntinomiaLog(ID); 
             LaCarteSurLeServeur.SendMessage("DetruireCarte");
         }
-
     }
 
     /// <summary>
@@ -803,24 +823,52 @@ public class Player : NetworkBehaviourAntinomia	 {
         NetworkServer.Destroy(Pile); 
     }
 
+    /// <summary>
+    /// Jouer l'effet si le joueur n'a pas autorité sur la pile
+    /// </summary>
     [Command]
     public void CmdJouerEffet() {
+        Debug.Log("CmdJouerEffet"); 
         RpcJouerEffet(PlayerID); 
     }
 
+    /// <summary>
+    /// Jouer effet si le joueur n'a pas autorité sur la pile. 
+    /// </summary>
+    /// <param name="playerID">ID du joueur qui n'a pas autorité.</param>
     [ClientRpc]
     public void RpcJouerEffet(int playerID) {
-        if (PlayerID != playerID) {
+        AntinomiaLog("RpcJouerEffet"); 
+        // Si on appelle cette la fonction, c'est forcément depuis le joueur local, 
+        // on veut donc executer la pile sur le joueur non local.
+        if (!isLocalPlayer) {
+            AntinomiaLog("Je suis le joueur qui a créé la pile"); 
             GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile(); 
         }
     }
 
+    /// <summary>
+    /// Ajouter un effet à la pile si le joueur n'a pas autorité. 
+    /// </summary>
+    /// <param name="IDObjetEffet"></param>
+    /// <param name="ListeObjetsCible"></param>
+    /// <param name="numeroEffet"></param>
+    /// <param name="numeroListeEffet"></param>
+    /// <param name="PlayerID"></param>
     [Command]
     public void CmdAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
         RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
     }
 
+    /// <summary>
+    /// Ajouter un effet à la pile si le joueur a autorité. 
+    /// </summary>
+    /// <param name="IDObjetEffet"></param>
+    /// <param name="ListeObjetsCible"></param>
+    /// <param name="numeroEffet"></param>
+    /// <param name="numeroListeEffet"></param>
+    /// <param name="PlayerID"></param>
     [ClientRpc]
     public void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {

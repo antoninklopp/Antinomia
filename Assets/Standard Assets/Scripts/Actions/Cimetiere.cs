@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking; 
 
+
+/// <summary>
+/// Objet représentant le cimetiere d'un joueur. 
+/// </summary>
 public class Cimetiere : NetworkBehaviour {
 	/*
 	 * 
@@ -13,6 +17,9 @@ public class Cimetiere : NetworkBehaviour {
 	List<GameObject> AllCreaturesCimetiere = new List<GameObject> (); 
 	public GameObject CartePrefab; 
 
+    /// <summary>
+    /// Reordonner les cartes du cimetiere. 
+    /// </summary>
 	void CmdReordonnerCarte(){
 		/*
 		 * Réordonner les cartes, pour l'instant sans animation
@@ -31,23 +38,36 @@ public class Cimetiere : NetworkBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Lors d'un clic sur le cimetiere. 
+    /// </summary>
 	void OnMouseDown(){
 		// Lorsque la souris touche le board. 
 
 
 	}
 
+    /// <summary>
+    /// Recuperer le nombre de cartes dans le cimetiere
+    /// </summary>
+    /// <returns>Nombre de cartes dans le cimetiere</returns>
     public int NombreDeCartesDansCimetiere() {
         return transform.childCount; 
     }
 
+    /// <summary>
+    /// Deposer une carte dans le cimetiere
+    /// </summary>
+    /// <param name="NewCard">Objet carte déposé</param>
 	[Command]
 	void CmdCarteDeposee(GameObject NewCard){
-		/*
+        /*
 		 * Depot d'une carte sur le board, pour l'instant aucune vérification n'est faite. 
 		 * TODO: Vérifier s'il est possible de poser la carte en question sur le board. 
 		 * 
-		 */ 
+		 */
+
+        Debug.Log("Carte deposee dans le cimetiere"); 
 
 		// On change le parent de la carte. 
 		NewCard.transform.SetParent (transform);

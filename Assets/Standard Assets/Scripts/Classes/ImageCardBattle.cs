@@ -43,6 +43,7 @@ public class ImageCardBattle : MonoBehaviour {
 				return; 
 			}
 		}
+
         GetComponent<SpriteRenderer>().sprite = AllImages[0];
 
         Debug.Log(name); 

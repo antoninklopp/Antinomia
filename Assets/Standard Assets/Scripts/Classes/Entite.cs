@@ -563,35 +563,35 @@ public class Entite : Carte {
 		 * Solution moyenne, temporaire
 		 */
 
-        ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
-        Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
-        Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+        //ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
+        //Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
+        //Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
+        //Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
-        carteState = newCarteState;
-        Debug.Log(carteState);
-        // il faut maintenant mettre à jour les position. 
-        switch (carteState) {
-            case State.CHAMPBATAILLE:
-                // Delete Card de la main ne sert à rien. 
-                Main.SendMessage("DeleteCard", gameObject);
-                ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
-                Main.SendMessage("ReordonnerCarte");
-                gameObject.tag = "BoardSanctuaire";
-                break;
-            case State.SANCTUAIRE:
-                Main.SendMessage("DeleteCard", gameObject);
-                Sanctuaire.SendMessage("CmdCarteDeposee", gameObject);
-                Sanctuaire.SendMessage("ReordonnerCarte");
-                gameObject.tag = "BoardSanctuaire";
-                break;
-            case State.CIMETIERE:
-                Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
-                Sanctuaire.SendMessage("ReordonnerCarte");
-                ChampBataille.SendMessage("CmdReordonnerCarte");
-                gameObject.tag = "Cimetiere";
-                break;
-        }
+        //carteState = newCarteState;
+        //Debug.Log(carteState);
+        //// il faut maintenant mettre à jour les position. 
+        //switch (carteState) {
+        //    case State.CHAMPBATAILLE:
+        //        // Delete Card de la main ne sert à rien. 
+        //        Main.SendMessage("DeleteCard", gameObject);
+        //        ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
+        //        Main.SendMessage("ReordonnerCarte");
+        //        gameObject.tag = "BoardSanctuaire";
+        //        break;
+        //    case State.SANCTUAIRE:
+        //        Main.SendMessage("DeleteCard", gameObject);
+        //        Sanctuaire.SendMessage("CmdCarteDeposee", gameObject);
+        //        Sanctuaire.SendMessage("ReordonnerCarte");
+        //        gameObject.tag = "BoardSanctuaire";
+        //        break;
+        //    case State.CIMETIERE:
+        //        Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
+        //        Sanctuaire.SendMessage("ReordonnerCarte");
+        //        ChampBataille.SendMessage("CmdReordonnerCarte");
+        //        gameObject.tag = "Cimetiere";
+        //        break;
+        //}
 
         RpcChangePosition(newCarteState); 
 
@@ -607,6 +607,8 @@ public class Entite : Carte {
 		 * 
 		 * Solution moyenne, temporaire
 		 */
+
+        AntinomiaLog("On change la position de la carte vers " + newCarteState.ToString()); 
 
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
@@ -754,7 +756,7 @@ public class Entite : Carte {
                                     string _AllEffetsAstrals, string _AllEffetsAstralToDisplay) {
 
         // On peut peut-être tout faire passer par les arguments. 
-        IDCardGame = _ID;
+        // IDCardGame = _ID;
         oID = _oID;
         Debug.Log(_oID);
         Name = _Name;
@@ -799,14 +801,15 @@ public class Entite : Carte {
         }
 
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
-        Debug.Log(Cimetiere);
+        AntinomiaLog(Cimetiere);
+        AntinomiaLog("Carte detruite" + IDCardGame.ToString()); 
 
         setState("CIMETIERE");
         Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
         Sanctuaire.SendMessage("ReordonnerCarte");
         ChampBataille.SendMessage("CmdReordonnerCarte");
 
-        Debug.Log(transform.parent.parent.parent.gameObject);
+        AntinomiaLog(transform.parent.parent.parent.gameObject);
         if (transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer) {
             /*
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
@@ -823,7 +826,7 @@ public class Entite : Carte {
             CmdChangeAscendanceTerrain(Ascendance.NEUTRE); 
         }
 
-        GererEffetsMort(); 
+        // GererEffetsMort(); 
     }
 
     public void printCarte() {
