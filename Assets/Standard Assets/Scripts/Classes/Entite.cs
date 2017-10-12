@@ -255,16 +255,17 @@ public class Entite : Carte {
             return;
         }
 
-        if (GameObject.Find("GameManager").GetComponent<GameManager>().Tour != FindLocalPlayer().GetComponent<Player>().PlayerID) {
-            // On ne peut pas interagir avec ses cartes si ce n'est pas son tour!
-            return;
-        }
-
         // S'il y a un sort en cours. 
+        Debug.Log(GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours);
         if (GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours != null) {
             GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours.SendMessage("RecupererCarteJouerSort", gameObject);
             Debug.Log("Le sort a été joué.");
-            return; 
+            return;
+        }
+
+        if (GameObject.Find("GameManager").GetComponent<GameManager>().Tour != FindLocalPlayer().GetComponent<Player>().PlayerID) {
+            // On ne peut pas interagir avec ses cartes si ce n'est pas son tour!
+            return;
         }
 
         if (GameObject.Find("GameManager").GetComponent<GameManager>().choixCartes) {
@@ -667,9 +668,9 @@ public class Entite : Carte {
                 AllEffetsAstralString, AllEffetsAstralStringToDisplay);
             // Inutile normalement.
             // RpcChangeParent (); 
-        } else {
-            yield break; 
-        }
+        } // else {
+        //    yield break; 
+        //}
 
         yield return new WaitForSeconds(0.1f);
 
@@ -718,13 +719,6 @@ public class Entite : Carte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
-    }
-
-    IEnumerator SetCardOnClient(string ID) {
-        //RpcsetoID1 (ID); 
-        yield return new WaitForSeconds(1f);
-        //RpcsetoID2 (ID); 
-
     }
 
     [ClientRpc]
@@ -1271,6 +1265,20 @@ public class Entite : Carte {
         for (int i = 0; i < AllEffetsMalefique.Count; ++i) {
             AllEffetsMalefique[i].AllConditionsEffet[0].updateUtilisePourCeTour(tourJoueurLocal);
         }
+    }
+
+    /// <summary>
+    /// Lors d'un clic droit sur la carte. 
+    /// </summary>
+    protected override void RightClickOnCarte() {
+        if (clicked) {
+            // Si un joueur fait un clic droit alors qu'il tient la carte en main, on remet la carte d'où elle vient. 
+            clicked = false;
+            // on remet la carte à sa bonne place. 
+            RpcChangePosition(carteState);
+            return;
+        }
+        base.RightClickOnCarte();
     }
 
 }

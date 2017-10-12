@@ -10,7 +10,6 @@ using UnityEditor.Callbacks;
 #endif
 
 
-
 /// <summary>
 /// Classe qui manage tous les éléments de UI 
 /// ainsi que beaucoup de choix de cartes et les attaques. 
@@ -936,14 +935,13 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     /// <summary>
     /// Permet au joueur de mettre le jeu en pause afin de pouvoir réagir à une action de l'autre joueur. 
+    /// Appelé directement depuis le bouton de pause sur l'écran. 
     /// </summary>
     public void PauseGame() {
         if (gameIsPaused) {
             gameIsPaused = false;
-            // PauseButton.GetComponent<Image>().sprite = Play; 
         } else {
             gameIsPaused = true;
-            // PauseButton.GetComponent<Image>().sprite = Pause;
         }
         FindLocalPlayer().GetComponent<Player>().CmdSetGameToPause(gameIsPaused);
         Debug.Log("GameIsSetToPause"); 
@@ -962,13 +960,26 @@ public class GameManager : NetworkBehaviourAntinomia {
             // Dans ce cas c'est ce joueur qui a demandé à ce que le jeu soit mis en pause. 
             // On le laisse donc faire son action.
             IPausedTheGame = gameIsPaused;
-            if (gameIsPaused) {
+            if (gamePaused) {
 
             } else {
-                PauseButton.SetActive(false); 
+                Debug.Log("Le jeu reprend. "); 
+                // Une fois qu'il a fini ses actions on défait la pile. 
+                PauseButton.SetActive(false);
+                //On regarde s'il y a une pile d'effet en cours. 
+                if (GameObject.FindGameObjectWithTag("Pile") != null) {
+                    GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
+                    if (Pile.GetComponent<PileAppelEffet>().DernierEffetVientJoueur(FindLocalPlayer().GetComponent<Player>().PlayerID)) {
+                        // Si c'est le joueur qui a mis un effet en dernier dans la pile, on la défait. 
+                        AntinomiaLog("Après avoir mis le jeu en pause, je défais la pile");
+                        Pile.GetComponent<PileAppelEffet>().DefaireLaPile();
+                    } 
+                    //Sinon on ne fait rien. 
+                }
+
             }
         } else {
-            gameIsPaused = gamePaused; 
+            this.gameIsPaused = gamePaused; 
             DisplayInfo.SetActive(true); 
             if (gameIsPaused) {
                 DisplayInfo.GetComponent<Text>().text = "Le jeu a été stoppé par votre adversaire."; 
@@ -978,6 +989,8 @@ public class GameManager : NetworkBehaviourAntinomia {
                 PauseButton.SetActive(false);
             }
         }
+
+        this.gameIsPaused = gamePaused; 
 
         if (gamePaused) {
             PauseButton.GetComponent<Image>().sprite = Pause;
@@ -1005,7 +1018,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     public void DisplayInfoToPlayer(string message) {
         DisplayInfo.SetActive(true);
         DisplayInfo.GetComponent<Text>().text = message;
-        DeactivateDisplayInfo(); 
+        StartCoroutine(DeactivateDisplayInfo()); 
     }
 
     /// <summary>
@@ -1022,6 +1035,8 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <returns></returns>
     public IEnumerator ProposeToPauseGame(int playerID=0, string message="") {
         if ((FindLocalPlayerID() != playerID) || (playerID == 0)) {
+            // Si on a reçu un effet, c'est que l'adversaire a réagi, le jeu n'est plus en pause. 
+            FindLocalPlayer().GetComponent<Player>().CmdOnlySetPause(false); 
             PauseButton.SetActive(true);
             if (message != ""){
                 // Si un message est fourni lors de l'appel, on l'affiche
@@ -1029,7 +1044,8 @@ public class GameManager : NetworkBehaviourAntinomia {
                 //DeactivateDisplayInfo(10f); 
             }
             // Temps d'attente. 
-            AntinomiaLog("Attente"); 
+            AntinomiaLog("Attente");
+            MontrerQuellesCartesPeuventJoueur(); 
             yield return new WaitForSeconds(5f);
             if (!gameIsPaused) {
                 PauseButton.SetActive(false);
@@ -1227,6 +1243,24 @@ public class GameManager : NetworkBehaviourAntinomia {
     public void Log(string log) {
         Debug.Log(log);
         Console.GetComponent<AntinomiaConsole>().AddStringToConsole(log); 
+    }
+
+    /// <summary>
+    /// Retourne true si le jeu est en pause, au moins pour ce joueur, 
+    /// false sinon
+    /// </summary>
+    public bool getGameIsPaused() {
+        return gameIsPaused;
+    }
+
+    /// <summary>
+    /// Montrer aux jours quelles cartes il peut jouer 
+    /// POUR REPONDRE A UN EFFET.
+    /// </summary>
+    private void MontrerQuellesCartesPeuventJoueur() {
+
+
+
     }
 
 }

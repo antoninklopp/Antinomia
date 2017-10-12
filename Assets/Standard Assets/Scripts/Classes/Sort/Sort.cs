@@ -227,6 +227,7 @@ public class Sort : Carte {
                 GetComponent<SpriteRenderer>().sprite = Cible;
                 // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
                 GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = gameObject;
+                // Debug.Log("On a mis sort en cours à gameObject"); 
                 clicked = 2;
             }
         }
@@ -268,6 +269,7 @@ public class Sort : Carte {
          */
 
         // ApplyEffectOnCarte(CarteCibleeRayCast.transform.gameObject);
+        Debug.Log("On a récupéré la carte"); 
         CarteCiblee = carteAffectee; 
         gameObject.tag = "SortJoue";
         // Le sort a été lancé
@@ -597,6 +599,28 @@ public class Sort : Carte {
         return "<color=red>" + Name + "</color>" + "\n" +
             "Niveau : " + Niveau.ToString() + "\n" +
             "Effets : " + AllEffetsStringToDisplay; 
+    }
+
+    /// <summary>
+    /// Lors d'un clic droit sur la carte. 
+    /// </summary>
+    protected override void RightClickOnCarte() {
+        if (clicked != 0) {
+            // Si un joueur fait un clic droit alors qu'il tient la carte en main, on remet la carte d'où elle vient. 
+            clicked = 0;
+            // on remet la carte dans la main
+            Main.GetComponent<MainJoueur>().SendMessage("ReordonnerCarte"); 
+            return;
+        }
+        base.RightClickOnCarte();
+    }
+
+    /// <summary>
+    /// La carte peut-elle être jouée en réponse à un effet.
+    /// </summary>
+    /// <returns></returns>
+    public override bool CarteJouerReponseEffet() {
+
     }
 
 }

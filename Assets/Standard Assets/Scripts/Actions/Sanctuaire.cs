@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Représente le sanctuaire du joueur.
+/// </summary>
 public class Sanctuaire : MonoBehaviour {
 
 	/*

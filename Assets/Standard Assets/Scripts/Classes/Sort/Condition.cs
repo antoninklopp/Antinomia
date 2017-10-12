@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System; 
 
+/// <summary>
+/// Chaque effet peut-être joué s'il remplit une liste de conditions.
+/// Chaque condition est représenté par cet objet. 
+/// </summary>
 public class Condition {
     /*
      * Classe répertoriant les conditions possibles lors de l'instanciation d'un sort. 
@@ -127,18 +131,37 @@ public class Condition {
 
     }
 
+    /// <summary>
+    /// Tour sur lequel est la condition. 
+    /// </summary>
     public enum Tour {
+        /// <summary>
+        /// Différent de Tour deux joueurs, ici le joueur ne peut jouer l'effet pendant aucun tour. 
+        /// </summary>
         NONE,
+        /// <summary>
+        /// Peut-être executé sur le tour des deux joueurs. 
+        /// </summary>
         TOUR_DEUX_JOUEURS,
+        /// <summary>
+        /// Lors du tour du joueur local
+        /// </summary>
         TOUR_LOCAL,
+        /// <summary>
+        /// Lors du tour du joueur qui n'est pas local. 
+        /// </summary>
         TOUR_NOT_LOCAL
     }
 
+    /// <summary>
+    /// True si la condition dépend de la phase. 
+    /// </summary>
     public bool dependsOnPhase = false;
     public Player.Phases PhaseCondition;
     public Reaction ReactionCondition = Reaction.NONE;
     public Tour TourCondition = Tour.NONE;
-    // Cet entier correspond à xx
+
+    
     /// <summary>
     /// Entier propre à la condition corresponde à xx
     /// </summary>
@@ -147,7 +170,9 @@ public class Condition {
     public int nombreDeTours = 0;
     public bool ActionObligatoire = false;
 
-    // Lorsqu'on a le droit de faire une action une fois par tour, il faut marquer cette action comme ayant été faite. 
+    /// <summary>
+    /// Lorsqu'on a le droit de faire une action une fois par tour, il faut marquer cette action comme ayant été faite.
+    /// </summary> 
     public bool utilisePourCeTour = false; 
 
     public Condition(ConditionEnum _condition, int _intCondition) {
@@ -161,6 +186,9 @@ public class Condition {
 
     }
 
+    /// <summary>
+    /// Methode permettant de décortiqueer l'int envoyé par la base de données gamesparks. 
+    /// </summary>
     public void understandInt() {
         /*
          * Cette méthode a pour but de "disséquer" l'entier pour en tirer les informations nécessaires. 

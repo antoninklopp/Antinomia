@@ -4,7 +4,10 @@ using UnityEngine;
 using UnityEngine.UI; 
 using UnityEngine.SceneManagement; 
 
-
+/// <summary>
+/// Game Manager de la scène où l'on peut manager ses cartes. 
+/// Gère les éléments de UI. 
+/// </summary>
 public class GameManagerManageCards : MonoBehaviour {
 
 	GameObject CarteZoom; 

@@ -2,34 +2,51 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using UnityEngine.Networking; 
+using UnityEngine.Networking;
 
+/// <summary>
+/// Cette classe de type aura pour but une fois une carte instanciée de pouvoir désactiver le(s) script(s) inutile à la carte. 
+/// Exemple, si la carte est un sort, on ne gardera actif que la classe sort.
+/// </summary>
 public class CarteType : NetworkBehaviour {
-    /*
-     * Cette classe de type aura pour but une fois une carte instanciée de pouvoir désactiver le(s) script(s) inutile à la carte. 
-     * Exemple, si la carte est un sort, on ne gardera actif que la classe sort. 
-     */ 
 
-    public enum Type { ENTITE, // La carte est une entité
-        SORT, // La carte est un sort
-        ASSISTANCE, // La carte est une assistance. 
+    public enum Type {
+        /// <summary>
+        /// La carte est une entité.
+        /// </summary>
+        ENTITE,
+        /// <summary>
+        /// La carte est un sort.
+        /// </summary>
+        SORT,
+        /// <summary>
+        /// La carte est une assistance. 
+        /// </summary>
+        ASSISTANCE, 
+        /// <summary>
+        /// La carte n'est d'aucun type. 
+        /// </summary>
         AUCUN
     };
 
+
     public Type thisCarteType = Type.AUCUN;
-    // True si la carte a été instanciée
+
+    /// <summary>
+    /// True si la carte a été instanciée
+    /// </summary>
     public bool instanciee = false; 
 
     // Use this for initialization
     void Start () {
         StartCoroutine(SetUpCard()); 
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
+    /// <summary>
+    /// Changer le type de la carte grâce au string donné au paramètre. 
+    /// Agit directement sur le thisTypeCarte de la classe.
+    /// </summary>
+    /// <param name="_type"></param>
     public void setTypeFromString(string _type) {
         switch (_type) {
             case "entité":
@@ -84,6 +101,7 @@ public class CarteType : NetworkBehaviour {
                 throw new Exception("Cette carte n'a pas de type");
         }
     }
+
 
     [ClientRpc]
     void RpcSetType(Type _type) {

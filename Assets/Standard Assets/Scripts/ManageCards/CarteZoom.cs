@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; 
 
+/// <summary>
+/// Zoom d'une carte
+/// INUTILISE EN CE MOMENT. 
+/// </summary>
 public class CarteZoom : MonoBehaviour {
 
 	// Use this for initialization

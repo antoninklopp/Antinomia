@@ -17,11 +17,26 @@ public class Action {
 
     // Le sort peut avoir un ou plusieurs effets
     public enum ActionEnum {
-        NATURE_EAU, // La nature d'x entités devient Eau pendant y tours 
-        NATURE_TERRE, // La nature d'x entités devient Terre pendant y tours
-        NATURE_FEU, // La nature d'x entités devient Feu pendant y tours
-        NATURE_AIR, // La nature d'x entités devient Air pendant y tours
-        NATURE, // La nature d'x entités devient de la nature choisie lors de la condition pendant y tours. 
+        /// <summary>
+        /// La nature d'x entités devient Eau pendant y tours 
+        /// </summary>
+        NATURE_EAU,
+        /// <summary>
+        /// La nature d'x entités devient Terre pendant y tours
+        /// </summary>
+        NATURE_TERRE,
+        /// <summary>
+        /// La nature d'x entités devient Feu pendant y tours
+        /// </summary>
+        NATURE_FEU,
+        /// <summary>
+        /// La nature d'x entités devient Air pendant y tours
+        /// </summary>
+        NATURE_AIR,
+        /// <summary>
+        /// La nature d'x entités devient de la nature choisie lors de la condition pendant y tours. 
+        /// </summary>
+        NATURE, 
         /// <summary>
         /// Changer la nature d'une autre entité. 
         /// </summary>
@@ -67,14 +82,20 @@ public class Action {
         /// Donc l'entier transmis sera de type xxyy avec xx l'augmentation de puissance (inférieur à 99) et yy le nombre de tours (inférieur à 99)
         /// </summary>
         PUISSANCE_AUGMENTE, 
+        /// <summary>
+        /// La puissance de la carte est multipliee
+        /// </summary>
         PUISSANCE_MULTIPLIE, 
+        /// <summary>
+        /// Le joueur gagne x AKA sur le tour. 
+        /// </summary>
         GAIN_AKA_UN_TOUR,
         /// <summary>
         /// Le joueur est obligé d'attaquer la carte en question.
         /// </summary>
         ATTAQUE_OBLIGATOIRE,
         /// <summary>
-        /// Sacrifie la carte choisie dans la condition.
+        /// Sacrifie la carte choisie dans la condition (sacrifice = dans la main du joueur). 
         /// </summary>
         SACRIFIER_CARTE, 
         /// <summary>

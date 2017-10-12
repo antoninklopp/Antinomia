@@ -801,8 +801,27 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// </summary>
     /// <param name="gameIsPaused"></param>
     [ClientRpc]
-    public void RpcSetGameToPause(bool gameIsPaused) {
+    private void RpcSetGameToPause(bool gameIsPaused) {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GameIsSetToPause(gameIsPaused); 
+    }
+
+    /// <summary>
+    /// Contrairement à <see cref="CmdSetGameToPause(bool)"/> cette fonction ne fait que changer la valeur de pause. 
+    /// Elle est utilé avant de pouvoir réagir à un effet.
+    /// C'est-à-dire que si on peut réagir, le jeu est forcément "pas en pause"
+    /// </summary>
+    /// <param name="gameIsPaused"></param>
+    [Command]
+    public void CmdOnlySetPause(bool gameIsPaused) {
+        RpcOnlySetPause(gameIsPaused); 
+    }
+
+    /// <summary>
+    /// <see cref="CmdOnlySetPause(bool)"/>
+    /// </summary>
+    [ClientRpc]
+    private void  RpcOnlySetPause(bool gameIsPaused) {
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused = gameIsPaused; 
     }
 
     /// <summary>

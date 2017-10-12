@@ -191,9 +191,10 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                     if (IDCardGameCibleEffet[i] != -1) {
                         // -1 est l'identifiant du joueur adverse. 
                         CibleEffet.Add(FindCardWithID(IDCardGameCibleEffet[i]));
-                        break; 
-                    } else {
-                        CibleEffet.Add(FindNotLocalPlayer()); 
+                        break;
+                    }
+                    else {
+                        CibleEffet.Add(FindNotLocalPlayer());
                     }
                 }
 
@@ -206,10 +207,10 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                             Debug.Log("Nombre d'attaques " + CibleEffet.Count.ToString());
                             Debug.LogWarning("Pas le bon nombre d'attaques");
                         }
-                        Debug.Log(thisCarte); 
+                        Debug.Log(thisCarte);
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, thisCarte, CibleEffet[0]);
                         yield return new WaitForSeconds(0.5f);
-                        yield break; 
+                        yield break;
                 }
 
                 switch (thisCarte.GetComponent<CarteType>().thisCarteType) {
@@ -226,8 +227,9 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                                                                                                 EffetListNumber, CibleEffet);
                         break;
                 }
-            } else {
-                Debug.Log("La carte a été détruite"); 
+            }
+            else {
+                AntinomiaLog("La carte a été détruite");
             }
             GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
         }

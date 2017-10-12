@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI; 
 using UnityEngine.SceneManagement; 
 
+/// <summary>
+/// Utile lors de la première scène du jeu.
+/// </summary>
 public class Introduction : MonoBehaviour {
 
 	GameObject Antinomia; 

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// INUTILISE
+/// </summary>
 public class EffetAssistance : MonoBehaviour {
     /*
      * Ce script regroupe les effets possibles d'une assistance. 

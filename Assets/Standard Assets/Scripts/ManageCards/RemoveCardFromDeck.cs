@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI; 
 
+/// <summary>
+/// Enlever une carte du deck.
+/// </summary>
 public class RemoveCardFromDeck : MonoBehaviour, IDropHandler {
 	/*
 	 * Enlever une carte du deck. 

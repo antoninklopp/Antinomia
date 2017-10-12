@@ -135,6 +135,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
         AntinomiaLog(PlayerID);
         AntinomiaLog(FindLocalPlayer().GetComponent<Player>().PlayerID); 
+
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // Si on est sur le joueur qui n'a pas demandé l'effet, on propose à l'autre joueur de répondre à l'effet. 
             InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
@@ -167,10 +168,10 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             for (int i = CartesAssociees.Count - 1; i >= 0; --i) {
                 effetTermine = false;
                 CmdJouerEffetPile(i, FindLocalPlayer().GetComponent<Player>().PlayerID);
-                //while (!effetTermine) {
-                //    yield return new WaitForSeconds(0.1f);
-                //}
-                yield return new WaitForSeconds(0.1f);
+                while (!effetTermine) {
+                    yield return new WaitForSeconds(0.1f);
+                }
+                yield return new WaitForSeconds(0.5f);
             }
 
             // Detruire l'objet pile. 
@@ -220,6 +221,21 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// </summary>
     void EffetTermine() {
         effetTermine = true; 
+    }
+
+    /// <summary>
+    /// regarder si le dernier effet vient du joueur. 
+    /// </summary>
+    public bool DernierEffetVientJoueur(int playerID) {
+        // On assure qu'il y ait au moins un effet dans la pile
+        Debug.Assert(pileEffets.Count > 0); 
+        GameObject lastEffet = pileEffets[pileEffets.Count - 1]; 
+        if (lastEffet.GetComponent<EffetInPile>().PlayerIDAssocie == playerID) {
+            return true; 
+        } else {
+            return false; 
+        }
+
     }
 
     

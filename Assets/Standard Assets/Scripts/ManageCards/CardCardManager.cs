@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.UI; 
 using System; 
 
+/// <summary>
+/// Carte du card manager. 
+/// C'est un élément de UI. 
+/// </summary>
 public class CardCardManager : MonoBehaviour {
 
 	Entite CarteScript;

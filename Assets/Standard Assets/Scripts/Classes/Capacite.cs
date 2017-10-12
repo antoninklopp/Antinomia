@@ -4,6 +4,9 @@ using UnityEngine;
 using System; 
 using UnityEngine.UI; 
 
+/// <summary>
+/// Classe obsolete, inutilisée. 
+/// </summary>
 public class Capacite {
 	/*
 	 * Classe spécifique pour la capacité qui peut prendre des formes très diverses. 

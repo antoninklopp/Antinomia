@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement; 
 
+/// <summary>
+/// GameManager lors de la scène du choix du deck.
+/// Gère les éléments de UI.
+/// </summary>
 public class GameManagerChoixDeck : MonoBehaviour {
 	
 	/*

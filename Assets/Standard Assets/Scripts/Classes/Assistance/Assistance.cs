@@ -590,4 +590,12 @@ public class Assistance : Carte {
                 "Effets : " + AllEffetsStringToDisplay; 
     }
 
+    /// <summary>
+    /// La carte peut-elle être jouée en réponse à un effet.
+    /// </summary>
+    /// <returns>toujours false, une assistance ne peut pas répondre à un effet. </returns>
+    public override bool CarteJouerReponseEffet() {
+        return false; 
+    }
+
 }

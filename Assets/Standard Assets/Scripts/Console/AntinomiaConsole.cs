@@ -115,52 +115,89 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
         string command = transform.Find("ConsoleView").Find("ConsoleWrite").gameObject.GetComponent<InputField>().text;
         string[] commandSplit = command.Split();
 
-        //On vérifie que le nombre de paramètre est bien égal à 2, la fonction puis le paramètre. 
-        // Debug.Assert(commandSplit.Length == 2);
-
-        if (commandSplit.Length != 2) {
-            AddStringToConsole("Format : Fonction parametre");
-            
-        }
-        else {
-
-            switch (commandSplit[0]) {
-                case "set_AKA":
-                case "set_aka":
-                    // Changer l'AKA du joueur
-
-                    if (!checkIfParameterConsoleIsInt(commandSplit[1])) {
-                        break;
-                    }
-                    FindLocalPlayer().GetComponent<Player>().PlayerAKA = int.Parse(commandSplit[1]);
-                    AddStringToConsole("L'AKA de votre joueur a été mis à " + commandSplit[1]);
+        switch (commandSplit[0]) {
+            case "set_AKA":
+            case "set_aka":
+                // Changer l'AKA du joueur
+                if (!checkParameters(2, commandSplit.Length)) {
+                    return; 
+                }
+                if (!checkIfParameterConsoleIsInt(commandSplit[1])) {
                     break;
-                case "Pioche":
-                case "pioche":
-                    //Si le paramètre n'est pas un entier, on sort du switch.
-                    if (!checkIfParameterConsoleIsInt(commandSplit[1])) {
-                        break;
-                    }
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(int.Parse(commandSplit[1]));
+                }
+                FindLocalPlayer().GetComponent<Player>().PlayerAKA = int.Parse(commandSplit[1]);
+                AddStringToConsole("L'AKA de votre joueur a été mis à " + commandSplit[1]);
+                break;
+            case "Pioche":
+            case "pioche":
+                if (!checkParameters(1, commandSplit.Length)) {
+                    return;
+                }
+                //Si le paramètre n'est pas un entier, on sort du switch.
+                if (!checkIfParameterConsoleIsInt(commandSplit[1])) {
                     break;
-                case "format":
-                case "Format":
-                    AddStringToConsole("Format : Fonction parametre");
-                    break;
-                case "ping":
-                case "Ping":
-                    // Connaitre la vitesse de sa connexion internet. 
-                    StartCoroutine(ShowPing()); 
-                    break; 
-                default:
-                    AddStringToConsole("Cette fonction n'existe pas");
-                    break;
-            }
+                }
+                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(int.Parse(commandSplit[1]));
+                break;
+            case "format":
+            case "Format":
+                if (!checkParameters(1, commandSplit.Length)) {
+                    return;
+                }
+                AddStringToConsole("Format : Fonction parametre");
+                break;
+            case "ping":
+            case "Ping":
+                if (!checkParameters(1, commandSplit.Length)) {
+                    return;
+                }
+                // Connaitre la vitesse de sa connexion internet. 
+                StartCoroutine(ShowPing()); 
+                break;
+            case "IsPause":
+            case "is_pause":
+            case "isPause":
+                if (!checkParameters(1, commandSplit.Length)) {
+                    return;
+                }
+                bool pause = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().getGameIsPaused();
+                if (pause) {
+                    AddStringToConsole("Le jeu est en pause"); 
+                } else {
+                    AddStringToConsole("Le jeu n'est pas en pause"); 
+                }
+                break;
+            case "liste_fonctions":
+            case "liste_fct":
+            case "ls_fct":
+                if (!checkParameters(1, commandSplit.Length)) {
+                    return;
+                }
+                AddStringToConsole("set_aka, pioche, isPause, format, ping"); 
+                break; 
+            default:
+                AddStringToConsole("Cette fonction n'existe pas");
+                break;
         }
 
         // On remet le texte à 0.
         transform.Find("ConsoleView").Find("ConsoleWrite").gameObject.GetComponent<InputField>().text = ""; 
 
+    }
+
+    /// <summary>
+    /// Vérifie si le nombre de paramètres attendu dans la fonction console demandée est le bon. 
+    /// </summary>
+    /// <param name="attendu">Nombre de paramètres attendus</param>
+    /// <param name="donne">Nombre de paramètres donnés</param>
+    /// <returns>true, si attendu==donne, false sinon</returns>
+    private bool checkParameters(int attendu, int donne) {
+        if (attendu != donne) {
+            AddStringToConsole("Format : Fonction parametre");
+            return false; 
+        } else {
+            return true; 
+        }
     }
 
     /// <summary>

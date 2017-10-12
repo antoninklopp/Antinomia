@@ -22,12 +22,11 @@ public class CarteDebut : MonoBehaviour {
 
     }
 
-
-	// Use this for initialization
-	void Start () {
-
-    }
-
+    /// <summary>
+    /// Après création de la classe, on met les infos à jour. 
+    /// </summary>
+    /// <param name="_shortCode">Le shortCode de la classe</param>
+    /// <param name="_StringToDisplay">Contient les informations essentielles de la classe</param>
     public void InfoDebut(string _shortCode, string _StringToDisplay) {
         shortCode = _shortCode;
         StringToDisplay = _StringToDisplay;

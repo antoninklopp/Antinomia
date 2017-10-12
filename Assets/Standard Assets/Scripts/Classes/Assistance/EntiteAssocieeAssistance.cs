@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// On ajoute ce script à une entité, lorsque une assistance est liée à cette entité. 
+/// On le détruit lorsque l'assistance est déliée. 
+/// </summary>
 public class EntiteAssocieeAssistance : MonoBehaviour {
 
     public GameObject AssistanceAssociee; 

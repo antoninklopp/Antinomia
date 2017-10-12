@@ -7,6 +7,11 @@ using System;
 /// <summary>
 /// Classe de base dont héritent toutes les cartes qui en sont dérivées. 
 /// Contient les attributs de base communs à toutes les cartes. 
+/// 
+/// Les cartes filles:
+/// <see cref="Sort"/>
+/// <see cref="Entite"/>
+/// <see cref="Assistance"/>
 /// </summary>
 public class Carte : NetworkBehaviourAntinomia {
     /*
@@ -189,6 +194,9 @@ public class Carte : NetworkBehaviourAntinomia {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().HideInfoCarte();
     }
 
+    /// <summary>
+    /// Lorsque la souris est au-dessus de la carte. 
+    /// </summary>
     public void OnMouseOver() {
         if (Input.GetMouseButtonDown(1)) {
             RightClickOnCarte();
@@ -197,13 +205,13 @@ public class Carte : NetworkBehaviourAntinomia {
 
     public virtual void OnMouseDown() {
         if (!isFromLocalPlayer) {
-            return; 
+            // return; 
         } 
         if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused 
             && !GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().IPausedTheGame) {
             // Pas d'interaction possible, si le joueur n'a pas mis le jeu en pause, mais qu'il est en pause. 
-            DisplayMessage("Votre adversaire a mis le jeu en pause");
-            return; 
+            // DisplayMessage("Votre adversaire a mis le jeu en pause");
+            // return; 
         }
     }
 
@@ -944,7 +952,16 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     public virtual string GetInfoCarte() {
         return ""; 
-    } 
+    }
+
+    /// <summary>
+    /// Override de la méthode toString. 
+    /// Elle renvoie maintenant <see cref="GetInfoCarte"/>
+    /// </summary>
+    /// <returns>Les informations essentielles de la carte</returns>
+    public override string ToString() {
+        return GetInfoCarte(); 
+    }
 
     /// <summary>
     /// Cette coroutine permet d'attendre des cartes choisies pour qu'on éxécute un effet.
@@ -967,7 +984,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// Lorsqu'on détecte un clic droit, on permet au joueur de jouer l'effet de la carte. 
     /// </summary>
-    public void RightClickOnCarte() {
+    protected virtual void RightClickOnCarte() {
 #if (!UNITY_ANDROID || !UNITY_IOS)
         // Dans le cas d'un clic droit. 
         Debug.Log("On check" + Name);
@@ -1223,7 +1240,22 @@ public class Carte : NetworkBehaviourAntinomia {
             CartesChoisiesPourEffets.Add(Cible);
             return false; 
         }
-
+    }
+    
+    /// <summary>
+    /// La carte peut-elle être jouée en réponse à un effet.
+    /// </summary>
+    /// <returns>toujours false, la méthode sera override dans les calsses filles. </returns>
+    public virtual bool CarteJouerReponseEffet() {
+        return false; 
     }
 
+    /// <summary>
+    /// Changer la couleur de la carte (en gros lui mettre un filtre)
+    /// Pour montrer au joueur qu'un effet est en cours sur cette carte. 
+    /// </summary>
+    /// <param name="color">La couleur qu'on veut donner à la carte.</param>
+    public void setColor(Color color) {
+        GetComponent<SpriteRenderer>().color = color; 
+    }
 }

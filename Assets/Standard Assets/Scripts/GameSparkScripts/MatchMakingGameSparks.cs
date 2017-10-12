@@ -4,6 +4,9 @@ using UnityEngine;
 using GameSparks; 
 using GameSparks.Core; 
 
+/// <summary>
+/// Matchmaking automatique en utilisant le profil de joueur sur gamesparks. 
+/// </summary>
 public class MatchMakingGameSparks : MonoBehaviour {
     /*
      * Matchmaking automatique en utilisant GameSparks. 

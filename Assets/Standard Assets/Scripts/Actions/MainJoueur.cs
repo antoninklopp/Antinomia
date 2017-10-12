@@ -4,15 +4,11 @@ using UnityEngine;
 // Le multijoueur!
 using UnityEngine.Networking; 
 
+/// <summary>
+/// Classe de la main du joueur. 
+/// </summary>
 public class MainJoueur : NetworkBehaviour {
-	/*
-	 * Classe de la main du joueur. 
-	 * Beaucoup d'informations vont être stockées ici et de calculs faits.
-	 * 
-	 * AKA rémanent, phase de pioche. 
-	 * Tout sera fait depuis la main du joueur.
-	 * 
-	 */ 
+
 	List<GameObject> CartesMains = new List<GameObject>(); 
 
 	public GameObject CartePrefab; 
