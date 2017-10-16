@@ -106,6 +106,24 @@ public class Condition {
         /// </summary>
         PAYER_AKA, 
         /// <summary>
+        /// Si la carte est sur le champ de bataille.
+        /// </summary>
+        CARTE_SUR_CHAMP_BATAILLE,
+        /// <summary>
+        /// Si la carte est dans le sanctuaire.
+        /// </summary>
+        CARTE_DANS_SANCTUAIRE, 
+        /// <summary>
+        /// Ici l'entier correspond au type de coût élémentaire payer
+        /// int  = :
+        /// 0 : n'importe quel coût élémentaire
+        /// 1 : EAU
+        /// 2 : FEU
+        /// 3 : TERRE
+        /// 4 : AIR
+        /// </summary>
+        PAYER_COUT_ELEMENTAIRE, 
+        /// <summary>
         /// Aucune condition nécessaire
         /// </summary>
         NONE

@@ -640,6 +640,113 @@ public class Carte : NetworkBehaviourAntinomia {
     }
 
 
+
+    /// <summary>
+    /// Gerer les conditions pour regarder si une carte peut executer un effet. 
+    /// </summary>
+    /// <param name="_conditions">Liste des conditions à vérifier</param>
+    /// <param name="_currentPhase">Phase dans laquelle on se trouve</param>
+    /// <param name="estMort">Si la carte vient d'être détruite</param>
+    /// <param name="debut">Si la carte vient d'être posée</param>
+    /// <param name="nouveauTour">true lorsque la fonction est appelée lors du passage à un nouveau tour</param>
+    /// <returns>true, si toutes les conditions sont remplies</returns>
+    /// <param name="Cible">Si c'est un sort qui appelle la méthode, il peut déjà avoir une cible</param>
+    public bool GererConditionsRechercheCarte(List<Condition> _conditions, Player.Phases _currentPhase = Player.Phases.INITIATION,
+                                    bool estMort = false, bool debut = false, bool nouveauTour = false, GameObject Cible = null) {
+        /*
+         * Regarde si toutes les conditions sont ok pour un effet. 
+         * Retourne true si c'est le cas, false sinon
+         * 
+         */
+        bool effetOK = true;
+        for (int j = 0; j < _conditions.Count; ++j) {
+            //if (!_conditions[j].dependsOnPhase) {
+            //    // Si l'effet ne dépend pas d'une phase, il n'y pas de raison
+            //    break;
+            //}
+            if (_conditions[j].dependsOnPhase &&
+                _currentPhase != _conditions[j].PhaseCondition) {
+                // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
+                return false;
+            }
+            else if (((_conditions[j].TourCondition == Condition.Tour.TOUR_LOCAL) && (
+                  GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour !=
+                  FindLocalPlayer().GetComponent<Player>().PlayerID)) ||
+                  (_conditions[j].TourCondition == Condition.Tour.TOUR_NOT_LOCAL)
+                  && (FindLocalPlayer().GetComponent<Player>().PlayerID ==
+                  GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour)) {
+                // La condition de tour n'est pas remplie, on passe donc à l'effet suivant. 
+                return false;
+            }
+            else if (debut && (_conditions[j].intCondition > 100)) {
+                // L'effet dépend donc d'une phase. 
+                Debug.Log("Cette effet dépend d'une phase particulière.");
+                return false;
+            }
+            else if (nouveauTour && !_conditions[j].dependsOnPhase) {
+                // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
+                return false;
+            }
+            else if (_conditions[j].utilisePourCeTour) {
+                return false;
+            }
+            else if (estMort && (_conditions[j].ConditionCondition != Condition.ConditionEnum.MORT)) {
+                // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditiosn lors de
+                // la mort d'une carte. 
+                return false;
+            }
+            else {
+                Debug.Log("<color=green>Verification de conditions </color>");
+                // if (_conditions[j].ActionObligatoire) {
+                // Dans le cas d'une action obligatoire. 
+                switch (_conditions[j].ConditionCondition) {
+                    case Condition.ConditionEnum.NONE:
+                        // Dans le cas où il n'y a aucune condition. 
+                        return true;
+                    case Condition.ConditionEnum.CARTES_CIMETIERE:
+                        if (FindLocalPlayer().transform.Find("Cimetiere").
+                            Find("CartesCimetiere").gameObject.GetComponent<Cimetiere>().NombreDeCartesDansCimetiere() <
+                            _conditions[j].properIntCondition) {
+                            return false;
+                        }
+                        break;
+                    case Condition.ConditionEnum.CHOIX_ELEMENT:
+                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
+                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
+                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
+                    case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
+                    case Condition.ConditionEnum.DEFAUSSER:
+                        break;
+                    case Condition.ConditionEnum.DELTA:
+                        // La condition delta est par rapport à TOUTES les cartes du terrain. 
+                        if (_conditions[j].properIntCondition + FindAllCartesLocal().Count >
+                            FindAllNotLocalCartes().Count) {
+                            return false;
+                        }
+                        break;
+                    case Condition.ConditionEnum.MORT:
+                        if (!estMort) {
+                            return false;
+                        }
+                        break;
+                    default:
+                        break;
+                        //}
+                }
+                //else {
+                // Si l'action n'est pas obligatoire, on n'oblige pas le joueur à jouer cet effet à ce moment précis. 
+                // On fait donc un break et passe à l'effet suivant. 
+                //   break;
+                //}
+                Debug.Log("<color=gree>effet est OK</color>");
+            }
+        }
+        Debug.Log(effetOK);
+        return effetOK;
+
+    }
+
+
     /// <summary>
     /// Gérer les actions d'un effet. 
     /// </summary>
@@ -651,115 +758,115 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Sinon on les ajoute juste à la pile. </param>
     /// <param name="CibleDejaChoisie">true si les paramètres ont été choisis en amont, par exemple pour un sort</param>
     public void GererActions(List<Action> _actions, int numeroEffet=0, int effetListNumber=0, bool jouerEffet=false, 
-                                    bool CibleDejaChoisie=false) {
-        // On doit maintenant gérer les effets.
-        for (int j = 0; j < _actions.Count; ++j) {
-            // On est obliger de regarder la condition jouerEffet à l'intérieur du switch parce que 
-            // certaines méthodes se font uniquement par cartes spécifiques. 
-            switch (_actions[j].ActionAction) {
-                case Action.ActionEnum.ATTAQUE_OBLIGATOIRE:
-                    Debug.LogWarning("Cet effet ne peut pas être joué ici. A vérifier.");
-                    break;
-                case Action.ActionEnum.CHANGER_POSITION:
-                    /*
-                     * Il faut d'abord choisir une carte puis changer sa position.
-                     * La carte aura été choisie précédemment. 
-                     */
-                    DisplayMessage("Choisissez une carte et changez sa position");
-                    if (jouerEffet) {
-                        StartCoroutine(ChangerPositionEffet(CibleDejaChoisie));
-                    } else {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    }
-                    break;
-                case Action.ActionEnum.DETRUIRE:
-                    /*
-                     * Il faut d'abord choisir une carte puis la détruire.
-                     */
-                    DisplayMessage("Choisissez une carte et détruisez la");
-                    if (jouerEffet) {
-                        StartCoroutine(DetruireEffet(CibleDejaChoisie));
-                    } else {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber)); 
-                    }
-                    break;
-                case Action.ActionEnum.GAIN_AKA_UN_TOUR:
-                    if (jouerEffet) {
-                        FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
-                        DisplayMessage("Ajout de " + _actions[j].intAction.ToString() + "AKA à ce tour");
-                    } else {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    }
-                    break;
-                case Action.ActionEnum.PIOCHER_CARTE:
-                    StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction));
-                    DisplayMessage("Pioche " + _actions[j].properIntAction.ToString() +  " carte");
-                    Debug.Log("<color=purple> Piocher une carte </color>"); 
-                    break;
-                case Action.ActionEnum.SACRIFIER_CARTE:
-                    // Sacrifier cette carte. 
-                    DisplayMessage("<color=orange>Sacrifice de cette carte</color>");
-                    if (jouerEffet) {
-                        SacrifierCarteEntite();
-                    } else {
-                        InformerSacrifierCarteEntite(); 
-                    }
-                    break;
-                case Action.ActionEnum.PLACER_SANCTUAIRE:
-                    if (jouerEffet) {
-                        DisplayMessage("On place cette carte dans le sanctuaire");
-                        PlacerSanctuaire();
-                    } else {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    }
-                    break;
-                case Action.ActionEnum.PUISSANCE_MULTIPLIE:
-                    // Multiplier la puissance des entités SUR LE CHAMP DE BATAILLE. 
-                    Debug.Log("Multiplication de la puissance"); 
-                    List<GameObject> CartesLocales = FindAllCartesLocal(); 
-                    for (int i = 0; i < CartesLocales.Count; ++i) {
-                        Debug.Log(3); 
-                        if (CartesLocales[i].GetComponent<Entite>() != null) {
-                            Debug.Log(CartesLocales[i].GetComponent<Entite>().Name);
-                            if (CartesLocales[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE) {
-                                CartesLocales[i].GetComponent<Entite>().CmdMultiplierStat(_actions[j].properIntAction); 
-                            }
+                                bool CibleDejaChoisie=false) {
+    // On doit maintenant gérer les effets.
+    for (int j = 0; j < _actions.Count; ++j) {
+        // On est obliger de regarder la condition jouerEffet à l'intérieur du switch parce que 
+        // certaines méthodes se font uniquement par cartes spécifiques. 
+        switch (_actions[j].ActionAction) {
+            case Action.ActionEnum.ATTAQUE_OBLIGATOIRE:
+                Debug.LogWarning("Cet effet ne peut pas être joué ici. A vérifier.");
+                break;
+            case Action.ActionEnum.CHANGER_POSITION:
+                /*
+                    * Il faut d'abord choisir une carte puis changer sa position.
+                    * La carte aura été choisie précédemment. 
+                    */
+                DisplayMessage("Choisissez une carte et changez sa position");
+                if (jouerEffet) {
+                    StartCoroutine(ChangerPositionEffet(CibleDejaChoisie));
+                } else {
+                    StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                }
+                break;
+            case Action.ActionEnum.DETRUIRE:
+                /*
+                    * Il faut d'abord choisir une carte puis la détruire.
+                    */
+                DisplayMessage("Choisissez une carte et détruisez la");
+                if (jouerEffet) {
+                    StartCoroutine(DetruireEffet(CibleDejaChoisie));
+                } else {
+                    StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber)); 
+                }
+                break;
+            case Action.ActionEnum.GAIN_AKA_UN_TOUR:
+                if (jouerEffet) {
+                    FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
+                    DisplayMessage("Ajout de " + _actions[j].intAction.ToString() + "AKA à ce tour");
+                } else {
+                    StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                }
+                break;
+            case Action.ActionEnum.PIOCHER_CARTE:
+                StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction));
+                DisplayMessage("Pioche " + _actions[j].properIntAction.ToString() +  " carte");
+                Debug.Log("<color=purple> Piocher une carte </color>"); 
+                break;
+            case Action.ActionEnum.SACRIFIER_CARTE:
+                // Sacrifier cette carte. 
+                DisplayMessage("<color=orange>Sacrifice de cette carte</color>");
+                if (jouerEffet) {
+                    SacrifierCarteEntite();
+                } else {
+                    InformerSacrifierCarteEntite(); 
+                }
+                break;
+            case Action.ActionEnum.PLACER_SANCTUAIRE:
+                if (jouerEffet) {
+                    DisplayMessage("On place cette carte dans le sanctuaire");
+                    PlacerSanctuaire();
+                } else {
+                    StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                }
+                break;
+            case Action.ActionEnum.PUISSANCE_MULTIPLIE:
+                // Multiplier la puissance des entités SUR LE CHAMP DE BATAILLE. 
+                Debug.Log("Multiplication de la puissance"); 
+                List<GameObject> CartesLocales = FindAllCartesLocal(); 
+                for (int i = 0; i < CartesLocales.Count; ++i) {
+                    Debug.Log(3); 
+                    if (CartesLocales[i].GetComponent<Entite>() != null) {
+                        Debug.Log(CartesLocales[i].GetComponent<Entite>().Name);
+                        if (CartesLocales[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE) {
+                            CartesLocales[i].GetComponent<Entite>().CmdMultiplierStat(_actions[j].properIntAction); 
                         }
                     }
-                    break;
-                case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
-                    if (jouerEffet) {
-                        GetComponent<Entite>().hasAttacked = -1;
-                        DisplayMessage("Cette entité ne peut pas attaquer");
-                    } else {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    }
-                    break;
-                case Action.ActionEnum.DEFAUSSER:
-                    // On propose de défausser. 
-                    // Il faut d'abord choisir une carte de la main du joueur. 
-                    ShowCardsForChoice(Main.transform);
-                    StartCoroutine(DefausserEffet()); 
-                    break;
-                case Action.ActionEnum.REVELER_CARTE:
-                    // Le joueur révèle une carte de sa main.
-                    StartCoroutine(RevelerCarteEffet(_actions[j].properIntAction));
-                    break;
-                case Action.ActionEnum.REVELER_CARTE_ADVERSAIRE:
-                    // L'adversaire doit révéler une carte. 
-                    Debug.Log("<color=purple>Reveler carte adversaire</color>"); 
-                    FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame, 
-                        "RevelerCarteEffet", _actions[j].properIntAction, FindLocalPlayer().GetComponent<Player>().PlayerID); 
-                    break;
-                case Action.ActionEnum.ATTAQUE_DIRECTE:
-                    attaqueDirecte = true; 
-                    break; 
-                default:
-                    Debug.LogWarning("Cet effet n'est pas géré");
-                    break;
-            }
-            updateEffetActive(numeroEffet, effetListNumber); 
+                }
+                break;
+            case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
+                if (jouerEffet) {
+                    GetComponent<Entite>().hasAttacked = -1;
+                    DisplayMessage("Cette entité ne peut pas attaquer");
+                } else {
+                    StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                }
+                break;
+            case Action.ActionEnum.DEFAUSSER:
+                // On propose de défausser. 
+                // Il faut d'abord choisir une carte de la main du joueur. 
+                ShowCardsForChoice(Main.transform);
+                StartCoroutine(DefausserEffet()); 
+                break;
+            case Action.ActionEnum.REVELER_CARTE:
+                // Le joueur révèle une carte de sa main.
+                StartCoroutine(RevelerCarteEffet(_actions[j].properIntAction));
+                break;
+            case Action.ActionEnum.REVELER_CARTE_ADVERSAIRE:
+                // L'adversaire doit révéler une carte. 
+                Debug.Log("<color=purple>Reveler carte adversaire</color>"); 
+                FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame, 
+                    "RevelerCarteEffet", _actions[j].properIntAction, FindLocalPlayer().GetComponent<Player>().PlayerID); 
+                break;
+            case Action.ActionEnum.ATTAQUE_DIRECTE:
+                attaqueDirecte = true; 
+                break; 
+            default:
+                Debug.LogWarning("Cet effet n'est pas géré");
+                break;
         }
+        updateEffetActive(numeroEffet, effetListNumber); 
+    }
     }
 
     /// <summary>
@@ -1242,11 +1349,45 @@ public class Carte : NetworkBehaviourAntinomia {
         }
     }
     
+    public virtual void CartePeutJouer(Player.Phases _currentPhase) {
+        if (CarteJouerReponseEffet(_currentPhase)) {
+            setColor(Color.blue); 
+        }
+    }
+
     /// <summary>
     /// La carte peut-elle être jouée en réponse à un effet.
     /// </summary>
     /// <returns>toujours false, la méthode sera override dans les calsses filles. </returns>
-    public virtual bool CarteJouerReponseEffet() {
+    protected virtual bool CarteJouerReponseEffet(Player.Phases _currentPhase, int numeroListe = 0) {
+        for (int i = 0; i < AllEffets.Count; ++i) {
+            // On regarde les effets un par un. 
+            // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
+            bool effetOK = GererConditionsRechercheCarte(AllEffets[i].AllConditionsEffet, _currentPhase);
+            if (effetOK && CheckIfActionReponseInAction(AllEffets[i].AllActionsEffet)) {
+                return true;
+            }
+        }
+        return false; 
+    }
+
+    protected bool CheckIfActionReponseInAction(List<Action> _allActions) {
+
+        for (int i = 0; i < _allActions.Count; i++) {
+            switch (_allActions[i].ActionAction) {
+                // Liste de tous les effets qui permettent une réponse. 
+                case Action.ActionEnum.DETRUIRE:
+                case Action.ActionEnum.PUISSANCE_AIR_AUGMENTE:
+                case Action.ActionEnum.PUISSANCE_EAU_AUGMENTE:
+                case Action.ActionEnum.PUISSANCE_TERRE_AUGMENTE:
+                case Action.ActionEnum.PUISSANCE_FEU_AUGMENTE:
+                case Action.ActionEnum.PUISSANCE_MULTIPLIE:
+                case Action.ActionEnum.TERRAIN_MALEFIQUE:
+                case Action.ActionEnum.TERRAIN_ASTRAL:
+                case Action.ActionEnum.PUISSANCE_AUGMENTE:
+                    return true; 
+            }
+        }
         return false; 
     }
 
@@ -1258,4 +1399,9 @@ public class Carte : NetworkBehaviourAntinomia {
     public void setColor(Color color) {
         GetComponent<SpriteRenderer>().color = color; 
     }
+
+    public void resetColor() {
+        GetComponent<SpriteRenderer>().color = Color.white; 
+    }
+
 }

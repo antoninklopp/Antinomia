@@ -174,8 +174,21 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// La console de développement. 
     /// </summary>
-    private GameObject Console; 
+    private GameObject Console;
 
+    /// <summary>
+    /// Objet qui permet de proposer de défaire la pile, 
+    /// il comporte deux boutons fils, oui et non.
+    /// </summary>
+    private GameObject ProposerDefairePile;
+
+    /// <summary>
+    /// Cette variable permet de gérer la réponse du joueur qui peut défaire la pile. 
+    /// 0, pas de réponse
+    /// 1, réponse positive, 
+    /// 2 réponse négative. 
+    /// </summary>
+    private int defairePile = 0; 
 
 	// Use this for initialization
 	public override void Start () {
@@ -209,16 +222,11 @@ public class GameManager : NetworkBehaviourAntinomia {
         ProposerEffet = GameObject.Find("ProposerEffet");
         ProposerEffet.SetActive(false);
         Console = GameObject.Find("Console");
-        StartCoroutine(MontrerCartesAChoisirDebut()); 
+        StartCoroutine(MontrerCartesAChoisirDebut());
+        ProposerDefairePile = GameObject.Find("ProposerDefairePile");
+        ProposerDefairePile.SetActive(false);
         // StartCoroutine(PiocheDebut (6)); 
 	}
-	
-	// Update is called once per frame
-	//void Update () {
-	//	if (syncPhase) {
-	//		//StartCoroutine (CoroutineDebugPhase ()); 
-	//	}
-	//}
 
 	IEnumerator CoroutineDebugPhase(){
 		syncPhase = false; 
@@ -231,26 +239,33 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Passage à la nouvelle phase lors du clic sur le bouton de passage à la nouvelle phase. 
     /// </summary>
-	public void GoToNextPhase(){
-		/*
+    /// <param name="defairePile">true si on défait la pile, false sinon. </param>
+	public void GoToNextPhase(bool defairePile=false){
+        /*
 		 * Lors d'un appui sur le bouton continuer, on passe à la phase suivante. 
-		 */ 
+		 */
 
-		GameObject PlayerObject = FindLocalPlayer ();
-		if (FindLocalPlayerID() == Tour) {
-			if (Phase == Player.Phases.FINALE) {
-				// Il faut passer la main au joueur suivant!
-				Phase = Player.Phases.INITIATION; 
-				// On change le tour. 
-				Tour = (Tour == 1) ? 2 : 1; 
-				PlayerObject.SendMessage ("ChangeUITour", Tour); 
-			} else {
-				Phase++; 
-			}
- 
-			PlayerObject.SendMessage ("ChangeUIPhase", Phase); 
-			StartNewPhase (); 
-		}
+        if (!defairePile) {
+            Debug.Log("On demande un changement de phase"); 
+            AjouterChangementDePhasePile();
+        } else {
+            GameObject PlayerObject = FindLocalPlayer();
+            if (FindLocalPlayerID() == Tour) {
+                if (Phase == Player.Phases.FINALE) {
+                    // Il faut passer la main au joueur suivant!
+                    Phase = Player.Phases.INITIATION;
+                    // On change le tour. 
+                    Tour = (Tour == 1) ? 2 : 1;
+                    PlayerObject.SendMessage("ChangeUITour", Tour);
+                }
+                else {
+                    Phase++;
+                }
+
+                PlayerObject.SendMessage("ChangeUIPhase", Phase);
+                StartNewPhase();
+            }
+        }
 	}
 
     /// <summary>
@@ -604,12 +619,16 @@ public class GameManager : NetworkBehaviourAntinomia {
         OtherPlayerEntity = null;
 	}
 
+    /// <summary>
+    /// Ajouter une attaque comme un effet dans la pile. 
+    /// </summary>
     private void AjouterEffetAttaquePile() {
         // On prévient qu'on va jouer l'effet. 
         List<GameObject> Cibles = new List<GameObject>();
         // On ajoute le joueur adverse à la liste des cibles. 
         // Il faudra bien faire un cas séparé lors de la recherche de l'ID lorsqu'on défait la pile.
         Cibles.Add(OtherPlayerEntity);
+        // -1 est le nombre spécial pour une attaque.
         MettreEffetDansLaPile(MyPlayerEntity, Cibles, -1);
 
         MyPlayerEntity = null;
@@ -619,6 +638,14 @@ public class GameManager : NetworkBehaviourAntinomia {
         Destroy(GameObject.FindGameObjectWithTag("Marque"));
 
         return;
+    }
+
+    /// <summary>
+    /// Ajouter le changement de phase comme un effet dans la pile. 
+    /// </summary>
+    private void AjouterChangementDePhasePile() {
+        // -4 est le nombre spécial pour le changement de phase
+        MettreEffetDansLaPile(null, new List<GameObject>(), -4); 
     }
 
 	void Detruire(){
@@ -1051,10 +1078,37 @@ public class GameManager : NetworkBehaviourAntinomia {
                 PauseButton.SetActive(false);
                 //On regarde s'il y a une pile d'effet en cours. 
                 if (GameObject.FindGameObjectWithTag("Pile") != null) {
-                    AntinomiaLog("Je n'ai pas mis en pause, je défais la pile");
-                    GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile(); 
+                    AntinomiaLog("Je n'ai pas mis en pause, j'explique à l'autre joueur que je n'ai pas souhaité répondre");
+                    // GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile(); 
+                    FindLocalPlayer().GetComponent<Player>().CmdProposerDefaireLaPile(FindLocalPlayerID()); 
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Proposer au joueur de défaire la pile.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator ProposerDefaireLaPile() {
+        // On vérifie d'abord que le seul élément dans la pile ne soit pas un changement de phase par exemple. 
+
+        // Necessite l'approbation
+        if (getPile().GetComponent<PileAppelEffet>().DefaireNecessiteApprobationJoueur()) {
+            ProposerDefairePile.SetActive(true);
+            while (defairePile == 0) {
+                yield return new WaitForSeconds(0.1f);
+            }
+            if (defairePile == 1) {
+                GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile();
+            }
+            else {
+                // Sinon on ne fait rien 
+            }
+            ProposerDefairePile.SetActive(false);
+            defairePile = 0;
+        } else {
+            GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile();
         }
     }
 
@@ -1258,9 +1312,20 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// POUR REPONDRE A UN EFFET.
     /// </summary>
     private void MontrerQuellesCartesPeuventJoueur() {
+        // TODO: Que à la main ou toutes les cartes? 
+        Transform CartesMain = FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"); 
+        for (int i = 0; i < CartesMain.childCount; ++i) {
+            GameObject Carte = CartesMain.GetChild(i).gameObject;
+            Carte.SendMessage("CartePeutJouer", Phase); 
+        }
+    }
 
+    public void DefairePileOui() {
+        defairePile = 1; 
+    }
 
-
+    public void DefairePileNon() {
+        defairePile = 2; 
     }
 
 }

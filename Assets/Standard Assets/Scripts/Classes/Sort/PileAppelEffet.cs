@@ -110,11 +110,16 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         GameObject NouveauEffetInPile = Instantiate(EffetInPilePrefab);
         Effet effetJoue = new Effet(); 
         switch (numeroEffet) {
-            // On vérifie que ce n'est pas un effet "spécial" tel qu'une attaque ou un déplacement. 
+            // On vérifie que ce n'est pas un effet "spécial" tel qu'une attaque ou un déplacement.
+            // Attaque
             case -1:
                 effetJoue = new Effet();
                 effetJoue.AllActionsEffet = new List<Action>();
                 effetJoue.AllActionsEffet.Add(new Action(Action.ActionEnum.ATTAQUE, 0));
+                break;
+            // Changement de phase
+            case -4:
+
                 break; 
             default:
                 effetJoue = GetEffetFromCarte(FindCardWithID(IDObjetEffet), numeroEffet, numeroListeEffet);
@@ -235,6 +240,26 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         } else {
             return false; 
         }
+
+    }
+
+    /// <summary>
+    /// On regarde si défaire la pile nécessite l'approbation des joueurs. 
+    /// </summary>
+    /// <returns>true si défaire la pile nécessite l'approbation du joueur, false sinon</returns>
+    public bool DefaireNecessiteApprobationJoueur() {
+        // S'il y a plus de 2 effets dans la pile, il faut l'approbation. 
+        if (transform.childCount > 1) {
+            return true; 
+        }
+        // Pour l'instant seul le changement de phase, implique qu'il n'y ait pas
+        // d'approbation du joueur qui a créé la pile. 
+        else if (pileEffets[0].GetComponent<EffetInPile>().numeroEffet == -4) {
+            return false; 
+        } else {
+            return true; 
+        }
+
 
     }
 

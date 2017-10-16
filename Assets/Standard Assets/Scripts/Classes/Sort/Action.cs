@@ -130,6 +130,12 @@ public class Action {
         /// Attaque du joueur adverse
         /// </summary>
         ATTAQUE_JOUEUR_ADVERSE, 
+        /// <summary>
+        /// Carte forte face aux entités neutres.
+        /// La puissance des entités neutre est donc divisée 
+        /// par deux dans un combat face à cetteentité
+        /// </summary>
+        FORTE_ENTITE_NEUTRE, 
         NONE
     };
 

@@ -895,6 +895,28 @@ public class Player : NetworkBehaviourAntinomia	 {
                                                                     numeroEffet, numeroListeEffet, PlayerID); 
     }
 
+    /// <summary>
+    /// Si le joueur X ne veut pas répondre au dernier effet du joueur Y, 
+    /// on propose au joueur Y de défaire la pile d'effets.
+    /// Fonction appelée sur le serveur. 
+    /// </summary>
+    /// <param name="PlayerID">ID du player qui appelle la fonction, ici le joueur X</param>
+    [Command]
+    public void CmdProposerDefaireLaPile(int PlayerID) {
+        RpcProposerDefaireLaPile(PlayerID); 
+    }
+
+    /// <summary>
+    /// equivalent sur le client de <see cref="CmdProposerDefaireLaPile(int)"/>
+    /// </summary>
+    /// <param name="PlayerID">ID du player qui appelle la fonction, ici le joueur X</param>
+    [ClientRpc]
+    public void RpcProposerDefaireLaPile(int PlayerID) {
+        if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
+            StartCoroutine(getGameManager().GetComponent<GameManager>().ProposerDefaireLaPile()); 
+        }
+    }
+
 
     /// ////////////////////////////////////////////////////////////////////////////////////////////
     ///                       TEST DU RESEAU                                                     //

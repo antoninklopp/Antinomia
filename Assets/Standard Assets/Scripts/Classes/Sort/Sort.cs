@@ -615,12 +615,17 @@ public class Sort : Carte {
         base.RightClickOnCarte();
     }
 
-    /// <summary>
-    /// La carte peut-elle être jouée en réponse à un effet.
-    /// </summary>
-    /// <returns></returns>
-    public override bool CarteJouerReponseEffet() {
-
+    protected override bool CarteJouerReponseEffet(Player.Phases _currentPhase, int numeroListe = 0) {
+        Debug.Log("On teste si cette carte peut utiliser un effet"); 
+        for (int i = 0; i < AllEffets.Count; ++i) {
+            // On regarde les effets un par un. 
+            // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
+            bool effetOK = GererConditionsRechercheCarte(AllEffets[i].AllConditionsEffet, _currentPhase);
+            if (effetOK && CheckIfActionReponseInAction(AllEffets[i].AllActionsEffet)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

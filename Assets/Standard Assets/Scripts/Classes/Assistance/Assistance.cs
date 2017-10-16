@@ -594,7 +594,7 @@ public class Assistance : Carte {
     /// La carte peut-elle être jouée en réponse à un effet.
     /// </summary>
     /// <returns>toujours false, une assistance ne peut pas répondre à un effet. </returns>
-    public override bool CarteJouerReponseEffet() {
+    protected override bool CarteJouerReponseEffet(Player.Phases _currentPhase, int numeroListe = 0) {
         return false; 
     }
 

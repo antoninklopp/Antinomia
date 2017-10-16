@@ -1266,7 +1266,7 @@ public class Entite : Carte {
             AllEffetsMalefique[i].AllConditionsEffet[0].updateUtilisePourCeTour(tourJoueurLocal);
         }
     }
-
+    
     /// <summary>
     /// Lors d'un clic droit sur la carte. 
     /// </summary>
@@ -1279,6 +1279,47 @@ public class Entite : Carte {
             return;
         }
         base.RightClickOnCarte();
+    }
+
+    public override void CartePeutJouer(Player.Phases _currentPhase) {
+        GameManager.AscendanceTerrain _ascendanceTerrain = getGameManager().GetComponent<GameManager>().ascendanceTerrain; 
+
+        base.CartePeutJouer(_currentPhase);
+
+        if (_ascendanceTerrain == GameManager.AscendanceTerrain.ASTRALE) {
+            if (CarteJouerReponseEffet(_currentPhase, 1)) {
+                setColor(Color.blue); 
+            }
+        } else if (_ascendanceTerrain == GameManager.AscendanceTerrain.MALEFIQUE) {
+            if (CarteJouerReponseEffet(_currentPhase, 2)) {
+                setColor(Color.blue);
+            }
+        }
+    }
+
+    protected override bool CarteJouerReponseEffet(Player.Phases _currentPhase, int numeroListe = 0) {
+        List<Effet> EffetsUtilises = new List<Effet>(); 
+        switch (numeroListe) {
+            case 0:
+                EffetsUtilises = AllEffets;
+                break; 
+            case 1:
+                EffetsUtilises = AllEffetsAstral;
+                break;
+            case 2:
+                EffetsUtilises = AllEffetsMalefique;
+                break;
+        }
+
+        for (int i = 0; i < EffetsUtilises.Count; ++i) {
+            // On regarde les effets un par un. 
+            // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
+            bool effetOK = GererConditionsRechercheCarte(EffetsUtilises[i].AllConditionsEffet, _currentPhase);
+            if (effetOK && CheckIfActionReponseInAction(EffetsUtilises[i].AllActionsEffet)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

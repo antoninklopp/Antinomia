@@ -89,6 +89,9 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
     /// <param name="Carte">La carte</param>
     /// <returns></returns>
     public int GetObjetIDCardGame(GameObject Carte) {
+        if (Carte == null) {
+            return -2; 
+        }
         if (Carte.GetComponent<Player>() != null) {
             // Utilise lors de l'attaque directe sur un joueur.
             return -1; 
@@ -187,6 +190,14 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
         } catch (NullReferenceException) {
             Debug.Log("Impossoble de faire le log"); 
         }
+    }
+
+    /// <summary>
+    /// Récupérer la Pile d'effets
+    /// </summary>
+    /// <returns>GameObject de la pile d'effets, null si elle n'existe pas. </returns>
+    protected GameObject getPile() {
+        return GameObject.FindGameObjectWithTag("Pile"); 
     }
 
 }

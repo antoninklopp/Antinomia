@@ -20,7 +20,8 @@ using System;
 /// NOTE : Il n'y a que quelques effet qui peuvent être faits par toutes les cartes:
 /// Attaquer une autre carte ou un joueur : -1
 /// Déplacement vers le board : -2
-/// Deplacemet vers le sanctuaire : -3
+/// Deplacement vers le sanctuaire : -3
+/// Changement de Phase: -4
 /// Le nombre sera celui du numéro de l'effet, le numéro de la liste sera 0. 
 /// 
 /// 
@@ -83,6 +84,12 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     public int numeroEffet;
 
     /// <summary>
+    /// Certains objets que l'on met dans la pile peuvent ne pas appartenir au flux. 
+    /// Exemple: Un changement de phase. 
+    /// </summary>
+    public bool AppartientAuFlux = false; 
+
+    /// <summary>
     /// Creer un effet dans la pile. 
     /// </summary>
     /// <param name="_IDCardGame">IDCardGame de la carte ayant créé l'effet</param>
@@ -123,6 +130,12 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     public string CreerPhraseDecritEffet() {
         string phraseDecritEffet = "";
         Debug.Log(ObjetEffet); 
+
+        // Dans le cas des effets "spéciaux". 
+        if (numeroEffet == -4) {
+            return "Passer à la phase suivante"; 
+        }
+
         try {
             // QUI JOUE L'EFFET
             switch (ObjetEffet.GetComponent<CarteType>().thisCarteType) {
@@ -179,10 +192,12 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     public IEnumerator JouerEffet(int playerID) {
         // On vérifie que c'est bien le joueur qui a créé l'effet qui le joue. 
         Debug.Log(PlayerIDAssocie);
-        Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID); 
+        Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
         if (PlayerIDAssocie == FindLocalPlayer().GetComponent<Player>().PlayerID) {
             Debug.Log("On joue l'effet depuis chez ce joueur");
-            if (FindCardWithID(IDObjectCardGame) != null) {
+            // Dans certains cas, changement de phase par exemple, 
+            // aucune carte n'a demandé l'effet. 
+            if (FindCardWithID(IDObjectCardGame) != null || numeroEffet < 0) {
                 Debug.Log("Depuis cette carte");
 
                 // On recrée la liste des cibles
@@ -197,8 +212,11 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         CibleEffet.Add(FindNotLocalPlayer());
                     }
                 }
-
-                GameObject thisCarte = FindCardWithID(IDObjectCardGame);
+                GameObject thisCarte = new GameObject(); 
+                if (IDObjectCardGame > 0) {
+                    thisCarte = FindCardWithID(IDObjectCardGame);
+                }
+                Debug.Log(numeroEffet); 
                 switch (numeroEffet) {
                     // On vérifie d'abord que l'effet ne soit pas un effet "spécial"
                     case -1:
@@ -211,6 +229,12 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, thisCarte, CibleEffet[0]);
                         yield return new WaitForSeconds(0.5f);
                         yield break;
+                    case -4:
+                        // Passage à une nouvelle phase
+                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GoToNextPhase(defairePile:true);
+                        Debug.Log("On va à la prochaine phase"); 
+                        yield return new WaitForSeconds(0.5f); 
+                        yield break; 
                 }
 
                 switch (thisCarte.GetComponent<CarteType>().thisCarteType) {
