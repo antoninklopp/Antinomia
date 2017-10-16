@@ -391,9 +391,10 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="allEffets">String reçu par la base de données. </param>
     public void stringToEffetList(string allEffets) {
-        if (allEffets == "None"){
+        if (allEffets == "None" || allEffets == "" || allEffets == " "){
             return; 
         }
+
         string[] AllEffetsStringList = allEffets.Split(':');
 
         for (int i = 0; i < AllEffetsStringList.Length; ++i) {
@@ -411,6 +412,8 @@ public class Carte : NetworkBehaviourAntinomia {
     public Effet stringToEffet(string _effetString) {
         Effet newEffet = new Effet();
         string ConditionList = _effetString.Split('!')[0];
+        Debug.Log(Name);
+        Debug.Log(_effetString); 
         string ActionList = _effetString.Split('!')[1];
 
         newEffet.AllActionsEffet = stringToActionList(ActionList);

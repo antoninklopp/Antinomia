@@ -95,6 +95,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
     /// <param name="data">L'information</param>
     /// <param name="ID"></param>
     void GSDataToCard(GameObject newCarte, GSData data, string ID="") {
+        Debug.Log(newCarte); 
         if (newCarte.GetComponent<CarteType>() != null) {
             newCarte.GetComponent<CarteType>().setTypeFromString(data.GetString("type"));
         } else {

@@ -12,6 +12,7 @@ public class DragImage : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
 	GameObject GameManagerObject;
 
+    [HideInInspector]
 	public bool inDeck; 
 
 	void Start(){

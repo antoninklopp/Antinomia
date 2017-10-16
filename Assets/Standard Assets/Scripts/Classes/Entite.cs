@@ -398,12 +398,12 @@ public class Entite : Carte {
                     // Si la carte est déposée sur le board, depuis la main.
                     // On vérifie qu'il y a moins de 5 cartes sur le board.
                     MoveToChampBataille(currentPhase);
-                    ProposerMettreJeuEnPause(); 
+                    // ProposerMettreJeuEnPause(); 
                 } else if (transform.position.y < yMaxSanctuaire && transform.position.y > yMinSanctuaire) {
                     // Si la carte est déposée sur le board. 
                     // On vérifie qu'il y a moins de 2 cartes sur le sanctuaire.
                     MoveToSanctuaire(currentPhase);
-                    ProposerMettreJeuEnPause(); 
+                    // ProposerMettreJeuEnPause(); 
                 }
                 // Si la carte n'est pas déposée, elle retrouve sa position grâce à la main qui est répordonnée.
                 Main.SendMessage("ReordonnerCarte");
@@ -429,12 +429,14 @@ public class Entite : Carte {
         CmdChangePosition(carteState);
     }
 
-    void MoveToSanctuaire(Player.Phases currentPhase) {
+    public void MoveToSanctuaire(Player.Phases currentPhase=Player.Phases.INITIATION, bool defairePile=false) {
         // Lorsque qu'une carte est mise sur le sanctuaire
         // Le state est changé par l'objet sanctuaire
         if (Sanctuaire.GetComponent<Sanctuaire>().getNumberCardsSanctuaire() < 2) {
             // On ne peut invoquer d'entités que lors des phases principales
-            if (carteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2)) {
+            // Lorsqu'on défait la pile on ne s'occupe pas des phases parce qu'elles ont été traitées lors de la création
+            // de "l'effet" dans la pile. 
+            if (carteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2 || defairePile)) {
                 // Le joueur ne peut pas invoquer plus d'une carte avec un coût élémentaire par tour. 
                 // On peut aussi payer des niveaux de couts différents selon l'élément de l'entité. 
                 if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().nombreInvocationsSanctuaire >= 1) {
@@ -462,25 +464,49 @@ public class Entite : Carte {
                                     GameObject.Find("GameManager").SendMessage("DisplayMessage", "Vous ne pouvez pas payer ce cout " + (10 * x).ToString() + " points de vie");
                                     return;
                                 } else {
-                                    GameObject.Find("GameManager").SendMessage("DisplayMessage", "Vous perdez " + (10 * x).ToString() + " points de vie");
-                                    FindLocalPlayer().GetComponent<Player>().AttackPlayer(10 * x);
+                                    if (!defairePile) {
+                                        MettreEffetDansLaPile(new List<GameObject>(), -3);
+                                        return; 
+                                    }
+                                    else {
+                                        GameObject.Find("GameManager").SendMessage("DisplayMessage", "Vous perdez " + (10 * x).ToString() + " points de vie");
+                                        FindLocalPlayer().GetComponent<Player>().AttackPlayer(10 * x);
+                                    }
                                 }
                                 break;
                             case Element.EAU:
-                                // Donner 10x points de vie à l'adversaire. 
-                                GameObject.Find("GameManager").SendMessage("DisplayMessage", "Votre adversaire gagne " + (10 * x).ToString() + "points de vie");
-                                // Comme le HealPlayer ne marche que sur le joueur local, sinon pas d'autorité
-                                // On fait une attaque à l'envers.
-                                FindNotLocalPlayer().GetComponent<Player>().AttackPlayer(-10 * x);
+                                if (!defairePile) {
+                                    MettreEffetDansLaPile(new List<GameObject>(), -3);
+                                    return; 
+                                }
+                                else {
+                                    // Donner 10x points de vie à l'adversaire. 
+                                    GameObject.Find("GameManager").SendMessage("DisplayMessage", "Votre adversaire gagne " + (10 * x).ToString() + "points de vie");
+                                    // Comme le HealPlayer ne marche que sur le joueur local, sinon pas d'autorité
+                                    // On fait une attaque à l'envers.
+                                    FindNotLocalPlayer().GetComponent<Player>().AttackPlayer(-10 * x);
+                                }
                                 break;
                             case Element.AIR:
-                                gameObject.tag = "BoardSanctuaire";
-                                GameObject.Find("GameManager").SendMessage("InvocationElementaireAir", x);
+                                if (!defairePile) {
+                                    MettreEffetDansLaPile(new List<GameObject>(), -3);
+                                    return;
+                                }
+                                else {
+                                    gameObject.tag = "BoardSanctuaire";
+                                    GameObject.Find("GameManager").SendMessage("InvocationElementaireAir", x);
+                                }
                                 break;
                             case Element.TERRE:
-                                // Detruire les x premières cartes du deck.
-                                GameObject.Find("GameManager").SendMessage("DisplayMessage", x.ToString() + "cartes de votre deck ont été détruites");
-                                FindLocalPlayer().SendMessage("DetruireCartesDessusDeck", x);
+                                if (!defairePile) {
+                                    MettreEffetDansLaPile(new List<GameObject>(), -3);
+                                    return;
+                                }
+                                else {
+                                    // Detruire les x premières cartes du deck.
+                                    GameObject.Find("GameManager").SendMessage("DisplayMessage", x.ToString() + "cartes de votre deck ont été détruites");
+                                    FindLocalPlayer().SendMessage("DetruireCartesDessusDeck", x);
+                                }
                                 break;
                             default:
                                 throw new Exception("La carte élémentaire devrait avoir un élément assigné"); 
@@ -500,21 +526,26 @@ public class Entite : Carte {
                 GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "On ne peut pas invoquer de cartes pendant la phase de preparation");
                 return;
             }
+
             Main.SendMessage("DeleteCard", gameObject);
             Sanctuaire.SendMessage("CmdCarteDeposee", gameObject);
             gameObject.tag = "BoardSanctuaire";
+
+            CmdChangePosition(State.SANCTUAIRE);
         } else {
             // On envoie un message à l'utilisateur disant qu'il y a plus de 2 cartes sur le sanctuaire.
             GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Deja 2 cartes dans le sanctuaire");
         }
     }
 
-    void MoveToChampBataille(Player.Phases currentPhase) {
+    public void MoveToChampBataille(Player.Phases currentPhase = Player.Phases.INITIATION, bool defairePile=false) {
         // Lorsqu'une carte est mise sur le board. 
         // Le state est changé par l'objet board, à changer ici? 
         if (ChampBataille.GetComponent<CartesBoard>().getNumberCardsChampBataille() < 5) {
             // On ne peut invoquer des entités que lors des phases principales
-            if (carteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2)) {
+            // Lorsqu'on défait la pile on ne s'occupe pas des phases parce qu'elles ont été traitées lors de la création
+            // de "l'effet" dans la pile. 
+            if (carteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2) || defairePile) {
                 if (carteAscendance == Ascendance.MALEFIQUE && cardAstraleOnChampBatailleOrSanctuaire()) {
                     GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Il y a une carte astrale sur le board");
                 } else if (carteAscendance == Ascendance.ASTRALE && cardMalefiqueOnChampBatailleOrSanctuaire()) {
@@ -525,11 +556,19 @@ public class Entite : Carte {
                     return;
                 } else {
                     // La carte est instanciée. 
-                    GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "AKA utilisé: " + CoutAKA.ToString());
-                    FindLocalPlayer().SendMessage("subtractAKA", CoutAKA);
+                    // Lorsqu'on ne défait pas la pile
+                    if (!defairePile) {
+                        MettreEffetDansLaPile(new List<GameObject>(), -2);
+                        return; 
+                    }
+                    // Lorsqu'on défait la pile.
+                    else {
+                        GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "AKA utilisé: " + CoutAKA.ToString());
+                        FindLocalPlayer().SendMessage("subtractAKA", CoutAKA);
 
-                    if ((carteAscendance == Ascendance.MALEFIQUE) || (carteAscendance == Ascendance.ASTRALE)) {
-                        CmdChangeAscendanceTerrain(carteAscendance);
+                        if ((carteAscendance == Ascendance.MALEFIQUE) || (carteAscendance == Ascendance.ASTRALE)) {
+                            CmdChangeAscendanceTerrain(carteAscendance);
+                        }
                     }
                 }
                 // On regarde les effets de la carte. 
@@ -547,6 +586,8 @@ public class Entite : Carte {
             Main.SendMessage("DeleteCard", gameObject);
             ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
             gameObject.tag = "BoardSanctuaire";
+
+            CmdChangePosition(State.CHAMPBATAILLE);
         } else {
             // TODO: Envoyer un message à l'utilisateur disant qu'il y a plus de 5 cartes sur le board. 
             GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Deja 5 cartes sur le board");
@@ -625,7 +666,7 @@ public class Entite : Carte {
                 Main.SendMessage("ReordonnerCarte");
                 gameObject.tag = "BoardSanctuaire";
                 // On offre au joueur adverse la possibilité de réagir. 
-                StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposeToPauseGame()); 
+                // StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposeToPauseGame()); 
                 break;
             case State.SANCTUAIRE:
                 Main.SendMessage("DeleteCard", gameObject);
@@ -634,7 +675,7 @@ public class Entite : Carte {
                 gameObject.tag = "BoardSanctuaire";
 
                 // On offre au joueur adverse la possibilité de réagir. 
-                StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposeToPauseGame());
+                // StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposeToPauseGame());
                 break;
             case State.CIMETIERE:
                 Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
@@ -652,6 +693,11 @@ public class Entite : Carte {
 
     }
 
+    /// <summary>
+    /// Set up de la carte. 
+    /// Lors du spawn sur le client, on envoie les informations à l'objet. 
+    /// </summary>
+    /// <returns>None</returns>
     public IEnumerator SetUpCard() {
         /*
 		 * On attend de savoir si le state de la carte est Main ou pas. 
@@ -1129,8 +1175,8 @@ public class Entite : Carte {
     }
 
     public void stringToEffetAstral(string allEffets) {
-        if (allEffets == "None") {
-            return; 
+        if (allEffets == "None" || allEffets == "" || allEffets == " ") {
+            return;
         }
         string[] AllEffetsStringList = allEffets.Split(':');
 
@@ -1141,8 +1187,8 @@ public class Entite : Carte {
     }
 
     public void stringToEffetMalefique(string allEffets) {
-        if (allEffets == "None") {
-            return; 
+        if (allEffets == "None" || allEffets == "" || allEffets == " ") {
+            return;
         }
         string[] AllEffetsStringList = allEffets.Split(':');
 

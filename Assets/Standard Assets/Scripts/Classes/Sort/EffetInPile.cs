@@ -134,6 +134,10 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         // Dans le cas des effets "spéciaux". 
         if (numeroEffet == -4) {
             return "Passer à la phase suivante"; 
+        } else if (numeroEffet == -3) {
+            return ObjetEffet.GetComponent<Entite>().Name + " se déplace au sanctuaire"; 
+        } else if (numeroEffet == -2) {
+            return ObjetEffet.GetComponent<Entite>().Name + " se déplace sur le champ de Batailles";
         }
 
         try {
@@ -228,12 +232,26 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         Debug.Log(thisCarte);
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, thisCarte, CibleEffet[0]);
                         yield return new WaitForSeconds(0.5f);
+                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
                         yield break;
+                    // Déplacement vers le champ de bataille. 
+                    case -2:
+                        thisCarte.GetComponent<Entite>().MoveToChampBataille(defairePile: true);
+                        yield return new WaitForSeconds(0.5f);
+                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        yield break;
+                    // Déplacement vers le sanctuaire 
+                    case -3:
+                        thisCarte.GetComponent<Entite>().MoveToSanctuaire(defairePile: true);
+                        yield return new WaitForSeconds(0.5f);
+                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        yield break; 
                     case -4:
                         // Passage à une nouvelle phase
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GoToNextPhase(defairePile:true);
                         Debug.Log("On va à la prochaine phase"); 
-                        yield return new WaitForSeconds(0.5f); 
+                        yield return new WaitForSeconds(0.5f);
+                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
                         yield break; 
                 }
 

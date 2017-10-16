@@ -120,6 +120,14 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             // Changement de phase
             case -4:
 
+                break;
+            // Changement de position vers le sanctuaire
+            case -3:
+
+                break;
+            // Changement de position vers le champ de bataille. 
+            case -2:
+
                 break; 
             default:
                 effetJoue = GetEffetFromCarte(FindCardWithID(IDObjetEffet), numeroEffet, numeroListeEffet);
@@ -252,9 +260,12 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         if (transform.childCount > 1) {
             return true; 
         }
-        // Pour l'instant seul le changement de phase, implique qu'il n'y ait pas
+        // Pour l'instant seul le changement de phase, le passage d'une carte au sanctuaire ou au champ de bataille, 
+        // implique qu'il n'y ait pas
         // d'approbation du joueur qui a créé la pile. 
-        else if (pileEffets[0].GetComponent<EffetInPile>().numeroEffet == -4) {
+        else if (pileEffets[0].GetComponent<EffetInPile>().numeroEffet == -4
+                || pileEffets[0].GetComponent<EffetInPile>().numeroEffet == -3
+                || pileEffets[0].GetComponent<EffetInPile>().numeroEffet == -2) {
             return false; 
         } else {
             return true; 
