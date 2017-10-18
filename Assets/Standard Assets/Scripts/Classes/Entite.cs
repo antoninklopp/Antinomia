@@ -1,11 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking; 
-using System; 
+using UnityEngine.Networking;
 using UnityEngine.UI;
-using GameSparks;
-using GameSparks.Core; 
 
 /// <summary>
 /// Hérite de la classe Carte. 
@@ -28,7 +26,15 @@ public class Entite : Carte {
 
     // Définition des enums nécessaires à la carte, à mettre ailleurs? 
     public enum Ascendance { ASTRALE, NEUTRE, MALEFIQUE, ELEMENTAIRE };
-    public enum Element { AIR, EAU, FEU, TERRE, AUCUN };
+
+    public enum Element {
+        AIR,
+        EAU,
+        FEU,
+        TERRE,
+        AUCUN
+    };
+
     public enum ConditionActive { };
     public enum ConditionPassive { };
     public enum State { MAIN, CHAMPBATAILLE, CIMETIERE, DECK, BIGCARD, SANCTUAIRE, ADVERSAIRE };
@@ -57,10 +63,7 @@ public class Entite : Carte {
     [SyncVar(hook = "ChangeElement")]
     public Element carteElement;
     public Ascendance carteAscendance;
-    // Ceci est une classe.
-    public Capacite carteCapacite;
-    public EffetAstral carteEffetAstral;
-    public EffetMalefique carteEffetMalefique;
+    
     // Le nombre d'attaques peut être changé par capacité d'une carte. 
     public int nombre_attaque = 1;
     // On peiut verrouiller la carte pour qu'elle ne puisse pas changer de position
@@ -75,24 +78,49 @@ public class Entite : Carte {
     /// Reçu par la bdd Gamesparks "Malefique". C'est le string à décortiquer pour créer la liste d'effets maléfiques. 
     /// </summary>
     public string AllEffetsMalefiqueString = "";
+
     /// <summary>
     /// Reçu par la bdd Gamesparks "Astral". C'est le string à décortiquer pour créer la liste d'effets astrals. 
     /// </summary>
     public string AllEffetsAstralString = "";
+
     /// <summary>
     /// Reçu par la bdd Gamesparks "MalefiqueString". C'est le string à afficher "en français" pour que 
     /// l'utilisateur comprenne l'effet maléfique en question. 
     /// </summary>
     public string AllEffetsMalefiqueStringToDisplay = "";
+
     /// <summary>
     /// Reçu par la bdd Gamesparks "AstralString". C'est le string à afficher "en français" pour que 
     /// l'utilisateur comprenne l'effet maléfique en question. 
     /// </summary>
-    public string AllEffetsAstralStringToDisplay = ""; 
+    public string AllEffetsAstralStringToDisplay = "";
 
+    /// <summary>
+    /// Certaines cartes peuvent être fortes face à certains éléments. 
+    /// si la liste est vide aucune force, 
+    /// si un chiffre est négatif, l'entité est FAIBLE face à l'élement. 
+    /// si un chiffre est positif, l'entité est FORTE face à l'élément.
+    /// 1 - AIR
+    /// 2 - EAU
+    /// 3 - FEU
+    /// 4 - TERRE
+    /// 5 - NEUTRE
+    /// </summary>
+    public List<int> ForteFaceAElement = new List<int>();
+
+    /// <summary>
+    /// Definition de la classe entité
+    /// Ce CONSTRUCTEUR N'EST JAMAIS UTILISE
+    /// </summary>
+    /// <param name="_Name">Nom de l'entité</param>
+    /// <param name="_ID">ID de l'entité</param>
+    /// <param name="_STAT">STAT de la carte</param>
+    /// <param name="_CoutAKA">Cout en AKA de la carte</param>
+    /// <param name="_carteElement">élément de la carte</param>
+    /// <param name="_carteAscendance">ascendance de la carte</param>
     public Entite(string _Name, int _ID, int _STAT, int _CoutAKA, Element _carteElement,
-        Ascendance _carteAscendance, Capacite _carteCapacite,
-        EffetMalefique _carteEffetMalefique, EffetAstral _carteEffetAstral) {
+        Ascendance _carteAscendance) {
         /*
 		 * Définition d'une nouvelle Carte.
 		*/
@@ -103,22 +131,26 @@ public class Entite : Carte {
         carteElement = _carteElement;
         carteAscendance = _carteAscendance;
         // Pour l'instant chaque carte n'a qu'une seule capacité. 
-        carteCapacite = _carteCapacite;
-        carteEffetAstral = _carteEffetAstral;
-        carteEffetMalefique = _carteEffetMalefique;
         canGoBig = true;
     }
 
+    /// <summary>
+    /// Définition de la classe entité sans paramètre? 
+    /// </summary>
     public Entite() {
         /* On peut créer la carte sans aucun attribut
 		* Pour que ce soit plus clair lors de la création.
 		*/
     }
-
-    //public int Attack; 
-    //public int Defense;
+    
+    /// <summary>
+    /// State de la carte
+    /// </summary>
     public State carteState = State.DECK;
-    // Track si l'utilisateur a cliqué sur la carte ou pas. 
+
+    /// <summary>
+    /// Track si l'utilisateur a cliqué sur la carte ou pas. 
+    /// </summary>
     public bool clicked = false;
 
     /// <summary>
@@ -881,52 +913,12 @@ public class Entite : Carte {
         Debug.Log("AKA : " + CoutAKA.ToString());
         Debug.Log("carteElement : " + carteElement.ToString());
         Debug.Log("carteAscendance : " + carteAscendance.ToString());
-        //Debug.Log("carteCapacite : " + carteCapacite.ToString()); 
-        Debug.Log("carteEffetAstral : " + carteEffetAstral.ToString());
-        Debug.Log("carteEffetMalefique : " + carteEffetMalefique.ToString());
 
         Debug.Log(" ---------- FIN INFO CARTE ------------");
     }
 
 
     // TOUT CE QUI CONCERNE LA GESTION DES CAPACITES : COMPLIQUE A DEPLACER DANS LA CLASSE CAPACITE (a cause des messages à envoyer aux objets). 
-
-
-    void DoCapacite() {
-        /*
-		 * Méthode la plus importante, doit faire la capacite. 
-		 * 
-		 */
-        // Premièrement on écrit au debug le nom de la capacite pour voir si on fait le bon effet. 
-        WriteCapacite.GetComponent<Text>().text = carteCapacite.name.ToString();
-
-        // Ensuite on fait une chose différente selon chaque capacité. 
-        switch (carteCapacite.name) {
-            case Capacite.CapaciteName.PIOCHE:
-                GameObject.Find("GameManager").SendMessage("PiocheMultiple", carteCapacite.capaciteInt);
-                break;
-            case Capacite.CapaciteName.MODIFIER_PUISSANCE:
-                ModifierPuissance(carteCapacite.capaciteInt, carteCapacite.coutCapacite);
-                break;
-            case Capacite.CapaciteName.DEGATS:
-                StartCoroutine(CartesDegats(carteCapacite.capaciteInt, 1));
-                break;
-            case Capacite.CapaciteName.DEFAUSSER:
-                StartCoroutine(Defausser(carteCapacite.capaciteInt));
-                break;
-
-
-
-
-
-
-
-
-
-
-        }
-
-    }
 
     public void VerrouillerCarte(bool verrouiller) {
         /*
@@ -962,24 +954,11 @@ public class Entite : Carte {
 
     }
 
-    void ModifierPuissance(int intModificationPuissance, int coutAKA) {
-        /*
-		 * On modifie la puissance de la carte, 
-		 * Si le cout en AKA est de 0, on modifie directement la puissance,
-		 * Sinon on propose au joueur de payer le cout en AKA, pour modifier sa puissance.
-		 */
-        if (coutAKA == 0) {
-            STAT += carteCapacite.capaciteInt;
-        } else {
-            GameObject GameManagerObject = GameObject.Find("GameManager");
-
-        }
-    }
-
+    /// <summary>
+    /// A chaque début de tour, toutes les cartes peuvent de nouveau attaquer
+    /// </summary>
     void resetHasAttacked() {
-        /*
-		 * A chaque début de tour, toutes les cartes peuvent de nouveau attaquer. 
-		 */
+        // Si hasAttacked == -1, alors la carte ne peut pas attaquer, jamais. 
         if (hasAttacked == -1) {
             return;
         }
@@ -988,6 +967,11 @@ public class Entite : Carte {
         }
     }
 
+    /// <summary>
+    /// Dire que la carte a attaque
+    /// </summary>
+    /// <param name="newHasAttacked">Par defaut, on dit que la carte a attaqué, mais on peut imaginer,
+    /// remettre à 0 l'attaque de cette carte</param>
     void setHasAttacked(bool newHasAttacked = true) {
         hasAttacked = 1;
     }
@@ -1208,13 +1192,16 @@ public class Entite : Carte {
                 "Element : " + carteElement + "\n"; 
         }
 
-        if (AllEffetsStringToDisplay != "None") {
+        List<string> noneStrings = new List<string>(){"None", " ", ""};
+        // Si le string n'est pas dans la liste des noneStrings;
+        if (!(noneStrings.FindIndex(o=>string.Equals(AllEffetsStringToDisplay, o, StringComparison.OrdinalIgnoreCase)) > -1)) {
             stringToReturn += "Effets : " + AllEffetsStringToDisplay + "\n"; 
         } 
-        if (AllEffetsAstralStringToDisplay != "None") {
+
+        if (!(noneStrings.FindIndex(o => string.Equals(AllEffetsAstralStringToDisplay, o, StringComparison.OrdinalIgnoreCase)) > -1)) {
             stringToReturn += "Astral : " + AllEffetsAstralStringToDisplay + "\n";
         }
-        if (AllEffetsMalefiqueStringToDisplay != "None") {
+        if (!(noneStrings.FindIndex(o => string.Equals(AllEffetsMalefiqueStringToDisplay, o, StringComparison.OrdinalIgnoreCase)) > -1)) {
             stringToReturn += "Malefique : " + AllEffetsMalefiqueStringToDisplay;
         }
 
@@ -1366,6 +1353,122 @@ public class Entite : Carte {
             }
         }
         return false;
+    }
+
+
+
+
+    /// <summary>
+    /// TODO : utiliser la propriété int des enums? 
+    /// element to int:
+    /// 1 : AIR
+    /// 2 : EAU
+    /// 3 : FEU
+    /// 4 : TERRE
+    /// 
+    /// On regarde si au moment où l'on check les conditions une carte paye un cout élémentaire. 
+    /// Et la carte doit appartenir au joueur dans PAYER_COUT_ELEMENTAIRE
+    /// </summary>
+    protected override bool CheckIfCartePayeCoutElementaire(int element) {
+        try {
+            if (GameObject.FindGameObjectWithTag("Pile") != null) {
+                GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
+                List<GameObject> allEffetsInPile = Pile.GetComponent<PileAppelEffet>().GetPileEffets();
+                for (int i = 0; i < allEffetsInPile.Count; ++i) {
+                    // Si l'effet est un déplacement vers le sanctuaire
+                    if (allEffetsInPile[i].GetComponent<EffetInPile>().numeroEffet == -3
+                        && allEffetsInPile[i].GetComponent<EffetInPile>().ObjetEffet.GetComponent<Carte>().isFromLocalPlayer) {
+                        switch (allEffetsInPile[i].GetComponent<EffetInPile>().ObjetEffet.GetComponent<Entite>().carteElement) {
+                            case Element.AIR:
+                                if (element == 1) {
+                                    return true;
+                                }
+                                break;
+                            case Element.EAU:
+                                if (element == 2) {
+                                    return true;
+                                }
+                                break;
+                            case Element.FEU:
+                                if (element == 3) {
+                                    return true;
+                                }
+                                break;
+                            case Element.TERRE:
+                                if (element == 4) {
+                                    return true;
+                                }
+                                break;
+                            default:
+                                Debug.LogWarning("On ne devrait pas passer par là. ");
+                                break;
+                        }
+                    }
+                }
+            }
+            return false;
+        } catch (NullReferenceException e) {
+            Debug.LogWarning("Probleme ICI" + e.ToString());
+            return false; 
+        }
+    }
+
+    protected override void CarteForteFaceA(int element) {
+        ForteFaceAElement.Add(element); 
+    }
+
+    /// <summary>
+    /// On teste si notre entité est forte face à une autre. 
+    /// </summary>
+    /// <param name="AutreEntite">element de l'autre entité</param>
+    /// <returns>un int 
+    /// 0 si ni faible ni forte
+    /// 1 si forte
+    /// -1 si faible</returns>
+    public int estForteFaceA(Element _elementAutreEntite, Ascendance _ascendanceAutreEntite) {
+        if (ForteFaceAElement.Count == 0) {
+            return 0; 
+        } else {
+            for (int i = 0; i < ForteFaceAElement.Count; ++i) {
+                // Les elements sont dans le bon ordre, 
+                // AIR, EAU, FEU, TERRE
+                if (Mathf.Abs(ForteFaceAElement[i]) == ((int)(_elementAutreEntite) - 1)) {
+                    if (ForteFaceAElement[i] > 0) {
+                        return 1; 
+                    } else {
+                        return -1; 
+                    }
+                } else if (ForteFaceAElement[i] == 5 && _ascendanceAutreEntite == Ascendance.NEUTRE) {
+                    return 1; 
+                } else if (ForteFaceAElement[i] == -5 && _ascendanceAutreEntite == Ascendance.NEUTRE) {
+                    return -1; 
+                }
+            }
+        }
+        return 0;
+    }
+
+    public int estForteFaceA(GameObject AutreEntite) {
+        return estForteFaceA(AutreEntite.GetComponent<Entite>().carteElement, AutreEntite.GetComponent<Entite>().carteAscendance); 
+    }
+
+    /// <summary>
+    /// <see cref="Carte.GererEffetsPonctuel"/>
+    /// </summary>
+    public override void GererEffetsPonctuel() {
+        base.GererEffetsPonctuel();
+
+        GameManager.AscendanceTerrain _ascendanceTerrain = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain();
+        switch (_ascendanceTerrain) {
+            case GameManager.AscendanceTerrain.NONE:
+                return;
+            case GameManager.AscendanceTerrain.MALEFIQUE:
+                GererEffets(AllEffetsMalefique);
+                break;
+            case GameManager.AscendanceTerrain.ASTRALE:
+                GererEffets(AllEffetsAstral);
+                break;
+        }
     }
 
 }

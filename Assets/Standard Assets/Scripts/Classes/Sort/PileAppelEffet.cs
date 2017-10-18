@@ -274,5 +274,9 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
     }
 
+    public List<GameObject> GetPileEffets() {
+        return pileEffets; 
+    }
+
     
 }

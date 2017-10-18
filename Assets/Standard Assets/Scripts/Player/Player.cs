@@ -707,6 +707,11 @@ public class Player : NetworkBehaviourAntinomia	 {
 		}
 	}
 
+    /// <summary>
+    /// Changer l'AKA du joueur
+    /// Non utilisé par la syncvar. 
+    /// </summary>
+    /// <param name="newAKA">Nouvelle valeur de l'AKA</param>
 	void setPlayerAKA(int newAKA){
 		/*
 		 * Changer l'AKA du joueur
@@ -715,21 +720,43 @@ public class Player : NetworkBehaviourAntinomia	 {
 		CmdChangePlayerAKA (PlayerAKA); 
 	}
 
+    /// <summary>
+    /// Changer l'AKA du joueur, sur le serveur
+    /// </summary>
+    /// <param name="AKA">Nouvelle valeur de l'AKA</param>
 	[Command]
 	void CmdChangePlayerAKA(int AKA){
 		PlayerAKA = AKA; 
 	}
 
-	// Fonction appelée par la syncvar
+    /// <summary>
+    /// Changer l'AKA du joueur
+    /// Utilisé par la syncvar
+    /// </summary>
+    /// <param name="newAKA"></param>
 	void ChangePlayerAKA(int newAKA){
-		PlayerAKA = newAKA; 
+        // Fonction appelée par la syncvar
+        PlayerAKA = newAKA; 
 		GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ().setPlayerAKAUI (PlayerID, PlayerAKA); 
 	}
 
+    /// <summary>
+    /// Enlever de l'AKA au joueur
+    /// </summary>
+    /// <param name="AKAToSubtract">Valeur de l'AKA à enlever</param>
 	public void subtractAKA(int AKAToSubtract){
 		PlayerAKA -= AKAToSubtract;
 		setPlayerAKA (PlayerAKA); 
 	}
+
+    /// <summary>
+    /// Ajouter de l'AKA au joueur
+    /// </summary>
+    /// <param name="AKAToAdd">Valeur de l'AKA à ajouter</param>
+    public void addAKA(int AKAToAdd) {
+        PlayerAKA += AKAToAdd;
+        setPlayerAKA(PlayerAKA); 
+    }
 
 
 	// ---- Fin du jeu : Le joueur gagne ou perd. 

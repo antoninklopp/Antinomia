@@ -245,7 +245,8 @@ public class GameManager : NetworkBehaviourAntinomia {
 		 * Lors d'un appui sur le bouton continuer, on passe à la phase suivante. 
 		 */
 
-        if (!defairePile) {
+        // On ne peut pas réagir lors après la phase finale. 
+        if (!defairePile && Phase != Player.Phases.FINALE) {
             Debug.Log("On demande un changement de phase"); 
             AjouterChangementDePhasePile();
         } else {
@@ -313,17 +314,10 @@ public class GameManager : NetworkBehaviourAntinomia {
 		}
 	}
 
-//	void CalculAKA(){
-//		/*
-//		 * En phase d'initiation, calcul de l'AKA rémanent de chaque joueur. 
-//		 * Le terme de rémanent désigne l'AKA fixé pour le tour et par le joueur, différent de l'AKA courant qui est
-//		 * la valeur fonction des actions du joueur qui peut en épuiser.
-//		 */ 
-//		AKARemanent = GameObject.Find ("CartesChampBatailleJoueur1").transform.childCount
-//		+ GameObject.Find ("CartesSanctuaireJoueur1").transform.childCount; 
-//		updateAKAAffichage (AKARemanent); 
-//	}
-
+    /// <summary>
+    /// Changer l'affichae de l'AKA 
+    /// </summary>
+    /// <param name="newAKA">Le nouvel aka</param>
 	void updateAKAAffichage(int newAKA){
 		AKA.GetComponent<Text> ().text = "AKA : " + newAKA.ToString (); 
 	}
@@ -432,9 +426,13 @@ public class GameManager : NetworkBehaviourAntinomia {
         }
     }
 
+    /// <summary>
+    /// Changer le tour
+    /// </summary>
+    /// <param name="newTour"></param>
 	void setTour(int newTour){
 		/*
-		 * Changer le Tour, fonction appelée par le Player. 
+		 * Fonction appelée par le Player. 
 		 */ 
 		Tour = newTour; 
 		CurrentTour.GetComponent<Text> ().text = Tour.ToString();
@@ -555,33 +553,12 @@ public class GameManager : NetworkBehaviourAntinomia {
             /*
 			 * Si l'entité attaquée est une carte du joueur adverse.  
 			 */
-
             if (JouerEffet) {
-                Entite.Ascendance AscendanceOtherEntity = OtherPlayerEntity.GetComponent<Entite>().carteAscendance;
-                Entite.Element ElementOther = OtherPlayerEntity.GetComponent<Entite>().carteElement;
-                int multiplicateurDegatsOther = 1;
 
-                // On regarde d'abord les ascendances des deux entités. 
-                if (AscendanceMyEntity == Entite.Ascendance.NEUTRE || AscendanceOtherEntity == Entite.Ascendance.NEUTRE) {
-                    // Si un des elements est neutre, l'autre n'est ni fort ni faible face à lui. 
-                }
-                else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity != Entite.Ascendance.ELEMENTAIRE) {
-                    multiplicateurDegatsMy = 2;
-                }
-                else if (AscendanceMyEntity != Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
-                    multiplicateurDegatsOther = 2;
-                }
-                else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
-                    // SI les deux sont élémentaires
-
-                    // vérifier ici les condition aux limites avec les derniers éléments à chaque fois. 
-                    if (ElementMy - ElementOther == 1) {
-                        multiplicateurDegatsOther = 2;
-                    }
-                    else if (ElementOther - ElementMy == 1) {
-                        multiplicateurDegatsMy = 2;
-                    }
-                }
+                List<int> Multiplicateurs = CalculMultiplicateurs(MyPlayerEntity, OtherPlayerEntity); 
+                int multiplicateurDegatsOther = Multiplicateurs[1];
+                multiplicateurDegatsMy = Multiplicateurs[0]; 
+                
 
                 Debug.Log("Il vient d'y avoir une attaque");
                 int attackMy = MyPlayerEntity.GetComponent<Entite>().STAT * multiplicateurDegatsMy;
@@ -618,6 +595,60 @@ public class GameManager : NetworkBehaviourAntinomia {
         MyPlayerEntity = null;
         OtherPlayerEntity = null;
 	}
+
+    /// <summary>
+    /// Calcul les multiplicateurs des deux entités qui se battent
+    /// </summary>
+    /// <returns>en [0], mon entité, en [1] l'entité adverse. </returns>
+    private List<int> CalculMultiplicateurs(GameObject MyPlayerEntity, GameObject OtherPlayerEntity) {
+
+        Entite.Ascendance AscendanceOtherEntity = OtherPlayerEntity.GetComponent<Entite>().carteAscendance;
+        Entite.Element ElementOther = OtherPlayerEntity.GetComponent<Entite>().carteElement;
+
+        Entite.Ascendance AscendanceMyEntity = MyPlayerEntity.GetComponent<Entite>().carteAscendance;
+        Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().carteElement;
+
+        List<int> MultiplicateursRetour = new List<int>();
+        // On ajoute 1 comme multiplicateur de base de mon entité
+        int MultiplicateurMyEntite = 1; 
+        // On ajoute 1 comme multiplicateur de base de l'autre entité. 
+        int MultiplicateurEntiteOther = 1;
+
+        // On regarde d'abord les ascendances des deux entités. 
+        if (AscendanceMyEntity == Entite.Ascendance.NEUTRE || AscendanceOtherEntity == Entite.Ascendance.NEUTRE) {
+            // Si un des elements est neutre, l'autre n'est ni fort ni faible face à lui. 
+        }
+        else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity != Entite.Ascendance.ELEMENTAIRE) {
+            MultiplicateurMyEntite = 2;
+        }
+        else if (AscendanceMyEntity != Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
+            MultiplicateurEntiteOther = 2;
+        }
+        else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
+            // SI les deux sont élémentaires
+
+            // vérifier ici les condition aux limites avec les derniers éléments à chaque fois. 
+            if (ElementMy - ElementOther == 1) {
+                MultiplicateurEntiteOther = 2;
+            }
+            else if (ElementOther - ElementMy == 1) {
+                MultiplicateurMyEntite = 2;
+            }
+        }
+
+        // On regarde si NOTRE entité est forte face à l'AUTRE (si forteFace == 1, alors NOTRE est forte face à AUTRE)
+        int forteFace = MyPlayerEntity.GetComponent<Entite>().estForteFaceA(OtherPlayerEntity); 
+        if (forteFace == 1) {
+            MultiplicateurMyEntite = 1; 
+        } else if (forteFace == -1) {
+            MultiplicateurEntiteOther = 1; 
+        }
+
+
+        MultiplicateursRetour.Add(MultiplicateurMyEntite);
+        MultiplicateursRetour.Add(MultiplicateurEntiteOther);
+        return MultiplicateursRetour; 
+    }
 
     /// <summary>
     /// Ajouter une attaque comme un effet dans la pile. 
@@ -816,7 +847,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 		 * Coroutine associée à la fonction DisplayMessage
 		 */ 
 		Capacite_Effet.GetComponent<Text> ().text = message; 
-		yield return new WaitForSeconds (5f); 
+		yield return new WaitForSeconds (2f); 
 		Capacite_Effet.GetComponent<Text> ().text = ""; 
 
 	}
@@ -1073,7 +1104,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             // Temps d'attente. 
             AntinomiaLog("Attente");
             MontrerQuellesCartesPeuventJoueur(); 
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(2f);
             if (!gameIsPaused) {
                 PauseButton.SetActive(false);
                 //On regarde s'il y a une pile d'effet en cours. 
@@ -1326,6 +1357,36 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     public void DefairePileNon() {
         defairePile = 2; 
+    }
+
+    /// <summary>
+    /// Regarder si certaines cartes peuvent jouer un ou plusieurs effet(s).
+    /// </summary>
+    public void CheckAllEffetsCartes() {
+        GameObject[] AllEntites = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
+        for (int i = 0; i < AllEntites.Length; ++i) {
+            try {
+                if (AllEntites[i].GetComponent<Entite>().isFromLocalPlayer) {
+                    AllEntites[i].GetComponent<Entite>().GererEffetsPonctuel();
+                }
+            }
+            catch (NullReferenceException e) {
+                Debug.Log(e);
+            }
+        }
+
+        GameObject[] AllAssistances = GameObject.FindGameObjectsWithTag("Assistance");
+        for (int i = 0; i < AllAssistances.Length; ++i) {
+            try {
+                if (AllAssistances[i].GetComponent<Assistance>().isFromLocalPlayer &&
+                    AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.JOUEE) {
+                    AllAssistances[i].GetComponent<Assistance>().GererEffetsPonctuel();
+                }
+            }
+            catch (NullReferenceException e) {
+                Debug.Log(e);
+            }
+        }
     }
 
 }

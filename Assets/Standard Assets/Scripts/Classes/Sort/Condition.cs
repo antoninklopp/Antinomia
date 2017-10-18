@@ -29,7 +29,7 @@ public class Condition {
     *      7 : Phase Finale
     *      
     * avec a: le tour lors duquel ce timing s'effectue. 
-    *      0 : Le tour n'a pas d'importance. 
+    *      0 : Le tour n'a pas d'importance/pendant aucun tour. 
     *      1 : les tours des deux joueurs
     *      2 : le tour du joueur local
     *      3 : le tour de l'autre joueur
@@ -117,10 +117,10 @@ public class Condition {
         /// Ici l'entier correspond au type de coût élémentaire payer
         /// int  = :
         /// 0 : n'importe quel coût élémentaire
-        /// 1 : EAU
-        /// 2 : FEU
-        /// 3 : TERRE
-        /// 4 : AIR
+        /// 1 : AIR
+        /// 2 : EAU
+        /// 3 : FEU
+        /// 4 : TERRE
         /// </summary>
         PAYER_COUT_ELEMENTAIRE, 
         /// <summary>

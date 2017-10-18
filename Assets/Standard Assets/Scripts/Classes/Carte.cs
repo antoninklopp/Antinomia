@@ -527,8 +527,13 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="nouveauTour">true lorsque la fonction est appelée lors du passage à un nouveau tour</param>
     /// <returns>true, si toutes les conditions sont remplies</returns>
     /// <param name="Cible">Si c'est un sort qui appelle la méthode, il peut déjà avoir une cible</param>
+    /// <param name="deposeCarte">Si on veut gérer les conditions lorsqu'on dépose une carte, 
+    /// 0 si on ne depose pas de cartes
+    /// 1 si on dépose une carte sur le sanctuaire
+    /// 2 si on depose une carte sur le champ de bataille</param>
     public bool GererConditions(List<Condition> _conditions, Player.Phases _currentPhase = Player.Phases.INITIATION,
-                                    bool estMort = false, bool debut = false, bool nouveauTour = false, GameObject Cible=null) {
+                                    bool estMort = false, bool debut = false, bool nouveauTour = false, GameObject Cible=null, 
+                                    int deposeCarte=0) {
         /*
          * Regarde si toutes les conditions sont ok pour un effet. 
          * Retourne true si c'est le cas, false sinon
@@ -623,6 +628,22 @@ public class Carte : NetworkBehaviourAntinomia {
                         if (!estMort) {
                             return false;
                         }
+                        break;
+                    case Condition.ConditionEnum.PAYER_COUT_ELEMENTAIRE:
+                        // Dans le cas où l'on ne dépose pas une carte sur le sanctuaire
+                        // Le cout élémentaire ne peut être payé que lorsqu'on dépose une carte dans le sanctuaire. 
+                        if (deposeCarte != 1) {
+                            return false; 
+                        } else {
+                            // Sinon il faut regarder dans la pile s'il n'y a pas une carte qui veut se déplacer dans le sanctuaire
+                            if (!CheckIfCartePayeCoutElementaire(_conditions[j].properIntCondition)) {
+                                return false; 
+                            }
+                        } 
+                        break;
+                    case Condition.ConditionEnum.SACRIFIER_CARTE:
+                        // Lorsque la condition est le sacrifice d'une carte. 
+                        // Dans le cas du sacrifice d'une carte, il faut rajouter dans les effets le sacrifice de la carte. 
                         break;
                     default:
                         Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
@@ -838,12 +859,14 @@ public class Carte : NetworkBehaviourAntinomia {
                 }
                 break;
             case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
-                if (jouerEffet) {
+                //if (jouerEffet) {
+                if (GetComponent<Entite>().hasAttacked != 1) {
                     GetComponent<Entite>().hasAttacked = -1;
                     DisplayMessage("Cette entité ne peut pas attaquer");
-                } else {
-                    StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                 }
+                //} else {
+                //    StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                //}
                 break;
             case Action.ActionEnum.DEFAUSSER:
                 // On propose de défausser. 
@@ -863,6 +886,13 @@ public class Carte : NetworkBehaviourAntinomia {
                 break;
             case Action.ActionEnum.ATTAQUE_DIRECTE:
                 attaqueDirecte = true; 
+                break;
+            case Action.ActionEnum.FORTE_ENTITE:
+                 // si une entité est forte face à l'entité d'un autre joueur
+                CarteForteFaceA(_actions[j].properIntAction); 
+                break;
+             case Action.ActionEnum.PROCURE_AKA_SUPPLEMENTAIRE:
+                FindLocalPlayer().GetComponent<Player>().addAKA(_actions[j].properIntAction); 
                 break; 
             default:
                 Debug.LogWarning("Cet effet n'est pas géré");
@@ -936,7 +966,15 @@ public class Carte : NetworkBehaviourAntinomia {
         // Les seuls cartes quel'on peut sacrifier sont des entités. 
         // La méthode est donc override dans la classe entité. 
     }
+
+    protected virtual bool CheckIfCartePayeCoutElementaire(int element) {
+        return false;
+    }
     
+    protected virtual void CarteForteFaceA(int element) {
+
+    }
+
     /// <summary>
     /// Lorsqu'il faut choisir des cartes pour un effet, cette méthode est appelée 
     /// pour stocker les cartes choisies dans la variable CartesChoisiesPourEffet. 
@@ -1405,6 +1443,16 @@ public class Carte : NetworkBehaviourAntinomia {
 
     public void resetColor() {
         GetComponent<SpriteRenderer>().color = Color.white; 
+    }
+
+    /// <summary>
+    /// Il se peut qu'après certains évênements tels que la pose d'une carte, 
+    /// on veuille vérifier si une carte n'a pas d'effets à jouer. 
+    /// Dans ce cas là, on appelle cette méthode. 
+    /// Cette méthode est override dans la classe Entite <seealso cref="Entite.GererEffetsPonctuel"/>
+    /// </summary>
+    public virtual void GererEffetsPonctuel() {
+        GererEffets(AllEffets); 
     }
 
 }

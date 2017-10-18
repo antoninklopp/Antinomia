@@ -133,9 +133,18 @@ public class Action {
         /// <summary>
         /// Carte forte face aux entités neutres.
         /// La puissance des entités neutre est donc divisée 
-        /// par deux dans un combat face à cetteentité
+        /// par deux dans un combat face à cette entité
+        /// 1 : AIR
+        /// 2 : EAU
+        /// 3 : FEU
+        /// 4 : TERRE
+        /// 5 : NEUTRE
         /// </summary>
-        FORTE_ENTITE_NEUTRE, 
+        FORTE_ENTITE, 
+        /// <summary>
+        /// Ajoute x points d'AKA supplémentaire. 
+        /// </summary>
+        PROCURE_AKA_SUPPLEMENTAIRE, 
         NONE
     };
 
