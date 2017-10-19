@@ -1022,6 +1022,11 @@ public class Entite : Carte {
         // Il faut ensuite commencer le compte à rebours. 
     }
 
+    /// <summary>
+    /// Changer l'élément d'une carte
+    /// </summary>
+    /// <param name="_newElement">Le nouvel élément que l'on associe à la carte.</param>
+    /// <param name="change">true, si on change de la carte de base, false si on reset l'élément.</param>
     [Command]
     public void CmdChangeElement(Element _newElement, bool change) {
         /*
@@ -1038,8 +1043,6 @@ public class Entite : Carte {
         }
     }
 
-
-
     void ChangeElement(Element newElement) {
         /*
          * Méthode appelée par la syncvar
@@ -1050,7 +1053,10 @@ public class Entite : Carte {
         // TODO: Montrer au joueur que la carte est changée. 
     }
 
-    void resetCarteElement() {
+    /// <summary>
+    /// Remettre l'élément, la nature d'une carte, à son état naturel.
+    /// </summary>
+    public void ResetCarteElement() {
         /*
          * Après la fin d'un effet qui change l'element de la carte, 
          * il faut remettre le "bon" element. 
@@ -1078,6 +1084,10 @@ public class Entite : Carte {
         STAT = newStat;
     }
 
+    /// <summary>
+    /// Changer la stat d'une carte
+    /// </summary>
+    /// <param name="newStat">Nouvelle stat</param>
     [Command]
     public void CmdChangeStat(int newStat) {
         /*
@@ -1087,6 +1097,10 @@ public class Entite : Carte {
         STAT = newStat;
     }
 
+    /// <summary>
+    /// Changer la stat d'une carte, lui ajouter de la valeur
+    /// </summary>
+    /// <param name="_statToAdd">Valeur à ajouter à la stat. </param>
     [Command]
     public void CmdAddStat(int _statToAdd) {
         /*
@@ -1097,6 +1111,10 @@ public class Entite : Carte {
         RpcChangeFromCardBase(); 
     }
 
+    /// <summary>
+    /// Changer la valeur de la stat, la multiplier. 
+    /// </summary>
+    /// <param name="_multiplicateur">Valeur par laquelle multiplier la stat.</param>
     [Command]
     public void CmdMultiplierStat(int _multiplicateur) {
         STAT *= _multiplicateur;
@@ -1120,27 +1138,47 @@ public class Entite : Carte {
         GetComponent<SpriteRenderer>().color = Color.white;
     }
 
+    /// <summary>
+    /// Changer l'ascendance du terrain. 
+    /// Fonction executée sur le serveur. 
+    /// </summary>
+    /// <param name="_carteAscendance">Ascendance de la carte qui change l'ascendance du terrain</param>
     [Command]
     void CmdChangeAscendanceTerrain(Entite.Ascendance _carteAscendance) {
         RpcChangeAscendanceTerrain(_carteAscendance); 
     }
 
+    /// <summary>
+    /// <see cref="CmdChangeAscendanceTerrain(Ascendance)"/>
+    /// </summary>
+    /// <param name="_carteAscendance"></param>
     [ClientRpc]
     void RpcChangeAscendanceTerrain (Entite.Ascendance _carteAscendance){
         // Si la carte est astrale ou maléfique, on montre l'effet de terrain. 
         GameObject.FindGameObjectWithTag("GameManager").SendMessage("EffetTerrain", _carteAscendance);
     }
 
+    /// <summary>
+    /// Sacrifier une entité
+    /// </summary>
     public override void SacrifierCarteEntite() {
         base.SacrifierCarteEntite();
         DetruireCarte(); 
     }
 
+    /// <summary>
+    /// Placer une entité dans le sanctuaire. 
+    /// </summary>
     public override void PlacerSanctuaire() {
         base.PlacerSanctuaire();
         CmdChangePosition(State.SANCTUAIRE); 
     }
 
+    /// <summary>
+    /// <see cref="Carte.UpdateNewPhase(Player.Phases, int)"/>
+    /// </summary>
+    /// <param name="_currentPhase">La nouvelle phase</param>
+    /// <param name="tour">Le tour</param>
     public override void UpdateNewPhase(Player.Phases _currentPhase, int tour) {
         clicked = false;
         base.UpdateNewPhase(_currentPhase, tour);
@@ -1229,7 +1267,7 @@ public class Entite : Carte {
             for (int i = 0; i < AllEffets.Count; ++i) {
                 if (AllEffets[i].AllConditionsEffet[0].TourCondition != Condition.Tour.NONE) {
                     // S'il vérifie les conditions
-                    if (GererConditions(AllEffets[i].AllConditionsEffet)) {
+                    if (GererConditions(AllEffets[i].AllConditionsEffet, choixJoueur:true)) {
                         // Si l'effet n'a pas déjà été joué à ce tour. 
                         Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
                         isEffetPlayable = i;
@@ -1255,10 +1293,10 @@ public class Entite : Carte {
                                                     GameManager.AscendanceTerrain _previousAscendance=GameManager.AscendanceTerrain.NONE) {
         switch (_ascendance) {
             case GameManager.AscendanceTerrain.MALEFIQUE:
-                GererEffets(AllEffetsMalefique); 
+                GererEffets(AllEffetsMalefique, debut:true); 
                 break;
             case GameManager.AscendanceTerrain.ASTRALE:
-                GererEffets(AllEffetsAstral);
+                GererEffets(AllEffetsAstral, debut:true);
                 break;
             case GameManager.AscendanceTerrain.NONE:
                 if (_previousAscendance == GameManager.AscendanceTerrain.ASTRALE) {
@@ -1314,6 +1352,10 @@ public class Entite : Carte {
         base.RightClickOnCarte();
     }
 
+    /// <summary>
+    /// <see cref="Carte.CartePeutJouer(Player.Phases)"/>
+    /// </summary>
+    /// <param name="_currentPhase"></param>
     public override void CartePeutJouer(Player.Phases _currentPhase) {
         GameManager.AscendanceTerrain _ascendanceTerrain = getGameManager().GetComponent<GameManager>().ascendanceTerrain; 
 
@@ -1330,6 +1372,12 @@ public class Entite : Carte {
         }
     }
 
+    /// <summary>
+    /// <see cref="Carte.CarteJouerReponseEffet(Player.Phases, int)"/>
+    /// </summary>
+    /// <param name="_currentPhase"></param>
+    /// <param name="numeroListe"></param>
+    /// <returns></returns>
     protected override bool CarteJouerReponseEffet(Player.Phases _currentPhase, int numeroListe = 0) {
         List<Effet> EffetsUtilises = new List<Effet>(); 
         switch (numeroListe) {
@@ -1413,8 +1461,31 @@ public class Entite : Carte {
         }
     }
 
+    /// <summary>
+    /// <see cref="Carte.CarteForteFaceA(int)"/>
+    /// </summary>
+    /// <param name="element"><see cref="CarteForteFaceA(int)"/></param>
     protected override void CarteForteFaceA(int element) {
+        // On regarde si la carte n'est pas déjà forte ou faible face à cet élémen
+        for (int i = 0; i < ForteFaceAElement.Count; ++i) {
+            if (Mathf.Abs(ForteFaceAElement[i]) == element) {
+                // Si c'est le cas on udpdate sa force ou sa faiblesse. 
+                // Puis on sort de la fonction car l'élément ne peut pas être présent 
+                // deux fois dans la liste
+                ForteFaceAElement[i] = element;
+                return; 
+            }
+        }
+        // S'il n'est pas présent, on ajoute l'élément en bout de liste
         ForteFaceAElement.Add(element); 
+    }
+
+    /// <summary>
+    /// <see cref="Carte.AnnulerForteFaceA(int)"/>
+    /// </summary>
+    /// <param name="element"></param>
+    protected override void AnnulerForteFaceA(int element) {
+        ForteFaceAElement.Remove(element); 
     }
 
     /// <summary>
@@ -1455,7 +1526,7 @@ public class Entite : Carte {
     /// <summary>
     /// <see cref="Carte.GererEffetsPonctuel"/>
     /// </summary>
-    public override void GererEffetsPonctuel() {
+    public override void GererEffetsPonctuel(bool debut=false) {
         base.GererEffetsPonctuel();
 
         GameManager.AscendanceTerrain _ascendanceTerrain = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain();
@@ -1463,10 +1534,10 @@ public class Entite : Carte {
             case GameManager.AscendanceTerrain.NONE:
                 return;
             case GameManager.AscendanceTerrain.MALEFIQUE:
-                GererEffets(AllEffetsMalefique);
+                GererEffets(AllEffetsMalefique, debut:debut);
                 break;
             case GameManager.AscendanceTerrain.ASTRALE:
-                GererEffets(AllEffetsAstral);
+                GererEffets(AllEffetsAstral, debut:debut);
                 break;
         }
     }

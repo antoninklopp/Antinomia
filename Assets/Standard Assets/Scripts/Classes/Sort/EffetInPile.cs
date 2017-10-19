@@ -238,15 +238,46 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         yield break;
                     // Déplacement vers le champ de bataille. 
                     case -2:
+                        // On dépose la carte sur le champ de bataille. 
                         thisCarte.GetComponent<Entite>().MoveToChampBataille(defairePile: true);
+                        // TODO: Ici il faudra vérifier que la carte a bien été bougée. 
                         yield return new WaitForSeconds(0.5f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        // On joue les effets de dépose de la carte. 
+                        switch (thisCarte.GetComponent<CarteType>().thisCarteType) {
+                            case CarteType.Type.ENTITE:
+                                thisCarte.GetComponent<Entite>().GererEffetsPonctuel(debut: true); 
+                                break;
+                            case CarteType.Type.ASSISTANCE:
+                                thisCarte.GetComponent<Assistance>().GererEffetsPonctuel(debut: true);
+                                break;
+                            case CarteType.Type.SORT:
+                                thisCarte.GetComponent<Sort>().GererEffetsPonctuel(debut: true);
+                                break;
+                            default:
+                                throw new Exception("Ce type d'exception n'est pas encore géré"); 
+                        }
                         yield break;
                     // Déplacement vers le sanctuaire 
                     case -3:
                         thisCarte.GetComponent<Entite>().MoveToSanctuaire(defairePile: true);
                         yield return new WaitForSeconds(0.5f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        // On joue les effets de dépose de la carte. 
+                        switch (thisCarte.GetComponent<CarteType>().thisCarteType) {
+                            case CarteType.Type.ENTITE:
+                                thisCarte.GetComponent<Entite>().GererEffetsPonctuel(debut: true);
+                                break;
+                            case CarteType.Type.ASSISTANCE:
+                                thisCarte.GetComponent<Assistance>().GererEffetsPonctuel(debut: true);
+                                break;
+                            case CarteType.Type.SORT:
+                                thisCarte.GetComponent<Sort>().GererEffetsPonctuel(debut: true);
+                                break;
+                            default:
+                                throw new Exception("Ce type d'exception n'est pas encore géré");
+                        }
                         yield break; 
                     case -4:
                         // Passage à une nouvelle phase

@@ -931,6 +931,10 @@ public class GameManager : NetworkBehaviourAntinomia {
         CartesCimetiere.SetActive(false); 
     }
 
+    /// <summary>
+    /// Montrer l'effet du terrain. 
+    /// </summary>
+    /// <param name="_ascendance">Ascnedance de la carte</param>
     void EffetTerrain(Entite.Ascendance _ascendance) {
         /*
          * On montre l'effet de terrain par un effet de particule,
@@ -963,11 +967,42 @@ public class GameManager : NetworkBehaviourAntinomia {
         for (int i = 0; i < AllCartes.Length; ++i) {
             AllCartes[i].GetComponent<Entite>().updateChangementAscendaceTerrain(ascendanceTerrain, previousAscendance); 
         }
-
     }
 
+    /// <summary>
+    /// <see cref="EffetTerrain(Entite.Ascendance)"/>
+    /// </summary>
+    /// <param name="_ascendanceTerrain">Nouvelle ascendance du terrain.</param>
+    void EffetTerrain(AscendanceTerrain _ascendanceTerrain) {
+        ascendanceTerrain = _ascendanceTerrain;
+
+        switch (ascendanceTerrain) {
+            case AscendanceTerrain.ASTRALE:
+                EffetTerrain(Entite.Ascendance.ASTRALE); 
+                break;
+            case AscendanceTerrain.MALEFIQUE:
+                EffetTerrain(Entite.Ascendance.MALEFIQUE);
+                break;
+            case AscendanceTerrain.NONE:
+                EffetTerrain(Entite.Ascendance.NEUTRE);
+                break; 
+        }
+    }
+
+    /// <summary>
+    /// Récupérer l'ascendance du terrain. 
+    /// </summary>
+    /// <returns></returns>
     public AscendanceTerrain GetAscendanceTerrain() {
         return ascendanceTerrain; 
+    }
+
+    /// <summary>
+    /// Changer l'ascendance du terrain depuis la console de développement. 
+    /// </summary>
+    /// <param name="_ascendanceTerrain">Nouvelle ascendance du terrain.</param>
+    public void SetAscendanceTerrain(AscendanceTerrain _ascendanceTerrain) {
+        FindLocalPlayer().GetComponent<Player>().CmdChangeAscendanceTerrain(_ascendanceTerrain); 
     }
 
     /// <summary>

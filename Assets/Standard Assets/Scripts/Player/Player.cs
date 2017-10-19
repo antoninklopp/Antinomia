@@ -944,6 +944,28 @@ public class Player : NetworkBehaviourAntinomia	 {
         }
     }
 
+    /// <summary>
+    /// Changer l'ascendance du terrain. 
+    /// Peut aussi être fait depuis une entité : <seealso cref="Entite.CmdChangeAscendanceTerrain(Entite.Ascendance)"/>
+    /// Fonction appelée sur le serveur. 
+    /// </summary>
+    /// <param name="_ascendance">Nouvelle ascendance du terrain</param>
+    [Command]
+    public void CmdChangeAscendanceTerrain(GameManager.AscendanceTerrain _ascendance) {
+        RpcChangeAscendanceTerrain(_ascendance); 
+    }
+
+    /// <summary>
+    /// <see cref="CmdChangeAscendanceTerrain(GameManager.AscendanceTerrain)"/>
+    /// <seealso cref="Entite.RpcChangeAscendanceTerrain(Entite.Ascendance)"/>
+    /// </summary>
+    /// <param name="_ascendance"></param>
+    [ClientRpc]
+    public void RpcChangeAscendanceTerrain(GameManager.AscendanceTerrain _ascendance) {
+        GameObject.FindGameObjectWithTag("GameManager").SendMessage("EffetTerrain", _ascendance);
+    }
+
+
 
     /// ////////////////////////////////////////////////////////////////////////////////////////////
     ///                       TEST DU RESEAU                                                     //

@@ -146,6 +146,7 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
                 }
                 AddStringToConsole("Format : Fonction parametre");
                 break;
+            // Connaitre son ping. 
             case "ping":
             case "Ping":
                 if (!checkParameters(1, commandSplit.Length)) {
@@ -154,6 +155,7 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
                 // Connaitre la vitesse de sa connexion internet. 
                 StartCoroutine(ShowPing()); 
                 break;
+            // Savoir si le jeu est en pause
             case "IsPause":
             case "is_pause":
             case "isPause":
@@ -167,6 +169,7 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
                     AddStringToConsole("Le jeu n'est pas en pause"); 
                 }
                 break;
+            // Avoir la liste des fonctions que l'on peut faire dans la console. 
             case "liste_fonctions":
             case "liste_fct":
             case "ls_fct":
@@ -174,6 +177,32 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
                     return;
                 }
                 AddStringToConsole("set_aka, pioche, isPause, format, ping"); 
+                break;
+            // Changer l'ascendance du terrain.
+            case "set_terrain":
+            case "terrain":
+                switch (commandSplit[1]) {
+                    // Changement de terrain maléfique. 
+                    case "malefique":
+                    case "Malefique":
+                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().
+                            SetAscendanceTerrain(GameManager.AscendanceTerrain.MALEFIQUE); 
+                        break;
+                    case "astrale":
+                    case "Astrale":
+                    case "astral":
+                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().
+                            SetAscendanceTerrain(GameManager.AscendanceTerrain.ASTRALE);
+                        break;
+                    case "none":
+                    case "NONE":
+                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().
+                            SetAscendanceTerrain(GameManager.AscendanceTerrain.NONE);
+                        break;
+                    default:
+                        InstantiateOneStringConsole("Le terrain peut être changé grâce aux paramètres: astral, malefique, none");
+                        break; 
+                }
                 break; 
             default:
                 AddStringToConsole("Cette fonction n'existe pas");
