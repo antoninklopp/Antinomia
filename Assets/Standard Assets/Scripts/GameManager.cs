@@ -488,7 +488,8 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Attaque d'ue carte, une assistance ou même directement du joueur par une autre carte.
     /// </summary>
-	public void Attack(bool JouerEffet=false, GameObject _MyPlayerEntity=null, GameObject _OtherPlayerEntity=null){
+    /// <param name="STAT">Si on ne veut pas utiliser la stat de la carte mais celle d'un effet, on peut la passer en paramètre</param>
+	public void Attack(bool JouerEffet = false, GameObject _MyPlayerEntity = null, GameObject _OtherPlayerEntity = null, int STAT = 0){
         /*
 		 * On compare les forces des entités dans cette fonction. 
 		 * 
@@ -528,8 +529,13 @@ public class GameManager : NetworkBehaviourAntinomia {
                     return; 
                 }
                 else {
-                    Debug.Log("Le joueur adverse a été attaqué"); 
-                    OtherPlayerEntity.SendMessage("AttackPlayer", MyPlayerEntity.GetComponent<Entite>().STAT);
+                    Debug.Log("Le joueur adverse a été attaqué");
+                    if (STAT == 0) {
+                        OtherPlayerEntity.SendMessage("AttackPlayer", MyPlayerEntity.GetComponent<Entite>().STAT);
+                    } else {
+                        // On override la STAT. 
+                        OtherPlayerEntity.SendMessage("AttackPlayer", STAT); 
+                    }
                 }
             }
             else {
@@ -669,6 +675,12 @@ public class GameManager : NetworkBehaviourAntinomia {
         Destroy(GameObject.FindGameObjectWithTag("Marque"));
 
         return;
+    }
+
+    public void AjouterEffetAttaquePileJoueurAdverse(GameObject CarteAttaque) {
+        List<GameObject> Cibles = new List<GameObject>();
+        Cibles.Add(FindNotLocalPlayer());
+        MettreEffetDansLaPile(CarteAttaque, Cibles, -1); 
     }
 
     /// <summary>
@@ -880,6 +892,9 @@ public class GameManager : NetworkBehaviourAntinomia {
 		FindLocalPlayer().GetComponent<Player>().CmdSendCards (AllCardsRandom);
 	}
 
+    /// <summary>
+    /// Mettre à jour tous les sorts. 
+    /// </summary>
     void updateAllSorts() {
         /*
          * A chaque tour on update les sorts qui sont en cours. 
@@ -890,6 +905,10 @@ public class GameManager : NetworkBehaviourAntinomia {
         }
     }
 
+    /// <summary>
+    /// Montrer les cartes dans le cimetière
+    /// </summary>
+    /// <param name="allCartesCimetiere">Cartes présentes dans le cimetière</param>
     void ShowCemetery(List<GameObject> allCartesCimetiere) {
         /*
          * Montrer les cartes dans le cimetiere. 
@@ -922,6 +941,20 @@ public class GameManager : NetworkBehaviourAntinomia {
     }
 
     /// <summary>
+    /// Montrer les cartes dans le ban
+    /// <seealso cref="ShowCemetery(List{GameObject})"/>
+    /// </summary>
+    /// <param name="allCartesCimetiere">Cartes présentes dans le cimetière</param>
+    void ShowBan(List<GameObject> allCartesBan) {
+        /*
+         * Montrer les cartes dans le cimetiere. 
+         */
+
+        // On "renomme" juste la fonction car les fonctions ShowBan et ShowCemetery son les mêmes fonctions
+        ShowCemetery(allCartesBan); 
+    }
+
+    /// <summary>
     /// Cacher le cimetiere.
     /// </summary>
     void HideCemetery() {
@@ -929,6 +962,17 @@ public class GameManager : NetworkBehaviourAntinomia {
          * Cacher le cimetiere
          */
         CartesCimetiere.SetActive(false); 
+    }
+
+    /// <summary>
+    /// Cacher le cimetiere.
+    /// <seealso cref="HideCemetery"/>
+    /// </summary>
+    void HideBan() {
+        /*
+         * Cacher le cimetiere
+         */
+        HideCemetery(); 
     }
 
     /// <summary>
@@ -974,9 +1018,9 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="_ascendanceTerrain">Nouvelle ascendance du terrain.</param>
     void EffetTerrain(AscendanceTerrain _ascendanceTerrain) {
-        ascendanceTerrain = _ascendanceTerrain;
+        // ascendanceTerrain = _ascendanceTerrain;
 
-        switch (ascendanceTerrain) {
+        switch (_ascendanceTerrain) {
             case AscendanceTerrain.ASTRALE:
                 EffetTerrain(Entite.Ascendance.ASTRALE); 
                 break;
@@ -1165,7 +1209,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             while (defairePile == 0) {
                 yield return new WaitForSeconds(0.1f);
             }
-            if (defairePile == 1) {
+            if (defairePile == 1 && GameObject.FindGameObjectWithTag("Pile") != null) {
                 GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().DefaireLaPile();
             }
             else {
@@ -1402,7 +1446,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         for (int i = 0; i < AllEntites.Length; ++i) {
             try {
                 if (AllEntites[i].GetComponent<Entite>().isFromLocalPlayer) {
-                    AllEntites[i].GetComponent<Entite>().GererEffetsPonctuel();
+                    AllEntites[i].GetComponent<Entite>().GererEffetsPonctuel(Phase);
                 }
             }
             catch (NullReferenceException e) {
@@ -1415,7 +1459,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             try {
                 if (AllAssistances[i].GetComponent<Assistance>().isFromLocalPlayer &&
                     AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.JOUEE) {
-                    AllAssistances[i].GetComponent<Assistance>().GererEffetsPonctuel();
+                    AllAssistances[i].GetComponent<Assistance>().GererEffetsPonctuel(Phase);
                 }
             }
             catch (NullReferenceException e) {

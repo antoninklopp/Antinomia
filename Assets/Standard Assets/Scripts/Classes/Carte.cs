@@ -453,7 +453,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     public void JouerEffetDeposeCarte() {
         Debug.Log("Les effets sont en cours de traitement"); 
-        GererEffets(AllEffets);
+        GererEffets(AllEffets, numeroListEffet:0);
     }
 
     /// <summary>
@@ -473,7 +473,7 @@ public class Carte : NetworkBehaviourAntinomia {
         }
 
         // Gestion "des effets normaux"
-        GererEffets(AllEffets, _currentPhase, nouveauTour:true);
+        GererEffets(AllEffets, _currentPhase, nouveauTour:true, numeroListEffet:0);
         
     }
 
@@ -486,22 +486,24 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="Cible">Si c'est un sort qui appelle la méthode, il peut déjà avoir une cible</param>
     /// <param name="nouveauTour">true si on vient de passer à un nouveau tour</param>
     public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false, 
-        bool nouveauTour=false, GameObject Cible=null) {
+        bool nouveauTour=false, GameObject Cible=null, int numeroListEffet=0, int deposeCarte=0) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
+            return; 
         }
         for (int i = 0; i < _allEffets.Count; ++i) {
             // On regarde les effets un par un. 
             // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
             bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut, nouveauTour:nouveauTour,
-                                               Cible:Cible);
+                                               Cible:Cible, deposeCarte:deposeCarte);
             Debug.Log("<color=orange>" + effetOK.ToString() + "</Color>"); 
             if (effetOK) {
                 // Dans le cas où toutes les conditions sont réunies. 
-                GererActions(_allEffets[i].AllActionsEffet, CibleDejaChoisie:!(Cible==null));
+                GererActions(_allEffets[i].AllActionsEffet, CibleDejaChoisie:!(Cible==null), numeroEffet:i, 
+                    effetListNumber:numeroListEffet);
             }
             else {
-                Debug.Log("<color=orange>L'effet n'a pas pu être joué, pour diverses raisons. </color>");
+                Debug.Log("<color=orange>L'effet n'a pas pu être joué, pour diverses raisons. </color>" + Name);
             }
         }
     }
@@ -556,7 +558,9 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.PUISSANCE_FEU_AUGMENTE:
                     break;
                 case Action.ActionEnum.PUISSANCE_AUGMENTE:
+                case Action.ActionEnum.PUISSANCE_AUGMENTE_DIRECT:
                     // Si on annule une puissance qui augmente, on diminue la puissance
+                    Debug.Log("On annule l'effet qui ajoute : " + _allActions[i].properIntAction.ToString() + " à la carte"); 
                     GetComponent<Entite>().CmdAddStat((-1)*_allActions[i].properIntAction); 
                     break;
                 case Action.ActionEnum.PUISSANCE_MULTIPLIE:
@@ -586,7 +590,7 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.ATTAQUE_JOUEUR_ADVERSE:
                     break;
                 case Action.ActionEnum.FORTE_ENTITE:
-                    AnnulerForteFaceA(_allActions[j].properIntAction); 
+                    AnnulerForteFaceA(_allActions[i].properIntAction); 
                     break;
                 case Action.ActionEnum.PROCURE_AKA_SUPPLEMENTAIRE:
                     break;
@@ -624,11 +628,15 @@ public class Carte : NetworkBehaviourAntinomia {
         for (int j = 0; j < _conditions.Count; ++j) {
             //if (!_conditions[j].dependsOnPhase) {
             //    // Si l'effet ne dépend pas d'une phase, il n'y pas de raison
-            //    break;
+            //    breakAKA
             //}
+            Debug.Log(_conditions[j].dependsOnPhase);
+            Debug.Log(_currentPhase);
+            Debug.Log(_conditions[j].PhaseCondition); 
             if (_conditions[j].dependsOnPhase &&
                 _currentPhase != _conditions[j].PhaseCondition) {
                 // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
+                Debug.Log("Condition de phase non remplie");
                 return false;
             }
             else if (((_conditions[j].TourCondition == Condition.Tour.TOUR_LOCAL) && (
@@ -638,6 +646,7 @@ public class Carte : NetworkBehaviourAntinomia {
                   && (FindLocalPlayer().GetComponent<Player>().PlayerID ==
                   GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour)) {
                 // La condition de tour n'est pas remplie, on passe donc à l'effet suivant. 
+                Debug.Log("Pas le bon tour"); 
                 return false;
             }
             else if (debut && (_conditions[j].intCondition > 100)) {
@@ -647,17 +656,23 @@ public class Carte : NetworkBehaviourAntinomia {
             }
             else if (nouveauTour && !_conditions[j].dependsOnPhase) {
                 // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
+                Debug.Log("Le tour n'est pas bon.");
                 return false;
-            } else if (!_conditions[j].ActionObligatoire && !choixJoueur) {
+            } else if (!_conditions[j].ActionObligatoire && !choixJoueur && j == 0) {
                 // Si on est pas sur une obligatoire et que le joueur n'a pas choisi de la jouée, on sort de là. 
+                // L'action obligatoire ne sera marquée que sur la première carte
+                Debug.Log("L'action n'est pas obligatoire" + Name);
+                Debug.Log(_conditions[j].intCondition); 
                 return false; 
             }
             else if (_conditions[j].utilisePourCeTour) {
                 // DisplayMessage("Cet effet a déjà été utilisé pour ce tour. ");
+                Debug.Log("Cet effet a déjà été utilisé pour ce tour."); 
                 return false;
             } else if (estMort && (_conditions[j].ConditionCondition != Condition.ConditionEnum.MORT)) {
                 // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditiosn lors de
                 // la mort d'une carte. 
+                Debug.Log("La carte n'a pas d'effets de mort"); 
                 return false; 
             }
             else {
@@ -716,6 +731,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.PAYER_COUT_ELEMENTAIRE:
                         // Dans le cas où l'on ne dépose pas une carte sur le sanctuaire
                         // Le cout élémentaire ne peut être payé que lorsqu'on dépose une carte dans le sanctuaire. 
+                        Debug.Log("Payer cout elementaire" + deposeCarte.ToString()); 
                         if (deposeCarte != 1) {
                             return false; 
                         } else {
@@ -729,6 +745,12 @@ public class Carte : NetworkBehaviourAntinomia {
                         // Lorsque la condition est le sacrifice d'une carte. 
                         // Dans le cas du sacrifice d'une carte, il faut rajouter dans les effets le sacrifice de la carte. 
                         break;
+                    case Condition.ConditionEnum.CARTE_SUR_CHAMP_BATAILLE:
+                        // Si la carte n'est pas sur le champ de bataille on s'arrête. 
+                        if (GetComponent<Entite>().carteState != Entite.State.CHAMPBATAILLE) {
+                            return false; 
+                        }
+                        break; 
                     default:
                         Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
                         break;
@@ -768,13 +790,11 @@ public class Carte : NetworkBehaviourAntinomia {
          */
         bool effetOK = true;
         for (int j = 0; j < _conditions.Count; ++j) {
-            //if (!_conditions[j].dependsOnPhase) {
-            //    // Si l'effet ne dépend pas d'une phase, il n'y pas de raison
-            //    break;
-            //}
+
             if (_conditions[j].dependsOnPhase &&
                 _currentPhase != _conditions[j].PhaseCondition) {
                 // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
+                Debug.Log("La phase n'est pas la bonne"); 
                 return false;
             }
             else if (((_conditions[j].TourCondition == Condition.Tour.TOUR_LOCAL) && (
@@ -784,23 +804,27 @@ public class Carte : NetworkBehaviourAntinomia {
                   && (FindLocalPlayer().GetComponent<Player>().PlayerID ==
                   GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour)) {
                 // La condition de tour n'est pas remplie, on passe donc à l'effet suivant. 
+                Debug.Log("La condition de Tour n'est pas bonne"); 
                 return false;
             }
-            else if (debut && (_conditions[j].intCondition < 100)) {
+            else if (debut && (_conditions[j].intCondition > 100)) {
                 // L'effet dépend donc d'une phase. 
                 Debug.Log("Cette effet dépend d'une phase particulière.");
                 return false;
             }
             else if (nouveauTour && !_conditions[j].dependsOnPhase) {
                 // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
+                Debug.Log("Le tour n'est pas bon.s"); 
                 return false;
             }
             else if (_conditions[j].utilisePourCeTour) {
+                Debug.Log("Deja utilise pour ce Tour"); 
                 return false;
             }
             else if (estMort && (_conditions[j].ConditionCondition != Condition.ConditionEnum.MORT)) {
                 // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditiosn lors de
                 // la mort d'une carte. 
+                Debug.Log("La carte n'a pas de condition de mort"); 
                 return false;
             }
             else {
@@ -976,12 +1000,13 @@ public class Carte : NetworkBehaviourAntinomia {
                     CarteForteFaceA(_actions[j].properIntAction); 
                     break;
                  case Action.ActionEnum.PROCURE_AKA_SUPPLEMENTAIRE:
-                    // Une carte peut procurer de l'AKA supplémentaire. 
+                    // Une carte peut procurer de l'AKA supplémentaire.
+                    Debug.Log("Cette carte procure un AKA supplémentaire"); 
                     FindLocalPlayer().GetComponent<Player>().addAKA(_actions[j].properIntAction); 
                     break;
                 case (Action.ActionEnum.NATURE_AIR):
                     if (!jouerEffet) {
-                        MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     } else {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.AIR, CibleDejaChoisie));
                     }
@@ -989,7 +1014,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case (Action.ActionEnum.NATURE_EAU):
                     if (!jouerEffet) {
-                        MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     } else {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.EAU, CibleDejaChoisie));
                     }
@@ -997,7 +1022,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case (Action.ActionEnum.NATURE_FEU):
                     if (!jouerEffet) {
-                        MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     } else {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.FEU, CibleDejaChoisie));
                     }
@@ -1005,7 +1030,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case (Action.ActionEnum.NATURE_TERRE):
                     if (!jouerEffet) {
-                        MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     } else {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.TERRE, CibleDejaChoisie));
                     }
@@ -1017,7 +1042,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log("Effet PUISSANCE AIR AUGMENTE");
                         ChangeEffetPuissance(Entite.Element.AIR, _actions[j].properIntAction);
                     } else {
-                            MettreEffetDansLaPileFromActions(numeroEffet, numeroListEffet: effetListNumber); 
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber)); 
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_TERRE_AUGMENTE:
@@ -1026,7 +1051,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log("Effet PUISSANCE TERRE AUGMENTE");
                         ChangeEffetPuissance(Entite.Element.TERRE, _actions[j].properIntAction);
                     } else {
-                        MettreEffetDansLaPileFromActions(numeroEffet, numeroListEffet: effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_EAU_AUGMENTE:
@@ -1035,7 +1060,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log("Effet PUISSANCE EAU AUGMENTE");
                         ChangeEffetPuissance(Entite.Element.EAU, _actions[j].properIntAction);
                     } else {
-                        MettreEffetDansLaPileFromActions(numeroEffet, numeroListEffet: effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_FEU_AUGMENTE:
@@ -1044,7 +1069,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log("Effet PUISSANCE FEU AUGMENTE");
                         ChangeEffetPuissance(Entite.Element.FEU, _actions[j].properIntAction);
                     } else {
-                        MettreEffetDansLaPileFromActions(numeroEffet, numeroListEffet: effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_AUGMENTE:
@@ -1052,15 +1077,19 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction); 
                     } else {
-                        MettreEffetDansLaPileFromActions(numeroEffet, numeroListEffet: effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
+                    break;
+                case Action.ActionEnum.PUISSANCE_AUGMENTE_DIRECT:
+                    // La puissance augmente directement, l'autre joueur ne peut pas répliquer à cette action
+                    GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction);
                     break; 
                 case Action.ActionEnum.TERRAIN_ASTRAL:
                     // On change l'ascendance du terrain en astral. 
                     if (jouerEffet) {
                         getGameManager().GetComponent<GameManager>().SetAscendanceTerrain(GameManager.AscendanceTerrain.ASTRALE);
                     } else {
-                        MettreEffetDansLaPileFromActions(numeroEffet, numeroListEffet: effetListNumber); 
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber)); 
                     }
                     break;
                 case Action.ActionEnum.TERRAIN_MALEFIQUE:
@@ -1069,9 +1098,37 @@ public class Carte : NetworkBehaviourAntinomia {
                         getGameManager().GetComponent<GameManager>().SetAscendanceTerrain(GameManager.AscendanceTerrain.MALEFIQUE); 
                     }
                     else {
-                        MettreEffetDansLaPileFromActions(numeroEffet, numeroListEffet: effetListNumber);
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
+                case Action.ActionEnum.ATTAQUE_JOUEUR_ADVERSE:
+                    if (jouerEffet) {
+                        Debug.Log("<color=green>CA PART222</color>");
+                        switch (effetListNumber) {
+                            case 0:
+                                // Effets normaux
+                                // Faire attention, ce n'est peut'être pas l'action 0. TODO: A changer, numero d'action à ajouter? 
+                                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
+                            _actions[j].properIntAction);
+                                break;
+                            case 1:
+                                // Effets astraux
+                                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
+                            _actions[j].properIntAction);
+                                break;
+                            case 2:
+                                // Effets Malefiques
+                                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
+                            _actions[j].properIntAction);
+                                break;
+                            default:
+                                throw new Exception("Le numero de la liste d'effet doit être compris entre 0 et 2");
+                        }
+                    } else {
+                        Debug.Log("<color=green>CA PART</color>"); 
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                    }
+                    break; 
                 default:
                     Debug.LogWarning("Cet effet n'est pas géré");
                     break;
@@ -1527,13 +1584,15 @@ public class Carte : NetworkBehaviourAntinomia {
 
     /// <summary>
     /// Certains effets ne pouvant être utilisés qu'une fois par tour, 
-    /// on doit écrire dans les conditions qu'ils on déjà été utilisés. 
+    /// on doit écrire dans les conditions qu'ils ont déjà été utilisés. 
     /// </summary>
     protected virtual void updateEffetActive(int nombreEffet, int effetListNumber=0) {
+        Debug.Log(effetListNumber);
+        Debug.Log(nombreEffet);
         switch (effetListNumber) {
             case 0:
                 // Dans le cas où il y a plusieurs conditions, on écrit toujours toutes les variables de timing dans l'int
-                // du premier
+                // de la première condition
                 AllEffets[nombreEffet].AllConditionsEffet[0].setSortUtilisePourCeTour();
                 break;
         }
@@ -1679,8 +1738,8 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Dans ce cas là, on appelle cette méthode. 
     /// Cette méthode est override dans la classe Entite <seealso cref="Entite.GererEffetsPonctuel"/>
     /// </summary>
-    public virtual void GererEffetsPonctuel(bool debut=false) {
-        GererEffets(AllEffets, debut:debut); 
+    public virtual void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false) {
+        GererEffets(AllEffets, _currentPhase:phase, debut:debut, numeroListEffet:0); 
     }
 
     /// <summary>

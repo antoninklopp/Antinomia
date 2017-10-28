@@ -87,7 +87,9 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// Certains objets que l'on met dans la pile peuvent ne pas appartenir au flux. 
     /// Exemple: Un changement de phase. 
     /// </summary>
-    public bool AppartientAuFlux = false; 
+    public bool AppartientAuFlux = false;
+
+    public bool effetTermine = false; 
 
     /// <summary>
     /// Creer un effet dans la pile. 
@@ -117,7 +119,8 @@ public class EffetInPile : NetworkBehaviourAntinomia {
 
         Debug.Log("Voici l'IDCardGame de l'objet qui crée l'effet : " + _IDCardGame.ToString());
 
-        getGameManager().GetComponent<GameManager>().CheckAllEffetsCartes(); 
+        // getGameManager().GetComponent<GameManager>().CheckAllEffetsCartes();
+
 
     }
 
@@ -197,12 +200,19 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// <returns>NONE</returns>
     public IEnumerator JouerEffet(int playerID) {
         // On vérifie que c'est bien le joueur qui a créé l'effet qui le joue. 
-        Debug.Log(PlayerIDAssocie);
-        Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
+        // Debug.Log(PlayerIDAssocie);
+        // Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
         if (PlayerIDAssocie == FindLocalPlayer().GetComponent<Player>().PlayerID) {
             Debug.Log("On joue l'effet depuis chez ce joueur");
             // Dans certains cas, changement de phase par exemple, 
             // aucune carte n'a demandé l'effet. 
+
+            if (effetTermine) {
+                // Si l'effeta déjà été joué
+                GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                yield break; 
+            }
+
             if (FindCardWithID(IDObjectCardGame) != null || numeroEffet < 0) {
                 Debug.Log("Depuis cette carte");
 
@@ -222,6 +232,9 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                 if (IDObjectCardGame > 0) {
                     thisCarte = FindCardWithID(IDObjectCardGame);
                 }
+
+                List<GameObject> allCardsPlayer = getAllCardsFromPlayerBoardSanctuaire(thisCarte);
+
                 Debug.Log(numeroEffet); 
                 switch (numeroEffet) {
                     // On vérifie d'abord que l'effet ne soit pas un effet "spécial"
@@ -232,9 +245,12 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                             Debug.LogWarning("Pas le bon nombre d'attaques");
                         }
                         Debug.Log(thisCarte);
+                        Debug.Log("attaque");
+                        Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"); 
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, thisCarte, CibleEffet[0]);
                         yield return new WaitForSeconds(0.5f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        effetTermine = true; 
                         yield break;
                     // Déplacement vers le champ de bataille. 
                     case -2:
@@ -242,42 +258,21 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         thisCarte.GetComponent<Entite>().MoveToChampBataille(defairePile: true);
                         // TODO: Ici il faudra vérifier que la carte a bien été bougée. 
                         yield return new WaitForSeconds(0.5f);
-                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
                         // On joue les effets de dépose de la carte. 
-                        switch (thisCarte.GetComponent<CarteType>().thisCarteType) {
-                            case CarteType.Type.ENTITE:
-                                thisCarte.GetComponent<Entite>().GererEffetsPonctuel(debut: true); 
-                                break;
-                            case CarteType.Type.ASSISTANCE:
-                                thisCarte.GetComponent<Assistance>().GererEffetsPonctuel(debut: true);
-                                break;
-                            case CarteType.Type.SORT:
-                                thisCarte.GetComponent<Sort>().GererEffetsPonctuel(debut: true);
-                                break;
-                            default:
-                                throw new Exception("Ce type d'exception n'est pas encore géré"); 
-                        }
+                        GererEffetsPonctuelPile(thisCarte, 2);
+                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        effetTermine = true; 
                         yield break;
                     // Déplacement vers le sanctuaire 
                     case -3:
                         thisCarte.GetComponent<Entite>().MoveToSanctuaire(defairePile: true);
                         yield return new WaitForSeconds(0.5f);
-                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
-                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+
+                        Debug.Log("On est sur un changement de position sur le sanctuaire");
                         // On joue les effets de dépose de la carte. 
-                        switch (thisCarte.GetComponent<CarteType>().thisCarteType) {
-                            case CarteType.Type.ENTITE:
-                                thisCarte.GetComponent<Entite>().GererEffetsPonctuel(debut: true);
-                                break;
-                            case CarteType.Type.ASSISTANCE:
-                                thisCarte.GetComponent<Assistance>().GererEffetsPonctuel(debut: true);
-                                break;
-                            case CarteType.Type.SORT:
-                                thisCarte.GetComponent<Sort>().GererEffetsPonctuel(debut: true);
-                                break;
-                            default:
-                                throw new Exception("Ce type d'exception n'est pas encore géré");
-                        }
+                        GererEffetsPonctuelPile(thisCarte, 1);
+                        GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        effetTermine = true; 
                         yield break; 
                     case -4:
                         // Passage à une nouvelle phase
@@ -285,6 +280,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         Debug.Log("On va à la prochaine phase"); 
                         yield return new WaitForSeconds(0.5f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+                        effetTermine = true; 
                         yield break; 
                 }
 
@@ -302,11 +298,28 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                                                                                                 EffetListNumber, CibleEffet);
                         break;
                 }
+                effetTermine = true; 
             }
             else {
                 AntinomiaLog("La carte a été détruite");
             }
             GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+        }
+    }
+
+    public void GererEffetsPonctuelPile(GameObject _carte, int deposeCarte=0) {
+        switch (_carte.GetComponent<CarteType>().thisCarteType) {
+            case CarteType.Type.ENTITE:
+                _carte.GetComponent<Entite>().GererEffetsPonctuel(debut: true, deposeCarte: deposeCarte);
+                break;
+            case CarteType.Type.ASSISTANCE:
+                _carte.GetComponent<Assistance>().GererEffetsPonctuel(debut: true);
+                break;
+            case CarteType.Type.SORT:
+                _carte.GetComponent<Sort>().GererEffetsPonctuel(debut: true);
+                break;
+            default:
+                throw new Exception("Ce type d'exception n'est pas encore géré");
         }
     }
 

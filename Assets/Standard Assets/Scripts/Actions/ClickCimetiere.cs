@@ -2,25 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Ce script est utilisé sur l'objet cimetière. 
+/// </summary>
 public class ClickCimetiere : MonoBehaviour {
     /*
      * Lors d'un clic sur l'object qui représente le cimetiere, on ouvre le cimetiere. 
-     * 
      */
 
-
+    /// <summary>
+    /// true si le cimetière est ouvert
+    /// false si le cimetière est fermé
+    /// </summary>
     bool cardsCurrentlyShown = false;  
-	// Use this for initialization
-	void Start () {
-		
-	}
 
     private void OnMouseDown() {
         /*
          * Lors d'un clic sur l'objet cimetiere (objet rose). 
          */
-
-        
         if (!cardsCurrentlyShown) {
             // On récupère les cartes dans le cimetière
             List<GameObject> allCartesCimetieres = new List<GameObject>();

@@ -25,20 +25,20 @@ public class Controller : MonoBehaviour{
 	private MySqlConnection connection = null; 
 
 	void Awake(){
-		connectionString = "Server=" + host + ";Database=" + database + ";User=" + user + ";Password=" + password + ";Pooling=";
-		if (pooling) {
-			connectionString += "true;"; 
-		} else {
-			connectionString += "false;";
-		}
-		try{
-			connection = new MySqlConnection(connectionString); 
-			connection.Open(); 
-			print("MySqlState " + connection.State.ToString()); 
+		//connectionString = "Server=" + host + ";Database=" + database + ";User=" + user + ";Password=" + password + ";Pooling=";
+		//if (pooling) {
+		//	connectionString += "true;"; 
+		//} else {
+		//	connectionString += "false;";
+		//}
+		//try{
+		//	connection = new MySqlConnection(connectionString); 
+		//	connection.Open(); 
+		//	print("MySqlState " + connection.State.ToString()); 
 
-		} catch (Exception e){
-			print (e); 
-		}
+		//} catch (Exception e){
+		//	print (e); 
+		//}
 	}
 
 	void OnApplicationQuit(){

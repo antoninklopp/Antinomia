@@ -24,9 +24,19 @@ public class Entite : Carte {
     // pour le debug, on écrira à un endroit le nom de la capacite
     private GameObject WriteCapacite;
 
-    // Définition des enums nécessaires à la carte, à mettre ailleurs? 
-    public enum Ascendance { ASTRALE, NEUTRE, MALEFIQUE, ELEMENTAIRE };
+    /// <summary>
+    /// L'ascendance de la carte. 
+    /// </summary>
+    public enum Ascendance {
+        ASTRALE,
+        NEUTRE,
+        MALEFIQUE,
+        ELEMENTAIRE
+    };
 
+    /// <summary>
+    /// L'élement de l'entité.
+    /// </summary>
     public enum Element {
         AIR,
         EAU,
@@ -35,21 +45,42 @@ public class Entite : Carte {
         AUCUN
     };
 
-    public enum ConditionActive { };
-    public enum ConditionPassive { };
-    public enum State { MAIN, CHAMPBATAILLE, CIMETIERE, DECK, BIGCARD, SANCTUAIRE, ADVERSAIRE };
-
-    public enum EffetMalefique {
-        AJOUT_AKA,
-        ATTAQUE_DIRECTE,
-        ATTAQUE_IMPOSSIBLE,
-        NONE
-    };
-    public enum EffetAstral {
-        AJOUT_AKA,
-        ATTAQUE_DIRECTE,
-        ATTAQUE_IMPOSSIBLE,
-        NONE
+    /// <summary>
+    /// L'état de l'entité. 
+    /// </summary>
+    public enum State {
+        /// <summary>
+        /// Carte dans la main
+        /// </summary>
+        MAIN,
+        /// <summary>
+        /// Carte posée sur le champ de bataille
+        /// </summary>
+        CHAMPBATAILLE,
+        /// <summary>
+        /// Carte morte, dans le cimetière
+        /// </summary>
+        CIMETIERE,
+        /// <summary>
+        /// Carte dans le deck
+        /// </summary>
+        DECK,
+        /// <summary>
+        /// Carte zoomée
+        /// </summary>
+        BIGCARD,
+        /// <summary>
+        /// Carte dans le sanctuaire
+        /// </summary>
+        SANCTUAIRE,
+        /// <summary>
+        /// Carte adversaire
+        /// </summary>
+        ADVERSAIRE,
+        /// <summary>
+        /// Carte dans le ban.
+        /// </summary>
+        BAN
     };
 
     /* ==================================
@@ -564,7 +595,11 @@ public class Entite : Carte {
             gameObject.tag = "BoardSanctuaire";
 
             CmdChangePosition(State.SANCTUAIRE);
-        } else {
+
+            // Il faut aussi vérifier si les autres cartes ont un effet à jouer
+            // GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().CheckAllEffetsCartes(); 
+        }
+        else {
             // On envoie un message à l'utilisateur disant qu'il y a plus de 2 cartes sur le sanctuaire.
             GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Deja 2 cartes dans le sanctuaire");
         }
@@ -1108,7 +1143,29 @@ public class Entite : Carte {
          *  on ajoute simplement le nombre _statToAdd à la stat courante. 
          */
         STAT += _statToAdd;
-        RpcChangeFromCardBase(); 
+        // On regarde si la carte revient à son état initial (on remet la carte en blanc)
+        // Ou si elle change (on la met en vert). 
+        new GameSparks.Api.Requests.LogEventRequest()
+           .SetEventKey("getSTATFromCardByID")
+           .SetEventAttribute("ID", oID)
+           .Send((response) => {
+               if (!response.HasErrors) {
+                   // La stat récupérée
+                   int getSTAT = response.ScriptData.GetInt("STAT").Value;
+                   if (getSTAT == STAT) {
+                       // Dans ce cas on a remis la carte dans son état de base
+                       RpcResetToCardBase(); 
+                   } else {
+                       RpcChangeFromCardBase();
+                   }
+               }
+               else { 
+                   // Dans le cas où ça bug on ne fait rien pour l'instant.
+                   // TODO: A implémenter. 
+                   throw new Exception("Impossible de reset l'element de la carte. ");
+               }
+
+           });
     }
 
     /// <summary>
@@ -1188,14 +1245,18 @@ public class Entite : Carte {
             case GameManager.AscendanceTerrain.NONE:
                 return;
             case GameManager.AscendanceTerrain.MALEFIQUE:
-                GererEffets(AllEffetsMalefique, _currentPhase); 
+                GererEffets(AllEffetsMalefique, _currentPhase, numeroListEffet:2); 
                 break;
             case GameManager.AscendanceTerrain.ASTRALE:
-                GererEffets(AllEffetsAstral, _currentPhase);
+                GererEffets(AllEffetsAstral, _currentPhase, numeroListEffet:1);
                 break; 
         }
     }
 
+    /// <summary>
+    /// Transforme un strin en effet astral. 
+    /// </summary>
+    /// <param name="allEffets">Le string donné par la base de données gamesparks. </param>
     public void stringToEffetAstral(string allEffets) {
         if (allEffets == "None" || allEffets == "" || allEffets == " ") {
             return;
@@ -1291,18 +1352,22 @@ public class Entite : Carte {
     /// <param name="_ascendance">la nouvelle ascendance du terrain. </param>
     public void updateChangementAscendaceTerrain(GameManager.AscendanceTerrain _ascendance, 
                                                     GameManager.AscendanceTerrain _previousAscendance=GameManager.AscendanceTerrain.NONE) {
+        Debug.Log(_ascendance);
+        Debug.Log(_previousAscendance);
         switch (_ascendance) {
             case GameManager.AscendanceTerrain.MALEFIQUE:
-                GererEffets(AllEffetsMalefique, debut:true); 
+                GererEffets(AllEffetsMalefique, debut:true, numeroListEffet:2); 
                 break;
             case GameManager.AscendanceTerrain.ASTRALE:
-                GererEffets(AllEffetsAstral, debut:true);
+                GererEffets(AllEffetsAstral, debut:true, numeroListEffet:1);
                 break;
             case GameManager.AscendanceTerrain.NONE:
                 if (_previousAscendance == GameManager.AscendanceTerrain.ASTRALE) {
-                    AnnulerEffets(AllEffetsAstral); 
+                    Debug.Log("Ascendance précédente astrale"); 
+                    AnnulerEffets(AllEffetsAstral);
                 } else {
-                    AnnulerEffets(AllEffetsMalefique); 
+                    Debug.Log("Ascendance précédente maléfique"); 
+                    AnnulerEffets(AllEffetsMalefique);
                 }
                 break; 
         }
@@ -1419,13 +1484,16 @@ public class Entite : Carte {
     /// </summary>
     protected override bool CheckIfCartePayeCoutElementaire(int element) {
         try {
+            Debug.Log("On regarde si un cout elementaire a été payé"); 
             if (GameObject.FindGameObjectWithTag("Pile") != null) {
                 GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
                 List<GameObject> allEffetsInPile = Pile.GetComponent<PileAppelEffet>().GetPileEffets();
                 for (int i = 0; i < allEffetsInPile.Count; ++i) {
+                    Debug.Log("On regarde les effets"); 
                     // Si l'effet est un déplacement vers le sanctuaire
                     if (allEffetsInPile[i].GetComponent<EffetInPile>().numeroEffet == -3
                         && allEffetsInPile[i].GetComponent<EffetInPile>().ObjetEffet.GetComponent<Carte>().isFromLocalPlayer) {
+                        Debug.Log("Ici c'est bon"); 
                         switch (allEffetsInPile[i].GetComponent<EffetInPile>().ObjetEffet.GetComponent<Entite>().carteElement) {
                             case Element.AIR:
                                 if (element == 1) {
@@ -1526,7 +1594,7 @@ public class Entite : Carte {
     /// <summary>
     /// <see cref="Carte.GererEffetsPonctuel"/>
     /// </summary>
-    public override void GererEffetsPonctuel(bool debut=false) {
+    public override void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false) {
         base.GererEffetsPonctuel();
 
         GameManager.AscendanceTerrain _ascendanceTerrain = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain();
@@ -1534,10 +1602,32 @@ public class Entite : Carte {
             case GameManager.AscendanceTerrain.NONE:
                 return;
             case GameManager.AscendanceTerrain.MALEFIQUE:
-                GererEffets(AllEffetsMalefique, debut:debut);
+                GererEffets(AllEffetsMalefique, _currentPhase: phase, debut:debut, numeroListEffet:2);
                 break;
             case GameManager.AscendanceTerrain.ASTRALE:
-                GererEffets(AllEffetsAstral, debut:debut);
+                GererEffets(AllEffetsAstral, _currentPhase: phase, debut:debut, numeroListEffet:1);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Gérer les effets d'une carte lorsqu'on dépose une carte sur le champ de bataille ou le sanctuaire
+    /// </summary>
+    /// <param name="phase"></param>
+    /// <param name="debut"></param>
+    /// <param name="deposeCarte"></param>
+    public void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false, int deposeCarte=0) {
+        GererEffets(AllEffets, _currentPhase: phase, debut: debut, numeroListEffet: 0, deposeCarte:deposeCarte);
+
+        GameManager.AscendanceTerrain _ascendanceTerrain = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain();
+        switch (_ascendanceTerrain) {
+            case GameManager.AscendanceTerrain.NONE:
+                return;
+            case GameManager.AscendanceTerrain.MALEFIQUE:
+                GererEffets(AllEffetsMalefique, _currentPhase: phase, debut:debut, numeroListEffet:2, deposeCarte:deposeCarte);
+                break;
+            case GameManager.AscendanceTerrain.ASTRALE:
+                GererEffets(AllEffetsAstral, _currentPhase: phase, debut:debut, numeroListEffet:1, deposeCarte:deposeCarte);
                 break;
         }
     }

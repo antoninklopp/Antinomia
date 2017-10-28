@@ -3,54 +3,50 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking; 
 
-
 /// <summary>
-/// Objet représentant le cimetiere d'un joueur. 
+/// Zone de Ban
 /// </summary>
-public class Cimetiere : NetworkBehaviour {
-	/*
-	 * Toutes les cartes envoyées au cimetiere par un joueur. 
-	 */ 
+public class Ban : NetworkBehaviourAntinomia {
 
-	List<GameObject> AllCreaturesCimetiere = new List<GameObject> (); 
-	public GameObject CartePrefab; 
+    List<GameObject> AllCreaturesBan = new List<GameObject>();
+    public GameObject CartePrefab;
 
     /// <summary>
     /// Reordonner les cartes du cimetiere. 
     /// </summary>
-	void CmdReordonnerCarte(){
-		/*
+    void CmdReordonnerCarte() {
+        /*
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.
-		 */ 
-		print ("Reordonner Cimetiere");
+		 */
+        print("Reordonner Ban");
 
-		AllCreaturesCimetiere = new List<GameObject> (); 
-		foreach (Transform child in transform) {
-			AllCreaturesCimetiere.Add (child.gameObject); 
-		}
-		for (int i = 0; i < AllCreaturesCimetiere.Count; i++) {
-			// On met toutes les cartes au même endroit. 
-			AllCreaturesCimetiere [i].transform.localPosition = Vector3.zero; 
+        AllCreaturesBan = new List<GameObject>();
+        foreach (Transform child in transform) {
+            AllCreaturesBan.Add(child.gameObject);
+        }
+        for (int i = 0; i < AllCreaturesBan.Count; i++) {
+            // On met toutes les cartes au même endroit. 
+            AllCreaturesBan[i].transform.localPosition = Vector3.zero;
 
-		}
-	}
+        }
+    }
 
     /// <summary>
     /// Lors d'un clic sur le cimetiere. 
     /// </summary>
-	void OnMouseDown(){
-		// Lorsque la souris touche le board. 
+	void OnMouseDown() {
+        // Lorsque la souris touche le board. 
 
 
-	}
+    }
 
     /// <summary>
     /// Recuperer le nombre de cartes dans le cimetiere
     /// </summary>
     /// <returns>Nombre de cartes dans le cimetiere</returns>
     public int NombreDeCartesDansCimetiere() {
-        return transform.childCount; 
+        return transform.childCount;
     }
 
     /// <summary>
@@ -58,25 +54,25 @@ public class Cimetiere : NetworkBehaviour {
     /// </summary>
     /// <param name="NewCard">Objet carte déposé</param>
 	[Command]
-	void CmdCarteDeposee(GameObject NewCard){
+    void CmdCarteDeposee(GameObject NewCard) {
         /*
 		 * Depot d'une carte sur le board, pour l'instant aucune vérification n'est faite. 
 		 * TODO: Vérifier s'il est possible de poser la carte en question sur le board. 
 		 * 
 		 */
 
-        Debug.Log("Carte deposee dans le cimetiere"); 
+        Debug.Log("Carte deposee dans le ban");
 
-		// On change le parent de la carte. 
-		NewCard.transform.SetParent (transform);
-		// Puis on réorganise l'affichage.
-		AllCreaturesCimetiere.Add(NewCard); 
-		CmdReordonnerCarte();
+        // On change le parent de la carte. 
+        NewCard.transform.SetParent(transform);
+        // Puis on réorganise l'affichage.
+        AllCreaturesBan.Add(NewCard);
+        CmdReordonnerCarte();
 
         // Et on change le statut de la carte de main à cimetière. 
         if (NewCard.GetComponent<Entite>() != null) {
             NewCard.SendMessage("setState", "CIMETIERE");
             NewCard.SendMessage("setClicked", false);
         }
-	}
+    }
 }

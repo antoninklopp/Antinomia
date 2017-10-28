@@ -121,13 +121,10 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             case -4:
 
                 break;
-            // Changement de position vers le sanctuaire
+            // Changement de position vers le sanctuaire ou vers le champ de bataille
             case -3:
-
-                break;
-            // Changement de position vers le champ de bataille. 
             case -2:
-
+                
                 break; 
             default:
                 effetJoue = GetEffetFromCarte(FindCardWithID(IDObjetEffet), numeroEffet, numeroListeEffet);
@@ -147,7 +144,40 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         CartesAssociees.Add(IDObjetEffet);
 
         AntinomiaLog(PlayerID);
-        AntinomiaLog(FindLocalPlayer().GetComponent<Player>().PlayerID); 
+        AntinomiaLog(FindLocalPlayer().GetComponent<Player>().PlayerID);
+
+        // On regarde les effets des cartes. 
+        switch (numeroEffet) {
+            case -2:
+            case -3:
+                ////////////// GESTION DES EFFETS PONCTUELS ////////////////
+                GameObject thisCarte = NouveauEffetInPile.GetComponent<EffetInPile>().ObjetEffet;
+
+                List<GameObject> allCardsPlayer = getAllCardsFromPlayerBoardSanctuaire(thisCarte);
+
+                int deposeCarte = 0;
+                switch (numeroEffet) {
+                    case -2:
+                        // On dépose une carte sur le board
+                        deposeCarte = 2;
+                        break;
+                    case -3:
+                        // On dépose une carte sur le sanctuaire
+                        Debug.Log("<color=red>Depose Carte 1</color>");
+                        deposeCarte = 1;
+                        break;
+                    default:
+                        // Si l'effet n'est d'aucun de ces deux types, 
+                        // c'est qu'il n'y a aucun effet à jouer lors d'une dépose de carte
+                        return;
+                }
+
+                for (int i = 0; i < allCardsPlayer.Count; i++) {
+                    Debug.Log("On gere les effets ponctuels de la pile");
+                    NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(allCardsPlayer[i], deposeCarte);
+                }
+                break;
+        }
 
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // Si on est sur le joueur qui n'a pas demandé l'effet, on propose à l'autre joueur de répondre à l'effet. 
@@ -167,7 +197,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// Defaire la pile d'effets. 
     /// </summary>
     public void DefaireLaPile() {
-        AntinomiaLog("Defaire la pile 151 PileAppelEffet"); 
+        // AntinomiaLog("Defaire la pile 151 PileAppelEffet"); 
         StartCoroutine(JouerLesEffets()); 
     }
 
@@ -178,6 +208,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
         if (hasAuthority) {
             AntinomiaLog("J'ai autorité sur la pile");
+            int NombreEffet = CartesAssociees.Count; 
             for (int i = CartesAssociees.Count - 1; i >= 0; --i) {
                 effetTermine = false;
                 CmdJouerEffetPile(i, FindLocalPlayer().GetComponent<Player>().PlayerID);
@@ -187,8 +218,16 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                 yield return new WaitForSeconds(0.5f);
             }
 
-            // Detruire l'objet pile. 
-            FindLocalPlayer().GetComponent<Player>().CmdDetruirePile(gameObject);
+            if (NombreEffet != CartesAssociees.Count) {
+                // Si on a ajouté un effet dans la pile entre temps. 
+                StartCoroutine(JouerLesEffets());
+                Debug.Log("On recommence dans la méthode jouerEffets");
+            }
+            else {
+                // Detruire l'objet pile. 
+                FindLocalPlayer().GetComponent<Player>().CmdDetruirePile(gameObject);
+            }
+
         } else {
             // Si le dernier effet est chez quelqu'un qui n'a pas instancier la pile
             // On doit envoyer l'information à l'autre joueur de défaire la pile. 

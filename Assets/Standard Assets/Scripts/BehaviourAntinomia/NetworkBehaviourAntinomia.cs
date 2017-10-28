@@ -200,4 +200,46 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
         return GameObject.FindGameObjectWithTag("Pile"); 
     }
 
+    protected List<GameObject> getAllCardsFromPlayerBoardSanctuaire(List<GameObject> CartesAEnlever=null) {
+
+        if (CartesAEnlever == null) {
+            CartesAEnlever = new List<GameObject>(); 
+        }
+
+        GameObject[] BoardSanctuaire = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
+        Debug.Log("Nombre de cartes board sanctuaire" + BoardSanctuaire.Length.ToString()); 
+        List<GameObject> Retourner = new List<GameObject>(); 
+
+        for (int i = 0; i < BoardSanctuaire.Length; i++) {
+            switch (BoardSanctuaire[i].GetComponent<CarteType>().thisCarteType) {
+                case CarteType.Type.ENTITE:
+                    if (BoardSanctuaire[i].GetComponent<Entite>().isFromLocalPlayer && CartesAEnlever.IndexOf(BoardSanctuaire[i]) == -1) {
+                        Retourner.Add(BoardSanctuaire[i]); 
+                    }
+                    break;
+                case CarteType.Type.SORT:
+                    if (BoardSanctuaire[i].GetComponent<Sort>().isFromLocalPlayer && CartesAEnlever.IndexOf(BoardSanctuaire[i]) == -1) {
+                        Retourner.Add(BoardSanctuaire[i]);
+                    }
+                    break;
+                case CarteType.Type.ASSISTANCE:
+                    if (BoardSanctuaire[i].GetComponent<Assistance>().isFromLocalPlayer && CartesAEnlever.IndexOf(BoardSanctuaire[i]) == -1) {
+                        Retourner.Add(BoardSanctuaire[i]);
+                    }
+                    break;
+                default:
+                    throw new Exception("Ce type de carte n'est pas implémenté"); 
+            }
+        }
+
+        Debug.Log("Nombre de cartes retournées" + Retourner.Count); 
+
+        return Retourner; 
+    }
+
+    protected List<GameObject> getAllCardsFromPlayerBoardSanctuaire(GameObject CarteAEnlever) {
+        List<GameObject> UneCarte = new List<GameObject>() { CarteAEnlever };
+        return getAllCardsFromPlayerBoardSanctuaire(UneCarte); 
+    }
+
 }

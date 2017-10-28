@@ -8,12 +8,22 @@ using System;
 /// Elle comprend l'action
 /// et l'entier associé à l'action.
 /// 
-/// entier yyxx
+/// entier zzyyxx
 /// 
 /// avec yy nombre de tours.
+/// avec zz la condition lors de la destruction ou autre
+/// 
 /// et xx l'entier symbolisant le changement tel qu'un changement de puissance.
 /// </summary>
 public class Action {
+
+    /*
+     * On définit yy de la manière suivante:
+     * yy entre 0 et 99 nombre de tours où la carte est active. (On suppose que la carte ne peut pas durer plus de 99 tours).
+     * 
+     * 
+     * 
+     */
 
     // Le sort peut avoir un ou plusieurs effets
     public enum ActionEnum {
@@ -82,6 +92,10 @@ public class Action {
         /// Donc l'entier transmis sera de type xxyy avec xx l'augmentation de puissance (inférieur à 99) et yy le nombre de tours (inférieur à 99)
         /// </summary>
         PUISSANCE_AUGMENTE, 
+        /// <summary>
+        /// La puissance agmente sans que l'autre joueur ne puisse répondre.
+        /// </summary>
+        PUISSANCE_AUGMENTE_DIRECT, 
         /// <summary>
         /// La puissance de la carte est multipliee
         /// </summary>

@@ -42,11 +42,12 @@ public class Condition {
     *      5 : 
     *      ...
     *
-    * avec xx < 99 : l'entier symbolisant le changement tel qu'un changement de puissance. 
+    * avec xx < 99 : l'entier symbolisant le changement tel que le nombre de cartes à choisir. 
     *   
     * LA DUREE DE L'EFFET EN NOMBRE DE TOURS EST GERE DANS ACTION. 
     *   
     * Si l'action est obligatoire, l'entier sera négatif. 
+    * Seul l'entier de la première condition sera négatif.
     * 
     * S'il n'y a aucune information de timing, l'effet se fait lorsque la carte est déposée sur le board. 
      */
@@ -122,31 +123,43 @@ public class Condition {
         /// 3 : FEU
         /// 4 : TERRE
         /// </summary>
-        PAYER_COUT_ELEMENTAIRE, 
+        PAYER_COUT_ELEMENTAIRE,
+        /// <summary>
+        /// Obligatoire est l'équivalent de NONE mais pour une action obligatoire, 
+        /// c'est_à-dire qu'il n'y a besoin d'aucune condition mais qu'elle est obligatoire. 
+        /// </summary>
+        OBLIGATOIRE,
         /// <summary>
         /// Aucune condition nécessaire
         /// </summary>
         NONE
     };
 
+    /// <summary>
+    /// La condition (ou une des conditions) de l'effet. 
+    /// </summary>
     public ConditionEnum ConditionCondition; 
+
     /// <summary>
     /// Entier transmis par la base de données. A décortiquer. 
     /// </summary>
     public int intCondition;
 
     public enum Reaction {
+        /// <summary>
+        /// Lorsqu'une carte est détruite. 
+        /// </summary>
         CARTE_DETRUITE,
-        NOUVELLE_CARTE_BOARD, // Lors de l'arrivée d'une nouvelle carte sur le board.
+        /// <summary>
+        /// Lors de l'arrivée d'une nouvelle carte sur le board.
+        /// </summary>
+        NOUVELLE_CARTE_BOARD, 
         /// <summary>
         /// Lorsque la carte est présente sur le board. L'effet est actif quand elle arrive, 
         /// quand elle est présente et disparaît une fois qu'elle en disparait. 
         /// </summary>
         PRESENCE_CARTE_BOARD,
         NONE
-
-
-
     }
 
     /// <summary>
@@ -193,12 +206,21 @@ public class Condition {
     /// </summary> 
     public bool utilisePourCeTour = false; 
 
+    /// <summary>
+    /// Constructeur de la classe Condition
+    /// </summary>
+    /// <param name="_condition">La condition</param>
+    /// <param name="_intCondition">L'entier qui correspond à la condition.</param>
     public Condition(ConditionEnum _condition, int _intCondition) {
         ConditionCondition = _condition;
         intCondition = _intCondition;
         understandInt();
     }
 
+    /// <summary>
+    /// Constructeur de la classe condition.
+    /// Sans arguments. 
+    /// </summary>
     public Condition() {
 
 
@@ -212,6 +234,11 @@ public class Condition {
          * Cette méthode a pour but de "disséquer" l'entier pour en tirer les informations nécessaires. 
          * Pas très élégant. Faire un switch case avec des puissances de 10? 
          */
+
+        if (ConditionCondition == ConditionEnum.OBLIGATOIRE) {
+            ActionObligatoire = true;
+            ConditionCondition = ConditionEnum.NONE; 
+        }
 
         if (intCondition < 0) {
             ActionObligatoire = true; 

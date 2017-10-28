@@ -10,7 +10,7 @@ public class LoginGUI : MonoBehaviour {
 	public Controller _mySqlHolder; 
 
 	void OnGUI(){
-		GUI.Label (new Rect (10, 10, 300, 30), _mySqlHolder.GetConnectionState ()); 
+		//GUI.Label (new Rect (10, 10, 300, 30), _mySqlHolder.GetConnectionState ()); 
 	}
 
 }

@@ -130,9 +130,6 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
                 break;
             case "Pioche":
             case "pioche":
-                if (!checkParameters(1, commandSplit.Length)) {
-                    return;
-                }
                 //Si le paramètre n'est pas un entier, on sort du switch.
                 if (!checkIfParameterConsoleIsInt(commandSplit[1])) {
                     break;
