@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System; 
 
+/// <summary>
+/// Effets d'une carte
+/// </summary>
 public class Effet {
     /*
      * L'effet est une association d'une liste de conditions et d'une liste d'actions. 

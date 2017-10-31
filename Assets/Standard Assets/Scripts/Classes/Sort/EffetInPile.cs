@@ -147,19 +147,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
 
         try {
             // QUI JOUE L'EFFET
-            switch (ObjetEffet.GetComponent<CarteType>().thisCarteType) {
-                case CarteType.Type.ENTITE:
-                    phraseDecritEffet += ObjetEffet.GetComponent<Entite>().Name;
-                    break;
-                case CarteType.Type.ASSISTANCE:
-                    phraseDecritEffet += ObjetEffet.GetComponent<Assistance>().Name;
-                    break;
-                case CarteType.Type.SORT:
-                    phraseDecritEffet += ObjetEffet.GetComponent<Sort>().Name;
-                    break;
-                default:
-                    throw new Exception("Ce type de carte n'existe pas");
-            }
+            phraseDecritEffet += ObjetEffet.GetComponent<Carte>().Name; 
         } catch (NullReferenceException e) {
             Debug.LogWarning(e); 
         }
@@ -175,19 +163,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
 
         // SUR QUI A-T-IL EFFET?
         for (int i = 0; i < CibleEffet.Count; ++i) {
-            switch (CibleEffet[i].GetComponent<CarteType>().thisCarteType) {
-                case CarteType.Type.ENTITE:
-                    phraseDecritEffet += CibleEffet[i].GetComponent<Entite>().Name;
-                    break;
-                case CarteType.Type.ASSISTANCE:
-                    phraseDecritEffet += CibleEffet[i].GetComponent<Assistance>().Name;
-                    break;
-                case CarteType.Type.SORT:
-                    phraseDecritEffet += CibleEffet[i].GetComponent<Sort>().Name;
-                    break;
-                default:
-                    throw new Exception("Ce type de carte n'existe pas");
-            }
+            phraseDecritEffet += CibleEffet[i].GetComponent<Carte>().Name;
         }
 
         return phraseDecritEffet; 

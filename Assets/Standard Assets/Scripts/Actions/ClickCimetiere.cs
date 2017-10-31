@@ -16,6 +16,9 @@ public class ClickCimetiere : MonoBehaviour {
     /// </summary>
     bool cardsCurrentlyShown = false;  
 
+    /// <summary>
+    /// Lors d'un click sur le cimetière. 
+    /// </summary>
     private void OnMouseDown() {
         /*
          * Lors d'un clic sur l'objet cimetiere (objet rose). 

@@ -598,4 +598,12 @@ public class Assistance : Carte {
         return false; 
     }
 
+    public override bool isCarteInMain() {
+        if (assistanceState == State.MAIN) {
+            return true; 
+        } else {
+            return false;
+        }
+    }
+
 }

@@ -188,7 +188,12 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// 1, réponse positive, 
     /// 2 réponse négative. 
     /// </summary>
-    private int defairePile = 0; 
+    private int defairePile = 0;
+
+    /// <summary>
+    /// Cet objet permet de matérialiser l'attente qu'il reste au joueur afin de pouvoir faire pause. 
+    /// </summary>
+    GameObject SliderPause; 
 
 	// Use this for initialization
 	public override void Start () {
@@ -226,6 +231,8 @@ public class GameManager : NetworkBehaviourAntinomia {
         ProposerDefairePile = GameObject.Find("ProposerDefairePile");
         ProposerDefairePile.SetActive(false);
         // StartCoroutine(PiocheDebut (6)); 
+        SliderPause = GameObject.Find("SliderPause");
+        SliderPause.SetActive(false); 
 	}
 
 	IEnumerator CoroutineDebugPhase(){
@@ -1175,6 +1182,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             // Si on a reçu un effet, c'est que l'adversaire a réagi, le jeu n'est plus en pause. 
             FindLocalPlayer().GetComponent<Player>().CmdOnlySetPause(false); 
             PauseButton.SetActive(true);
+            StartCoroutine(ShowTimeSpendPause(1f)); 
             if (message != ""){
                 // Si un message est fourni lors de l'appel, on l'affiche
                 DisplayInfoToPlayer(message);
@@ -1194,6 +1202,22 @@ public class GameManager : NetworkBehaviourAntinomia {
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Montrer au joueur pendant combien de temps il peut encore faire pause.
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator ShowTimeSpendPause(float time) {
+        float timeSpent = 1f;
+        SliderPause.SetActive(true); 
+        while (timeSpent >= 0f) {
+            SliderPause.GetComponent<Image>().fillAmount = timeSpent;
+            timeSpent -= 1f / 180f;
+            yield return new WaitForSeconds(time / 180f);
+            // Debug.Log(timeSpent); 
+        }
+        SliderPause.SetActive(false); 
     }
 
     /// <summary>

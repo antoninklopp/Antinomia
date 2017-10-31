@@ -8,8 +8,11 @@ using UnityEngine.Networking;
 /// Cette classe de type aura pour but une fois une carte instanciée de pouvoir désactiver le(s) script(s) inutile à la carte. 
 /// Exemple, si la carte est un sort, on ne gardera actif que la classe sort.
 /// </summary>
-public class CarteType : NetworkBehaviour {
+public class CarteType : NetworkBehaviourAntinomia {
 
+    /// <summary>
+    /// Type de la carte
+    /// </summary>
     public enum Type {
         /// <summary>
         /// La carte est une entité.
@@ -22,7 +25,11 @@ public class CarteType : NetworkBehaviour {
         /// <summary>
         /// La carte est une assistance. 
         /// </summary>
-        ASSISTANCE, 
+        ASSISTANCE,
+        /// <summary>
+        /// La carte est une émanation. 
+        /// </summary>
+        EMANATION,
         /// <summary>
         /// La carte n'est d'aucun type. 
         /// </summary>
@@ -38,7 +45,7 @@ public class CarteType : NetworkBehaviour {
     public bool instanciee = false; 
 
     // Use this for initialization
-    void Start () {
+    public override void Start () {
         StartCoroutine(SetUpCard()); 
 	}
 
@@ -58,11 +65,18 @@ public class CarteType : NetworkBehaviour {
             case "assistance":
                 thisCarteType = Type.ASSISTANCE;
                 break;
+            case "emanation":
+                thisCarteType = Type.EMANATION;
+                break; 
             default:
                 throw new Exception("Le type est inconnu"); 
         }
     }
 
+    /// <summary>
+    /// Lors du spawn de la carte on lui envoie des attributs
+    /// </summary>
+    /// <returns>None</returns>
     IEnumerator SetUpCard() {
         yield return new WaitForSeconds(0.04f);
 
@@ -86,23 +100,34 @@ public class CarteType : NetworkBehaviour {
 
         switch (thisCarteType) {
             case Type.SORT:
-                Destroy(GetComponent<Entite>());
-                Destroy(GetComponent<Assistance>()); 
+                DetruireComposant(Type.ENTITE);
+                DetruireComposant(Type.ASSISTANCE);
+                DetruireComposant(Type.EMANATION); 
                 break;
             case Type.ENTITE:
-                Destroy(GetComponent<Sort>());
-                Destroy(GetComponent<Assistance>());
+                DetruireComposant(Type.SORT);
+                DetruireComposant(Type.ASSISTANCE);
+                DetruireComposant(Type.EMANATION);
                 break;
             case Type.ASSISTANCE:
-                Destroy(GetComponent<Sort>());
-                Destroy(GetComponent<Entite>());
+                DetruireComposant(Type.SORT);
+                DetruireComposant(Type.ENTITE);
+                DetruireComposant(Type.EMANATION);
+                break;
+            case Type.EMANATION:
+                DetruireComposant(Type.SORT);
+                DetruireComposant(Type.ENTITE);
+                DetruireComposant(Type.ASSISTANCE);
                 break; 
             default:
                 throw new Exception("Cette carte n'a pas de type");
         }
     }
 
-
+    /// <summary>
+    /// Changer le type sur tous les clients.
+    /// </summary>
+    /// <param name="_type"></param>
     [ClientRpc]
     void RpcSetType(Type _type) {
         /*
@@ -110,4 +135,45 @@ public class CarteType : NetworkBehaviour {
          */ 
         thisCarteType = _type; 
     }
+
+    /// <summary>
+    /// Sert à détruire les composants inutiles d'une carte
+    /// </summary>
+    /// <param name="carteType"></param>
+    private void DetruireComposant(Type carteType) {
+        // Il faut vérifier à chaque fois que le composant n'a pas été détruit. 
+        switch (carteType) {
+            case Type.ENTITE:
+                if (GetComponent<Entite>() != null) {
+                    Destroy(GetComponent<Entite>()); 
+                }
+                break;
+            case Type.EMANATION:
+                if (GetComponent<Emanation>() != null) {
+                    Destroy(GetComponent<Emanation>());
+                }
+                break;
+            case Type.SORT:
+                if (GetComponent<Sort>() != null) {
+                    Destroy(GetComponent<Sort>());
+                }
+                break;
+            case Type.ASSISTANCE:
+                if (GetComponent<Assistance>() != null) {
+                    Destroy(GetComponent<Assistance>());
+                }
+                break;
+            default:
+                Debug.Log("Ce composant n'existe pas");
+                break; 
+        }
+    }
+
+    /// <summary>
+    /// Récupérer le type de la carte
+    /// </summary>
+    /// <returns>Type de la carte. </returns>
+    public Type getType() {
+        return thisCarteType;
+    } 
 }

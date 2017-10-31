@@ -1,14 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking; 
+using UnityEngine.Networking;
+using UnityEngine.TestTools; 
 
 /// <summary>
 /// Gestion des cartes sur le Champ de Bataille. 
 /// 
 /// Il peut y avoir au maximum 5 cartes sur le board
 /// </summary>
-public class CartesBoard : NetworkBehaviour {
+public class CartesBoard : NetworkBehaviourAntinomia {
 
 	/*
 	 * Il peut y avoir au maximum 5 cartes sur le board. 
@@ -39,7 +40,7 @@ public class CartesBoard : NetworkBehaviour {
     /// <summary>
     /// Reordonner les cartes sur le champ de bataille. 
     /// </summary>
-	void CmdReordonnerCarte(){
+	public void CmdReordonnerCarte(){
 		/*
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.
@@ -58,9 +59,10 @@ public class CartesBoard : NetworkBehaviour {
 				// Sinon on les décale toutes vers la gauche et on insère à droite. 
 				//AllCreaturesChampBataille [i].transform.localPosition = 
 				//	new Vector3 (AllCreaturesChampBataille [i].transform.localPosition.x - Carte.GetComponent<BoxCollider2D>().size.x/2 - OffsetCarteChampBataille , 0, 0); 
-				AllCreaturesChampBataille [i].transform.localPosition = 
-					new Vector3 (2*(-(int)AllCreaturesChampBataille.Count/2 + i)*CartePrefab.GetComponent<BoxCollider2D>().size.x*CartePrefab.transform.localScale.x - OffsetCarteChampBataille , 0, 0);
-
+				// AllCreaturesChampBataille [i].transform.localPosition = 
+				//	new Vector3 (2*(-(int)AllCreaturesChampBataille.Count/2 + i)*CartePrefab.GetComponent<BoxCollider2D>().size.x*CartePrefab.transform.localScale.x - OffsetCarteChampBataille , 0, 0);
+                ChangePositionCarte(AllCreaturesChampBataille[i], new Vector3(2 * (-(int)AllCreaturesChampBataille.Count / 2 + i) * 
+                    CartePrefab.GetComponent<BoxCollider2D>().size.x * CartePrefab.transform.localScale.x - OffsetCarteChampBataille, 0, 0)); 
 			}
 			// On insère la dernière carte à droite. 
 			//AllCreaturesChampBataille[AllCreaturesChampBataille.Count - 1].transform.localPosition = 
@@ -110,5 +112,47 @@ public class CartesBoard : NetworkBehaviour {
 
 		return AllCreaturesChampBataille.Count;  
 	}
+
+    /// <summary>
+    /// Changer la position d'une carte
+    /// </summary>
+    public static void ChangePositionCarte(GameObject Carte, Vector3 newPosition) {
+        Debug.Log("CHANGEMENT DE POSITIOB DE LA CARTE");
+        // TODO A rectifier. 
+        Carte.GetComponent<Carte>().RepositionnerCarte(1, newPosition);
+    } 
+
+    public List<GameObject> getCartesChampBataille() {
+        AllCreaturesChampBataille = new List<GameObject>();
+        foreach (Transform child in transform) {
+            AllCreaturesChampBataille.Add(child.gameObject);
+        }
+
+        return AllCreaturesChampBataille; 
+    } 
+
+    [UnityTest]
+    private bool checkIfCartesStateChampBataille() {
+        List<GameObject> CartesChampBataille = getCartesChampBataille();
+        for (int i = 0; i < CartesChampBataille.Count; i++) {
+            switch (CartesChampBataille[i].GetComponent<CarteType>().thisCarteType) {
+                case CarteType.Type.ENTITE:
+                case CarteType.Type.EMANATION:
+                    if (CartesChampBataille[i].GetComponent<Entite>().getState() != Entite.State.CHAMPBATAILLE) {
+                        return false;
+                    }
+                    break;
+                case CarteType.Type.ASSISTANCE:
+                    if (CartesChampBataille[i].GetComponent<Assistance>().assistanceState != Assistance.State.JOUEE
+                        && CartesChampBataille[i].GetComponent<Assistance>().assistanceState != Assistance.State.ASSOCIE_A_CARTE) {
+                        return false; 
+                    }
+                    break;
+                default:
+                    throw new System.Exception("Type inconnu");
+            }
+        }
+        return true; 
+    }
 
 }

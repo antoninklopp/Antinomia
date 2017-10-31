@@ -138,8 +138,45 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
                 //Debug.Log("On set l'OID de la carte" + ID);
                 _carte.oID = ID;
             }
-        }
-        else if (data.GetString("type") == "sort") {
+        } else if (data.GetString("type") == "emanation") {
+            // Dans le cas d'une carte entité
+            // TODO : On pourrait peut-être regrouper entité et emanation. 
+            Emanation _carte = newCarte.AddComponent<Emanation>();
+            _carte.coutElementaire = data.GetInt("COUT").Value;
+            _carte.STAT = data.GetInt("STAT").Value;
+            _carte.shortCode = data.GetString("shortCode");
+            _carte.Name = data.GetString("name");
+            _carte.carteAscendance = stringToAscendance(data.GetString("Element"));
+            _carte.carteElement = stringToElement(data.GetString("Element"));
+            _carte.stringToEffetList(data.GetString("Effet"));
+            _carte.stringToEffetAstral(data.GetString("Astral"));
+            _carte.stringToEffetMalefique(data.GetString("Malefique"));
+            _carte.AllEffetsAstralStringToDisplay = data.GetString("AstralString");
+            _carte.AllEffetsMalefiqueStringToDisplay = data.GetString("MalefiqueString");
+            _carte.AllEffetsStringToDisplay = data.GetString("EffetString");
+            _carte.AllEffetsString = data.GetString("Effet");
+            _carte.AllEffetsAstralString = data.GetString("Astral");
+            _carte.AllEffetsMalefiqueString = data.GetString("Malefique");
+            _carte.CoutAKA = data.GetInt("AKA").Value;
+
+            if (data.GetString("oID") != null) {
+                /*
+                 * Une fois que la carte a été instanciée sur le réseau, c'est la fonction 
+                 * GetCardByIdSparks qui est appelée. 
+                 * Elle recherche la carte dans la metaCollection et dans ce cas il n'y a pas de oID.
+                 * Mais elle n'est plus nécessaire une fois la carte jouée et instanciée. 
+                 */
+                //Debug.Log(data.GetInt("card_ID").Value);
+                _carte.oID = data.GetString("oID");
+                _carte.IDAllCards = data.GetInt("card_ID").Value;
+            }
+            if (ID != "") {
+                // L'oID de la carte peut être utile dans le cas où on aurait changé des élements sur la carte 
+                // et qu'on voudrait récupérer les infos de base. 
+                //Debug.Log("On set l'OID de la carte" + ID);
+                _carte.oID = ID;
+            }
+        } else if (data.GetString("type") == "sort") {
             // Dans le cas d'une carte sort
             Sort _sort = newCarte.AddComponent<Sort>();
             _sort.shortCode = data.GetString("shortCode");

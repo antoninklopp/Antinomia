@@ -199,8 +199,11 @@ public class Entite : Carte {
         return carteState;
     }
 
-
-    public void setState(string newState) {
+    /// <summary>
+    /// Changer le state d'une carte
+    /// </summary>
+    /// <param name="newState"></param>
+    public virtual void setState(string newState) {
         switch (newState) {
             case "MAIN":
                 carteState = State.MAIN;
@@ -217,6 +220,12 @@ public class Entite : Carte {
             case "CIMETIERE":
                 carteState = State.CIMETIERE;
                 break;
+            case "DECK":
+                carteState = State.DECK;
+                break;
+            case "BAN":
+                carteState = State.BAN;
+                break; 
         }
     }
 
@@ -319,7 +328,7 @@ public class Entite : Carte {
         }
 
         // S'il y a un sort en cours. 
-        Debug.Log(GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours);
+        Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().SortEnCours);
         if (GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours != null) {
             GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours.SendMessage("RecupererCarteJouerSort", gameObject);
             Debug.Log("Le sort a été joué.");
@@ -433,9 +442,13 @@ public class Entite : Carte {
             GetInfoCarte());
     }
 
-    void ChangePosition(Player.Phases currentPhase) {
+    /// <summary>
+    /// Changer la position d'une carte. 
+    /// </summary>
+    /// <param name="currentPhase">Phase en cours. </param>
+    protected virtual void ChangePosition(Player.Phases currentPhase) {
         /*
-		 * Changer la position de la carte lors d'un reclique. 
+		 * Changer la position de la carte lors d'un re - clic. 
 		 * 
 		 * Change position:
 		 * Comprend les invocations des phases principales ET
@@ -896,7 +909,7 @@ public class Entite : Carte {
     /// Detruire une carte. 
     /// On change son state, pour l'envoyer au cimetière. 
     /// </summary>
-    void DetruireCarte() {
+    protected void DetruireCarte() {
         /*
 		 * On change juste la carte de State pour pouvoir laisser au joueur la possibilité de la récupérer ensuite. 
          * Et pouvoir l'afficher dans le cimetiere. 
@@ -1629,6 +1642,18 @@ public class Entite : Carte {
             case GameManager.AscendanceTerrain.ASTRALE:
                 GererEffets(AllEffetsAstral, _currentPhase: phase, debut:debut, numeroListEffet:1, deposeCarte:deposeCarte);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// <see cref="Carte.isCarteInMain"/>
+    /// </summary>
+    /// <returns></returns>
+    public override bool isCarteInMain() {
+        if (carteState == State.MAIN) {
+            return true; 
+        } else {
+            return false;
         }
     }
 

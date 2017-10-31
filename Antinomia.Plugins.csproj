@@ -139,6 +139,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Classes\CarteType.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Creature.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Deck.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\Emanation.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Entite.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\ImageCardBattle.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\ImageCardToShow.cs" />
@@ -156,6 +157,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\LoginGUI.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GameSparksManager.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GetGlobalInfoGameSparks.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GetPlayerInfoGameSparks.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\InGamePurchase.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\MatchMakingGameSparks.cs" />

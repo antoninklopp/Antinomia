@@ -242,4 +242,13 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
         return getAllCardsFromPlayerBoardSanctuaire(UneCarte); 
     }
 
+    /// <summary>
+    /// Outil de copie d'un vecteur
+    /// </summary>
+    /// <param name="vecteur">Le vecteur à recopier</param>
+    /// <returns>Un vecteur copié</returns>
+    public static Vector3 Copy(Vector3 vecteur) {
+        return new Vector3(vecteur.x, vecteur.y, vecteur.z); 
+    }
+
 }

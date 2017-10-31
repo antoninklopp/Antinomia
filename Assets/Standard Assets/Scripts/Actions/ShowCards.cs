@@ -5,32 +5,50 @@ using System;
 using UnityEngine.UI; 
 using UnityEngine.Networking; 
 
-public class ShowCards : NetworkBehaviour {
+/// <summary>
+/// Montrer des cartes pour que le joueur puisse les choisir. 
+/// </summary>
+public class ShowCards : NetworkBehaviourAntinomia {
 	/*
 	 * On fait une zoom sur les cartes pour choisir certaines cartes. 
 	 * Comme par exemple, les cartes à révéler pour pouvoir invoquer une carte de type AIR en montrant des cartes à son adversaire. 
 	 * 
 	 */ 
 
+    /// <summary>
+    /// Ecart entre les cartes lorsqu'on les montre au joueur. (inutilisé). 
+    /// </summary>
 	public float ecart = 1.2f; 
 
+    /// <summary>
+    /// Prefab de la carte à montrer 
+    /// </summary>
 	public GameObject CartePrefab; 
+    
+    /// <summary>
+    /// Liste des cartes à montrer au joueur. 
+    /// </summary>
 	private List<GameObject> AllCardsToShow; 
-	private List<GameObject> AllCardsToReturn = new List<GameObject>(); 
-	private List<GameObject> AllCardsGiven; 
+
+    /// <summary>
+    /// Liste des cartes à retourner à l'objet demandeur
+    /// </summary>
+	private List<GameObject> AllCardsToReturn = new List<GameObject>();
+
+    private List<GameObject> AllCardsGiven; 
 
 	private List<string> AllCardsToShowOther = new List<string> ();
 
     // Toutes les cartes à retourner avec les ID en game des cartes
     private List<int> AllCardsToReturnID = new List<int>(); 
 
-	//private List<string> AllCardsToShowOther; 
-
+    /// <summary>
+    /// Référence du bouton de fin du choix
+    /// </summary>
 	GameObject FiniButton; 
+
 	private SyncListString newListSync = new SyncListString(); 
 
-	//[HideInInspector]
-	//[SerializeField]
 	private string[] newList;
 
     // un objet peut demander une carte, après la demande c'est à lui qu'on revoit l'objet sélectionné. 
@@ -39,25 +57,36 @@ public class ShowCards : NetworkBehaviour {
     /// <summary>
     /// true si le joueur a local a un effet en cours. 
     /// </summary>
-    private bool effetEnCours; 
+    private bool effetEnCours;
+
+    /// <summary>
+    /// Nombre de cartes à choisir par le joueur.
+    /// </summary>
+    private int nombreDeCartesAChoisir;
+
+    GameObject DisplayString; 
+
 
 	// Use this for initialization
-	void Start () {
+	public override void Start () {
 		FiniButton = GameObject.Find ("Fini"); 
 		FiniButton.SetActive (false); 
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
-	public void ShowCardsToChoose(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking=null){
+    /// <summary>
+    /// Montrer les cartes que le joueur doit pouvoir choisir pour divers effets
+    /// </summary>
+    /// <param name="_AllCardsGiven">Les objets que le joueur peut choisir</param>
+    /// <param name="_ObjectAsking">L'objet demandeur de l'effet</param>
+    /// <param name="stringToDisplay">Le string à montrer au joueur pour expliquer le choix qu'il doit faire. </param>
+	public void ShowCardsToChoose(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking=null, string stringToDisplay="", 
+                                    int _nombreDeCartesAChoisir=1){
         /*
 		 * On crée toutes les images à partir de la carte. 
 		 * 
 		 */
 
+        nombreDeCartesAChoisir = _nombreDeCartesAChoisir; 
         effetEnCours = true; 
 
         ObjectAsking = _ObjectAsking;
@@ -88,6 +117,10 @@ public class ShowCards : NetworkBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Ajouter une carte à la liste des cartes à retourner à l'objet demandeur
+    /// </summary>
+    /// <param name="number">Numéro de la carte</param>
 	void AddNewCardToReturn(int number){
 		/*
 		 * Envoi d'une information de l'image cliquée. 
@@ -99,6 +132,10 @@ public class ShowCards : NetworkBehaviour {
         AllCardsToReturnID.Add(AllCardsGiven[number].GetComponent<Carte>().IDCardGame);
     }
 
+    /// <summary>
+    /// Enlever une carte de la liste de cartes à retourner à l'objet demandeur
+    /// </summary>
+    /// <param name="number">Numéro de la carte</param>
 	void RemoveCardToReturn(int number){
 		/*
 		 * Envoi d'une information de l'image cliquée
@@ -116,6 +153,10 @@ public class ShowCards : NetworkBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Envoie de la liste de cartes à l'objet qui a demandé les cartes
+    /// pour un effet. 
+    /// </summary>
 	public void SendAllCardsChoosen(){
 		/*
 		 * Lors du clique de fin. 
@@ -216,19 +257,6 @@ public class ShowCards : NetworkBehaviour {
         Debug.Log("CARTES QUE J4AI CHOISIES");
         //FinShowCards (0.1f, AllCardsToShow); 
         StartCoroutine(ShowAllCardsChosen());
-    }
-
-    GameObject FindLocalPlayer() {
-        /*
-		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
-		 */
-        GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
-        if (Players[0].GetComponent<Player>().isLocalPlayer) {
-            return Players[0];
-        }
-        else {
-            return Players[1];
-        }
     }
 
 }

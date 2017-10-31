@@ -628,4 +628,12 @@ public class Sort : Carte {
         return false;
     }
 
+    public override bool isCarteInMain() {
+        if (sortState == State.MAIN) {
+            return true; 
+        } else {
+            return false; 
+        }
+    }
+
 }

@@ -744,6 +744,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.SACRIFIER_CARTE:
                         // Lorsque la condition est le sacrifice d'une carte. 
                         // Dans le cas du sacrifice d'une carte, il faut rajouter dans les effets le sacrifice de la carte. 
+                        Debug.Log("Une carte est sacrifiée, condition"); 
+                        // il faudra vérifier si la carte peut être sacrifiée. 
                         break;
                     case Condition.ConditionEnum.CARTE_SUR_CHAMP_BATAILLE:
                         // Si la carte n'est pas sur le champ de bataille on s'arrête. 
@@ -1104,26 +1106,8 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.ATTAQUE_JOUEUR_ADVERSE:
                     if (jouerEffet) {
                         Debug.Log("<color=green>CA PART222</color>");
-                        switch (effetListNumber) {
-                            case 0:
-                                // Effets normaux
-                                // Faire attention, ce n'est peut'être pas l'action 0. TODO: A changer, numero d'action à ajouter? 
-                                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
-                            _actions[j].properIntAction);
-                                break;
-                            case 1:
-                                // Effets astraux
-                                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
-                            _actions[j].properIntAction);
-                                break;
-                            case 2:
-                                // Effets Malefiques
-                                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
-                            _actions[j].properIntAction);
-                                break;
-                            default:
-                                throw new Exception("Le numero de la liste d'effet doit être compris entre 0 et 2");
-                        }
+                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
+                        _actions[j].properIntAction);
                     } else {
                         Debug.Log("<color=green>CA PART</color>"); 
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
@@ -1767,6 +1751,42 @@ public class Carte : NetworkBehaviourAntinomia {
                     "CmdAddStat", _intToAdd, FindLocalPlayer().GetComponent<Player>().PlayerID);
             }
         }
+    }
+
+    /// <summary>
+    /// Repositionner une carte avec un effet sur le board. 
+    /// </summary>
+    /// <param name="speed">La vitesse de repositionnement de la carte, nombre de pas de 0.05f</param>
+    /// <param name="newPosition">La nouvelle position de la carte</param>
+    public IEnumerator RepositionnerCarteRoutine(int speed, Vector3 newPosition) {
+        Vector3 currentPosition = NetworkBehaviourAntinomia.Copy(transform.localPosition);
+        int stepCount = 0; 
+        Vector3 stepVector = new Vector3(-(currentPosition.x - newPosition.x)/speed,
+                                          -(currentPosition.y - newPosition.y) / speed,
+                                          -(currentPosition.z - newPosition.z) / speed);
+
+        Debug.Log(stepVector);
+        Debug.Log(newPosition);
+
+        while (stepCount < speed) {
+            transform.localPosition = new Vector3(transform.localPosition.x + stepVector.x,
+                                             transform.localPosition.y + stepVector.y, 
+                                             transform.localPosition.z + stepVector.z);
+            yield return new WaitForSeconds(0.05f);
+            stepCount++; 
+        }
+    }
+
+    public void RepositionnerCarte(int speed, Vector3 newPosition) {
+        StartCoroutine(RepositionnerCarteRoutine(speed, newPosition)); 
+    }
+
+    /// <summary>
+    /// Renvoie true si la carte est dans la main, false sinon. 
+    /// </summary>
+    /// <returns>false par défaut</returns>
+    public virtual bool isCarteInMain() {
+        return false; 
     }
 
 }
