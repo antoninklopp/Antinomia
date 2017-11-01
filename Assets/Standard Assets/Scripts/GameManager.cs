@@ -56,7 +56,8 @@ public class GameManager : NetworkBehaviourAntinomia {
 	GameObject NomJoueur1;
 	GameObject NomJoueur2;
 
-    GameObject InfoCarteBattle; 
+    GameObject InfoCarteBattle;
+    GameObject InfoCarteBattlePhone; 
 
     /// <summary>
     /// AKA sur le tour, c'est à dire à son niveau maximum au début du tour. 
@@ -195,8 +196,11 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     GameObject SliderPause; 
 
-	// Use this for initialization
+	/// <summary>
+    /// Initialisation du GameManager
+    /// </summary>
 	public override void Start () {
+        // On récupère tous les objets UI
         base.Start(); 
 
 		NomJoueur1 = GameObject.Find ("NomJoueur1"); 
@@ -217,6 +221,8 @@ public class GameManager : NetworkBehaviourAntinomia {
         EffetParticuleTerrain.SetActive(false);
         InfoCarteBattle = GameObject.Find("InfoCarte");
         InfoCarteBattle.SetActive(false);
+        InfoCarteBattlePhone = GameObject.Find("InfoCartePhone");
+        InfoCarteBattlePhone.SetActive(false); 
         DisplayInfo = GameObject.Find("DisplayInfo");
         PauseButton = GameObject.Find("PauseButton");
         DisplayInfo.SetActive(false);
@@ -251,6 +257,12 @@ public class GameManager : NetworkBehaviourAntinomia {
         /*
 		 * Lors d'un appui sur le bouton continuer, on passe à la phase suivante. 
 		 */
+
+        // Si d'autres effets sont en cours, on ne peut pas changer de phase. 
+        if (GameObject.Find("Pile") != null) {
+            DisplayMessage("Impossible de passer à une autre phase pour l'instant. "); 
+            return;
+        }
 
         // On ne peut pas réagir lors après la phase finale. 
         if (!defairePile && Phase != Player.Phases.FINALE) {
@@ -1064,16 +1076,25 @@ public class GameManager : NetworkBehaviourAntinomia {
     public void ShowCarteInfo(string shortCode, string Info) {
         /*
          * Afficher les informations liées à la carte. 
-         */ 
+         */
+#if (UNITY_ANDROID || UNITY_IOS)
+        InfoCarteBattlePhone.SetActive(true);
+        InfoCarteBattlePhone.GetComponent<InfoCarteBattle>().SetInfoCarte(shortCode, Info);
+#else 
         InfoCarteBattle.SetActive(true);
         InfoCarteBattle.GetComponent<InfoCarteBattle>().SetInfoCarte(shortCode, Info);
+#endif
     }
 
     /// <summary>
     /// Cacher le panneau qui montre les infos de la carte.
     /// </summary>
     public void HideInfoCarte() {
-        InfoCarteBattle.SetActive(false); 
+#if (UNITY_ADNROID || UNITY_IOS)
+        InfoCarteBattlePhone.SetActive(false); 
+#else 
+        InfoCarteBattle.SetActive(false);
+#endif
     }
 
 
@@ -1213,8 +1234,8 @@ public class GameManager : NetworkBehaviourAntinomia {
         SliderPause.SetActive(true); 
         while (timeSpent >= 0f) {
             SliderPause.GetComponent<Image>().fillAmount = timeSpent;
-            timeSpent -= 1f / 180f;
-            yield return new WaitForSeconds(time / 180f);
+            timeSpent -= 1f / 50f;
+            yield return new WaitForSeconds(time / 50f);
             // Debug.Log(timeSpent); 
         }
         SliderPause.SetActive(false); 

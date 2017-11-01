@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.TestTools; 
+// using UnityEngine.TestTools; 
 
 /// <summary>
 /// Gestion des cartes sur le Champ de Bataille. 
@@ -131,7 +131,7 @@ public class CartesBoard : NetworkBehaviourAntinomia {
         return AllCreaturesChampBataille; 
     } 
 
-    [UnityTest]
+    // [UnityTest]
     private bool checkIfCartesStateChampBataille() {
         List<GameObject> CartesChampBataille = getCartesChampBataille();
         for (int i = 0; i < CartesChampBataille.Count; i++) {

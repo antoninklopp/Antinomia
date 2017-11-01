@@ -60,6 +60,10 @@ public class Action {
         /// </summary>
         DETRUIRE, 
         /// <summary>
+        /// Detruire une carte directement sans possibilité de réponse de l'autre joueur. 
+        /// </summary>
+        DETRUIRE_DIRECT,
+        /// <summary>
         /// Changer la position d'une carte
         /// </summary>
         CHANGER_POSITION, 

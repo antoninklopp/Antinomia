@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2017
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antinomia.Plugins", "Antinomia.Plugins.csproj", "{19CA5E02-E462-8B74-AAD2-C40A5A11303C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antinomia", "Antinomia.csproj", "{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}"
@@ -36,8 +34,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4DEA9E79-A8F5-46D6-84B8-D309D8DACB63}
 	EndGlobalSection
 EndGlobal

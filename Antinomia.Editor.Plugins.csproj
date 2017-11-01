@@ -159,13 +159,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Antinomia.csproj">
-      <Project>{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}</Project>
-      <Name>Antinomia</Name>
-    </ProjectReference>
     <ProjectReference Include="Antinomia.Plugins.csproj">
       <Project>{19CA5E02-E462-8B74-AAD2-C40A5A11303C}</Project>
       <Name>Antinomia.Plugins</Name>
+    </ProjectReference>
+    <ProjectReference Include="Antinomia.csproj">
+      <Project>{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}</Project>
+      <Name>Antinomia</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

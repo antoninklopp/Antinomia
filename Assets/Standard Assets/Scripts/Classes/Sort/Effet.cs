@@ -24,14 +24,9 @@ public class Effet {
 
     }
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-
-    // Update is called once per frame
-    void Update() {
-
+    public Effet(List<Condition> AllCondiditonsEffet, List<Action> AllActionsEffet) {
+        this.AllConditionsEffet = AllCondiditonsEffet;
+        this.AllActionsEffet = AllActionsEffet; 
     }
 
 

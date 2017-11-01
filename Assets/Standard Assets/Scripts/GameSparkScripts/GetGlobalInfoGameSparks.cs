@@ -41,6 +41,11 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
             }); 
     }
 
+    /// <summary>
+    /// Attente des notes de version. 
+    /// </summary>
+    /// <param name="start"></param>
+    /// <returns></returns>
     public IEnumerator WaitForVersionNotes(bool start=true) {
         GetVersionNote(start);
         while(VersionNote == "") {

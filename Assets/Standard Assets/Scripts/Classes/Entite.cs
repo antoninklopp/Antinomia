@@ -9,7 +9,7 @@ using UnityEngine.UI;
 /// Hérite de la classe Carte. 
 /// Décrit une carte entité.
 /// </summary>
-public class Entite : Carte {
+public class Entite : Carte, ICarte {
     /*
 	 * Classe carte décrivant toutes les spécificités d'une carte.
 	 * Ce script ne devrait jamais être directement utilisé dans un script? Car il vaudrait mieux utiliser sort ou créature? 
@@ -185,6 +185,11 @@ public class Entite : Carte {
     public bool clicked = false;
 
     /// <summary>
+    /// Track si l'utiliseur drag la carte ou pas. 
+    /// </summary>
+    public bool dragging = false; 
+
+    /// <summary>
     /// Valeur permettant de savoir si un joueur a attaqué. 
     /// -1: Le joueur ne pourra JAMAIS attaquer. 
     /// 0 : Le joueur n'a pas encore attaqué à ce tour mais pourra attaquer. 
@@ -270,7 +275,7 @@ public class Entite : Carte {
     public override void Update() {
         base.Update(); 
 
-        if (clicked) {
+        if (clicked || dragging) {
             // Si on a cliqué sur la carte. 
             // On ne peut la déplacer que pendant la phase de préparation. (depuis le sanctuaire ou le board)
             // On ne peut l'invoquer que pendant les phases principales. 
@@ -321,6 +326,17 @@ public class Entite : Carte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
 
+#if (UNITY_ANDROID || UNITY_IOS)
+        InformationsSurLaCarte(); 
+#else
+        CliqueSimpleCarte(false);
+#endif
+    }
+
+    /// <summary>
+    /// Clique simple sur une carte
+    /// </summary>
+    private void CliqueSimpleCarte(bool drag=false) {
         ResetLocalScale();
 
         if (carteState == State.CIMETIERE) {
@@ -368,16 +384,22 @@ public class Entite : Carte {
                     GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) && carteState == State.MAIN))) {
                 GetComponent<SpriteRenderer>().enabled = true;
                 Destroy(BigCard);
-                clicked = !clicked;
+                if (drag) {
+                    dragging = true; 
+                } else {
+                    clicked = !clicked;
+                }
                 canGoBig = false;
-            } else if (!verrouillee) {
+            }
+            else if (!verrouillee) {
                 CheckCardOverlap();
                 // Il faut bien regarder que le carte ne soit pas verrouillée!
                 ChangePosition(currentPhase);
                 clicked = false;
                 canGoBig = true;
             }
-        } else if (GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.COMBAT) {
+        }
+        else if (GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.COMBAT) {
             /*
 			 * Lors de la phase de combat. 
 			 * 
@@ -387,22 +409,26 @@ public class Entite : Carte {
             Debug.Log("Ceci est une phase de combats");
             if (hasAttacked == 1) {
                 GameObject.Find("GameManager").SendMessage("DisplayMessage", "Cette carte ne peut pas/plus attaquer");
-                return; 
-            } else if (hasAttacked == -1) {
-                DisplayMessage("Cette carte ne peut pas attaquer"); 
-                return; 
+                return;
+            }
+            else if (hasAttacked == -1) {
+                DisplayMessage("Cette carte ne peut pas attaquer");
+                return;
             }
             if (isFromLocalPlayer && hasAttacked == 0) {
                 // pour pouvoir attaquer il faut que la carte n'ait pas déjà attaqué. 
                 if (carteState != State.CHAMPBATAILLE) {
                     GameObject.Find("GameManager").SendMessage("DisplayMessage", "Une carte qui attaque doit etre sur le champ de bataille");
-                } else {
+                }
+                else {
                     GameObject.Find("GameManager").SendMessage("AttackMyPlayer", gameObject);
                 }
-            } else {
+            }
+            else {
                 if (carteState != State.CHAMPBATAILLE) {
                     GameObject.Find("GameManager").SendMessage("DisplayMessage", "Vous ne pouvez attaquer qu'une carte sur le champ de bataille!");
-                } else {
+                }
+                else {
                     GameObject.Find("GameManager").SendMessage("AttackOtherPlayer", gameObject);
                 }
             }
@@ -410,20 +436,23 @@ public class Entite : Carte {
         }
     }
 
-
-    void OnMouseDrag() {
-
-
+    /// <summary>
+    /// Lors du drag de la carte
+    /// </summary>
+    public override void OnMouseDrag() {
+        CliqueSimpleCarte(true); 
     }
 
-    void OnMouseUp() {
+    public void OnMouseUp() {
         /*
 		 * Lorsque la carte est relachée par l'utilisateur. 
 		 * 
 		 * TODO: Implémenter cette phase lors du drap and drop. 
 		 */
-
-
+         if (dragging) {
+            CliqueSimpleCarte(true); 
+         }
+         // Sinon on n'appelle pas la fonction
     }
 
     public override void CreateBigCard(string messageToDisplay="") {
@@ -1236,6 +1265,11 @@ public class Entite : Carte {
         DetruireCarte(); 
     }
 
+    public override void InformerSacrifierCarteEntite(int numeroEffet, int numeroListEffet=0) {
+        base.InformerSacrifierCarteEntite(numeroEffet, numeroListEffet);
+        MettreEffetDansLaPile(new List<GameObject>() { gameObject }, numeroEffet, numeroListEffet); 
+    }
+
     /// <summary>
     /// Placer une entité dans le sanctuaire. 
     /// </summary>
@@ -1331,31 +1365,73 @@ public class Entite : Carte {
     /// <summary>
     /// Regarde si une carte peut jouer un de ses effets.
     /// </summary>
-    public override int CheckForEffet() {
+    public override List<EffetPlusInfo> CheckForEffet() {
         // Il faut que l'entité soit dans le main ou dans le sanctuaire pour pouvoir utiliser son effet. 
-        int isEffetPlayable = -1; 
+        List<EffetPlusInfo> effetPlayable = new List<EffetPlusInfo>(); 
         Debug.Log("On check 2 "); 
         if (carteState == State.CHAMPBATAILLE || carteState == State.SANCTUAIRE) {
             // On vérifie les effets que le joueur peut jouer, lors de son tour ou lors du tour de son adversaire uniquement.
             // Pas les effets en réponse à des actions. 
+            Debug.Log("On vérifie les effets normaux"); 
             for (int i = 0; i < AllEffets.Count; ++i) {
                 if (AllEffets[i].AllConditionsEffet[0].TourCondition != Condition.Tour.NONE) {
                     // S'il vérifie les conditions
                     if (GererConditions(AllEffets[i].AllConditionsEffet, choixJoueur:true)) {
                         // Si l'effet n'a pas déjà été joué à ce tour. 
                         Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
-                        isEffetPlayable = i;
+                        effetPlayable.Add(new EffetPlusInfo(AllEffets[i], i, 0));
                     } 
                 } else {
                     Debug.Log("<color=red>" + AllEffets[i].AllConditionsEffet[0].TourCondition.ToString() + "</color>"); 
                 }
             }
+
+            Debug.Log("Ici");
+            Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain()); 
+            if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain() ==
+                GameManager.AscendanceTerrain.ASTRALE) {
+                Debug.Log("On vérifie les effets astraux"); 
+                for (int i = 0; i < AllEffetsAstral.Count; ++i) {
+                    if (AllEffetsAstral[i].AllConditionsEffet[0].TourCondition != Condition.Tour.NONE) {
+                        // S'il vérifie les conditions
+
+                        if (GererConditions(AllEffetsAstral[i].AllConditionsEffet, choixJoueur: true)) {
+                            // Si l'effet n'a pas déjà été joué à ce tour. 
+                            Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
+                            effetPlayable.Add(new EffetPlusInfo(AllEffetsAstral[i], i, 1));
+                        } else {
+                            Debug.Log("Impossible"); 
+                        }
+                    }
+                    else {
+                        Debug.Log("<color=red>" + AllEffetsAstral[i].AllConditionsEffet[0].TourCondition.ToString() + "</color>");
+                    }
+                }
+            }
+
+            if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain() ==
+                GameManager.AscendanceTerrain.MALEFIQUE) {
+                for (int i = 0; i < AllEffetsMalefique.Count; ++i) {
+                    if (AllEffetsMalefique[i].AllConditionsEffet[0].TourCondition != Condition.Tour.NONE) {
+                        // S'il vérifie les conditions
+                        if (GererConditions(AllEffetsMalefique[i].AllConditionsEffet, choixJoueur: true)) {
+                            // Si l'effet n'a pas déjà été joué à ce tour. 
+                            Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
+                            effetPlayable.Add(new EffetPlusInfo(AllEffetsMalefique[i], i, 2));
+                        }
+                    }
+                    else {
+                        Debug.Log("<color=red>" + AllEffetsMalefique[i].AllConditionsEffet[0].TourCondition.ToString() + "</color>");
+                    }
+                }
+            }
+
         }
 
-        return isEffetPlayable;
+        return effetPlayable;
     }
 
-    public override void ProposerEffets(int effetPropose) {
+    public override void ProposerEffets(List<EffetPlusInfo> effetPropose) {
         base.ProposerEffets(effetPropose);
     }
 
@@ -1387,6 +1463,11 @@ public class Entite : Carte {
 
     }
 
+    /// <summary>
+    /// <see cref="Carte.updateEffetActive(int, int)"/>
+    /// </summary>
+    /// <param name="nombreEffet"></param>
+    /// <param name="effetListNumber"></param>
     protected override void updateEffetActive(int nombreEffet, int effetListNumber = 0) {
         base.updateEffetActive(nombreEffet, effetListNumber);
         switch (effetListNumber) {

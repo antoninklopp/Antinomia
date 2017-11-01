@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 // Le multijoueur!
 using UnityEngine.Networking;
-using UnityEngine.TestTools; 
+// using UnityEngine.TestTools; 
 
 /// <summary>
 /// Classe de la main du joueur. 
@@ -115,7 +115,7 @@ public class MainJoueur : NetworkBehaviourAntinomia {
         return CartesMain;
     }
 
-    [UnityTest]
+    // [UnityTest]
     private bool checkIfCartesStateMain() {
         List<GameObject> _CartesMain = getCartesMain();
         for (int i = 0; i < _CartesMain.Count; i++) {

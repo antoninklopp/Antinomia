@@ -8,7 +8,7 @@ using System;
 /// Classe pour modéliser un sort. 
 /// Hérite de la classe carte. 
 /// </summary>
-public class Sort : Carte {
+public class Sort : Carte, ICarte {
 
      /// <summary>
      /// Niveau du sort. 
@@ -18,11 +18,12 @@ public class Sort : Carte {
     public string Condition;
     public int CoutAKA;
 
+    private bool dragging; 
 
+    /// <summary>
+    /// Constructeur de la classe 
+    /// </summary>
     public Sort() {
-        /*
-         * 
-         */
 
 
     }
@@ -113,7 +114,7 @@ public class Sort : Carte {
 
     public override void Update() {
         base.Update();
-        if (clicked != 0) {
+        if (clicked != 0 || dragging) {
             Dragging(); 
         } 
     }
@@ -141,8 +142,20 @@ public class Sort : Carte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
 
+#if (UNITY_ANDROID || UNITY_IOS)
+        InformationsSurLaCarte(); 
+#else
+        CliqueSimpleCarte(); 
+#endif
+    }
+
+    /// <summary>
+    /// Lors d'un clique simple sur la carte.
+    /// </summary>
+    /// <param name="drag"></param>
+    public void CliqueSimpleCarte(bool drag = false) {
         int nombreSortsLances = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().sortLance;
-        if (clicked != 0) {
+        if (clicked != 0 || dragging) {
             canGoBig = false;
             // Si on a déjà cliqué sur la carte une première fois
             if (nombreSortsLances == 0) {
@@ -150,16 +163,23 @@ public class Sort : Carte {
                 ChangePosition();
                 // Le sort a été joué. 
                 Debug.Log("Le sort a été lancé");
-                DisplayMessage("Le sort " + Name + "a été joué"); 
-            } else {
-                clicked = 0;
-                canGoBig = true; 
-                // TODO: Display Message qui dit qu'un sort a déjà été lancé. 
+                DisplayMessage("Le sort " + Name + "a été joué");
             }
-        } else {
-            // Si on clique sur la carte pour la première fois. 
-            clicked = 1;
-            canGoBig = false; 
+            else {
+                clicked = 0;
+                canGoBig = true;
+                // TODO: Display Message qui dit qu'un sort a déjà été lancé.
+                DisplayMessage("Un sort a déjà été lancé à ce tour."); 
+            }
+        }
+        else {
+            // Si on clique sur la carte pour la première fois.
+            if (drag) {
+                dragging = true;
+            } else {
+                clicked = 1;
+            }
+            canGoBig = false;
             //Dragging(); 
         }
     }
@@ -191,6 +211,23 @@ public class Sort : Carte {
     }
 
     /// <summary>
+    /// Drag de la carte
+    /// </summary>
+    public override void OnMouseDrag() {
+        // On s'assure de remettre dragging à false même s'il devrait déjà l'être. 
+        dragging = false; 
+        CliqueSimpleCarte(true); 
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void OnMouseUp() {
+        if (dragging) {
+            CliqueSimpleCarte(true);
+        }
+    }
+    /// <summary>
     /// Changer la position du sort, 
     /// Appelé lors d'un clic sur la carte. 
     /// Vérifie si la carte va être rejouée ou remise dans la main. 
@@ -219,32 +256,57 @@ public class Sort : Carte {
         /*
          * Jouer la carte sort
          */
-        if (coutCarte <= FindLocalPlayer().GetComponent<Player>().PlayerAKA && clicked == 1) {
-            // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
-            Destroy(GetComponent<BoxCollider2D>()); 
-            // Target du sort. 
-            if (!ApplyEffectOnAll()) {
-                GetComponent<SpriteRenderer>().sprite = Cible;
-                // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
-                GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = gameObject;
-                // Debug.Log("On a mis sort en cours à gameObject"); 
-                clicked = 2;
+        // Si on a fait un clic sur la carte
+        if (!dragging) {
+            if (coutCarte <= FindLocalPlayer().GetComponent<Player>().PlayerAKA && clicked == 1) {
+                // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
+                Destroy(GetComponent<BoxCollider2D>());
+                // Target du sort. 
+                if (!ApplyEffectOnAll()) {
+                    GetComponent<SpriteRenderer>().sprite = Cible;
+                    // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
+                    GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = gameObject;
+                    // Debug.Log("On a mis sort en cours à gameObject"); 
+                    clicked = 2;
+                }
+            }
+            else if (clicked == 2) {
+                // 3è clic sur la carte == choix de la carte sur laquelle le sort va être joué. 
+                // ATTENTION: Il est possible qu'une carte ait effet sur tout le terrain, dans ce cas pas besoin d'un troisième clic.
+                // Dans le cas où le sort n'a qu'une seule cible
+                Debug.Log("Cliqué une deuxième fois");
+                // CarteCibleeRayCast contient la référence de la carte qui est ciblee. 
+                Debug.Log("Je suis dans le raycast");
+
+            }
+            else {
+                // Display un message disant que le joueur n'a pas assez d'AKA pour jouer
+                clicked = 0;
+                Main.SendMessage("ReordonnerCarte");
+                GameObject.Find("GameManager").GetComponent<GameManager>().DisplayMessage("Le sort n'a pas été lancé");
+                return;
             }
         }
-        else if (clicked == 2) {
-            // 3è clic sur la carte == choix de la carte sur laquelle le sort va être joué. 
-            // ATTENTION: Il est possible qu'une carte ait effet sur tout le terrain, dans ce cas pas besoin d'un troisième clic.
-            // Dans le cas où le sort n'a qu'une seule cible
-            Debug.Log("Cliqué une deuxième fois"); 
-            // CarteCibleeRayCast contient la référence de la carte qui est ciblee. 
-            Debug.Log("Je suis dans le raycast");
-            
-        } else {
-            // Display un message disant que le joueur n'a pas assez d'AKA pour jouer
-            clicked = 0;
-            Main.SendMessage("ReordonnerCarte");
-            GameObject.Find("GameManager").GetComponent<GameManager>().DisplayMessage("Le sort n'a pas été lancé"); 
-            return; 
+        // Si on a drag la carte
+        else {
+            if (coutCarte <= FindLocalPlayer().GetComponent<Player>().PlayerAKA) {
+                if (!ApplyEffectOnAll()) { // Si l'effet s'applique sur tous il est joué dans la fonction
+                    GameObject Proche = CarteProche(gameObject); 
+                    if (Proche != null) {
+                        RecupererCarteJouerSort(Proche); 
+                    } else {
+                        DisplayMessage("Vous n'avez pas assez d'AKA pour jouer ce sort");
+                        clicked = 0;
+                        dragging = false;
+                        Main.SendMessage("ReordonnerCarte");
+                    }
+                }
+            } else {
+                DisplayMessage("Vous n'avez pas assez d'AKA pour jouer ce sort");
+                clicked = 0;
+                dragging = false;
+                Main.SendMessage("ReordonnerCarte"); 
+            }
         }
     }
 
@@ -289,43 +351,9 @@ public class Sort : Carte {
     }
 
     /// <summary>
-    /// Appliquer un effet sur une carte.
-    /// NE DOIT PAS ETRE UTILISE dans la version actuelle du jeu. 
+    /// Regarde si la carte a effet sur une ou toutes les cartes. 
     /// </summary>
-    /// <param name="Cible">Carte cible du sort</param>
-    void ApplyEffectOnCarte(GameObject Cible) {
-        /*
-         * Envoyer à la carte l'effet appliqué. 
-         * 
-         * NE DOIT PAS ETRE UTILISE
-         */ 
-         // Gestion de l'effet 1
-        switch (AllEffets[0].AllActionsEffet[0].ActionAction) {
-            case (Action.ActionEnum.CHANGER_POSITION):
-                Cible.SendMessage("setClicked", true); 
-                break;
-            case (Action.ActionEnum.DETRUIRE):
-                Cible.SendMessage("DetruireCarte"); 
-                break;
-            case (Action.ActionEnum.NATURE_AIR):
-                Cible.GetComponent<Entite>().CmdChangeElement(Entite.Element.AIR, true);
-                Debug.Log("Element de la carte changé en AIR"); 
-                break;
-            case (Action.ActionEnum.NATURE_EAU):
-                Cible.GetComponent<Entite>().CmdChangeElement(Entite.Element.EAU, true);
-                Debug.Log("Element de la carte changé en EAU");
-                break;
-            case (Action.ActionEnum.NATURE_FEU):
-                Cible.GetComponent<Entite>().CmdChangeElement(Entite.Element.FEU, true);
-                Debug.Log("Element de la carte changé en FEU");
-                break;
-            case (Action.ActionEnum.NATURE_TERRE):
-                Cible.GetComponent<Entite>().CmdChangeElement(Entite.Element.TERRE, true);
-                Debug.Log("Element de la carte changé en TERRE");
-                break; 
-        }
-    }
-
+    /// <returns></returns>
     bool ApplyEffectOnAll() {
         /*
          * Effectuer un sort sur tout le terrain. 
@@ -333,49 +361,24 @@ public class Sort : Carte {
          * 
          * return false dans le cas où l'effet ne target pas tout le monde 
          * true sinon
-         * 
-         * NE DOIT PAS ETRE UTILISE
          */
         // Gestion de l'effet1
          if (!AllEffets[0].AllActionsEffet[0].isEffetTargetAll()) {
             return false; 
         } else {
-            switch (AllEffets[0].AllActionsEffet[0].ActionAction) {
-                case Action.ActionEnum.PIOCHER_CARTE:
-                    Debug.Log("Effet PIOCHER CARTE");
-                    // Attention possibilité de piocher plusieurs cartes. 
-                    StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().
-                        PiocheMultiple(AllEffets[0].AllActionsEffet[0].intAction)); 
-                    break;
-                case Action.ActionEnum.PUISSANCE_AIR_AUGMENTE:
-                    Debug.Log("Effet PUISSANCE AIR AUGMENTE"); 
-                    ChangeEffetPuissance(Entite.Element.AIR, AllEffets[0].AllActionsEffet[0].intAction); 
-                    break;
-                case Action.ActionEnum.PUISSANCE_TERRE_AUGMENTE:
-                    Debug.Log("Effet PUISSANCE TERRE AUGMENTE"); 
-                    ChangeEffetPuissance(Entite.Element.TERRE, AllEffets[0].AllActionsEffet[0].intAction);
-                    break;
-                case Action.ActionEnum.PUISSANCE_EAU_AUGMENTE:
-                    Debug.Log("Effet PUISSANCE EAU AUGMENTE"); 
-                    ChangeEffetPuissance(Entite.Element.EAU, AllEffets[0].AllActionsEffet[0].intAction);
-                    break;
-                case Action.ActionEnum.PUISSANCE_FEU_AUGMENTE:
-                    Debug.Log("Effet PUISSANCE FEU AUGMENTE"); 
-                    ChangeEffetPuissance(Entite.Element.FEU, AllEffets[0].AllActionsEffet[0].intAction);
-                    break;
-                case Action.ActionEnum.TERRAIN_ASTRAL:
-                    // TODO : A implémenter lors de l'implémentation des terrains
-                    break;
-                case Action.ActionEnum.TERRAIN_MALEFIQUE:
-                    // TODO : A implémenter lors de l'implémentation des terrains. 
-                    break; 
-            }
+            GererEffets(AllEffets, debut: true); 
             CmdDetruireCarte(); 
             return true; 
         }
 
     }
 
+    /// <summary>
+    /// Changer la puissance d'un element
+    /// <obsolet>Cette méthode est obsolète. </obsolet>
+    /// </summary>
+    /// <param name="_element"></param>
+    /// <param name="_intToAdd"></param>
     void ChangeEffetPuissance(Entite.Element _element, int _intToAdd) {
         /*
          * Changer la puissance de toutes les cartes d'un certain élément. 
@@ -404,9 +407,7 @@ public class Sort : Carte {
     /// A appeler à chaque début de tour.
     /// </summary>
     void updateSortNewTurn() {
-        /*
-
-         * 
+        /* 
          */ 
          if (AllEffets.Count == 0) {
             // Si le sort n'effectue plus d'effets on le détruit. 
@@ -566,7 +567,6 @@ public class Sort : Carte {
     /// <remarks>peut-être à inclure dans la classe parent "Carte"</remarks>
     [Command]
     void CmdDetruireCarte() {
-
         RpcDetruireCarte();
     }
 
@@ -615,6 +615,7 @@ public class Sort : Carte {
         base.RightClickOnCarte();
     }
 
+
     protected override bool CarteJouerReponseEffet(Player.Phases _currentPhase, int numeroListe = 0) {
         Debug.Log("On teste si cette carte peut utiliser un effet"); 
         for (int i = 0; i < AllEffets.Count; ++i) {
@@ -633,6 +634,46 @@ public class Sort : Carte {
             return true; 
         } else {
             return false; 
+        }
+    }
+
+
+    /// <summary>
+    /// Trouver la carte la plus proche de celle-ci
+    /// </summary>
+    /// <param name="distance">distance maximale que l'on veut entre deux cartes, sinon
+    /// on considère qu'il n'y en a aucune de proche</param>
+    /// <returns>La carte la plus proche, ou null si aucune n'est assez proche. </returns>
+    public static GameObject CarteProche(GameObject MaCarte, float distance=1f) {
+        Carte[] AllCartes = FindObjectsOfType(typeof(Carte)) as Carte[];
+        List<GameObject> CartesProches = new List<GameObject>(); 
+
+        for (int i = 0; i < AllCartes.Length; i++) {
+            GameObject Carte = AllCartes[i].gameObject; 
+            if (Vector3.Distance(MaCarte.transform.position, Carte.transform.position) < distance) {
+                CartesProches.Add(Carte);
+            }
+        }
+
+        // S'il n'y a pas de cartes proches
+        if (CartesProches.Count == 0) {
+            return null; 
+        }
+        // S'il n'y a qu'une carte proche (le mieux!)
+        else if (CartesProches.Count == 1) {
+            return CartesProches[0]; 
+        }
+        // S'il y a plusieurs cartes proches
+        else {
+            GameObject CarteLaPlusProche = CartesProches[0];
+            float minDistance = Vector3.Distance(MaCarte.transform.position, CartesProches[0].transform.position); 
+            for (int i = 0; i < CartesProches.Count; i++) {
+                if (Vector3.Distance(MaCarte.transform.position, CartesProches[i].transform.position) < minDistance) {
+                    minDistance = Vector3.Distance(MaCarte.transform.position, CartesProches[i].transform.position);
+                    CarteLaPlusProche = CartesProches[i]; 
+                }
+            }
+            return CarteLaPlusProche;
         }
     }
 

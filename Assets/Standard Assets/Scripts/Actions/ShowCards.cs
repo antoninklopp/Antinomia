@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 /// <summary>
 /// Montrer des cartes pour que le joueur puisse les choisir. 
 /// </summary>
-public class ShowCards : NetworkBehaviourAntinomia {
+public class ShowCards : NetworkBehaviour {
 	/*
 	 * On fait une zoom sur les cartes pour choisir certaines cartes. 
 	 * Comme par exemple, les cartes à révéler pour pouvoir invoquer une carte de type AIR en montrant des cartes à son adversaire. 
@@ -68,7 +68,7 @@ public class ShowCards : NetworkBehaviourAntinomia {
 
 
 	// Use this for initialization
-	public override void Start () {
+	public void Start () {
 		FiniButton = GameObject.Find ("Fini"); 
 		FiniButton.SetActive (false); 
 	}
@@ -257,6 +257,19 @@ public class ShowCards : NetworkBehaviourAntinomia {
         Debug.Log("CARTES QUE J4AI CHOISIES");
         //FinShowCards (0.1f, AllCardsToShow); 
         StartCoroutine(ShowAllCardsChosen());
+    }
+
+    GameObject FindLocalPlayer() {
+        /*
+		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
+		 */
+        GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
+        if (Players[0].GetComponent<Player>().isLocalPlayer) {
+            return Players[0];
+        }
+        else {
+            return Players[1];
+        }
     }
 
 }

@@ -13,7 +13,7 @@ using UnityEngine.Networking;
 /// Une assistance ne peut pas être ciblée par une attaque tant que l’entité qui lui est liée est sur le champ de bataille.
 /// Une assistance ne peut être liée qu’à une entité à la fois.
 /// </summary>
-public class Assistance : Carte {
+public class Assistance : Carte, ICarte {
 
     /// <summary>
     /// Etats possibles de l'assistance. 
@@ -49,6 +49,8 @@ public class Assistance : Carte {
 
 
     private int clicked = 0;
+
+    private bool dragging = false;
 
     /// <summary>
     /// Carte Ciblee par un effet de l'assistance.
@@ -95,8 +97,28 @@ public class Assistance : Carte {
 
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
 
+#if (UNITY_ANDROID || UNITY_IOS)
+        InformationsSurLaCarte(); 
+#else
+        CliqueSimpleCarte();
+#endif
+    }
+
+    public void OnMouseUp() {
+        if (dragging) {
+            CliqueSimpleCarte(true); 
+        }
+    }
+
+    public override void OnMouseDrag() {
+        base.OnMouseDrag();
+        dragging = false; 
+        CliqueSimpleCarte(true);
+    }
+
+    public void CliqueSimpleCarte(bool drag = false) {
         if (assistanceState == State.CIMETIERE) {
-            return; 
+            return;
         }
 
         if (GameObject.Find("GameManager").GetComponent<GameManager>().Tour != FindLocalPlayer().GetComponent<Player>().PlayerID) {
@@ -105,7 +127,7 @@ public class Assistance : Carte {
         }
 
         // On ne peut interagir avec une assistance si on n'est pas dans une phase principale. 
-        if (!(GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE1) || 
+        if (!(GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE1) ||
             (GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2)) {
             return;
         }
@@ -113,8 +135,9 @@ public class Assistance : Carte {
         if (GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.COMBAT) {
             if (isFromLocalPlayer) {
                 // Une assistance ne peut pas attaquer. 
-                return; 
-            } else {
+                return;
+            }
+            else {
                 GameObject.Find("GameManager").SendMessage("AttackOtherPlayer", gameObject);
             }
         }
@@ -122,24 +145,36 @@ public class Assistance : Carte {
         if (clicked != 0 && ((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PREPARATION &&
                     (assistanceState == State.JOUEE))
                     || ((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE1 ||
-                    GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) && 
+                    GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) &&
                     (assistanceState == State.MAIN || assistanceState == State.JOUEE || assistanceState == State.ASSOCIE_A_CARTE)))) {
             clicked = 1;
             //canGoBig = false;
             ChangePosition();
-        } else {
-            clicked = 1;
-            //canGoBig = false; 
+        }
+        else {
+            if (drag) {
+                dragging = true;
+            } else {
+                clicked = 1;
+            }
         }
     }
 
-
+    /// <summary>
+    /// Creation de la carte zoomée. 
+    /// </summary>
+    /// <param name="messageToDisplay"></param>
     public override void CreateBigCard(string messageToDisplay = "") {
         base.CreateBigCard("Assistance " + "\n" + 
             Name + "\n");
         BigCard.GetComponent<Assistance>().assistanceState = State.BIGCARD;
     }
 
+    /// <summary>
+    /// Montrer les infos dans le CardManager. 
+    /// </summary>
+    /// <param name="shortCode"></param>
+    /// <param name="messageToDisplay"></param>
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
         if (carteLiee == "") {
             base.DisplayInfoCarteGameManager(this.shortCode,
@@ -197,32 +232,44 @@ public class Assistance : Carte {
     /// Il choisit ensuite la carte à détruire pour pouvoir la poser (conformément aux règles). 
     /// </summary>
     void JouerAssistance() {
+        if (!dragging) {
+            if (clicked == 1) {
+                // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
+                GetComponent<BoxCollider2D>().enabled = false;
+                // Target du sort. 
+                GetComponent<SpriteRenderer>().sprite = Cible;
+                Debug.Log("Sprite changé en cible");
+                // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
+                GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = gameObject;
+                clicked = 2;
+            }
+            else if (clicked == 2) {
+                // 3è clic sur la carte == choix de la carte sur laquelle le sort va être joué. 
+                // ATTENTION: Il est possible qu'une carte ait effet sur tout le terrain, dans ce cas pas besoin d'un troisième clic.
+                // Dans le cas où le sort n'a qu'une seule cible
+                Debug.Log("Cliqué une deuxième fois");
+                // CarteCibleeRayCast contient la référence de la carte qui est ciblee. 
+                Debug.Log("Je suis dans le raycast");
 
-        if (clicked == 1) {
-            // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
-            GetComponent<BoxCollider2D>().enabled = false;
-            // Target du sort. 
-            GetComponent<SpriteRenderer>().sprite = Cible;
-            Debug.Log("Sprite changé en cible"); 
-            // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
-            GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = gameObject;
-            clicked = 2;
-        }
-        else if (clicked == 2) {
-            // 3è clic sur la carte == choix de la carte sur laquelle le sort va être joué. 
-            // ATTENTION: Il est possible qu'une carte ait effet sur tout le terrain, dans ce cas pas besoin d'un troisième clic.
-            // Dans le cas où le sort n'a qu'une seule cible
-            Debug.Log("Cliqué une deuxième fois");
-            // CarteCibleeRayCast contient la référence de la carte qui est ciblee. 
-            Debug.Log("Je suis dans le raycast");
-
-        }
-        else {
-            // Display un message disant que le joueur n'a pas assez d'AKA pour jouer
-            clicked = 0;
-            Main.SendMessage("ReordonnerCarte");
-            GameObject.Find("GameManager").GetComponent<GameManager>().DisplayMessage("L'assistance n'a pas été jouée");
-            return;
+            }
+            else {
+                // Display un message disant que le joueur n'a pas assez d'AKA pour jouer
+                clicked = 0;
+                Main.SendMessage("ReordonnerCarte");
+                GameObject.Find("GameManager").GetComponent<GameManager>().DisplayMessage("L'assistance n'a pas été jouée");
+                return;
+            }
+        } else {
+            GameObject Proche = Sort.CarteProche(gameObject);
+            if (Proche != null) {
+                RecupererCarteJouerSort(Proche);
+            }
+            else {
+                DisplayMessage("Vous n'avez pas assez d'AKA pour jouer ce sort");
+                clicked = 0;
+                dragging = false;
+                Main.SendMessage("ReordonnerCarte");
+            }
         }
     }
 
