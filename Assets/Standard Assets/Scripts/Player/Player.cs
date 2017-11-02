@@ -44,7 +44,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 	private GameObject ObjectInfo; 
 
 	[SyncVar(hook="ChangePlayerPV")]
-	public int PlayerPV = 100;
+	public int PlayerPV = 400;
 	[SyncVar(hook="ChangePlayerAKA")]
 	public int PlayerAKA = 0; 
 

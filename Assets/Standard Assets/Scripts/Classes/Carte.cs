@@ -170,6 +170,9 @@ public class Carte : NetworkBehaviourAntinomia {
 #endif
     }
 
+    /// <summary>
+    /// Afficher les informations sur la carte.
+    /// </summary>
     protected void InformationsSurLaCarte() {
         isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
 
@@ -1797,8 +1800,8 @@ public class Carte : NetworkBehaviourAntinomia {
                                           -(currentPosition.y - newPosition.y) / speed,
                                           -(currentPosition.z - newPosition.z) / speed);
 
-        Debug.Log(stepVector);
-        Debug.Log(newPosition);
+        // Debug.Log(stepVector);
+        // Debug.Log(newPosition);
 
         while (stepCount < speed) {
             transform.localPosition = new Vector3(transform.localPosition.x + stepVector.x,

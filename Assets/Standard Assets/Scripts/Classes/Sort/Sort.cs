@@ -18,7 +18,9 @@ public class Sort : Carte, ICarte {
     public string Condition;
     public int CoutAKA;
 
-    private bool dragging; 
+    private bool dragging;
+
+    private Vector3 positionBeforeDragging;
 
     /// <summary>
     /// Constructeur de la classe 
@@ -114,7 +116,7 @@ public class Sort : Carte, ICarte {
 
     public override void Update() {
         base.Update();
-        if (clicked != 0 || dragging) {
+        if (clicked != 0) {
             Dragging(); 
         } 
     }
@@ -155,7 +157,7 @@ public class Sort : Carte, ICarte {
     /// <param name="drag"></param>
     public void CliqueSimpleCarte(bool drag = false) {
         int nombreSortsLances = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().sortLance;
-        if (clicked != 0 || dragging) {
+        if (clicked != 0) {
             canGoBig = false;
             // Si on a déjà cliqué sur la carte une première fois
             if (nombreSortsLances == 0) {
@@ -174,12 +176,11 @@ public class Sort : Carte, ICarte {
         }
         else {
             // Si on clique sur la carte pour la première fois.
-            if (drag) {
-                dragging = true;
-            } else {
-                clicked = 1;
-            }
+            clicked = 1;
             canGoBig = false;
+            positionBeforeDragging = new Vector3(transform.position.x,
+                                                 transform.position.y,
+                                                 transform.position.z); 
             //Dragging(); 
         }
     }
@@ -214,18 +215,34 @@ public class Sort : Carte, ICarte {
     /// Drag de la carte
     /// </summary>
     public override void OnMouseDrag() {
-        // On s'assure de remettre dragging à false même s'il devrait déjà l'être. 
-        dragging = false; 
-        CliqueSimpleCarte(true); 
+#if (UNITY_ANDROID || UNITY_IOS)
+        clicked = 1;
+        if (!dragging && Vector2.Distance(transform.position, positionBeforeDragging) > 0.5f) {
+            clicked = 0;
+            CliqueSimpleCarte(true);
+            dragging = true;
+        }
+#endif
     }
 
     /// <summary>
     /// 
     /// </summary>
     public void OnMouseUp() {
-        if (dragging) {
+        Debug.Log(Vector3.Distance(positionBeforeDragging, transform.position));
+        if (Vector2.Distance(positionBeforeDragging, transform.position) > 1f) {
             CliqueSimpleCarte(true);
+            positionBeforeDragging = transform.position;
         }
+        else {
+#if (UNITY_ANDROID || UNITY_IOS)
+            InformationsSurLaCarte();
+            clicked = 0;
+            Main.SendMessage("ReordonnerCarte");
+#endif
+        }
+        // Sinon on n'appelle pas la fonction
+        dragging = false;
     }
     /// <summary>
     /// Changer la position du sort, 

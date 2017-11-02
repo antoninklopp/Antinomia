@@ -168,6 +168,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Interfaces\ICarte.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Introduction\Introduction.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Lobby\LobbyMatchMakingAuto.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Lobby\LobbyPlayer.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Log\GameManagerLogIn.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\MainMenu\GameManagerMainMenu.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\AddImageToDeck.cs" />

@@ -187,7 +187,9 @@ public class Entite : Carte, ICarte {
     /// <summary>
     /// Track si l'utiliseur drag la carte ou pas. 
     /// </summary>
-    public bool dragging = false; 
+    public bool dragging = false;
+
+    private Vector3 PositionBeforeDragging; 
 
     /// <summary>
     /// Valeur permettant de savoir si un joueur a attaqué. 
@@ -275,7 +277,7 @@ public class Entite : Carte, ICarte {
     public override void Update() {
         base.Update(); 
 
-        if (clicked || dragging) {
+        if (clicked) {
             // Si on a cliqué sur la carte. 
             // On ne peut la déplacer que pendant la phase de préparation. (depuis le sanctuaire ou le board)
             // On ne peut l'invoquer que pendant les phases principales. 
@@ -319,6 +321,7 @@ public class Entite : Carte, ICarte {
 		 * 
 		 * TODO: Implémenter également un drag and drop. 
 		 */
+        Debug.Log("DOWN"); 
 
         base.OnMouseDown(); 
 
@@ -326,8 +329,12 @@ public class Entite : Carte, ICarte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
 
+        PositionBeforeDragging = new Vector3(transform.position.x,
+                                             transform.position.y,
+                                             transform.position.z); 
+
 #if (UNITY_ANDROID || UNITY_IOS)
-        InformationsSurLaCarte(); 
+        // InformationsSurLaCarte(); 
 #else
         CliqueSimpleCarte(false);
 #endif
@@ -353,15 +360,27 @@ public class Entite : Carte, ICarte {
 
         if (GameObject.Find("GameManager").GetComponent<GameManager>().Tour != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On ne peut pas interagir avec ses cartes si ce n'est pas son tour!
+#if (UNITY_ANDROID || UNITY_IOS)
+            clicked = false;
+            Main.SendMessage("ReordonnerCarte"); 
+#endif
             return;
         }
 
         if (GameObject.Find("GameManager").GetComponent<GameManager>().choixCartes) {
             if (!isFromLocalPlayer) {
+#if (UNITY_ANDROID || UNITY_IOS)
+                clicked = false;
+                Main.SendMessage("ReordonnerCarte");
+#endif
                 return;
             }
             // On envoie le gameObject au gameManager, puis on arrête la fonction, pour ne pas faire la suite
             GameObject.Find("GameManager").SendMessage("CarteChoisie", gameObject);
+#if (UNITY_ANDROID || UNITY_IOS)
+            clicked = false;
+            Main.SendMessage("ReordonnerCarte");
+#endif
             return;
         }
 
@@ -384,20 +403,20 @@ public class Entite : Carte, ICarte {
                     GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) && carteState == State.MAIN))) {
                 GetComponent<SpriteRenderer>().enabled = true;
                 Destroy(BigCard);
-                if (drag) {
-                    dragging = true; 
-                } else {
-                    clicked = !clicked;
-                }
+                clicked = true;
+                PositionBeforeDragging = new Vector3(transform.position.x, 
+                                                     transform.position.y, 
+                                                     transform.position.z); 
                 canGoBig = false;
             }
             else if (!verrouillee) {
                 CheckCardOverlap();
                 // Il faut bien regarder que le carte ne soit pas verrouillée!
+                Debug.Log("On change la position"); 
                 ChangePosition(currentPhase);
                 clicked = false;
                 canGoBig = true;
-            }
+            } 
         }
         else if (GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.COMBAT) {
             /*
@@ -433,28 +452,59 @@ public class Entite : Carte, ICarte {
                 }
             }
             return;
+        } else {
+#if (UNITY_ANDROID || UNITY_IOS)
+            Main.SendMessage("ReordonnerCarte");
+            AntinomiaLog("Pas la bonne phase");
+            clicked = false;
+            dragging = false;
+#endif
         }
+        dragging = false;
     }
 
     /// <summary>
     /// Lors du drag de la carte
     /// </summary>
     public override void OnMouseDrag() {
-        CliqueSimpleCarte(true); 
+#if (UNITY_ANDROID || UNITY_IOS)
+        clicked = true; 
+        if (!dragging && Vector2.Distance(transform.position, PositionBeforeDragging) > 0.5f) {
+            clicked = false; 
+            CliqueSimpleCarte(true);
+            dragging = true; 
+        } 
+#endif
     }
 
+    /// <summary>
+    /// Lorsqu'on relache le clic
+    /// </summary>
     public void OnMouseUp() {
         /*
 		 * Lorsque la carte est relachée par l'utilisateur. 
 		 * 
 		 * TODO: Implémenter cette phase lors du drap and drop. 
 		 */
-         if (dragging) {
-            CliqueSimpleCarte(true); 
+         Debug.Log(Vector3.Distance(PositionBeforeDragging, transform.position)); 
+         if (Vector2.Distance(PositionBeforeDragging, transform.position) > 1f) {
+            CliqueSimpleCarte(true);
+            PositionBeforeDragging = transform.position; 
+         } else {
+#if (UNITY_ANDROID || UNITY_IOS)
+            InformationsSurLaCarte();
+            clicked = false;
+            Main.SendMessage("ReordonnerCarte"); 
+#endif
          }
          // Sinon on n'appelle pas la fonction
+         dragging = false;
     }
 
+    /// <summary>
+    /// Création de la carte zoomée. 
+    /// </summary>
+    /// <param name="messageToDisplay"></param>
     public override void CreateBigCard(string messageToDisplay="") {
 
         base.CreateBigCard(

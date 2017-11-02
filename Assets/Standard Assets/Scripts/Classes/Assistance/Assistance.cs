@@ -51,6 +51,7 @@ public class Assistance : Carte, ICarte {
     private int clicked = 0;
 
     private bool dragging = false;
+    private Vector3 positionBeforeDragging; 
 
     /// <summary>
     /// Carte Ciblee par un effet de l'assistance.
@@ -105,15 +106,32 @@ public class Assistance : Carte, ICarte {
     }
 
     public void OnMouseUp() {
-        if (dragging) {
-            CliqueSimpleCarte(true); 
+        Debug.Log(Vector3.Distance(positionBeforeDragging, transform.position));
+        if (Vector2.Distance(positionBeforeDragging, transform.position) > 1f) {
+            CliqueSimpleCarte(true);
+            positionBeforeDragging = transform.position;
         }
+        else {
+#if (UNITY_ANDROID || UNITY_IOS)
+            InformationsSurLaCarte();
+            clicked = 0;
+            Main.SendMessage("ReordonnerCarte");
+#endif
+        }
+        // Sinon on n'appelle pas la fonction
+        dragging = false;
     }
 
+
     public override void OnMouseDrag() {
-        base.OnMouseDrag();
-        dragging = false; 
-        CliqueSimpleCarte(true);
+#if (UNITY_ANDROID || UNITY_IOS)
+        clicked = 1;
+        if (!dragging && Vector2.Distance(transform.position, positionBeforeDragging) > 0.5f) {
+            clicked = 0;
+            CliqueSimpleCarte(true);
+            dragging = true;
+        }
+#endif
     }
 
     public void CliqueSimpleCarte(bool drag = false) {
@@ -148,15 +166,17 @@ public class Assistance : Carte, ICarte {
                     GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) &&
                     (assistanceState == State.MAIN || assistanceState == State.JOUEE || assistanceState == State.ASSOCIE_A_CARTE)))) {
             clicked = 1;
+            positionBeforeDragging = new Vector3(transform.position.x,
+                                                 transform.position.y,
+                                                 transform.position.z); 
             //canGoBig = false;
             ChangePosition();
         }
         else {
-            if (drag) {
-                dragging = true;
-            } else {
-                clicked = 1;
-            }
+            positionBeforeDragging = new Vector3(transform.position.x,
+                                                 transform.position.y,
+                                                 transform.position.z);
+            clicked = 1;
         }
     }
 

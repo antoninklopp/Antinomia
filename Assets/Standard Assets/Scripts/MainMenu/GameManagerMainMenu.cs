@@ -42,14 +42,15 @@ public class GameManagerMainMenu : MonoBehaviour {
 	}
 
 	public void GoToLobby(){
-		/*
+        /*
 		 * Changement de scène pour aller au lobby
-		 */ 
+		 */
+        Debug.Log("salut"); 
 		if (choixDeck) {
 			SceneManager.LoadScene ("ChoixDeck");
 		} else {
-			PlayerPrefs.SetInt ("ChoixDeck", 0); 
-			SceneManager.LoadScene ("SimpleLobby"); 
+			PlayerPrefs.SetInt ("ChoixDeck", 2); 
+			SceneManager.LoadScene ("SimpleLobbyMatchmakingAuto"); 
 		}
 	}
 

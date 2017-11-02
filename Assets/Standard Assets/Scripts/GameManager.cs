@@ -258,6 +258,11 @@ public class GameManager : NetworkBehaviourAntinomia {
 		 * Lors d'un appui sur le bouton continuer, on passe à la phase suivante. 
 		 */
 
+        // On ne peut pas changer de phase quand ce n'est pas son tour. 
+        if (Tour != FindLocalPlayerID()) {
+            return; 
+        }
+
         // Si d'autres effets sont en cours, on ne peut pas changer de phase. 
         if (GameObject.Find("Pile") != null) {
             DisplayMessage("Impossible de passer à une autre phase pour l'instant. "); 
@@ -1090,7 +1095,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Cacher le panneau qui montre les infos de la carte.
     /// </summary>
     public void HideInfoCarte() {
-#if (UNITY_ADNROID || UNITY_IOS)
+#if (UNITY_ANDROID || UNITY_IOS)
         InfoCarteBattlePhone.SetActive(false); 
 #else 
         InfoCarteBattle.SetActive(false);
@@ -1450,7 +1455,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Add a log into the console. 
     /// </summary>
     public void Log(string log) {
-        Debug.Log(log);
+        // Debug.Log(log);
         Console.GetComponent<AntinomiaConsole>().AddStringToConsole(log); 
     }
 

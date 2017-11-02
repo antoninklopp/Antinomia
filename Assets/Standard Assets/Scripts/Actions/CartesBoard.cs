@@ -45,7 +45,7 @@ public class CartesBoard : NetworkBehaviourAntinomia {
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.
 		 */ 
-		Debug.Log ("Reordonner ChampBataille");
+		// Debug.Log ("Reordonner ChampBataille");
 
 		AllCreaturesChampBataille = new List<GameObject> (); 
 		foreach (Transform child in transform) {
@@ -117,7 +117,7 @@ public class CartesBoard : NetworkBehaviourAntinomia {
     /// Changer la position d'une carte
     /// </summary>
     public static void ChangePositionCarte(GameObject Carte, Vector3 newPosition) {
-        Debug.Log("CHANGEMENT DE POSITIOB DE LA CARTE");
+        // Debug.Log("CHANGEMENT DE POSITIOB DE LA CARTE");
         // TODO A rectifier. 
         Carte.GetComponent<Carte>().RepositionnerCarte(1, newPosition);
     } 

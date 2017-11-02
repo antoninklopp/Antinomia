@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using GameSparks; 
-using GameSparks.Core; 
+using GameSparks.Core;
+using GameSparks.Api.Responses;
+using GameSparks.Api.Requests; 
+using UnityEngine.Networking; 
 
 /// <summary>
 /// Matchmaking automatique en utilisant le profil de joueur sur gamesparks. 
@@ -31,36 +34,51 @@ public class MatchMakingGameSparks : MonoBehaviour {
 		
 	}
 
+    /// <summary>
+    /// Faire une requête de match 
+    /// </summary>
+    /// <param name="skill"></param>
 	public void MultiplayerMatchRequest(long skill){
 		/*
 		 * Faire une requête de matchmaking. 
 		 */ 
-		new GameSparks.Api.Requests.MatchmakingRequest ()
+		new GameSparks.Api.Requests.FindMatchRequest ()
 			.SetMatchShortCode ("Game")
 			.SetMatchGroup ("group1")
 			.SetSkill (skill)
 			.Send((response) => {
 				if (!response.HasErrors){
-                    //List<GSData> participants; 
-                    //if (response.ScriptData.GetGSDataList("particpants") != null) {
-                    //    // On récupère la liste des participants. 
-                    //    participants = response.ScriptData.GetGSDataList("particpants");
-                    //    // On récupère le nom du deuxième joueur.
-                    //    // Comme ça, on le garde et on n'aura pas à l'envoyer à l'autre joueur, au début de la game. 
-                    //    // TODO : Il faudra peut-être vérifier que les joueurs ont le statut online
-                    //    if (PlayerPrefs.GetString("user") == participants[0].GetString("displayName")) {
-                    //        // Si le premier joueur est celui qui est connecté sur le device, 
-                    //        // on met le deuxième joueur dans le PlayerPrefs user2
-                    //        PlayerPrefs.SetString("user2", participants[1].GetString("displayName")); 
-                    //    } else {
-                    //        PlayerPrefs.SetString("user2", participants[0].GetString("displayName")); 
+                    Debug.Log("reponse" + response.JSONString);
+                    Debug.Log(response.MatchId); 
+                    GSEnumerable<FindMatchResponse._Player> participants;
+                    if (response.Opponents != null) {
+                        // On récupère la liste des participants. 
+                        participants = response.Opponents;
 
-                    //    }
-
-                    //} else {
-                    //    // Les participants ne sont pas encore in-game
-                    //    return; 
-                    //}
+                        // On récupère le nom du deuxième joueur.
+                        // Comme ça, on le garde et on n'aura pas à l'envoyer à l'autre joueur, au début de la game. 
+                        // TODO : Il faudra peut-être vérifier que les joueurs ont le statut online
+                        //if (PlayerPrefs.GetString("user") == participants[0].GetString("displayName")) {
+                        //    // Si le premier joueur est celui qui est connecté sur le device, 
+                        //    // on met le deuxième joueur dans le PlayerPrefs user2
+                        //    PlayerPrefs.SetString("user2", participants[1].GetString("displayName"));
+                        //}
+                        //else {
+                        //    PlayerPrefs.SetString("user2", participants[0].GetString("displayName"));
+                        //}
+                        LobbyPlayer _lobbyPlayer = new LobbyPlayer(
+                            // .GetString("displayName"),
+                            // participants[0].GetString("id"),
+                            // participants[0].GetBoolean("online").Value,
+                            response.PeerId.Value,
+                            response.MatchId
+                            );
+                        CreateGame(_lobbyPlayer);
+                    }
+                    else {
+                        // Les participants ne sont pas encore in-game
+                        return;
+                    }
                     Debug.Log("Player en attente de game"); 
 				} else {
 					Debug.Log("On n'a pu ajouter le joueur au matchmaking"); 
@@ -68,6 +86,9 @@ public class MatchMakingGameSparks : MonoBehaviour {
 		}); 
 	}
 
+    /// <summary>
+    /// Update la requête de matchMaking. 
+    /// </summary>
 	public void UpdateMatchRequest(){
         /*
          * Avant l'update il faut avoir appelé une multiplayer request.
@@ -144,5 +165,13 @@ public class MatchMakingGameSparks : MonoBehaviour {
                    Debug.Log("Le nombre de games du joueur n'a pas pu être augmentée"); 
                }
            }); 
+    }
+
+    /// <summary>
+    /// Creation d'une salle de jeu.
+    /// </summary>
+    public void CreateGame(LobbyPlayer _player) {
+        GetComponent<LobbyMatchMakingAuto>().CreateGame(_player); 
+        GetComponent<LobbyMatchMakingAuto>().setOtherPlayerReady();
     }
 }
