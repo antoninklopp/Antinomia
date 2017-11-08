@@ -78,7 +78,8 @@ public class GameManager : NetworkBehaviourAntinomia {
 
 	[HideInInspector]
 	public GameObject CarteChoix; 
-	public List<GameObject> CartesChoisies; 
+    [HideInInspector]
+	public List<GameObject> _CartesChoisies; 
 
 	/*
 	 * Lors de l'attaque. 
@@ -275,6 +276,14 @@ public class GameManager : NetworkBehaviourAntinomia {
             AjouterChangementDePhasePile();
         } else {
             GameObject PlayerObject = FindLocalPlayer();
+
+            //On vérifie que le joueur n'ait pas trop de cartes dans la main en phase finale
+            if (Phase == Player.Phases.FINALE) {
+                if (CheckMainPleine(PlayerObject)) {
+                    return;
+                }
+            }
+
             if (FindLocalPlayerID() == Tour) {
                 if (Phase == Player.Phases.FINALE) {
                     // Il faut passer la main au joueur suivant!
@@ -360,7 +369,6 @@ public class GameManager : NetworkBehaviourAntinomia {
 				return; 
 			}
 		}
-		//GameObject.Find ("CartesMainJoueur1").SendMessage ("TirerCarte");
 	}
 
     /// <summary>
@@ -701,6 +709,10 @@ public class GameManager : NetworkBehaviourAntinomia {
         return;
     }
 
+    /// <summary>
+    /// Ajouter un effet d'attaque à la pile de l'adversaire. 
+    /// </summary>
+    /// <param name="CarteAttaque"></param>
     public void AjouterEffetAttaquePileJoueurAdverse(GameObject CarteAttaque) {
         List<GameObject> Cibles = new List<GameObject>();
         Cibles.Add(FindNotLocalPlayer());
@@ -738,7 +750,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 		// On pourrait ici lancer une animation comme par exemple, un fond noir et les cartes en surbrillance pour montrer le choix. 
 
 		// On remet la liste des cartes choisies à zero.
-		CartesChoisies = new List<GameObject>(); 
+		_CartesChoisies = new List<GameObject>(); 
 	}
 
 	public void FinChoixCartes(){
@@ -754,18 +766,19 @@ public class GameManager : NetworkBehaviourAntinomia {
 		/*
 		 * On attend que l'utilisateur ait choisi toutes ses cartes. 
 		 */ 
-		while (CartesChoisies.Count < nombreCartes) {
+		while (_CartesChoisies.Count < nombreCartes) {
 			yield return new WaitForSeconds (0.5f); 
 		}
 	}
 
-	public void CarteChoisie(GameObject Carte){
-		// La carte envoie un message au GameManager pour dire qu'elle a été choisie. 
-		if (!choixCartes) {
-			throw new Exception ("Le choix des cartes était désactivé. Cette méthode ne devrait pas être appelée"); 
-		}
-		CartesChoisies.Add (Carte); 
-	}
+	//public void CarteChoisie(GameObject Carte){
+    // INUTILISEE
+	//	// La carte envoie un message au GameManager pour dire qu'elle a été choisie. 
+	//	if (!choixCartes) {
+	//		throw new Exception ("Le choix des cartes était désactivé. Cette méthode ne devrait pas être appelée"); 
+	//	}
+	//	CartesChoisies.Add (Carte); 
+	//}
 
     /// <summary>
     /// Pioche de cartes au début du jeu.
@@ -829,6 +842,11 @@ public class GameManager : NetworkBehaviourAntinomia {
 		}
 	}
 
+    /// <summary>
+    /// Changer l'AKA sur l'UI visible. 
+    /// </summary>
+    /// <param name="IDJoueur"></param>
+    /// <param name="AKA"></param>
 	public void setPlayerAKAUI(int IDJoueur, int AKA){
 		/*
 		 * Mettre à joueur l'AKA du joueur sur l'écran. 
@@ -888,6 +906,10 @@ public class GameManager : NetworkBehaviourAntinomia {
 
 	}
 
+    /// <summary>
+    /// Invocation d'une carte élémentaire air. 
+    /// </summary>
+    /// <param name="cout"></param>
 	void InvocationElementaireAir(int cout){
 		/*
 		 * Les cartes à montrer sont choisies au hasard. 
@@ -1515,6 +1537,70 @@ public class GameManager : NetworkBehaviourAntinomia {
             catch (NullReferenceException e) {
                 Debug.Log(e);
             }
+        }
+    }
+
+
+    public void ShowCardsForEffect(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking = null, string stringToDisplay = "",
+                                    int _nombreDeCartesAChoisir = 1) {
+        ShowCards.GetComponent<ShowCards>().ShowCardsToChoose(_AllCardsGiven, _ObjectAsking, stringToDisplay, _nombreDeCartesAChoisir); 
+    }
+
+    /// <summary>
+    /// Recevoir les cartes choisies de ShowCards
+    /// </summary>
+    public void CartesChoisies(List<int> AllCardsReturned) {
+        _CartesChoisies = new List<GameObject>(); 
+        for (int i = 0; i < AllCardsReturned.Count; i++) {
+            _CartesChoisies.Add(FindCardWithID(AllCardsReturned[i])); 
+        }
+        choixCartes = false;
+        Debug.Log("FinChoixCartes"); 
+    }
+
+    /// <summary>
+    /// Lorsque la main est pleine, on attend que le joueur ait choisies les cartes
+    /// qu'il veut défausser. 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator WaitForChoixCartesMainPleine() {
+        // On peut faire des actions ici peut-être.
+        while (choixCartes) {
+            yield return new WaitForSeconds(0.1f); 
+        }
+        // Maintenant qu'on a récupérer les cartes, il faut les défausser. 
+        for (int i = 0; i < _CartesChoisies.Count; i++) {
+            _CartesChoisies[i].GetComponent<Carte>().DetruireCarte(); 
+        }
+        Debug.Log("FinChoixCartes2");
+        // Comme cette méthode ne peut avoir été jouée que pour la fin du tour. 
+        // On appelle la méthode GoToNextPhase. 
+        GoToNextPhase(); 
+    }
+
+
+    /// <summary>
+    /// Vérifier que la main du joueur ne comporte pas plus de 8 cartes lors de la fin de son tour. 
+    /// </summary>
+    /// <param name="Player"></param>
+    /// <returns></returns>
+    private bool CheckMainPleine(GameObject Player) { 
+
+        if (Player.transform.Find("MainJoueur").Find("CartesMainJoueur").gameObject.GetComponent<MainJoueur>().getNombreCartesMain() > 7) {
+            // Le joueur doit avoir 7 cartes ou moins à la fin du tour. 
+            List<GameObject> cartesMain =
+                Player.transform.Find("MainJoueur").Find("CartesMainJoueur").gameObject.GetComponent<MainJoueur>().getCartesMain();
+            ShowCardsForEffect(
+                cartesMain,
+                _ObjectAsking : gameObject, 
+                stringToDisplay: "Vous avez plus de 7 cartes en main, choisissez celle dont vous voulez vous séparer.", 
+                _nombreDeCartesAChoisir : cartesMain.Count - 7
+             );
+            choixCartes = true;
+            StartCoroutine(WaitForChoixCartesMainPleine()); 
+            return true; 
+        } else {
+            return false; 
         }
     }
 

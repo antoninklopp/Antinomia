@@ -179,6 +179,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\ImageCard.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\RemoveCardFromDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\AttackMyPlayer.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Player\IA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\Player.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\PlayerChoice.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ReadData\ReadXMLData.cs" />

@@ -64,13 +64,16 @@ public class ShowCards : NetworkBehaviour {
     /// </summary>
     private int nombreDeCartesAChoisir;
 
-    GameObject DisplayString; 
+    GameObject DisplayString;
 
+    GameObject TextShowCards;
 
 	// Use this for initialization
 	public void Start () {
 		FiniButton = GameObject.Find ("Fini"); 
-		FiniButton.SetActive (false); 
+		FiniButton.SetActive (false);
+        TextShowCards = GameObject.Find("TextShowCards");
+        TextShowCards.SetActive(false); 
 	}
 
     /// <summary>
@@ -93,7 +96,9 @@ public class ShowCards : NetworkBehaviour {
 		FiniButton.SetActive (true); 
 		AllCardsGiven = _AllCardsGiven; 
 		AllCardsToShow = new List<GameObject> (); 
-		float widthPrefab = CartePrefab.GetComponent<RectTransform> ().sizeDelta.x; 
+		float widthPrefab = CartePrefab.GetComponent<RectTransform> ().sizeDelta.x;
+        TextShowCards.SetActive(true);
+        TextShowCards.GetComponent<Text>().text = stringToDisplay;
 
 		List<string> AllShortCodes = new List<string> ();
         List<int> AllIDCards = new List<int>(); 
@@ -162,8 +167,20 @@ public class ShowCards : NetworkBehaviour {
 		 * Lors du clique de fin. 
 		 * On envoie toutes les cartes!
 		 */ 
+
+        if (nombreDeCartesAChoisir < AllCardsToReturnID.Count) {
+            TextShowCards.GetComponent<Text>().text = "Vous devez encore choisir " +
+                (AllCardsToReturnID.Count - nombreDeCartesAChoisir).ToString() + "cartes";
+            return; 
+        } else if (nombreDeCartesAChoisir > AllCardsToReturnID.Count) {
+            TextShowCards.GetComponent<Text>().text = "Vous avez choisi" +
+                (AllCardsToReturnID.Count - nombreDeCartesAChoisir).ToString() + "cartes en trop. Supprimez en."; 
+            return;
+        }
+
 		Debug.Log (AllCardsToReturn [0]); 
 		FiniButton.SetActive (false);
+        TextShowCards.SetActive(false); 
 		newList = new string[AllCardsToShowOther.Count];  
 		for (int i = 0; i < AllCardsToShowOther.Count; ++i) {
 			newList[i] = AllCardsToShowOther [i]; 
@@ -172,7 +189,7 @@ public class ShowCards : NetworkBehaviour {
         if (ObjectAsking == null){
             FindLocalPlayer().GetComponent<Player>().CmdSendCards (newList);
         } else {
-            Debug.Log("Object Asking" + ObjectAsking.GetComponent<Entite>().Name); 
+            // Debug.Log("Object Asking" + ObjectAsking.GetComponent<Entite>().Name); 
             ObjectAsking.SendMessage("CartesChoisies", AllCardsToReturnID); 
         }
         StartCoroutine(FinShowCards(0f, AllCardsToShow)); 
@@ -190,7 +207,6 @@ public class ShowCards : NetworkBehaviour {
 	IEnumerator ShowAllCardsChosen(){
 		/*
 		 * Montrer les cartes choisies par l'autre joueur. 
-		 * 
 		 */ 
 
 		yield return new WaitForSeconds (0.2f); 
@@ -229,6 +245,12 @@ public class ShowCards : NetworkBehaviour {
         } 
 	}
 
+    /// <summary>
+    /// Arrêter de montrer les cartes au joueur. 
+    /// </summary>
+    /// <param name="nbSeconds"></param>
+    /// <param name="AllCardsToDestroy"></param>
+    /// <returns></returns>
 	IEnumerator FinShowCards(float nbSeconds, List<GameObject> AllCardsToDestroy){
 		/*
 		 * Arrêter de montrer les cartes. 

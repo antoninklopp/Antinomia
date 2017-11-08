@@ -8,12 +8,14 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 #endif
 
+/// <summary>
+/// GameManager du menu du jeu. 
+/// </summary>
 public class GameManagerMainMenu : MonoBehaviour {
-	/*
-	 * GameManager du MainMenu
-	 * 
-	 */ 
 
+    /// <summary>
+    /// Offrir la possibilité d'un choix de Deck. 
+    /// </summary>
 	public bool choixDeck = false; 
 	GameObject BuildVersion; 
 
@@ -27,12 +29,10 @@ public class GameManagerMainMenu : MonoBehaviour {
             PlayerPrefs.GetString("user") + "\nBuild version : " + Application.version; 
 #endif
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
+    /// <summary>
+    /// Aller au management des cartes. 
+    /// </summary>
 	public void GoToManageCards(){
 		/*
 		 * Changement de scene pour le management des cartes
@@ -41,6 +41,9 @@ public class GameManagerMainMenu : MonoBehaviour {
 		SceneManager.LoadScene ("ManageCards"); 
 	}
 
+    /// <summary>
+    /// Aller au lobby en passant par le matchmaking auto 
+    /// </summary>
 	public void GoToLobby(){
         /*
 		 * Changement de scène pour aller au lobby
@@ -54,6 +57,17 @@ public class GameManagerMainMenu : MonoBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Aller au lobby sans passer par le matchmaking auto
+    /// </summary>
+    public void GoToLobbyCustom() {
+        SceneManager.LoadScene("ChoixDeck"); 
+
+    }
+
+    /// <summary>
+    /// Aller au Shop. 
+    /// </summary>
 	public void GoToShop(){
 		/*
 		 * Changement de scène pour le magasin!
@@ -61,6 +75,9 @@ public class GameManagerMainMenu : MonoBehaviour {
 		SceneManager.LoadScene ("Shop"); 
 	}
 
+    /// <summary>
+    /// Se déconnecter et revenir à l'écran de connexion. 
+    /// </summary>
 	public void Disconnect(){
 		/*
 		 * Deconnexion du joueur. 

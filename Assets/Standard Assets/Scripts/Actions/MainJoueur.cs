@@ -98,6 +98,10 @@ public class MainJoueur : NetworkBehaviourAntinomia {
 		}
 	}
 
+    /// <summary>
+    /// Enlever une carte de la liste des cartes de la main. 
+    /// </summary>
+    /// <param name="Object"></param>
 	void DeleteCard(GameObject Object){
 		/*
 		 * Supprimer une carte de la liste des cartes de la main. 
@@ -106,6 +110,10 @@ public class MainJoueur : NetworkBehaviourAntinomia {
 		Debug.Log (CartesMain.Count); 
 	}
 
+    /// <summary>
+    /// Récupérer les cartes de la main. 
+    /// </summary>
+    /// <returns></returns>
     public List<GameObject> getCartesMain() {
         CartesMain = new List<GameObject>();
         foreach (Transform child in transform) {
@@ -113,6 +121,10 @@ public class MainJoueur : NetworkBehaviourAntinomia {
         }
 
         return CartesMain;
+    }
+
+    public int getNombreCartesMain() {
+        return transform.childCount; 
     }
 
     // [UnityTest]

@@ -134,7 +134,9 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
                 if (!checkIfParameterConsoleIsInt(commandSplit[1])) {
                     break;
                 }
-                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(int.Parse(commandSplit[1]));
+                Debug.Log("Demande de pioche ICI"); 
+                StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").
+                    GetComponent<GameManager>().PiocheMultiple(int.Parse(commandSplit[1])));
                 break;
             case "format":
             case "Format":

@@ -107,7 +107,12 @@ public class Assistance : Carte, ICarte {
 
     public void OnMouseUp() {
         Debug.Log(Vector3.Distance(positionBeforeDragging, transform.position));
-        if (Vector2.Distance(positionBeforeDragging, transform.position) > 1f) {
+
+        Vector3 MousePosition = Input.mousePosition;
+        MousePosition.z = 15;
+        Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
+
+        if (Vector2.Distance(positionBeforeDragging, mouseWorldPoint) > 0.5f) {
             CliqueSimpleCarte(true);
             positionBeforeDragging = transform.position;
         }
@@ -124,9 +129,14 @@ public class Assistance : Carte, ICarte {
 
 
     public override void OnMouseDrag() {
+
+        Vector3 MousePosition = Input.mousePosition;
+        MousePosition.z = 15;
+        Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
+
 #if (UNITY_ANDROID || UNITY_IOS)
         clicked = 1;
-        if (!dragging && Vector2.Distance(transform.position, positionBeforeDragging) > 0.5f) {
+        if (!dragging && Vector2.Distance(mouseWorldPoint, positionBeforeDragging) > 0.5f) {
             clicked = 0;
             CliqueSimpleCarte(true);
             dragging = true;
@@ -591,7 +601,7 @@ public class Assistance : Carte, ICarte {
     /// <summary>
     /// Detruire la carte.
     /// </summary>
-    void DetruireCarte() {
+    public override void DetruireCarte() {
         
         if (transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer) {
             /*

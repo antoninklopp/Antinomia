@@ -329,9 +329,12 @@ public class Entite : Carte, ICarte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
 
-        PositionBeforeDragging = new Vector3(transform.position.x,
-                                             transform.position.y,
-                                             transform.position.z); 
+        Vector3 MousePosition = Input.mousePosition;
+        MousePosition.z = 15;
+        Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
+        // transform.position = mouseWorldPoint;
+
+        PositionBeforeDragging = mouseWorldPoint; 
 
 #if (UNITY_ANDROID || UNITY_IOS)
         // InformationsSurLaCarte(); 
@@ -457,19 +460,23 @@ public class Entite : Carte, ICarte {
             Main.SendMessage("ReordonnerCarte");
             AntinomiaLog("Pas la bonne phase");
             clicked = false;
-            dragging = false;
+            // dragging = false;
 #endif
         }
-        dragging = false;
+        // dragging = false;
     }
 
     /// <summary>
     /// Lors du drag de la carte
     /// </summary>
     public override void OnMouseDrag() {
+
+        Vector3 MousePosition = Input.mousePosition;
+        MousePosition.z = 15;
+        Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
+
 #if (UNITY_ANDROID || UNITY_IOS)
-        clicked = true; 
-        if (!dragging && Vector2.Distance(transform.position, PositionBeforeDragging) > 0.5f) {
+        if (!dragging && Vector2.Distance(mouseWorldPoint, PositionBeforeDragging) > 0.5f) {
             clicked = false; 
             CliqueSimpleCarte(true);
             dragging = true; 
@@ -486,8 +493,11 @@ public class Entite : Carte, ICarte {
 		 * 
 		 * TODO: Implémenter cette phase lors du drap and drop. 
 		 */
-         Debug.Log(Vector3.Distance(PositionBeforeDragging, transform.position)); 
-         if (Vector2.Distance(PositionBeforeDragging, transform.position) > 1f) {
+        Vector3 MousePosition = Input.mousePosition;
+        MousePosition.z = 15;
+        Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
+
+         if (Vector2.Distance(PositionBeforeDragging, mouseWorldPoint) > 0.5f) {
             CliqueSimpleCarte(true);
             PositionBeforeDragging = transform.position; 
          } else {
@@ -988,7 +998,7 @@ public class Entite : Carte, ICarte {
     /// Detruire une carte. 
     /// On change son state, pour l'envoyer au cimetière. 
     /// </summary>
-    protected void DetruireCarte() {
+    public override void DetruireCarte() {
         /*
 		 * On change juste la carte de State pour pouvoir laisser au joueur la possibilité de la récupérer ensuite. 
          * Et pouvoir l'afficher dans le cimetiere. 
@@ -1007,6 +1017,7 @@ public class Entite : Carte, ICarte {
         Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
         Sanctuaire.SendMessage("ReordonnerCarte");
         ChampBataille.SendMessage("CmdReordonnerCarte");
+        Main.SendMessage("ReordonnerCarte");
 
         AntinomiaLog(transform.parent.parent.parent.gameObject);
         if (transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer) {
@@ -1063,7 +1074,7 @@ public class Entite : Carte, ICarte {
         GameManagerObject.GetComponent<GameManager>().DebutChoixCartes(nombreCartes);
         yield return GameManagerObject.GetComponent<GameManager>().WaitForChoixCartes(nombreCartes);
         // Normalement on devrait avoir le résultat à ce moment la . 
-        List<GameObject> CartesChoisies = GameManagerObject.GetComponent<GameManager>().CartesChoisies;
+        List<GameObject> CartesChoisies = GameManagerObject.GetComponent<GameManager>()._CartesChoisies;
         for (int i = 0; i < nombreCartes; ++i) {
             CartesChoisies[i].SendMessage("TakeDamage", (-1) * nombreDeDegats);
         }

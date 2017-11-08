@@ -215,9 +215,13 @@ public class Sort : Carte, ICarte {
     /// Drag de la carte
     /// </summary>
     public override void OnMouseDrag() {
+        Vector3 MousePosition = Input.mousePosition;
+        MousePosition.z = 15;
+        Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
+
 #if (UNITY_ANDROID || UNITY_IOS)
         clicked = 1;
-        if (!dragging && Vector2.Distance(transform.position, positionBeforeDragging) > 0.5f) {
+        if (!dragging && Vector2.Distance(mouseWorldPoint, positionBeforeDragging) > 0.5f) {
             clicked = 0;
             CliqueSimpleCarte(true);
             dragging = true;
@@ -226,11 +230,15 @@ public class Sort : Carte, ICarte {
     }
 
     /// <summary>
-    /// 
+    /// Lorsqu'on relache le clic sur une carte
     /// </summary>
     public void OnMouseUp() {
+        Vector3 MousePosition = Input.mousePosition;
+        MousePosition.z = 15;
+        Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
+
         Debug.Log(Vector3.Distance(positionBeforeDragging, transform.position));
-        if (Vector2.Distance(positionBeforeDragging, transform.position) > 1f) {
+        if (Vector2.Distance(positionBeforeDragging, mouseWorldPoint) > 0.5f) {
             CliqueSimpleCarte(true);
             positionBeforeDragging = transform.position;
         }
@@ -576,6 +584,10 @@ public class Sort : Carte, ICarte {
     public override void UpdateNewPhase(Player.Phases _currentPhase, int tour) {
         base.UpdateNewPhase(_currentPhase, tour);
         clicked = 0; 
+    }
+
+    public override void DetruireCarte() {
+        CmdDetruireCarte(); 
     }
 
     /// <summary>

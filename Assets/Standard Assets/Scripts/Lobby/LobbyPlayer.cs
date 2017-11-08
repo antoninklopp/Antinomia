@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 
 /// <summary>
 /// Représentation du joueur dans le lobby. 
+/// Classe Lobby Player du MatchMaking Auto de Antinomia (!= celui du Lobby). 
 /// </summary>
 public class LobbyPlayer : NetworkLobbyPlayer {
 
@@ -17,6 +18,9 @@ public class LobbyPlayer : NetworkLobbyPlayer {
 
     public string matchMakingID; 
 
+    /// <summary>
+    /// Constructeur de la classe LobbyPlayer
+    /// </summary>
     public LobbyPlayer() {
 
     }
@@ -37,9 +41,33 @@ public class LobbyPlayer : NetworkLobbyPlayer {
         matchMakingID = _matchMakingID; 
     }
 
+    /// <summary>
+    /// Constructeur de la classe LobbyPlayer
+    /// </summary>
+    /// <param name="_peerID"></param>
+    /// <param name="_matchMakingID"></param>
     public LobbyPlayer(int _peerID, string _matchMakingID) {
         matchMakingID = _matchMakingID;
         peerID = _peerID; 
+    }
+
+    /// <summary>
+    /// Obliger le joueur à passer en prêt. 
+    /// </summary>
+    public void SetPlayerReady() {
+        Debug.Log("send");
+        if (this.isLocalPlayer)
+            Debug.Log("local"); 
+            this.SendReadyToBeginMessage(); 
+    }
+
+    /// <summary>
+    /// TODO: à changer, va être déprécier. 
+    /// Permet de désactiver certains boutons au changement de scène. 
+    /// </summary>
+    /// <param name="level"></param>
+    public void OnLevelWasLoaded(int level) {
+        GameObject.Find("GameSearch").SetActive(false); 
     }
 
 }

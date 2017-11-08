@@ -16,7 +16,6 @@ using System;
 public class Carte : NetworkBehaviourAntinomia {
     /*
      * Parent des cartes de base : entite, sort, assistance.  
-     * 
      */
 
     /// <summary>
@@ -1812,6 +1811,11 @@ public class Carte : NetworkBehaviourAntinomia {
         }
     }
 
+    /// <summary>
+    /// Repositionner une carte. 
+    /// </summary>
+    /// <param name="speed"></param>
+    /// <param name="newPosition"></param>
     public void RepositionnerCarte(int speed, Vector3 newPosition) {
         StartCoroutine(RepositionnerCarteRoutine(speed, newPosition)); 
     }
@@ -1823,5 +1827,15 @@ public class Carte : NetworkBehaviourAntinomia {
     public virtual bool isCarteInMain() {
         return false; 
     }
+
+    /// <summary>
+    /// Detruire une carte
+    /// </summary>
+    public virtual void DetruireCarte() { }
+
+    /// <summary>
+    /// Bannir une carte. 
+    /// </summary>
+    public virtual void BannirCarte() { }
 
 }

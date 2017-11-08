@@ -15,6 +15,8 @@ public interface ICarte {
 
     void OnMouseDrag();
 
-    IEnumerator SetUpCard(); 
+    IEnumerator SetUpCard();
+
+    void DetruireCarte();
 
 }
