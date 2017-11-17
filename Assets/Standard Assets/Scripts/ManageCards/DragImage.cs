@@ -23,6 +23,7 @@ public class DragImage : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 	#region IBeginDragHandler implementation
 
 	public void OnBeginDrag (PointerEventData eventData){
+        int siblingIndex = gameObject.transform.GetSiblingIndex(); 
 		itemBeingDragged = gameObject; 
 		startPosition = transform.position;
 		startParent = transform.parent; 
@@ -31,7 +32,7 @@ public class DragImage : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
         if (startParent.parent.parent == GameManagerObject.transform.Find("AllCards")) {
             // La carte n'est pas dans un deck au départ.
-            GameManagerObject.SendMessage("ObjectBeingDragged", gameObject);
+            GameManagerObject.GetComponent<GameManagerManageCards>().ObjectBeingDragged(gameObject, siblingIndex);
             inDeck = false;
         }
         else {

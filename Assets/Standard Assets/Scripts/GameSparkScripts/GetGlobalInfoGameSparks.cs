@@ -68,4 +68,23 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
     public string getVersionNumber() {
         return VersionNumber; 
     }
+
+    /// <summary>
+    /// Si un joueur de la beta veut faire un commentaire. 
+    /// </summary>
+    /// <param name="comment">Le texte du commentaire.</param>
+    public void MakeABetaComment(string comment) {
+        new GameSparks.Api.Requests.LogEventRequest()
+            .SetEventKey("addACommentBeta")
+            .SetEventAttribute("name", PlayerPrefs.GetString("user"))
+            .SetEventAttribute("comment", comment)
+            .Send((response) => {
+                if (!response.HasErrors) {
+                    Debug.Log("Le commentaire a bien été ajouté"); 
+                } else {
+                    Debug.Log("Probleme lors de l'ajout du commentaire");
+                }
+
+            }); 
+    }
 }

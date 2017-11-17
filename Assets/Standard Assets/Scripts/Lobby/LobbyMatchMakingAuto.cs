@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 using UnityEngine.Networking.Types;
-using UnityEngine.UI; 
+using UnityEngine.UI;
 
 /// <summary>
 /// Lobby du matchmaking auto
@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /*
      * Fonctionne mais doit encore vraiment être amélioré. 
-     */ 
+     */
 
     // Il faut qu'il y ait un composant MatchMakingGameSparks qui soit sur le gameManager
     MatchMakingGameSparks matchMaking;
@@ -32,7 +32,7 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// Methode Start
     /// </summary>
     public void Start() {
-        matchMaking = GetComponent<MatchMakingGameSparks>(); 
+        matchMaking = GetComponent<MatchMakingGameSparks>();
     }
 
     /// <summary>
@@ -42,9 +42,9 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
         // Il faudra remplacer par le skill ici. 
         matchMaking.MultiplayerMatchRequest(10);
         StartCoroutine(LaunchMatch());
-        MontrerRechercher(); 
+        MontrerRechercher();
     }
-    
+
     /// <summary>
     /// Lorsque le match se crée. 
     /// </summary>
@@ -57,7 +57,7 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     }
 
     public void setOtherPlayerReady() {
-        OtherPlayerReady = true; 
+        OtherPlayerReady = true;
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// <returns></returns>
     private IEnumerator LaunchMatch() {
         while (!OtherPlayerReady) {
-            yield return new WaitForSeconds(0.5f); 
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -89,19 +89,22 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     public static bool PlayerInferieur(string player1, string player2) {
         if (player1.Length > player2.Length) {
             return true;
-        } else if (player1.Length < player2.Length) {
+        }
+        else if (player1.Length < player2.Length) {
             return false;
-        } else {
+        }
+        else {
             for (int i = 0; i < player1.Length; i++) {
                 if ((int)char.Parse((player1.Substring(i, 1))) > (int)char.Parse((player2.Substring(i, 1)))) {
-                    return true; 
-                } else if((int)char.Parse((player1.Substring(i, 1))) < (int)char.Parse((player2.Substring(i, 1)))) {
-                    return false; 
+                    return true;
+                }
+                else if ((int)char.Parse((player1.Substring(i, 1))) < (int)char.Parse((player2.Substring(i, 1)))) {
+                    return false;
                 }
             }
         }
         // Normalement on ne devrait jamais arriver ici parce que les deux identifiants sont différents. 
-        return true; 
+        return true;
     }
 
     /// <summary>
@@ -112,12 +115,12 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
         _playerAssiociated = _player;
         // S'il a l'ID 1, c'est lui crée la Game
         if (_playerAssiociated.peerID == 1) {
-            CreateMatchmakingGame(); 
-        } else {
-            Debug.Log("WaitToJoin"); 
-            StartCoroutine(WaitToJoin()); 
+            CreateMatchmakingGame();
         }
-        MontrerMatchTrouve(); 
+        else {
+            StartCoroutine(WaitToJoin());
+        }
+        MontrerMatchTrouve();
     }
 
     /// <summary>
@@ -141,20 +144,26 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// </summary>
     public void OnClickJoin() {
         StartMatchMaker();
-        StartCoroutine(ListMatchesRoutine()); 
+        StartCoroutine(ListMatchesRoutine());
         // networkAddress = _playerAssiociated.matchMakingID;
         Debug.Log(_playerAssiociated.matchMakingID);
+        // StartCoroutine(Info());
 
+        // lobbyManager.backDelegate = lobbyManager.StopClientClbk;
+        // lobbyManager.DisplayIsConnecting();
+
+        // lobbyManager.SetServerInfo("Connecting...", lobbyManager.networkAddress);
+
+        StartCoroutine(WaitForConnectionBothPlayers(2));
     }
 
     public IEnumerator ListMatchesRoutine() {
         yield return new WaitForSeconds(2f);
-        Debug.Log(matchMaker.isActiveAndEnabled); 
         matchMaker.ListMatches(0, 6, _playerAssiociated.matchMakingID, true, 0, 0, SimpleVoidDisplay);
-        // while (client.isConnected == false) {
-        //    yield return new WaitForSeconds(0.5f);
+        while (client.isConnected == false) {
+            yield return new WaitForSeconds(0.5f);
             // matchMaker.ListMatches(0, 6, _playerAssiociated.matchMakingID, true, 0, 0, SimpleVoidDisplay);
-        // }
+        }
     }
 
     /// <summary>
@@ -163,15 +172,14 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// <returns></returns>
     public IEnumerator WaitToJoin() {
         yield return new WaitForSeconds(1f);
-        OnClickJoin(); 
+        OnClickJoin();
     }
 
     private IEnumerator Info() {
         while (true) {
-            Debug.Log("salut"); 
-            // Debug.Log(client.serverIp);
+            Debug.Log(client.serverIp);
             Debug.Log(client.isConnected);
-            yield return new WaitForSeconds(1f); 
+            yield return new WaitForSeconds(1f);
         }
     }
 
@@ -183,11 +191,12 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// <param name="match"></param>
     public void SimpleVoidDisplay(bool success, string extendedInfo, List<MatchInfoSnapshot> match) {
         Debug.Log("salut");
-        Debug.Log("Nombre de matchs " + match.Count); 
         for (int i = 0; i < match.Count; i++) {
             Debug.Log(1);
             Debug.Log(match[0].networkId);
+            // networkAddress = 0;
             JoinMatch(match[0].networkId);
+            // FindLobbyPlayer(2).GetComponent<LobbyPlayer>().SetPlayerReady();
         }
     }
 
@@ -197,18 +206,9 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// <param name="networkID"></param>
     void JoinMatch(NetworkID networkID) {
         matchMaker.JoinMatch(networkID, "", "", "", 0, 0, OnMatchJoined);
-        Debug.Log("Match Joined executed");
-        // StartCoroutine(Info()); 
-    }
-
-    public override void OnMatchJoined(bool success, string extendedInfo, MatchInfo matchInfo) {
-        base.OnMatchJoined(success, extendedInfo, matchInfo);
-        Debug.Log(success);
-        Debug.Log(extendedInfo);
-        Debug.Log(matchInfo.usingRelay); 
-        StartClient();
-
-        StartCoroutine(WaitForConnectionBothPlayers(2));
+        // backDelegate = lobbyManager.StopClientClbk;
+        // _isMatchmaking = true;
+        // lobbyManager.DisplayIsConnecting();
     }
 
     /// <summary>
@@ -219,11 +219,12 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     GameObject FindLobbyPlayer(int ID) {
         LobbyPlayer[] Player = FindObjectsOfType<LobbyPlayer>();
         Debug.Log(Player[0].peerID);
-        Debug.Log(Player[1].peerID); 
+        Debug.Log(Player[1].peerID);
         if (Player[0].peerID == ID) {
-            return Player[0].gameObject; 
-        } else {
-            return Player[1].gameObject; 
+            return Player[0].gameObject;
+        }
+        else {
+            return Player[1].gameObject;
         }
     }
 
@@ -233,30 +234,32 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// <param name="ID"></param>
     /// <returns></returns>
     public IEnumerator WaitForConnectionBothPlayers(int ID) {
-        Debug.Log("On essaie"); 
+        Debug.Log("On essaie");
         LobbyPlayer[] Player = FindObjectsOfType<LobbyPlayer>();
         while (Player.Length != 2) {
             yield return new WaitForSeconds(1f);
             Player = FindObjectsOfType<LobbyPlayer>();
         }
-        Debug.Log("On essaie 2 "); 
+        Debug.Log("On essaie 2 ");
         if (ID == 2) {
-            yield return new WaitForSeconds(2f); 
+            yield return new WaitForSeconds(2f);
+        }
+        // FindLobbyPlayer(ID).GetComponent<LobbyPlayer>().SetPlayerReady();
+        // FindLobbyPlayer(ID).GetComponent<LobbyPlayer>().readyToBegin = true;
+        for (int i = 0; i < 2; i++) {
+            Player[i].SetPlayerReady();
         }
 
-        for (int i = 0; i < 2; i++) {
-            Player[i].SetPlayerReady(); 
-        }
-        
-        Debug.Log("Player is ready"); 
+
+        Debug.Log("Player is ready");
     }
 
     /// <summary>
     /// Montrer au joueur que la recherche est en cours. 
     /// </summary>
     void MontrerRechercher() {
-        GameObject.Find("MontrerText").GetComponent<Text>().text = 
-            "Recherche de match en cours... "; 
+        GameObject.Find("MontrerText").GetComponent<Text>().text =
+            "Recherche de match en cours... ";
     }
 
     /// <summary>
@@ -265,13 +268,17 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     void MontrerMatchTrouve() {
         GameObject.Find("MontrerText").GetComponent<Text>().text =
             "Match trouvé! Connexion... ";
-        StartCoroutine(HideMatchTrouve()); 
+        StartCoroutine(HideMatchTrouve());
     }
 
     public IEnumerator HideMatchTrouve() {
         yield return new WaitForSeconds(3f);
         GameObject.Find("MontrerText").SetActive(false);
-        
+
     }
+
+    //public override void OnClientSceneChanged(NetworkConnection conn) {
+    //    base.OnClientSceneChanged(conn);
+    //}
 
 }

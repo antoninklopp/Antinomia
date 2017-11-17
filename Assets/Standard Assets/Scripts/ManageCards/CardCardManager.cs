@@ -34,17 +34,15 @@ public class CardCardManager : MonoBehaviour {
 			Debug.Log ("Mince alors"); 
 		}
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
 	void setInformation(){
 
 
 	}
 
+    /// <summary>
+    /// Click sur la carte. 
+    /// </summary>
 	public void OnClickCarte(){
         /*
 		 * Lors d'un clic sur la carte

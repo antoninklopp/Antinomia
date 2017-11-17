@@ -22,14 +22,23 @@ public class LanguageData {
 
     /// <summary>
     /// Retourner un string dans une langue spéciale
+    /// Les textes seront ceux à l'intérieur de l'application.
     /// </summary>
     /// <param name="language">Langue demandée</param>
     /// <param name="stringShortCode">shortCode du string, commun à toutes les langues.</param>
-    public string GetString(string stringShortCode, string language = "english") {
+    /// <param name="nomFichier"> Nom du fichier à chercher. De base rien pour les textes à l'intérieur de l'appli
+    /// Peut prendre d'autres valeurs pour rassembler des strings de quêtes par exemple.
+    /// Le nom du fichier sera forcément fichier_langue </param>
+    public string GetString(string stringShortCode, string language = "english", string nomFichier = "") {
         SetLanguage(language);
         XmlDocument xmlDoc = new XmlDocument();
 
-        TextAsset textAsset = (TextAsset)Resources.Load(language, typeof(TextAsset));
+        TextAsset textAsset;
+        if (nomFichier == "") {
+           textAsset = (TextAsset)Resources.Load(language, typeof(TextAsset));
+        } else {
+            textAsset = (TextAsset)Resources.Load(nomFichier + "_" + language, typeof(TextAsset));
+        }
         xmlDoc.LoadXml(textAsset.text);
         XmlNodeList transformList = xmlDoc.GetElementsByTagName(stringShortCode)[0].ChildNodes;
         string toReturn = xmlDoc.SelectSingleNode("transforms/" + stringShortCode).InnerText; 

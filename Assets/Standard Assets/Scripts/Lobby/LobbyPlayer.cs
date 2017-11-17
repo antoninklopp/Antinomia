@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking; 
+using UnityEngine.Networking;
 
 
 /// <summary>
@@ -16,7 +16,7 @@ public class LobbyPlayer : NetworkLobbyPlayer {
     // Doit être égal à 1 ou à 2. 
     public int peerID;
 
-    public string matchMakingID; 
+    public string matchMakingID;
 
     /// <summary>
     /// Constructeur de la classe LobbyPlayer
@@ -38,7 +38,7 @@ public class LobbyPlayer : NetworkLobbyPlayer {
         ID = _ID;
         online = _online;
         peerID = _peerID;
-        matchMakingID = _matchMakingID; 
+        matchMakingID = _matchMakingID;
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public class LobbyPlayer : NetworkLobbyPlayer {
     /// <param name="_matchMakingID"></param>
     public LobbyPlayer(int _peerID, string _matchMakingID) {
         matchMakingID = _matchMakingID;
-        peerID = _peerID; 
+        peerID = _peerID;
     }
 
     /// <summary>
@@ -57,8 +57,8 @@ public class LobbyPlayer : NetworkLobbyPlayer {
     public void SetPlayerReady() {
         Debug.Log("send");
         if (this.isLocalPlayer)
-            Debug.Log("local"); 
-            this.SendReadyToBeginMessage(); 
+            Debug.Log("local");
+        this.SendReadyToBeginMessage();
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class LobbyPlayer : NetworkLobbyPlayer {
     /// </summary>
     /// <param name="level"></param>
     public void OnLevelWasLoaded(int level) {
-        GameObject.Find("GameSearch").SetActive(false); 
+        GameObject.Find("GameSearch").SetActive(false);
     }
 
 }

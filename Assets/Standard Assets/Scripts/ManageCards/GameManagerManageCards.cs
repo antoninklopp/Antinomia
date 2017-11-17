@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; 
-using UnityEngine.SceneManagement; 
+using UnityEngine.SceneManagement;
+using UnityEngine.Events; 
 
 /// <summary>
 /// Game Manager de la scène où l'on peut manager ses cartes. 
@@ -31,36 +32,45 @@ public class GameManagerManageCards : MonoBehaviour {
 	List<GameObject> listAllCards = new List<GameObject>(); 
 
 	// Le deck qui est en train d'être regardé. 
-	public int currentDeckNumber = 1; 
+	public int currentDeckNumber = 1;
 
-	// Use this for initialization
-	void Start () {
-		CarteZoom = GameObject.Find ("CarteZoom"); 
-		AllCards = GameObject.Find ("AllCards"); 
-		playerInfo = GetComponent<GetPlayerInfoGameSparks> ();
-		CardPrefab = GameObject.Find ("Carte");
-		ContentAllCards = GameObject.Find ("ContentAllCards"); 
-		ContentAllDecks = GameObject.Find ("ContentAllDecks"); 
+    GameObject DecksButton;
+    public GameObject DeckButtonPrefab;
+    /// <summary>
+    /// Nombre de decks du joueur. 
+    /// </summary>
+    int deckNumberTotal;
 
-		longueurAllCards = ContentAllCards.transform.parent.parent.gameObject.GetComponent<RectTransform> ().sizeDelta.x; 
+    /// <summary>
+    /// Liste de tous les boutons de decks. 
+    /// </summary>
+    List<GameObject> allDecksButtonsList; 
 
-		// On change la taille de la card prefab
+    // Use this for initialization
+    void Start() {
+        CarteZoom = GameObject.Find("CarteZoom");
+        AllCards = GameObject.Find("AllCards");
+        playerInfo = GetComponent<GetPlayerInfoGameSparks>();
+        CardPrefab = GameObject.Find("Carte");
+        ContentAllCards = GameObject.Find("ContentAllCards");
+        ContentAllDecks = GameObject.Find("ContentAllDecks");
+
+        DecksButton = GameObject.Find("DecksButton");
+
+        longueurAllCards = ContentAllCards.transform.parent.parent.gameObject.GetComponent<RectTransform>().sizeDelta.x;
+
+        // On change la taille de la card prefab
 
 #if (UNITY_ANDROID)
-		CardPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(longueurCartesAndroid,
-			CardPrefab.GetComponent<RectTransform>().sizeDelta.y/CardPrefab.GetComponent<RectTransform>().sizeDelta.x * longueurCartesAndroid); 
-#else 
+        CardPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(longueurCartesAndroid,
+            CardPrefab.GetComponent<RectTransform>().sizeDelta.y / CardPrefab.GetComponent<RectTransform>().sizeDelta.x * longueurCartesAndroid);
+#else
 		CardPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(longueurCartesOrdinateur,
 			CardPrefab.GetComponent<RectTransform>().sizeDelta.y/CardPrefab.GetComponent<RectTransform>().sizeDelta.x * longueurCartesOrdinateur);
 #endif
 
-        StartCoroutine(setAllCards ()); 
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+        StartCoroutine(setAllCards());
+    }
 
 	IEnumerator setAllCards(){
 		/*
@@ -84,8 +94,11 @@ public class GameManagerManageCards : MonoBehaviour {
 		 * Inventaire des decks, situé en bas. 
 		 */ 
 		yield return playerInfo.WaitForPlayerDecks (CardPrefab); 
-		List<Deck> allDecks = playerInfo.GetAllDecks (CardPrefab); 
-		allDecksGlobal = allDecks; 
+		List<Deck> allDecks = playerInfo.GetAllDecks (CardPrefab);
+        // On récupère le nombre de decks. 
+        this.deckNumberTotal = allDecks.Count;
+        SetButtonsDecks();
+        allDecksGlobal = allDecks; 
 		// Debug.Log (allDecks.Count.ToString() + "               fhzihfuzehfuozhfoeznfojzbùefhzbe"); 
 		yield return new WaitForSeconds (0.1f); 
 		for (int i = 0; i < allDecksGlobal.Count; ++i) {
@@ -100,10 +113,15 @@ public class GameManagerManageCards : MonoBehaviour {
 		ReorganiseCardsInScrollView (ContentAllDecks, allDecks[deckNumber - 1].Cartes, 225f); 
 	}
 
+    /// <summary>
+    /// Changer le deck ue l'on voit
+    /// </summary>
+    /// <param name="deckNumber"></param>
 	public void changeDeckView(int deckNumber){
-		/*
+        /*
 		 * On active les bonnes cartes et on désactive les autres. 
 		 */
+        Debug.Log("DECK NUMBER" + (deckNumber - 1).ToString()); 
 		for (int i = 0; i < allDecksGlobal.Count; ++i) {
 			for (int j = 0; j < allDecksGlobal [i].Cartes.Count; ++j) {
 				if (i == deckNumber - 1){
@@ -177,7 +195,12 @@ public class GameManagerManageCards : MonoBehaviour {
 		Debug.Log ("On reorganise"); 
 	}
 
-	void ObjectBeingDragged(GameObject draggedObject){
+    /// <summary>
+    /// Call lorsqu'un objet va être drag and drop
+    /// </summary>
+    /// <param name="draggedObject">Objet drag</param>
+    /// <param name="indexSibling">index de draggedObject dans la hiérarchie.</param>
+	public void ObjectBeingDragged(GameObject draggedObject, int indexSibling){
 		/*
 		 * Lorsqu'un objet va être drag and drop,
 		 * on en crée un autre qui va prendre sa place 
@@ -194,9 +217,8 @@ public class GameManagerManageCards : MonoBehaviour {
 				listAllCards.Insert (i, newDraggedObject); 
 				listAllCards.Remove (draggedObject);
                 newDraggedObject.transform.SetParent(ContentAllCards.transform, false);
-                Debug.Log(draggedObject.transform.GetSiblingIndex()); 
-                newDraggedObject.transform.SetSiblingIndex(draggedObject.transform.GetSiblingIndex()); 
-				//ReorganiseCardsInScrollView (ContentAllCards, listAllCards, 0f); 
+                newDraggedObject.transform.SetSiblingIndex(indexSibling); 
+				// ReorganiseCardsInScrollView (ContentAllCards, listAllCards, 0f); 
 				break; 
 			}
 		}
@@ -212,7 +234,6 @@ public class GameManagerManageCards : MonoBehaviour {
 		if (CheckIfCardNotInDeck(deckNumber, NouvelleCarte)) {
 			allDecksGlobal [deckNumber - 1].AjouterCarte (NouvelleCarte);
 			playerInfo.AddCardToDeck (GetIDAllCards(NouvelleCarte), deckNumber); 
-			Debug.Log ("NP"); 
 		}
 
 		Debug.Log ("Carte Ajoutee au deck " + deckNumber.ToString ()); 
@@ -264,6 +285,31 @@ public class GameManagerManageCards : MonoBehaviour {
         } else {
             throw new System.Exception("Probleme lors de la récupération de l'IDAllCards");
         }
+    }
 
+    /// <summary>
+    /// Créer les boutons de decks. 
+    /// </summary>
+    public void SetButtonsDecks() {
+        allDecksButtonsList = new List<GameObject>(); 
+        for (int i = 0; i < deckNumberTotal; i++) {
+            GameObject newButton = Instantiate(DeckButtonPrefab);
+            newButton.transform.SetParent(DecksButton.transform.Find("Viewport").Find("Content"), false);
+            newButton.transform.Find("Text").gameObject.GetComponent<Text>().text = "DECK " + (i + 1).ToString();
+            int number = i; 
+            newButton.GetComponent<Button>().onClick.AddListener(delegate { changeDeckView(number + 1); });
+            newButton.GetComponent<Button>().onClick.AddListener(delegate { changeColorDeckButton(number); }); 
+            allDecksButtonsList.Add(newButton); 
+        }
+    }
+    
+    public void changeColorDeckButton(int number) {
+        for (int i = 0; i < allDecksButtonsList.Count; i++) {
+            if (i == number) {
+                allDecksButtonsList[i].GetComponent<Image>().color = Color.green; 
+            } else {
+                allDecksButtonsList[i].GetComponent<Image>().color = Color.white;
+            }
+        }
     }
 }

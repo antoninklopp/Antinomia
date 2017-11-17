@@ -1326,20 +1326,8 @@ public class GameManager : NetworkBehaviourAntinomia {
             GameObject newCarte = Instantiate(CarteDebutPrefab);
             newCarte.transform.SetParent(ParentCartesDebut, false);
             // Si ça ne marche pas, il FAUT différencier, sort, entité, et assistance. 
-            switch (_cartesDebut[i].GetComponent<CarteType>().thisCarteType) {
-                case CarteType.Type.ASSISTANCE:
-                    newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Carte>().shortCode,
+            newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Carte>().shortCode,
                     _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
-                    break; 
-                 case CarteType.Type.ENTITE:
-                    newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Entite>().shortCode,
-                    _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
-                    break;
-                 case CarteType.Type.SORT:
-                    newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Sort>().shortCode,
-                    _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
-                    break;
-            }
         }
 
         CarteDebutPrefab.SetActive(false);
