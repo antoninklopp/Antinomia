@@ -20,9 +20,6 @@ public class Action {
     /*
      * On définit yy de la manière suivante:
      * yy entre 0 et 99 nombre de tours où la carte est active. (On suppose que la carte ne peut pas durer plus de 99 tours).
-     * 
-     * 
-     * 
      */
 
     // Le sort peut avoir un ou plusieurs effets

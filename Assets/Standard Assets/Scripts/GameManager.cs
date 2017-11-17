@@ -271,7 +271,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         }
 
         // On ne peut pas réagir lors après la phase finale. 
-        if (!defairePile && Phase != Player.Phases.FINALE) {
+        if (!defairePile && Phase != Player.Phases.INITIATION) {
             Debug.Log("On demande un changement de phase"); 
             AjouterChangementDePhasePile();
         } else {

@@ -179,11 +179,11 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                 break;
         }
 
-        if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
-            // Si on est sur le joueur qui n'a pas demandé l'effet, on propose à l'autre joueur de répondre à l'effet. 
+        // if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
+            // On propose à tous les joueurs de répondre/ajouter des effets à la pile
             InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
             AntinomiaLog("L'effet devrait être display"); 
-        }
+        // }
     }
 
     /// <summary>

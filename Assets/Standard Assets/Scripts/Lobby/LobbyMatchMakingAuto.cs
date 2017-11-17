@@ -114,6 +114,7 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
         if (_playerAssiociated.peerID == 1) {
             CreateMatchmakingGame(); 
         } else {
+            Debug.Log("WaitToJoin"); 
             StartCoroutine(WaitToJoin()); 
         }
         MontrerMatchTrouve(); 
@@ -143,23 +144,17 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
         StartCoroutine(ListMatchesRoutine()); 
         // networkAddress = _playerAssiociated.matchMakingID;
         Debug.Log(_playerAssiociated.matchMakingID);
-        // StartCoroutine(Info());
 
-        // lobbyManager.backDelegate = lobbyManager.StopClientClbk;
-        // lobbyManager.DisplayIsConnecting();
-
-        // lobbyManager.SetServerInfo("Connecting...", lobbyManager.networkAddress);
-
-        StartCoroutine(WaitForConnectionBothPlayers(2)); 
     }
 
     public IEnumerator ListMatchesRoutine() {
-        yield return new WaitForSeconds(2f); 
+        yield return new WaitForSeconds(2f);
+        Debug.Log(matchMaker.isActiveAndEnabled); 
         matchMaker.ListMatches(0, 6, _playerAssiociated.matchMakingID, true, 0, 0, SimpleVoidDisplay);
-        while (client.isConnected == false) {
-            yield return new WaitForSeconds(0.5f);
+        // while (client.isConnected == false) {
+        //    yield return new WaitForSeconds(0.5f);
             // matchMaker.ListMatches(0, 6, _playerAssiociated.matchMakingID, true, 0, 0, SimpleVoidDisplay);
-        }
+        // }
     }
 
     /// <summary>
@@ -173,7 +168,8 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
 
     private IEnumerator Info() {
         while (true) {
-            Debug.Log(client.serverIp);
+            Debug.Log("salut"); 
+            // Debug.Log(client.serverIp);
             Debug.Log(client.isConnected);
             yield return new WaitForSeconds(1f); 
         }
@@ -186,13 +182,12 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// <param name="extendedInfo"></param>
     /// <param name="match"></param>
     public void SimpleVoidDisplay(bool success, string extendedInfo, List<MatchInfoSnapshot> match) {
-        Debug.Log("salut"); 
+        Debug.Log("salut");
+        Debug.Log("Nombre de matchs " + match.Count); 
         for (int i = 0; i < match.Count; i++) {
             Debug.Log(1);
             Debug.Log(match[0].networkId);
-            // networkAddress = 0;
             JoinMatch(match[0].networkId);
-            // FindLobbyPlayer(2).GetComponent<LobbyPlayer>().SetPlayerReady();
         }
     }
 
@@ -202,9 +197,18 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
     /// <param name="networkID"></param>
     void JoinMatch(NetworkID networkID) {
         matchMaker.JoinMatch(networkID, "", "", "", 0, 0, OnMatchJoined);
-        // backDelegate = lobbyManager.StopClientClbk;
-        // _isMatchmaking = true;
-        // lobbyManager.DisplayIsConnecting();
+        Debug.Log("Match Joined executed");
+        // StartCoroutine(Info()); 
+    }
+
+    public override void OnMatchJoined(bool success, string extendedInfo, MatchInfo matchInfo) {
+        base.OnMatchJoined(success, extendedInfo, matchInfo);
+        Debug.Log(success);
+        Debug.Log(extendedInfo);
+        Debug.Log(matchInfo.usingRelay); 
+        StartClient();
+
+        StartCoroutine(WaitForConnectionBothPlayers(2));
     }
 
     /// <summary>
@@ -239,12 +243,10 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
         if (ID == 2) {
             yield return new WaitForSeconds(2f); 
         }
-        // FindLobbyPlayer(ID).GetComponent<LobbyPlayer>().SetPlayerReady();
-        // FindLobbyPlayer(ID).GetComponent<LobbyPlayer>().readyToBegin = true;
+
         for (int i = 0; i < 2; i++) {
             Player[i].SetPlayerReady(); 
         }
-
         
         Debug.Log("Player is ready"); 
     }
@@ -271,9 +273,5 @@ public class LobbyMatchMakingAuto : NetworkLobbyManager {
         GameObject.Find("MontrerText").SetActive(false);
         
     }
-
-    //public override void OnClientSceneChanged(NetworkConnection conn) {
-    //    base.OnClientSceneChanged(conn);
-    //}
 
 }
