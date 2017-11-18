@@ -8,8 +8,17 @@ public class RegisterPlayer : MonoBehaviour{
 
 	//public Text displayNameInput, userNameInput, passwordInput; 
 	bool authorize = false;
-	bool finish = false; 
+	bool finish = false;
 
+    [HideInInspector]
+    public bool errorRegistrationName; 
+
+    /// <summary>
+    /// Créer un nouveau compte joueur dans la base de donnée
+    /// </summary>
+    /// <param name="displayName">Le nom d'utilisateur</param>
+    /// <param name="userName">Le mot de passe utiilisateur</param>
+    /// <param name="password">L'ancien nom du joueur (peut-être pour un changement de compte)</param>
 	public void RegisterPlayerSetup(string displayName, string userName, string password){
 		// register a new Player
 		print ("Registering Player..."); 
@@ -18,10 +27,10 @@ public class RegisterPlayer : MonoBehaviour{
 			.SetUserName(userName)
 			.SetPassword(password)
 			.Send(( response ) => {
-
 				if(!response.HasErrors){
 					print("Player Registered \n User Name: " + response.DisplayName); 
 				} else {
+                    errorRegistrationName = true; 
 					print("Error registering Player... \n " + response.Errors.JSON.ToString()); 
 				}
 			}); 
@@ -58,6 +67,14 @@ public class RegisterPlayer : MonoBehaviour{
 		}
 		finish = false; 
 	}
+
+    public IEnumerator RegisterPlayerRoutine(string userName, string password) {
+        RegisterPlayerSetup(userName, password, userName);
+        while (!finish) {
+            yield return new WaitForSeconds(0.2f);
+        }
+        finish = false;
+    }
 
 	public bool getAuthorize(){
 		return authorize; 

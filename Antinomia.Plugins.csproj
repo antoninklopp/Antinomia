@@ -170,6 +170,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Lobby\LobbyMatchMakingAuto.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Lobby\LobbyPlayer.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Log\GameManagerLogIn.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Log\GameManagerRegistration.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\MainMenu\GameManagerMainMenu.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\AddImageToDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\CardCardManager.cs" />
@@ -184,6 +185,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Player\PlayerChoice.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ReadData\LanguageData.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ReadData\ReadXMLData.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ReadData\UILanguageString.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Shop\GameManagerShop.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\WriteOutputFile.cs" />
   </ItemGroup>
@@ -200,6 +202,8 @@
     <None Include="Assets\Lobby\Documentation.txt" />
     <None Include="Assets\Lobby\Instruction.txt" />
     <None Include="Assets\Resources\WaitForCardoID.txt" />
+    <None Include="Assets\Resources\XmlData\English\global.xml" />
+    <None Include="Assets\Resources\XmlData\French\global.xml" />
     <None Include="Assets\Resources\informations.xml" />
     <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
     <None Include="Assets\Standard Assets\Fonts\OpenSans\License!.txt" />
