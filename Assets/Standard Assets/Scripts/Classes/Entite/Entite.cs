@@ -609,22 +609,11 @@ public class Entite : Carte, ICarte {
                 } else {
                     Debug.Log("INVOCATION ELEMENTAIRE");
                     if (carteAscendance == Ascendance.ELEMENTAIRE) {
-                        int x = 1;
-                        switch (coutElementaire) {
-                            case 1:
-                                x = 1;
-                                break;
-                            case 2:
-                                x = 3;
-                                break;
-                            case 3:
-                                x = 5;
-                                break;
-                        }
+                        int x = coutElementaire; 
                         switch (carteElement) {
                             case Element.FEU:
                                 // Enlever 10x points de vie au joueur. 
-                                if (FindLocalPlayer().GetComponent<Player>().PlayerPV < 10 * x) {
+                                if (FindLocalPlayer().GetComponent<Player>().PlayerPV < 40 * x) {
                                     // Si le joueur ne peut pas payer le cout
                                     GameObject.Find("GameManager").SendMessage("DisplayMessage", "Vous ne pouvez pas payer ce cout " + (10 * x).ToString() + " points de vie");
                                     return;
@@ -634,8 +623,8 @@ public class Entite : Carte, ICarte {
                                         return; 
                                     }
                                     else {
-                                        GameObject.Find("GameManager").SendMessage("DisplayMessage", "Vous perdez " + (10 * x).ToString() + " points de vie");
-                                        FindLocalPlayer().GetComponent<Player>().AttackPlayer(10 * x);
+                                        GameObject.Find("GameManager").SendMessage("DisplayMessage", "Vous perdez " + (40 * x).ToString() + " points de vie");
+                                        FindLocalPlayer().GetComponent<Player>().AttackPlayer(40 * x);
                                     }
                                 }
                                 break;
@@ -646,10 +635,10 @@ public class Entite : Carte, ICarte {
                                 }
                                 else {
                                     // Donner 10x points de vie à l'adversaire. 
-                                    GameObject.Find("GameManager").SendMessage("DisplayMessage", "Votre adversaire gagne " + (10 * x).ToString() + "points de vie");
+                                    GameObject.Find("GameManager").SendMessage("DisplayMessage", "Votre adversaire gagne " + (40 * x).ToString() + "points de vie");
                                     // Comme le HealPlayer ne marche que sur le joueur local, sinon pas d'autorité
                                     // On fait une attaque à l'envers.
-                                    FindNotLocalPlayer().GetComponent<Player>().AttackPlayer(-10 * x);
+                                    FindNotLocalPlayer().GetComponent<Player>().AttackPlayer(-40 * x);
                                 }
                                 break;
                             case Element.AIR:
@@ -659,7 +648,7 @@ public class Entite : Carte, ICarte {
                                 }
                                 else {
                                     gameObject.tag = "BoardSanctuaire";
-                                    GameObject.Find("GameManager").SendMessage("InvocationElementaireAir", x);
+                                    GameObject.Find("GameManager").SendMessage("InvocationElementaireAir", 2*x);
                                 }
                                 break;
                             case Element.TERRE:

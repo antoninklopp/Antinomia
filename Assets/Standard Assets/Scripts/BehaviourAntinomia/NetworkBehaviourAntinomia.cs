@@ -84,6 +84,21 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
     }
 
     /// <summary>
+    /// Trouver un joueur grâce à son playerID. 
+    /// </summary>
+    /// <param name="PlayerID"></param>
+    /// <returns></returns>
+    public GameObject FindPlayerWithID(int PlayerID) {
+        GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
+        if (Players[0].GetComponent<Player>().PlayerID == PlayerID) {
+            return Players[0];
+        }
+        else {
+            return Players[1];
+        }
+    }
+
+    /// <summary>
     /// Recuperer l'ID carte game d'une carte (de n'importe quel type)
     /// </summary>
     /// <param name="Carte">La carte</param>

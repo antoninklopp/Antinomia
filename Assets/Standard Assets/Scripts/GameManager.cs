@@ -441,7 +441,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                     AllEntites[i].GetComponent<Entite>().UpdateNewPhase(currentPhase, Tour);
                 }
             } catch (NullReferenceException e) {
-                Debug.Log(e); 
+                // Debug.Log(e); 
             }
         }
 
@@ -453,7 +453,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                     AllAssistances[i].SendMessage("UpdateNewPhase", currentPhase);
                 }
             } catch (NullReferenceException e) {
-                Debug.Log(e); 
+                // Debug.Log(e); 
             }
         }
     }
@@ -1216,15 +1216,15 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Après une action, on propose au joueur adverse de mettre le jeu en pause. 
     /// Si le playerID reste à 0, c'est que le choix du joueur qui peut mettre le jeu
-    /// en pause est géré par un autre élément.Exemple: Lors d'un changement de phase, 
-    /// c'est déjà géré dans la fonction du gameManager. 
+    /// en pause est géré par un autre élément.Exemple: 
+    /// Lors d'un changement de phase, c'est déjà géré dans la fonction du gameManager. 
     /// 
     /// Sinon, l'ID passée en paramètre est celle proposée par le joueur qui appelle la fonction. 
     /// La proposition du bouton pause est donc uniquement pour celui qui n'a pas fait l'action
     /// </summary>
     /// <param name="playerID"></param>
     /// <param name="message">Lorsque le jeu est mis en pause, on peut vouloir afficher un message au joueur</param>
-    /// <returns></returns>
+    /// <returns>None</returns>
     public IEnumerator ProposeToPauseGame(int playerID=0, string message="") {
         if ((FindLocalPlayerID() != playerID) || (playerID == 0)) {
             // Si on a reçu un effet, c'est que l'adversaire a réagi, le jeu n'est plus en pause. 
@@ -1234,7 +1234,6 @@ public class GameManager : NetworkBehaviourAntinomia {
             if (message != ""){
                 // Si un message est fourni lors de l'appel, on l'affiche
                 DisplayInfoToPlayer(message);
-                //DeactivateDisplayInfo(10f); 
             }
             // Temps d'attente. 
             AntinomiaLog("Attente");

@@ -39,12 +39,17 @@ public class GameManagerLoginUser : MonoBehaviour {
 	}
 
 	public void OnClickResult(){
-		string login = InputFieldLogin.GetComponent<InputField> ().text; 
+        Result.transform.GetChild(0).gameObject.GetComponent<Text>().text = "TRY TO CONNECT"; 
+        string login = InputFieldLogin.GetComponent<InputField> ().text; 
 		string password = InputFieldPassword.GetComponent<InputField> ().text; 
 		StartCoroutine (OnClickResultRoutine (login, password)); 
 	}
 
-	public IEnumerator OnClickResultRoutine(string login, string password){
+    public void CreateAccount() {
+        SceneManager.LoadScene("Registration");
+    }
+
+    public IEnumerator OnClickResultRoutine(string login, string password){
 		//DataBaseLogin baseLogin = gameObject.GetComponent<DataBaseLogin> (); 
 //		if (baseLogin.LoginUser (login, password) != 0) {
 //			Result.transform.GetChild (0).gameObject.GetComponent<Text> ().text = baseLogin.LoginUser (login, password).ToString (); 

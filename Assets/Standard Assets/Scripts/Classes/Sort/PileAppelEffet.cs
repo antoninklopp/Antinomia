@@ -179,11 +179,11 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                 break;
         }
 
-        // if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
+        if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On propose à tous les joueurs de répondre/ajouter des effets à la pile
             InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
             AntinomiaLog("L'effet devrait être display"); 
-        // }
+        }
     }
 
     /// <summary>
@@ -197,7 +197,6 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// Defaire la pile d'effets. 
     /// </summary>
     public void DefaireLaPile() {
-        // AntinomiaLog("Defaire la pile 151 PileAppelEffet"); 
         StartCoroutine(JouerLesEffets()); 
     }
 
@@ -211,6 +210,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             int NombreEffet = CartesAssociees.Count; 
             for (int i = CartesAssociees.Count - 1; i >= 0; --i) {
                 effetTermine = false;
+                Debug.Log("On joue un effet dans la boucle for ici."); 
                 CmdJouerEffetPile(i, FindLocalPlayer().GetComponent<Player>().PlayerID);
                 while (!effetTermine) {
                     yield return new WaitForSeconds(0.1f);

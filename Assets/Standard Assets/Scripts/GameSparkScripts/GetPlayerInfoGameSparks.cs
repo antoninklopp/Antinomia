@@ -618,7 +618,30 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             Destroy(newCarte.GetComponent<Assistance>());
         }
     }
-    
+
+    /// <summary>
+    /// Créer un nouveau deck dans la base de données. 
+    /// </summary>
+    private void createDeck() {
+        new GameSparks.Api.Requests.LogEventRequest()
+            .SetEventKey("createDeck")
+            .Send((response) => {
+                if (!response.HasErrors) {
+                    Debug.Log("Deck créé " + response.ScriptData.GetInt("deck created").Value.ToString()); 
+                } else {
+                    Debug.Log("Le deck n'a pas pu être créé."); 
+                }
+                finish = true; 
+            }); 
+    }
+
+    public IEnumerator createDeckRoutine() {
+        finish = false; 
+        createDeck();
+        while (!finish) {
+            yield return new WaitForSeconds(0.1f); 
+        }
+    }
 
 
 }

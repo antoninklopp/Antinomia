@@ -9,7 +9,8 @@ namespace LanguageModule {
     /// </summary>
     public class UILanguageString : MonoBehaviour {
 
-        public string stringToDisplay; 
+        public string stringToDisplay;
+        public string stringFileName = "global";
 
         // Use this for initialization
         void Start() {
@@ -19,10 +20,11 @@ namespace LanguageModule {
             }
 
             if (PlayerPrefs.HasKey("Language")) {
-                gameObject.GetComponent<Text>().text = LanguageData.GetString(stringToDisplay, PlayerPrefs.GetString("Language"));
+                gameObject.GetComponent<Text>().text = LanguageData.GetString(stringToDisplay, PlayerPrefs.GetString("Language"), 
+                    stringFileName);
             } else {
                 gameObject.GetComponent<Text>().text = LanguageData.GetString(stringToDisplay, 
-                    Application.systemLanguage.ToString());
+                    Application.systemLanguage.ToString(), stringFileName);
             }
         }
 

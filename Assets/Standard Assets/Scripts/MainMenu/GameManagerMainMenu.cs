@@ -86,4 +86,8 @@ public class GameManagerMainMenu : MonoBehaviour {
 		save.DisconnectPlayer (); 
 		Application.Quit (); 
 	}
+
+    public void SubmitComment() {
+        SceneManager.LoadScene("CommentBeta"); 
+    }
 }

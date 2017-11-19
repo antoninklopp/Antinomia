@@ -35,7 +35,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     public GameObject ObjetEffet;
 
     /// <summary>
-    /// IDCardGame del'objet qui produit l'effet.
+    /// IDCardGame de l'objet qui produit l'effet.
     /// </summary>
     public int IDObjectCardGame; 
 
@@ -89,7 +89,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// </summary>
     public bool AppartientAuFlux = false;
 
-    public bool effetTermine = false; 
+    public bool effetTermine = false;
 
     /// <summary>
     /// Creer un effet dans la pile. 
@@ -121,7 +121,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
 
         // getGameManager().GetComponent<GameManager>().CheckAllEffetsCartes();
 
-
+        MontrerCartesDeplacement(); 
     }
 
     public void setPlayerIDAssociee(int _playerID) {
@@ -178,6 +178,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         // On vérifie que c'est bien le joueur qui a créé l'effet qui le joue. 
         // Debug.Log(PlayerIDAssocie);
         // Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
+        DestructionUnitesTemporaires();
         if (PlayerIDAssocie == FindLocalPlayer().GetComponent<Player>().PlayerID) {
             Debug.Log("On joue l'effet depuis chez ce joueur");
             // Dans certains cas, changement de phase par exemple, 
@@ -221,8 +222,6 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                             Debug.LogWarning("Pas le bon nombre d'attaques");
                         }
                         Debug.Log(thisCarte);
-                        Debug.Log("attaque");
-                        Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"); 
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, thisCarte, CibleEffet[0]);
                         yield return new WaitForSeconds(0.5f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
@@ -249,10 +248,13 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         GererEffetsPonctuelPile(thisCarte, 1);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
                         effetTermine = true; 
-                        yield break; 
+                        yield break;
+                    // Passage à une nouvelle phase
                     case -4:
-                        // Passage à une nouvelle phase
-                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GoToNextPhase(defairePile:true);
+                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GoToNextPhase(defairePile: true);
+                        AntinomiaLog("Appel à GoToNextPhase"); 
+                        Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
+                        Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour); 
                         Debug.Log("On va à la prochaine phase"); 
                         yield return new WaitForSeconds(0.5f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
@@ -260,26 +262,16 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         yield break; 
                 }
 
-                switch (thisCarte.GetComponent<CarteType>().thisCarteType) {
-                    case CarteType.Type.ENTITE:
-                        yield return thisCarte.GetComponent<Entite>().GererActionsCoroutine(effetJoue.AllActionsEffet, numeroEffet,
+                yield return thisCarte.GetComponent<Carte>().GererActionsCoroutine(effetJoue.AllActionsEffet, numeroEffet,
                                                                                                 EffetListNumber, CibleEffet);
-                        break;
-                    case CarteType.Type.SORT:
-                        yield return thisCarte.GetComponent<Sort>().GererActionsCoroutine(effetJoue.AllActionsEffet, numeroEffet,
-                                                                                                EffetListNumber, CibleEffet);
-                        break;
-                    case CarteType.Type.ASSISTANCE:
-                        yield return thisCarte.GetComponent<Assistance>().GererActionsCoroutine(effetJoue.AllActionsEffet, numeroEffet,
-                                                                                                EffetListNumber, CibleEffet);
-                        break;
-                }
+
                 effetTermine = true; 
             }
             else {
                 AntinomiaLog("La carte a été détruite");
             }
             GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
+
         }
     }
 
@@ -299,5 +291,44 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         }
     }
 
+    public void MontrerCartesDeplacement() {
+        /*
+         * Dans le cas où un effet est un déplacement de carte, 
+         * on montre la position dans laquelle la carte va pouvoir potentiellement être.
+         */
+        if (numeroEffet == -2 || numeroEffet == -3) {
+            GameObject CarteDeplacee = FindCardWithID(IDObjectCardGame);
+            GameObject newCarte = Instantiate(CarteDeplacee); 
+            if (newCarte.GetComponent<CarteType>().thisCarteType == CarteType.Type.ENTITE) {
+                Entite _entite = newCarte.GetComponent<Entite>();
+                EntiteTemporaire _entiteTemporaire = newCarte.AddComponent<EntiteTemporaire>();
+                _entiteTemporaire.setInfoEntiteTemporaire(_entite);
+                Destroy(_entite);
+            }
+            if (numeroEffet == -2) {
+                // Deplacement vers le board. 
+                Transform ChampBataille; 
+                ChampBataille= FindPlayerWithID(PlayerIDAssocie).GetComponent<Player>().GetChampBatailleJoueur();
+                newCarte.transform.SetParent(ChampBataille, false);
+                ChampBataille.gameObject.GetComponent<CartesBoard>().CmdReordonnerCarte();
+                newCarte.GetComponent<EntiteTemporaire>().carteState = Entite.State.CHAMPBATAILLE; 
+            } else if (numeroEffet == -3) {
+                // Deplacement vers le sanctuaire. 
+                Transform Sanctuaire; 
+                Sanctuaire = FindPlayerWithID(PlayerIDAssocie).GetComponent<Player>().GetSanctuaireJoueur();
+                newCarte.transform.SetParent(Sanctuaire, false);
+                Sanctuaire.gameObject.GetComponent<CartesBoard>().CmdReordonnerCarte();
+                newCarte.GetComponent<EntiteTemporaire>().carteState = Entite.State.SANCTUAIRE;
+            }
+        }
+
+    }
+
+    private void DestructionUnitesTemporaires() {
+        EntiteTemporaire[] temporaires = FindObjectsOfType<EntiteTemporaire>();
+        foreach (EntiteTemporaire temp in temporaires) {
+            Destroy(temp.gameObject);
+        }
+    }
 
 }

@@ -41,7 +41,13 @@ namespace LanguageModule {
             }
         }
 
+        public static void setLanguage(string Language) {
+            PlayerPrefs.SetString("Language", Language); 
+        }
 
+        public static string getLanguage() {
+            return PlayerPrefs.GetString("Language"); 
+        }
     }
 
 }

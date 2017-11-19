@@ -663,24 +663,6 @@ public class Player : NetworkBehaviourAntinomia	 {
 		FindPlayerWithID (1).GetComponent<Player>().CmdSetPlayerPV(newPV); 
 	}
 
-	GameObject FindPlayerWithID(int ID){
-		/*
-		 * trouver le joueur avec le bon ID. 
-		 */ 
-		GameObject[] Players = GameObject.FindGameObjectsWithTag ("Player"); 
-		if (Players [0].GetComponent<Player>().PlayerID == ID) {
-			return Players [0]; 
-		} else {
-			return Players [1]; 
-		}
-	}
-
-
-//	void setPlayerPV(int newPV){
-//		PlayerPV = newPV; 
-//		GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ().setPlayerPVUI (PlayerID, newPV); 
-//	}
-
 	// ------ Fin mise à jour des informations sur le serveur ------
 	void setPlayerAKADebutTour(int newAKA){
 		/*
@@ -1070,6 +1052,18 @@ public class Player : NetworkBehaviourAntinomia	 {
         }
 
         // Debug.Log("<color=red>" + testMessage + "</color>"); 
+    }
+
+    public Transform GetMainJoueur() {
+        return transform.Find("MainJoueur").Find("CartesMainJoueur");
+    }
+
+    public Transform GetChampBatailleJoueur() {
+        return transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"); 
+    }
+
+    public Transform GetSanctuaireJoueur() {
+        return transform.Find("Sanctuaire").Find("CartesSanctuaireJoueur");
     }
 
 }

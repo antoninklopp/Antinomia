@@ -14,7 +14,15 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
     /// <summary>
     /// Numéro de la version. 
     /// </summary>
-    string VersionNumber; 
+    string VersionNumber;
+
+    /// <summary>
+    /// Commentaire OK dit si le commentaire a bien été envoyé. 
+    /// -1 si le commentaire n'a pas réussi à être envoyé
+    /// 0 si le commentaire n'a pas encore été soumis
+    /// 1 si l'envoie a réussi. 
+    /// </summary>
+    int commentaireOK = 0; 
 
     /// <summary>
     /// Récupérer la note de version (et le numéro de la version) 
@@ -73,18 +81,30 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
     /// Si un joueur de la beta veut faire un commentaire. 
     /// </summary>
     /// <param name="comment">Le texte du commentaire.</param>
-    public void MakeABetaComment(string comment) {
+    private void MakeABetaComment(string comment) {
         new GameSparks.Api.Requests.LogEventRequest()
             .SetEventKey("addACommentBeta")
             .SetEventAttribute("name", PlayerPrefs.GetString("user"))
             .SetEventAttribute("comment", comment)
             .Send((response) => {
                 if (!response.HasErrors) {
-                    Debug.Log("Le commentaire a bien été ajouté"); 
+                    Debug.Log("Le commentaire a bien été ajouté");
+                    commentaireOK = 1; 
                 } else {
                     Debug.Log("Probleme lors de l'ajout du commentaire");
+                    commentaireOK = -1; 
                 }
-
             }); 
+    }
+
+    public IEnumerator WaitForComment(string comment) {
+        MakeABetaComment(comment); 
+        while(commentaireOK == 0) {
+            yield return new WaitForSeconds(0.1f); 
+        }
+    }
+
+    public int getCommentaireOK() {
+        return commentaireOK;
     }
 }
