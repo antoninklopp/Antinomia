@@ -494,7 +494,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Choix de la carte qui attaque. 
     /// </summary>
     /// <param name="MyPlayer">La carte qui attaque</param>
-	void AttackMyPlayer(GameObject MyPlayer){
+	public void AttackMyPlayer(GameObject MyPlayer){
 		/*
 		 * Choix de la première carte d'attaque, celle du joueur
 		 */ 
@@ -508,7 +508,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Choix de la carte A attaquer. 
     /// </summary>
     /// <param name="OtherPlayer">La carte attaquée</param>
-	void AttackOtherPlayer(GameObject OtherPlayer){
+	public void AttackOtherPlayer(GameObject OtherPlayer){
 		/*
 		 * Choix de la carte à attaquer, celle de l'adversaire. 
 		 */ 
@@ -1589,6 +1589,14 @@ public class GameManager : NetworkBehaviourAntinomia {
         } else {
             return false; 
         }
+    }
+
+    public Player.Phases getPhase() {
+        return Phase; 
+    }
+
+    public int getTour() {
+        return Tour; 
     }
 
 }

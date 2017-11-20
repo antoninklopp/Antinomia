@@ -32,7 +32,7 @@ public class Sanctuaire : MonoBehaviour {
 
 	}
 
-	public void PoserCarteChampBataille(){//Carte CarteAPoser){
+	public void PoserCarteSanctuaire(){//Carte CarteAPoser){
 		GameObject NouvelleCarte = Instantiate (CartePrefab); 
 		NouvelleCarte.transform.SetParent (transform); 
 		AllCreatureSanctuaire.Add (NouvelleCarte); 
@@ -73,6 +73,10 @@ public class Sanctuaire : MonoBehaviour {
 
 	}
 
+    /// <summary>
+    /// Une carte a été déposée sur le sanctuaire. 
+    /// </summary>
+    /// <param name="NewCard"></param>
 	void CmdCarteDeposee(GameObject NewCard){
 		/*
 		 * Depot d'une carte sur le board, pour l'instant aucune vérification n'est faite. 
@@ -91,15 +95,32 @@ public class Sanctuaire : MonoBehaviour {
 		NewCard.SendMessage ("setClicked", false); 
 	}
 
+    /// <summary>
+    /// Récypérer le nombre de cartes du sanctuaire
+    /// </summary>
+    /// <returns>Un itncompris entre 0 et 2</returns>
 	public int getNumberCardsSanctuaire(){
-		/*
-		 * Retourne le nombre de cartes dans le sanctuaire. 
-		 */
 		AllCreatureSanctuaire = new List<GameObject> (); 
 		foreach (Transform child in transform) {
 			AllCreatureSanctuaire.Add (child.gameObject); 
 		}
 
+        if (AllCreatureSanctuaire.Count > 2) {
+            Debug.LogWarning("Attention, il y a trop de cartes dans le sanctuaire"); 
+        }
+
 		return AllCreatureSanctuaire.Count; 
 	}
+
+    /// <summary>
+    /// Récupérer les cartes du sanctuaire
+    /// </summary>
+    /// <returns>La liste des cartes du sanctuaire.</returns>
+    public List<GameObject> getCartesSanctuaire() {
+        List<GameObject> CartesSanctuaire = new List<GameObject>(); 
+        for (int i = 0; i < transform.childCount; i++) {
+            CartesSanctuaire.Add(transform.GetChild(i).gameObject); 
+        }
+        return CartesSanctuaire; 
+    }
 }

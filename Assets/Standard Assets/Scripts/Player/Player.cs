@@ -49,9 +49,15 @@ public class Player : NetworkBehaviourAntinomia	 {
 	public int PlayerAKA = 0; 
 
 	[HideInInspector]
-	public enum Phases{INITIATION, PIOCHE, PREPARATION, PRINCIPALE1, COMBAT, PRINCIPALE2, FINALE}; 
-
-
+	public enum Phases{
+        INITIATION,
+        PIOCHE,
+        PREPARATION,
+        PRINCIPALE1,
+        COMBAT,
+        PRINCIPALE2,
+        FINALE
+    }; 
 
 	[SyncVar(hook="ChangementPhase")]
 	/*
@@ -1064,6 +1070,17 @@ public class Player : NetworkBehaviourAntinomia	 {
 
     public Transform GetSanctuaireJoueur() {
         return transform.Find("Sanctuaire").Find("CartesSanctuaireJoueur");
+    }
+
+    /// <summary>
+    /// Récupérer le nombre de cartes du joueur. 
+    /// </summary>
+    /// <returns></returns>
+    public int getNombreDeCartes() {
+        int nombre = 0;
+        nombre += GetChampBatailleJoueur().GetComponent<CartesBoard>().getNumberCardsChampBataille();
+        nombre += GetSanctuaireJoueur().GetComponent<Sanctuaire>().getNumberCardsSanctuaire(); 
+        return nombre; 
     }
 
 }

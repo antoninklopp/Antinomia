@@ -110,6 +110,10 @@ public class CartesBoard : NetworkBehaviourAntinomia {
 			AllCreaturesChampBataille.Add (child.gameObject); 
 		}
 
+        if (AllCreaturesChampBataille.Count > 5) {
+            Debug.LogWarning("Attention il y a trop de cartes sur le champ de bataille"); 
+        }
+
 		return AllCreaturesChampBataille.Count;  
 	}
 
