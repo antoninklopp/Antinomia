@@ -36,7 +36,8 @@ public class ImageCardBattle : MonoBehaviour {
 		/*
 		 * Changer l'image
 		 */ 
-		for (int i = 0; i < AllImages.Length; ++i) {
+         AllImages = Resources.LoadAll<Sprite>("Cartes"); 
+        for (int i = 0; i < AllImages.Length; ++i) {
 			if (name == AllImages [i].name) {
 				// On cherche la bonne image dans la liste. 
 				GetComponent<SpriteRenderer>().sprite = AllImages[i]; 

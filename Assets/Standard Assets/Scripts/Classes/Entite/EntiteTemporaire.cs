@@ -50,7 +50,9 @@ public class EntiteTemporaire : MonoBehaviour {
 
         gameObject.tag = "CarteTemporaire";
 
-        GetComponent<ImageCardBattle>().setImage(shortCode); 
+        GetComponent<ImageCardBattle>().setImage(shortCode);
+        GetComponent<CarteType>().thisCarteType = CarteType.Type.ENTITE_TEMPORAIRE;
+        GetComponent<CarteType>().instanciee = false; 
     }
 
     public void DetruireTemporaire() {

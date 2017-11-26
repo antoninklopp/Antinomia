@@ -159,6 +159,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\GameManagerLoginUser.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\LoginGUI.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\GameManagerIA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GameSparksManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GetGlobalInfoGameSparks.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GetPlayerInfoGameSparks.cs" />
@@ -183,6 +184,8 @@
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\RemoveCardFromDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\AttackMyPlayer.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\IA\IA.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Player\IA\LogActionIA.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Player\IA\LogIA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\Player.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\PlayerChoice.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ReadData\LanguageData.cs" />

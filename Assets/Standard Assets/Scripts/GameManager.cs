@@ -9,7 +9,6 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 #endif
 
-
 /// <summary>
 /// Classe qui manage tous les éléments de UI 
 /// ainsi que beaucoup de choix de cartes et les attaques. 
@@ -42,22 +41,22 @@ public class GameManager : NetworkBehaviourAntinomia {
 	#endif
 
 	// Bouton
-	GameObject NextPhase; 
+	protected GameObject NextPhase; 
 	// Texte
-	GameObject CurrentPhase;
+	protected GameObject CurrentPhase;
 
 #pragma warning disable CS0649 // Le champ 'GameManager.AKA' n'est jamais assigné et aura toujours sa valeur par défaut null
-	GameObject AKA; 
+	protected GameObject AKA; 
 #pragma warning restore CS0649 // Le champ 'GameManager.AKA' n'est jamais assigné et aura toujours sa valeur par défaut null
-	GameObject CurrentTour;
+	protected GameObject CurrentTour;
 
-	GameObject Capacite_Effet; 
+	protected GameObject Capacite_Effet; 
 
-	GameObject NomJoueur1;
-	GameObject NomJoueur2;
+	protected GameObject NomJoueur1;
+	protected GameObject NomJoueur2;
 
-    GameObject InfoCarteBattle;
-    GameObject InfoCarteBattlePhone; 
+    protected GameObject InfoCarteBattle;
+    protected GameObject InfoCarteBattlePhone; 
 
     /// <summary>
     /// AKA sur le tour, c'est à dire à son niveau maximum au début du tour. 
@@ -105,7 +104,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
 	public int nombreInvocationsSanctuaire = 0; 
 
-	GameObject ShowCards;
+	protected GameObject ShowCards;
 
     /// <summary>
     ///  Cette variable permet de savoir si un sort est en train d'être jouer.
@@ -119,16 +118,17 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Représentation du cimetière qui peut être ouverte lors d'un clic joueur, s'il
     /// veut voir les cartes de son cimetière ou du cimetière de l'autre joueur. 
     /// </summary>
-    private GameObject CartesCimetiere;
+    protected  GameObject CartesCimetiere;
+
     /// <summary>
     /// Le prefab de la carte du cimetière.
     /// </summary>
-    private GameObject CarteBaseCimetiere;
+    protected GameObject CarteBaseCimetiere;
 
     /// <summary>
     /// Effet de particule sur le terrain, qui matérialise l'ascendance du terrain. 
     /// </summary>
-    private GameObject EffetParticuleTerrain;
+    protected GameObject EffetParticuleTerrain;
     
     /// <summary>
     /// true si le jeu est en pause, false sinon
@@ -151,15 +151,17 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// L'objet text qui permet de montrer des effets au milieu de l'écran
     /// </summary>
-    private GameObject DisplayInfo;
+    protected  GameObject DisplayInfo;
+
     /// <summary>
     /// Le bouton pause. 
     /// </summary>
-    private GameObject PauseButton;
-   
+    protected GameObject PauseButton;
 
-    private GameObject ChoixCartesDebut;
-    private GameObject CarteDebutPrefab; 
+    protected GameObject ChoixCartesDebut;
+
+    protected GameObject CarteDebutPrefab; 
+
     /// <summary>
     /// Si l'int est à 0, il n'a pas encore été set
     /// à 1, il est false. 
@@ -167,22 +169,22 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     int choixDebut = 0;
 
-    GameObject ProposerEffet;
+    protected GameObject ProposerEffet;
     /// <summary>
     /// Lien dans le GameManager de l'objet qui a demandé à execute un effet. (clic droit sur la carte). 
     /// </summary>
-    GameObject ObjetDemandeEffet;
+    protected GameObject ObjetDemandeEffet;
 
     /// <summary>
     /// La console de développement. 
     /// </summary>
-    private GameObject Console;
+    protected GameObject Console;
 
     /// <summary>
     /// Objet qui permet de proposer de défaire la pile, 
     /// il comporte deux boutons fils, oui et non.
     /// </summary>
-    private GameObject ProposerDefairePile;
+    protected GameObject ProposerDefairePile;
 
     /// <summary>
     /// Cette variable permet de gérer la réponse du joueur qui peut défaire la pile. 
@@ -190,12 +192,12 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// 1, réponse positive, 
     /// 2 réponse négative. 
     /// </summary>
-    private int defairePile = 0;
+    protected int defairePile = 0;
 
     /// <summary>
     /// Cet objet permet de matérialiser l'attente qu'il reste au joueur afin de pouvoir faire pause. 
     /// </summary>
-    GameObject SliderPause; 
+    protected GameObject SliderPause; 
 
 	/// <summary>
     /// Initialisation du GameManager
@@ -377,7 +379,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// de mettre à jour plusieurs choses slon les phases, comme l'AKA par exemple. 
     /// </summary>
     /// <param name="newPhase"></param>
-	void setNamePhaseUI(Player.Phases newPhase){
+	protected void setNamePhaseUI(Player.Phases newPhase){
 		/*
 		 * La phase courante est écrite en haut à gauche de l'écran.
 		 */ 
@@ -462,7 +464,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Changer le tour
     /// </summary>
     /// <param name="newTour"></param>
-	void setTour(int newTour){
+	protected void setTour(int newTour){
 		/*
 		 * Fonction appelée par le Player. 
 		 */ 
@@ -494,7 +496,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Choix de la carte qui attaque. 
     /// </summary>
     /// <param name="MyPlayer">La carte qui attaque</param>
-	public void AttackMyPlayer(GameObject MyPlayer){
+	public virtual void AttackMyPlayer(GameObject MyPlayer){
 		/*
 		 * Choix de la première carte d'attaque, celle du joueur
 		 */ 
@@ -508,7 +510,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Choix de la carte A attaquer. 
     /// </summary>
     /// <param name="OtherPlayer">La carte attaquée</param>
-	public void AttackOtherPlayer(GameObject OtherPlayer){
+	public virtual void AttackOtherPlayer(GameObject OtherPlayer){
 		/*
 		 * Choix de la carte à attaquer, celle de l'adversaire. 
 		 */ 
@@ -521,7 +523,8 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Attaque d'ue carte, une assistance ou même directement du joueur par une autre carte.
     /// </summary>
     /// <param name="STAT">Si on ne veut pas utiliser la stat de la carte mais celle d'un effet, on peut la passer en paramètre</param>
-	public void Attack(bool JouerEffet = false, GameObject _MyPlayerEntity = null, GameObject _OtherPlayerEntity = null, int STAT = 0){
+	public virtual void Attack(bool JouerEffet = false, GameObject _MyPlayerEntity = null, 
+        GameObject _OtherPlayerEntity = null, int STAT = 0){
         /*
 		 * On compare les forces des entités dans cette fonction. 
 		 * 
@@ -782,10 +785,11 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     /// <summary>
     /// Pioche de cartes au début du jeu.
+    /// CETTE METHODE N'EST PLUS UTILISEE => Voir => MontrerCartesAChoisirDebut
     /// </summary>
     /// <param name="nombreCartes"></param>
     /// <returns></returns>
-	public IEnumerator PiocheDebut(int nombreCartes){
+	public virtual IEnumerator PiocheDebut(int nombreCartes){
 		/*
 		 * Pioche au début de la partie. 
 		 */ 

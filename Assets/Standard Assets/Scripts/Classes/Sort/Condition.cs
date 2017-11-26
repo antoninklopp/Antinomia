@@ -130,6 +130,39 @@ public class Condition {
         /// </summary>
         OBLIGATOIRE,
         /// <summary>
+        /// Se défausser d'une carte d'un type spécial : 
+        /// sera sous la forme yyxx. 
+        /// Code associé : 
+        /// 1 - AIR
+        /// 2 - EAU
+        /// 3 - FEU
+        /// 4 - TERRE
+        /// 5 - NEUTRE
+        /// 6 - ASTRALE
+        /// 7 - MALEFIQUE
+        /// </summary>
+        DEFAUSSER_TYPE,
+        /// <summary>
+        /// Le terrain doit être sous une certaine domination
+        /// 1 - sans domination
+        /// 2 - domination Astrale
+        /// 3 - domination Malefique
+        /// </summary>
+        DOMINATION,
+        /// <summary>
+        /// Si le terrain passe sous domination astrale ou malefique
+        /// 2 - domination astrale
+        /// 3 - Domination malefique
+        /// </summary>
+        PASSAGE_DOMINATION,
+        /// <summary>
+        /// Lorsque le terrain changement de domination
+        /// 1 - Sans domination
+        /// 2 - domination astrale
+        /// 3 - Domination malefique
+        /// </summary>
+        CHANGEMENT_DOMINATION, 
+        /// <summary>
         /// Aucune condition nécessaire
         /// </summary>
         NONE

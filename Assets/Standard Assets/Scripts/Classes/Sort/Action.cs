@@ -102,6 +102,11 @@ public class Action {
         /// </summary>
         PUISSANCE_MULTIPLIE, 
         /// <summary>
+        /// La puissance d'une entité augmente pendant x tours. 
+        /// Le string transmis est donc de yyxx. 
+        /// </summary>
+        PUISSANCE_AUGMENTE_X_TOURS, 
+        /// <summary>
         /// Le joueur gagne x AKA sur le tour. 
         /// </summary>
         GAIN_AKA_UN_TOUR,
@@ -155,11 +160,26 @@ public class Action {
         /// 4 : TERRE
         /// 5 : NEUTRE
         /// </summary>
-        FORTE_ENTITE, 
+        FORTE_ENTITE,
+        /// <summary>
+        /// La carte retourne dans le main de son propriétaire
+        /// </summary>
+        RETOUR_MAIN_PROPRIETAIRE, 
         /// <summary>
         /// Ajoute x points d'AKA supplémentaire. 
         /// </summary>
         PROCURE_AKA_SUPPLEMENTAIRE, 
+        /// <summary>
+        /// La carte ne peut plus changer sa position
+        /// </summary>
+        CHANGER_POSITION_IMPOSSIBLE,
+        /// <summary>
+        /// Si possible, la carte doit attaquer. 
+        /// </summary>
+        CARTE_DOIT_ATTAQUER,
+        /// <summary>
+        /// Aucune action
+        /// </summary>
         NONE
     };
 

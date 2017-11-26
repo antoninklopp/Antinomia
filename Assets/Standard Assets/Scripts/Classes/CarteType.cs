@@ -31,6 +31,11 @@ public class CarteType : NetworkBehaviourAntinomia {
         /// </summary>
         EMANATION,
         /// <summary>
+        /// Une entité temporaire, 
+        /// instanciée lors d'une invocation par aka ou élémentaire. 
+        /// </summary>
+        ENTITE_TEMPORAIRE, 
+        /// <summary>
         /// La carte n'est d'aucun type. 
         /// </summary>
         AUCUN
@@ -118,6 +123,8 @@ public class CarteType : NetworkBehaviourAntinomia {
                 DetruireComposant(Type.SORT);
                 DetruireComposant(Type.ENTITE);
                 DetruireComposant(Type.ASSISTANCE);
+                break;
+            case Type.ENTITE_TEMPORAIRE:
                 break; 
             default:
                 throw new Exception("Cette carte n'a pas de type");

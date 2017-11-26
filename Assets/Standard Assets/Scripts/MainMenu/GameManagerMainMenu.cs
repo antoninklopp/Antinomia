@@ -17,16 +17,20 @@ public class GameManagerMainMenu : MonoBehaviour {
     /// Offrir la possibilité d'un choix de Deck. 
     /// </summary>
 	public bool choixDeck = false; 
-	GameObject BuildVersion; 
+	GameObject BuildVersion;
+
+    GameObject IA; 
 
 	// Use this for initialization
 	void Start () {
 		BuildVersion = GameObject.Find ("BuildVersion");
+        IA = GameObject.Find("IAvIA"); 
 #if UNITY_EDITOR
         BuildVersion.GetComponent<Text>().text = "Debug Version : device" + "\nBuild version : " + Application.version;
 #else
         BuildVersion.GetComponent<Text> ().text = "Connected as : " + 
             PlayerPrefs.GetString("user") + "\nBuild version : " + Application.version; 
+        IA.SetActive(false);
 #endif
     }
 
@@ -89,5 +93,9 @@ public class GameManagerMainMenu : MonoBehaviour {
 
     public void SubmitComment() {
         SceneManager.LoadScene("CommentBeta"); 
+    }
+
+    public void SceneIAvIA() {
+        SceneManager.LoadScene("IAvIA");
     }
 }
