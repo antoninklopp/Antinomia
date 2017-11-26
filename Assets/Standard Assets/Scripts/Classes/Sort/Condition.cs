@@ -163,6 +163,10 @@ public class Condition {
         /// </summary>
         CHANGEMENT_DOMINATION, 
         /// <summary>
+        /// Lorsqu'une entité déclare une attaque. 
+        /// </summary>
+        DECLARE_ATTAQUE,
+        /// <summary>
         /// Aucune condition nécessaire
         /// </summary>
         NONE
