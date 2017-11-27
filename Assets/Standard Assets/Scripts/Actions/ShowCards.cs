@@ -86,7 +86,6 @@ public class ShowCards : NetworkBehaviour {
                                     int _nombreDeCartesAChoisir=1){
         /*
 		 * On crée toutes les images à partir de la carte. 
-		 * 
 		 */
 
         nombreDeCartesAChoisir = _nombreDeCartesAChoisir; 
@@ -120,6 +119,10 @@ public class ShowCards : NetworkBehaviour {
 			AllCardsToShow[i].SendMessage("setImage", AllShortCodes[i]); 
 			AllCardsToShow [i].SendMessage ("setOnIntListener", i);
 		}
+
+        // On change la taille du grid Layout.
+        // 75 est la taille d'une cellule. 
+        gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2((_AllCardsGiven.Count + 1) * 75f, 100f); 
 	}
 
     /// <summary>

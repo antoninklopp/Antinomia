@@ -602,20 +602,20 @@ public class GameManager : NetworkBehaviourAntinomia {
                 
 
                 Debug.Log("Il vient d'y avoir une attaque");
-                int attackMy = MyPlayerEntity.GetComponent<Entite>().STAT * multiplicateurDegatsMy;
-                int attackOther = OtherPlayerEntity.GetComponent<Entite>().STAT * multiplicateurDegatsOther;
+                int attackMy = MyPlayerEntity.GetComponent<Entite>().getPuissance() * multiplicateurDegatsMy;
+                int attackOther = OtherPlayerEntity.GetComponent<Entite>().getPuissance() * multiplicateurDegatsOther;
                 Debug.Log("Attaque faite au personnage 1 : " + attackOther.ToString());
                 Debug.Log("Attaque faite au personnage 2 : " + attackMy.ToString());
 
                 // On Détruit la carte la plus faible, ou les deux dans un cas d'égalité
-                if (multiplicateurDegatsMy * MyPlayerEntity.GetComponent<Entite>().STAT ==
-                   multiplicateurDegatsOther * OtherPlayerEntity.GetComponent<Entite>().STAT) {
+                if (multiplicateurDegatsMy * MyPlayerEntity.GetComponent<Entite>().getPuissance() ==
+                   multiplicateurDegatsOther * OtherPlayerEntity.GetComponent<Entite>().getPuissance()) {
                     // Cas d'égalité
                     MyPlayerEntity.SendMessage("DetruireCarte");
                     OtherPlayerEntity.SendMessage("DetruireCarte");
                 }
-                else if (multiplicateurDegatsMy * MyPlayerEntity.GetComponent<Entite>().STAT >
-                        multiplicateurDegatsOther * OtherPlayerEntity.GetComponent<Entite>().STAT) {
+                else if (multiplicateurDegatsMy * MyPlayerEntity.GetComponent<Entite>().getPuissance() >
+                        multiplicateurDegatsOther * OtherPlayerEntity.GetComponent<Entite>().getPuissance()) {
                     // La carte du joueur local est plus forte. 
                     OtherPlayerEntity.SendMessage("DetruireCarte");
                 }

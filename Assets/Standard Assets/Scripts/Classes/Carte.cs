@@ -632,7 +632,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// un effet lié à cette carte</param>
     public bool GererConditions(List<Condition> _conditions, Player.Phases _currentPhase = Player.Phases.INITIATION,
                                     bool estMort = false, bool debut = false, bool nouveauTour = false, GameObject Cible=null, 
-                                    int deposeCarte=0, bool choixJoueur=false) {
+                                    int deposeCarte=0, bool choixJoueur=false, bool changementDomination=false) {
         /*
          * Regarde si toutes les conditions sont ok pour un effet. 
          * Retourne true si c'est le cas, false sinon
@@ -684,9 +684,12 @@ public class Carte : NetworkBehaviourAntinomia {
                 Debug.Log("Cet effet a déjà été utilisé pour ce tour."); 
                 return false;
             } else if (estMort && (_conditions[j].ConditionCondition != Condition.ConditionEnum.MORT)) {
-                // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditiosn lors de
+                // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditions lors de
                 // la mort d'une carte. 
                 Debug.Log("La carte n'a pas d'effets de mort"); 
+                return false; 
+            } else if (changementDomination && (_conditions[j].ConditionCondition != Condition.ConditionEnum.CHANGEMENT_DOMINATION)) {
+                // Il faut TOUJOURS mettre la condition de changement de domination en premier. 
                 return false; 
             }
             else {
@@ -708,7 +711,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         // Permettre au joueur de choisir un élément.
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
-                        if (checkCibleNull(Cible)) { 
+                        if (checkCibleNull(Cible)) {
                             ShowCardsForChoiceChampBatailleDeuxJoueurs();
                         }
                         break;
@@ -745,28 +748,82 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.PAYER_COUT_ELEMENTAIRE:
                         // Dans le cas où l'on ne dépose pas une carte sur le sanctuaire
                         // Le cout élémentaire ne peut être payé que lorsqu'on dépose une carte dans le sanctuaire. 
-                        Debug.Log("Payer cout elementaire" + deposeCarte.ToString()); 
+                        Debug.Log("Payer cout elementaire" + deposeCarte.ToString());
                         if (deposeCarte != 1) {
-                            return false; 
-                        } else {
+                            return false;
+                        }
+                        else {
                             // Sinon il faut regarder dans la pile s'il n'y a pas une carte qui veut se déplacer dans le sanctuaire
                             if (!CheckIfCartePayeCoutElementaire(_conditions[j].properIntCondition)) {
-                                return false; 
+                                return false;
                             }
-                        } 
+                        }
                         break;
                     case Condition.ConditionEnum.SACRIFIER_CARTE:
                         // Lorsque la condition est le sacrifice d'une carte. 
                         // Dans le cas du sacrifice d'une carte, il faut rajouter dans les effets le sacrifice de la carte. 
-                        Debug.Log("Une carte est sacrifiée, condition"); 
+                        Debug.Log("Une carte est sacrifiée, condition");
                         // il faudra vérifier si la carte peut être sacrifiée. 
                         break;
                     case Condition.ConditionEnum.CARTE_SUR_CHAMP_BATAILLE:
                         // Si la carte n'est pas sur le champ de bataille on s'arrête. 
                         if (GetComponent<Entite>().carteState != Entite.State.CHAMPBATAILLE) {
+                            return false;
+                        }
+                        break;
+                    case Condition.ConditionEnum.CHOIX_ENTITE_NEUTRE_ADVERSAIRE:
+                        break;
+                    case Condition.ConditionEnum.CHOIX_ENTITE_NEUTRE_JOUEUR:
+                        break;
+                    case Condition.ConditionEnum.PAYER_AKA:
+                        // On vérifie que le joueur a assez d'AKA 
+                        if (_conditions[j].properIntCondition > FindLocalPlayer().GetComponent<Player>().getAKA()) {
+                            DisplayMessage("Vous n'avez pas assez d'AKA"); 
                             return false; 
                         }
-                        break; 
+                        break;
+                    case Condition.ConditionEnum.CARTE_DANS_SANCTUAIRE:
+                        if (GetComponent<CarteType>().thisCarteType != CarteType.Type.ENTITE) {
+                            return false; 
+                        } else if (GetComponent<Entite>().carteState != Entite.State.SANCTUAIRE) {
+                            return false; 
+                        }
+                        break;
+                    case Condition.ConditionEnum.OBLIGATOIRE:
+                        break;
+                    case Condition.ConditionEnum.DEFAUSSER_TYPE:
+                        break;
+                    case Condition.ConditionEnum.DOMINATION:
+                        // On vérifie que l'ascendance correspond. 
+                        if ((_conditions[j].properIntCondition == 1 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                            GameManager.AscendanceTerrain.NONE) ||
+                            (_conditions[j].properIntCondition == 2 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                            GameManager.AscendanceTerrain.ASTRALE) ||
+                            (_conditions[j].properIntCondition == 3 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                            GameManager.AscendanceTerrain.MALEFIQUE)) {
+                            return false; 
+                        }
+                        break;
+                    case Condition.ConditionEnum.PASSAGE_DOMINATION:
+                        break;
+                    case Condition.ConditionEnum.CHANGEMENT_DOMINATION:
+                        // S'il n'y a pas de changement de domination ou si le changement ne correspondau type maléfique/astral 
+                        // demandé
+                        if (!changementDomination ||  
+                            (_conditions[j].properIntCondition == 1 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                            GameManager.AscendanceTerrain.NONE) ||
+                            (_conditions[j].properIntCondition == 2 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                            GameManager.AscendanceTerrain.ASTRALE) ||
+                            (_conditions[j].properIntCondition == 3 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                            GameManager.AscendanceTerrain.MALEFIQUE)) {
+                            return false;
+                        }
+                        break;
+                    case Condition.ConditionEnum.DECLARE_ATTAQUE:
+                        if (!CheckIfCarteDeclareAttaque()) {
+                            return false; 
+                        } 
+                        break;
                     default:
                         Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
                         break;
@@ -1099,14 +1156,14 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.PUISSANCE_AUGMENTE:
                     // La puissance de cette carte augmente (uniquement cette carte). 
                     if (jouerEffet) {
-                        GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction);
+                        GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, IDCardGame);
                     } else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_AUGMENTE_DIRECT:
                     // La puissance augmente directement, l'autre joueur ne peut pas répliquer à cette action
-                    GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction);
+                    GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, IDCardGame);
                     break; 
                 case Action.ActionEnum.TERRAIN_ASTRAL:
                     // On change l'ascendance du terrain en astral. 
@@ -1210,13 +1267,17 @@ public class Carte : NetworkBehaviourAntinomia {
     }
 
     /// <summary>
-    /// On regarde si une carte est en train de payer un coût élémentaire i.e. elle etst en train d'être 
+    /// On regarde si une carte est en train de payer un coût élémentaire i.e. elle est en train d'être 
     /// invoquée dans le sanctuaire. 
     /// </summary>
     /// <param name="element">l'élément dont on recherche une carte qui paye un coût élémentaire</param>
     /// <returns>true, si un élément vient de payer ce coût élémentaire, false sinon.</returns>
     protected virtual bool CheckIfCartePayeCoutElementaire(int element) {
         return false;
+    }
+
+    protected virtual bool CheckIfCarteDeclareAttaque() {
+        return false; 
     }
     
     /// <summary>

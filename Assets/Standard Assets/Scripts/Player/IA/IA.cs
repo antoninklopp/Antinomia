@@ -68,6 +68,7 @@ public class IA : Player {
         currentPhase = GameManagerObject.GetComponent<GameManager>().getPhase();
     }
 
+
     private void getTour() {
         currentTour = GameManagerObject.GetComponent<GameManager>().getTour(); 
     }
@@ -183,7 +184,7 @@ public class IA : Player {
                 List<GameObject> CartesChampBatailleAdversaire = FindNotLocalPlayer().GetComponent<Player>().GetChampBatailleJoueur().
                     GetComponent<CartesBoard>().getCartesChampBataille(); 
                 for (int j = 0; j < CartesChampBatailleAdversaire.Count; i++) {
-                    if (Carte.GetComponent<Entite>().STAT > CartesChampBatailleAdversaire[i].GetComponent<Entite>().STAT) {
+                    if (Carte.GetComponent<Entite>().getPuissance() > CartesChampBatailleAdversaire[i].GetComponent<Entite>().getPuissance()) {
                         GameManagerObject.GetComponent<GameManager>().AttackMyPlayer(Carte);
                         GameManagerObject.GetComponent<GameManager>().AttackOtherPlayer(CartesChampBatailleAdversaire[i]); 
                         GameManagerObject.GetComponent<GameManager>().Attack();

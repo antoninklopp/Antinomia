@@ -8,11 +8,20 @@ using UnityEngine;
 /// </summary>
 public class PuissanceEntite {
 
-    private List<ChangementPuissance> TousChangementsPuissance = new List<ChangementPuissance>(); 
+    private List<ChangementPuissance> TousChangementsPuissance = new List<ChangementPuissance>();
+
+    /// <summary>
+    /// Puissance de base de l'entité. 
+    /// </summary>
+    private int puissanceBase = -1; 
+
 
     public PuissanceEntite() {
 
+    }
 
+    public PuissanceEntite(int STAT) : this() {
+        puissanceBase = STAT; 
     }
 
     /// <summary>
@@ -51,6 +60,13 @@ public class PuissanceEntite {
             }
         }
         return puissanceCourante; 
+    }
+
+    public int RecupererPuissanceEntite() {
+        if (puissanceBase == -1) {
+            throw new System.Exception("La puissance de cette entité n'a pas été initialisée"); 
+        }
+        return RecupererPuissanceEntite(puissanceBase); 
     }
 
 }

@@ -88,12 +88,20 @@ public class Entite : Carte, ICarte {
 	 * ====================================
 	 */
      
+    /// <summary>
+    /// STAT initiale de la carte. 
+    /// </summary>
     [SyncVar(hook ="ChangeStat")]
     public int STAT;
     public int CoutAKA;
     [SyncVar(hook = "ChangeElement")]
     public Element carteElement;
     public Ascendance carteAscendance;
+
+    /// <summary>
+    /// Puissance de l'entité.
+    /// </summary>
+    private PuissanceEntite puissance; 
     
     // Le nombre d'attaques peut être changé par capacité d'une carte. 
     public int nombre_attaque = 1;
@@ -923,6 +931,8 @@ public class Entite : Carte, ICarte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+
+        puissance = new PuissanceEntite(STAT);
     }
 
     [ClientRpc]
@@ -1203,6 +1213,11 @@ public class Entite : Carte, ICarte {
         CmdChangeElement(carteElement, false); 
     }
 
+    /// <summary>
+    /// Changer la STAT de la carte. 
+    /// FONCTION JAMAIS APPELEE
+    /// </summary>
+    /// <param name="newStat"></param>
     void ChangeStat(int newStat) {
         /*
          * Fonction appelée après un changement de stat sur le réseau
@@ -1213,6 +1228,7 @@ public class Entite : Carte, ICarte {
 
     /// <summary>
     /// Changer la stat d'une carte
+    /// FONCTION JAMAIS APPELEE
     /// </summary>
     /// <param name="newStat">Nouvelle stat</param>
     [Command]
@@ -1234,31 +1250,58 @@ public class Entite : Carte, ICarte {
          *  Même fonction que la précédente mais au lieu de changer la stat directement
          *  on ajoute simplement le nombre _statToAdd à la stat courante. 
          */
-        STAT += _statToAdd;
+
+        RpcAddStat(_statToAdd, 0); 
+        // STAT += _statToAdd;
         // On regarde si la carte revient à son état initial (on remet la carte en blanc)
         // Ou si elle change (on la met en vert). 
-        new GameSparks.Api.Requests.LogEventRequest()
-           .SetEventKey("getSTATFromCardByID")
-           .SetEventAttribute("ID", oID)
-           .Send((response) => {
-               if (!response.HasErrors) {
-                   // La stat récupérée
-                   int getSTAT = response.ScriptData.GetInt("STAT").Value;
-                   if (getSTAT == STAT) {
-                       // Dans ce cas on a remis la carte dans son état de base
-                       RpcResetToCardBase(); 
-                   } else {
-                       RpcChangeFromCardBase();
-                   }
-               }
-               else { 
-                   // Dans le cas où ça bug on ne fait rien pour l'instant.
-                   // TODO: A implémenter. 
-                   throw new Exception("Impossible de reset l'element de la carte. ");
-               }
 
-           });
+        // REDEFINITION DE LA METHODE APRES CHANGEMENT DE LA NOTION DE PUISSANCE 27/11/2017
+        //new GameSparks.Api.Requests.LogEventRequest()
+        //   .SetEventKey("getSTATFromCardByID")
+        //   .SetEventAttribute("ID", oID)
+        //   .Send((response) => {
+        //       if (!response.HasErrors) {
+        //           // La stat récupérée
+        //           int getSTAT = response.ScriptData.GetInt("STAT").Value;
+        //           if (getSTAT == STAT) {
+        //               // Dans ce cas on a remis la carte dans son état de base
+        //               RpcResetToCardBase(); 
+        //           } else {
+        //               RpcChangeFromCardBase();
+        //           }
+        //       }
+        //       else { 
+        //           // Dans le cas où ça bug on ne fait rien pour l'instant.
+        //           // TODO: A implémenter. 
+        //           throw new Exception("Impossible de reset l'element de la carte. ");
+        //       }
+
+        //   });
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="_statToAdd"></param>
+    /// <param name="IDCardGameChanged">IDCardGame de la carte dont provient l'effet qui a créé un changement de puissance.</param>
+    [Command]
+    public void CmdAddStat(int _statToAdd, int IDCardGameChanged) {
+        RpcAddStat(_statToAdd, IDCardGameChanged); 
+    }
+
+
+    [ClientRpc]
+    public void RpcAddStat(int _statToAdd, int IDCardGameChanged) {
+        puissance.AjouterChangementPuissance(new ChangementPuissance(ChangementPuissance.Type.MULTIPLICATION, 
+            _statToAdd, IDCardGameChanged)); 
+        if (puissance.RecupererPuissanceEntite() == STAT) {
+            RpcResetToCardBase(); 
+        } else {
+            RpcChangeFromCardBase(); 
+        }
+    }
+
 
     /// <summary>
     /// Changer la valeur de la stat, la multiplier. 
@@ -1266,10 +1309,27 @@ public class Entite : Carte, ICarte {
     /// <param name="_multiplicateur">Valeur par laquelle multiplier la stat.</param>
     [Command]
     public void CmdMultiplierStat(int _multiplicateur) {
-        STAT *= _multiplicateur;
-        Debug.Log("Multiplication des valeurs de la carte1");
-        RpcChangeFromCardBase();
-        Debug.Log("Multiplication des valeurs de la carte2");
+        RpcMultiplierStat(_multiplicateur, 0);
+        // STAT *= _multiplicateur;
+        // Debug.Log("Multiplication des valeurs de la carte1");
+        // RpcChangeFromCardBase();
+        // Debug.Log("Multiplication des valeurs de la carte2");
+    }
+
+    [Command]
+    public void CmdMultiplierStat(int _multiplicateur, int IDCardGameChanged) {
+        RpcMultiplierStat(_multiplicateur, 0);
+    }
+
+    [ClientRpc]
+    public void RpcMultiplierStat(int _multiplicateur, int IDCardGameChanged) {
+        puissance.AjouterChangementPuissance(new ChangementPuissance(ChangementPuissance.Type.MULTIPLICATION, _multiplicateur,
+            IDCardGameChanged));
+        if (puissance.RecupererPuissanceEntite() == STAT) {
+            RpcResetToCardBase(); 
+        } else {
+            RpcChangeFromCardBase(); 
+        }
     }
 
     [ClientRpc]
@@ -1378,9 +1438,13 @@ public class Entite : Carte, ICarte {
         }
     }
 
+    /// <summary>
+    /// <see cref="Carte.GetInfoCarte"/>
+    /// </summary>
+    /// <returns></returns>
     public override string GetInfoCarte() {
         string stringToReturn = "<color=red>" + Name + "</color>" + "\n" +
-            "STAT : " + STAT.ToString() + "\n" + "AKA : " + CoutAKA.ToString() + "\n"; 
+            "STAT : " + getPuissance().ToString() + "\n" + "AKA : " + CoutAKA.ToString() + "\n"; 
         if (carteElement == Element.AUCUN) {
             stringToReturn += "Ascendance : " + carteAscendance + "\n"; 
         } else {
@@ -1674,6 +1738,26 @@ public class Entite : Carte, ICarte {
     }
 
     /// <summary>
+    /// On regarde si une carte ne déclare pas d'attaque.
+    /// </summary>
+    /// <returns></returns>
+    protected override bool CheckIfCarteDeclareAttaque() {
+        Debug.Log("On regarde si une attaque a été déclarée");
+        if (GameObject.FindGameObjectWithTag("Pile") != null) {
+            GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
+            List<GameObject> allEffetsInPile = Pile.GetComponent<PileAppelEffet>().GetPileEffets();
+            for (int i = 0; i < allEffetsInPile.Count; ++i) {
+                if (allEffetsInPile[i].GetComponent<EffetInPile>().numeroEffet == -1 && 
+                    allEffetsInPile[i].GetComponent<EffetInPile>().PlayerIDAssocie == FindLocalPlayer().GetComponent<Player>().PlayerID) {
+                    // On a trouvé dans la pile un effet du joueur qui est une attaque. 
+                    return true; 
+                }
+            }
+        }
+        return false; 
+    }
+
+    /// <summary>
     /// <see cref="Carte.CarteForteFaceA(int)"/>
     /// </summary>
     /// <param name="element"><see cref="CarteForteFaceA(int)"/></param>
@@ -1786,6 +1870,10 @@ public class Entite : Carte, ICarte {
         } else {
             return false;
         }
+    }
+
+    public int getPuissance() {
+        return puissance.RecupererPuissanceEntite();
     }
 
 }

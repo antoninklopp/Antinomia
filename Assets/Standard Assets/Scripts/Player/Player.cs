@@ -1083,4 +1083,8 @@ public class Player : NetworkBehaviourAntinomia	 {
         return nombre; 
     }
 
+    public int getAKA() {
+        return PlayerAKA; 
+    }
+
 }
