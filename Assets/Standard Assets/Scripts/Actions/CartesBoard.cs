@@ -121,7 +121,7 @@ public class CartesBoard : NetworkBehaviourAntinomia {
     /// Changer la position d'une carte
     /// </summary>
     public static void ChangePositionCarte(GameObject Carte, Vector3 newPosition) {
-        // Debug.Log("CHANGEMENT DE POSITIOB DE LA CARTE");
+        // Debug.Log("CHANGEMENT DE POSITION DE LA CARTE");
         // TODO A rectifier. 
         Carte.GetComponent<Carte>().RepositionnerCarte(1, newPosition);
     } 

@@ -117,6 +117,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
 
         PhraseDecritEffet = CreerPhraseDecritEffet();
 
+        Debug.Log(ObjetEffet);
         Debug.Log("Voici l'IDCardGame de l'objet qui crée l'effet : " + _IDCardGame.ToString());
 
         // getGameManager().GetComponent<GameManager>().CheckAllEffetsCartes();

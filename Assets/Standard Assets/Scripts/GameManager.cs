@@ -1537,6 +1537,14 @@ public class GameManager : NetworkBehaviourAntinomia {
         ShowCards.GetComponent<ShowCards>().ShowCardsToChoose(_AllCardsGiven, _ObjectAsking, stringToDisplay, _nombreDeCartesAChoisir); 
     }
 
+    public void ActivateShowCards(bool activate=true) {
+        ShowCards.SetActive(activate);
+        // On permet au joueur d'interagir. 
+        if (activate) {
+            ShowCards.GetComponent<ShowCards>().PermettreInteraction();
+        }
+    }
+
     /// <summary>
     /// Recevoir les cartes choisies de ShowCards
     /// </summary>

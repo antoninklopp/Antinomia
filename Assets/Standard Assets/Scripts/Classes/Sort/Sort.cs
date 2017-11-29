@@ -417,7 +417,7 @@ public class Sort : Carte, ICarte {
             Entite _carte = carteElement[i].GetComponent<Entite>();
             if (_carte.isFromLocalPlayer) {
                 // on peut directement changer la STAT depuis la carte. 
-                _carte.CmdAddStat(_intToAdd);
+                _carte.CmdAddStat(_intToAdd, 0);
             }
             else {
                 FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(_carte.IDCardGame,

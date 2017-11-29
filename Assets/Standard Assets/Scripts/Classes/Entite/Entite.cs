@@ -826,6 +826,12 @@ public class Entite : Carte, ICarte {
         carteState = newCarteState;
         // il faut maintenant mettre à jour les position. 
         switch (carteState) {
+            case State.MAIN:
+                Main.SendMessage("AjouterCarteMain", gameObject);
+                ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
+                Sanctuaire.SendMessage("ReordonnerCarte");
+                gameObject.tag = "Main"; 
+                break; 
             case State.CHAMPBATAILLE:
                 Main.SendMessage("DeleteCard", gameObject);
                 ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
@@ -914,7 +920,7 @@ public class Entite : Carte, ICarte {
         }
 
         transform.parent.gameObject.SendMessage("ReordonnerCarte");
-
+        puissance = new PuissanceEntite(STAT);
 
         // Player est le parent au deuxième degré. 
         // Le joueur ne peut grossir que ses propres cartes! 
@@ -932,7 +938,6 @@ public class Entite : Carte, ICarte {
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
-        puissance = new PuissanceEntite(STAT);
     }
 
     [ClientRpc]
@@ -1244,14 +1249,14 @@ public class Entite : Carte, ICarte {
     /// Changer la stat d'une carte, lui ajouter de la valeur
     /// </summary>
     /// <param name="_statToAdd">Valeur à ajouter à la stat. </param>
-    [Command]
-    public void CmdAddStat(int _statToAdd) {
+    //[Command]
+    //public void CmdAddStat(int _statToAdd) {
         /*
          *  Même fonction que la précédente mais au lieu de changer la stat directement
          *  on ajoute simplement le nombre _statToAdd à la stat courante. 
          */
 
-        RpcAddStat(_statToAdd, 0); 
+        // RpcAddStat(_statToAdd, 0); 
         // STAT += _statToAdd;
         // On regarde si la carte revient à son état initial (on remet la carte en blanc)
         // Ou si elle change (on la met en vert). 
@@ -1278,7 +1283,7 @@ public class Entite : Carte, ICarte {
         //       }
 
         //   });
-    }
+    // }
 
     /// <summary>
     /// 
@@ -1307,14 +1312,14 @@ public class Entite : Carte, ICarte {
     /// Changer la valeur de la stat, la multiplier. 
     /// </summary>
     /// <param name="_multiplicateur">Valeur par laquelle multiplier la stat.</param>
-    [Command]
-    public void CmdMultiplierStat(int _multiplicateur) {
-        RpcMultiplierStat(_multiplicateur, 0);
-        // STAT *= _multiplicateur;
-        // Debug.Log("Multiplication des valeurs de la carte1");
-        // RpcChangeFromCardBase();
-        // Debug.Log("Multiplication des valeurs de la carte2");
-    }
+    //[Command]
+    //public void CmdMultiplierStat(int _multiplicateur) {
+    //    RpcMultiplierStat(_multiplicateur, 0);
+    //    // STAT *= _multiplicateur;
+    //    // Debug.Log("Multiplication des valeurs de la carte1");
+    //    // RpcChangeFromCardBase();
+    //    // Debug.Log("Multiplication des valeurs de la carte2");
+    //}
 
     [Command]
     public void CmdMultiplierStat(int _multiplicateur, int IDCardGameChanged) {
@@ -1444,7 +1449,7 @@ public class Entite : Carte, ICarte {
     /// <returns></returns>
     public override string GetInfoCarte() {
         string stringToReturn = "<color=red>" + Name + "</color>" + "\n" +
-            "STAT : " + getPuissance().ToString() + "\n" + "AKA : " + CoutAKA.ToString() + "\n"; 
+            "STAT : " + STAT.ToString() + "\n" + "AKA : " + CoutAKA.ToString() + "\n"; 
         if (carteElement == Element.AUCUN) {
             stringToReturn += "Ascendance : " + carteAscendance + "\n"; 
         } else {
@@ -1872,8 +1877,24 @@ public class Entite : Carte, ICarte {
         }
     }
 
+    /// <summary>
+    /// Récupérer la puissance de la carte. 
+    /// </summary>
+    /// <returns></returns>
     public int getPuissance() {
-        return puissance.RecupererPuissanceEntite();
+        try {
+            return puissance.RecupererPuissanceEntite();
+        } catch (NullReferenceException e) {
+            Debug.LogWarning("NullReferenceException ici " + e.ToString());
+            return STAT; 
+        }
+    }
+
+    /// <summary>
+    /// Renvoyer une carte dans la main de son propriétaire. 
+    /// </summary>
+    public void RenvoyerCarteMain() {
+        CmdChangePosition(State.MAIN); 
     }
 
 }

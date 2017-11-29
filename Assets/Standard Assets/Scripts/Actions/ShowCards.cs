@@ -82,8 +82,10 @@ public class ShowCards : NetworkBehaviour {
     /// <param name="_AllCardsGiven">Les objets que le joueur peut choisir</param>
     /// <param name="_ObjectAsking">L'objet demandeur de l'effet</param>
     /// <param name="stringToDisplay">Le string à montrer au joueur pour expliquer le choix qu'il doit faire. </param>
+    /// <param name="deactivateAfter">Desactive l'objet directement après dans le cas où on veut d'abord proposer 
+    /// au joueur de jouer un effet.</param>
 	public void ShowCardsToChoose(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking=null, string stringToDisplay="", 
-                                    int _nombreDeCartesAChoisir=1){
+                                    int _nombreDeCartesAChoisir=1, bool deactivateAfter=false){
         /*
 		 * On crée toutes les images à partir de la carte. 
 		 */
@@ -123,7 +125,28 @@ public class ShowCards : NetworkBehaviour {
         // On change la taille du grid Layout.
         // 75 est la taille d'une cellule. 
         gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2((_AllCardsGiven.Count + 1) * 75f, 100f); 
+
+        if (deactivateAfter) {
+            EmpecherInteraction(); 
+        }
 	}
+
+    /// <summary>
+    /// Permettre au joueur d'interagir. 
+    /// </summary>
+    public void PermettreInteraction() {
+        TextShowCards.SetActive(true);
+        FiniButton.SetActive(true);
+    }
+
+    /// <summary>
+    /// Empecher l'interaction au joueur
+    /// </summary>
+    public void EmpecherInteraction() {
+        TextShowCards.SetActive(false);
+        FiniButton.SetActive(false);
+        gameObject.SetActive(false);
+    }
 
     /// <summary>
     /// Ajouter une carte à la liste des cartes à retourner à l'objet demandeur

@@ -138,4 +138,9 @@ public class MainJoueur : NetworkBehaviourAntinomia {
         return true;
     }
 
+    public void AjouterCarteMain(GameObject Carte) {
+        Carte.transform.SetParent(transform, false);
+        ReordonnerCarte(); 
+    }
+
 }

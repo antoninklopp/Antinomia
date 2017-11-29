@@ -100,9 +100,12 @@ public class Carte : NetworkBehaviourAntinomia {
     /// La carte peut-elle attaquer directement le joueur adverse? 
     /// </summary>
     [HideInInspector]
-    public bool attaqueDirecte = false; 
+    public bool attaqueDirecte = false;
 
-    
+    /// <summary>
+    /// True si l'objet ShowCards doit être activé
+    /// </summary>
+    private bool ShowCardsMustBeActivated; 
 
     // Use this for initialization
     public override void Start () {
@@ -575,11 +578,11 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.PUISSANCE_AUGMENTE_DIRECT:
                     // Si on annule une puissance qui augmente, on diminue la puissance
                     Debug.Log("On annule l'effet qui ajoute : " + _allActions[i].properIntAction.ToString() + " à la carte"); 
-                    GetComponent<Entite>().CmdAddStat((-1)*_allActions[i].properIntAction); 
+                    GetComponent<Entite>().CmdAddStat((-1)*_allActions[i].properIntAction, 0); 
                     break;
                 case Action.ActionEnum.PUISSANCE_MULTIPLIE:
                     // On divise la puissance de l'entité.
-                    GetComponent<Entite>().CmdMultiplierStat(1 / _allActions[i].properIntAction); 
+                    GetComponent<Entite>().CmdMultiplierStat(1 / _allActions[i].properIntAction, 0); 
                     break;
                 case Action.ActionEnum.GAIN_AKA_UN_TOUR:
                     break;
@@ -712,26 +715,29 @@ public class Carte : NetworkBehaviourAntinomia {
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
                         if (checkCibleNull(Cible)) {
-                            ShowCardsForChoiceChampBatailleDeuxJoueurs();
+                            ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
                         }
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
                         if (checkCibleNull(Cible)) {
-                            ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"));
+                            ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                                _conditions[j].properIntCondition);
                         }
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
                         if (checkCibleNull(Cible)) {
-                            ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"));
+                            ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                                _conditions[j].properIntCondition);
                         }
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
                         if (checkCibleNull(Cible)) {
-                            ShowCardsForChoiceAllCartesDeuxJoueurs();
+                            ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition);
                         }
                         break;
                     case Condition.ConditionEnum.DEFAUSSER:
-                        ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"));
+                        ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
+                            _conditions[j].properIntCondition);
                         break;
                     case Condition.ConditionEnum.DELTA:
                         // La condition delta est par rapport à TOUTES les cartes du terrain. 
@@ -792,6 +798,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.OBLIGATOIRE:
                         break;
                     case Condition.ConditionEnum.DEFAUSSER_TYPE:
+                        ShowCardsForChoiceType(_conditions[j].properIntCondition); 
                         break;
                     case Condition.ConditionEnum.DOMINATION:
                         // On vérifie que l'ascendance correspond. 
@@ -979,7 +986,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     DisplayMessage("Choisissez une carte et changez sa position");
                     if (jouerEffet) {
                         StartCoroutine(ChangerPositionEffet(CibleDejaChoisie));
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         // On ne met l'effet dans la pile que si le 1er de la liste parce que dans tous les cas les autres seront joués
                         // sinon. 
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
@@ -992,8 +1000,9 @@ public class Carte : NetworkBehaviourAntinomia {
                     DisplayMessage("Choisissez une carte et détruisez la");
                     if (jouerEffet) {
                         StartCoroutine(DetruireEffet(CibleDejaChoisie));
-                    } else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber)); 
+                    }
+                    else if (j == 0) {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
                     break;
                 case Action.ActionEnum.GAIN_AKA_UN_TOUR:
@@ -1020,8 +1029,9 @@ public class Carte : NetworkBehaviourAntinomia {
                     DisplayMessage("<color=orange>Sacrifice de cette carte</color>");
                     if (jouerEffet) {
                         SacrifierCarteEntite();
-                    } else {
-                        InformerSacrifierCarteEntite(numeroEffet, effetListNumber); 
+                    }
+                    else {
+                        InformerSacrifierCarteEntite(numeroEffet, effetListNumber);
                     }
                     break;
                 case Action.ActionEnum.PLACER_SANCTUAIRE:
@@ -1035,14 +1045,14 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Action.ActionEnum.PUISSANCE_MULTIPLIE:
                     // Multiplier la puissance des entités SUR LE CHAMP DE BATAILLE. 
-                    Debug.Log("Multiplication de la puissance"); 
-                    List<GameObject> CartesLocales = FindAllCartesLocal(); 
+                    Debug.Log("Multiplication de la puissance");
+                    List<GameObject> CartesLocales = FindAllCartesLocal();
                     for (int i = 0; i < CartesLocales.Count; ++i) {
-                        Debug.Log(3); 
+                        Debug.Log(3);
                         if (CartesLocales[i].GetComponent<Entite>() != null) {
                             Debug.Log(CartesLocales[i].GetComponent<Entite>().Name);
                             if (CartesLocales[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE) {
-                                CartesLocales[i].GetComponent<Entite>().CmdMultiplierStat(_actions[j].properIntAction); 
+                                CartesLocales[i].GetComponent<Entite>().CmdMultiplierStat(_actions[j].properIntAction, 0);
                             }
                         }
                     }
@@ -1060,8 +1070,10 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.DEFAUSSER:
                     // On propose de défausser. 
                     // Il faut d'abord choisir une carte de la main du joueur. 
-                    ShowCardsForChoice(Main.transform);
-                    StartCoroutine(DefausserEffet()); 
+
+                    // Ceci devrait être dans les conditions. 
+                    // ShowCardsForChoice(Main.transform, _actions[j].properIntAction, "Defaussez les");
+                    StartCoroutine(DefausserEffet());
                     break;
                 case Action.ActionEnum.REVELER_CARTE:
                     // Le joueur révèle une carte de sa main.
@@ -1069,26 +1081,27 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Action.ActionEnum.REVELER_CARTE_ADVERSAIRE:
                     // L'adversaire doit révéler une carte. 
-                    Debug.Log("<color=purple>Reveler carte adversaire</color>"); 
-                    FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame, 
-                        "RevelerCarteEffet", _actions[j].properIntAction, FindLocalPlayer().GetComponent<Player>().PlayerID); 
+                    Debug.Log("<color=purple>Reveler carte adversaire</color>");
+                    FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame,
+                        "RevelerCarteEffet", _actions[j].properIntAction, FindLocalPlayer().GetComponent<Player>().PlayerID);
                     break;
                 case Action.ActionEnum.ATTAQUE_DIRECTE:
-                    attaqueDirecte = true; 
+                    attaqueDirecte = true;
                     break;
                 case Action.ActionEnum.FORTE_ENTITE:
-                     // si une entité est forte face à l'entité d'un autre joueur
-                    CarteForteFaceA(_actions[j].properIntAction); 
+                    // si une entité est forte face à l'entité d'un autre joueur
+                    CarteForteFaceA(_actions[j].properIntAction);
                     break;
-                 case Action.ActionEnum.PROCURE_AKA_SUPPLEMENTAIRE:
+                case Action.ActionEnum.PROCURE_AKA_SUPPLEMENTAIRE:
                     // Une carte peut procurer de l'AKA supplémentaire.
-                    Debug.Log("Cette carte procure un AKA supplémentaire"); 
-                    FindLocalPlayer().GetComponent<Player>().addAKA(_actions[j].properIntAction); 
+                    Debug.Log("Cette carte procure un AKA supplémentaire");
+                    FindLocalPlayer().GetComponent<Player>().addAKA(_actions[j].properIntAction);
                     break;
                 case (Action.ActionEnum.NATURE_AIR):
                     if (!jouerEffet) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.AIR, CibleDejaChoisie));
                     }
                     Debug.Log("Element de la carte changé en AIR");
@@ -1096,7 +1109,8 @@ public class Carte : NetworkBehaviourAntinomia {
                 case (Action.ActionEnum.NATURE_EAU):
                     if (!jouerEffet) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.EAU, CibleDejaChoisie));
                     }
                     Debug.Log("Element de la carte changé en EAU");
@@ -1104,7 +1118,8 @@ public class Carte : NetworkBehaviourAntinomia {
                 case (Action.ActionEnum.NATURE_FEU):
                     if (!jouerEffet) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.FEU, CibleDejaChoisie));
                     }
                     Debug.Log("Element de la carte changé en FEU");
@@ -1112,18 +1127,20 @@ public class Carte : NetworkBehaviourAntinomia {
                 case (Action.ActionEnum.NATURE_TERRE):
                     if (!jouerEffet) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.TERRE, CibleDejaChoisie));
                     }
-                    Debug.Log("Element de la carte changé en TERRE"); 
+                    Debug.Log("Element de la carte changé en TERRE");
                     break;
                 case Action.ActionEnum.PUISSANCE_AIR_AUGMENTE:
                     // La puissance de toutes les cartes air augmente
                     if (jouerEffet) {
                         Debug.Log("Effet PUISSANCE AIR AUGMENTE");
                         ChangeEffetPuissance(Entite.Element.AIR, _actions[j].properIntAction);
-                    } else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber)); 
+                    }
+                    else if (j == 0) {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_TERRE_AUGMENTE:
@@ -1131,7 +1148,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         Debug.Log("Effet PUISSANCE TERRE AUGMENTE");
                         ChangeEffetPuissance(Entite.Element.TERRE, _actions[j].properIntAction);
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
@@ -1140,7 +1158,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         Debug.Log("Effet PUISSANCE EAU AUGMENTE");
                         ChangeEffetPuissance(Entite.Element.EAU, _actions[j].properIntAction);
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
@@ -1149,7 +1168,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         Debug.Log("Effet PUISSANCE FEU AUGMENTE");
                         ChangeEffetPuissance(Entite.Element.FEU, _actions[j].properIntAction);
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
@@ -1157,27 +1177,30 @@ public class Carte : NetworkBehaviourAntinomia {
                     // La puissance de cette carte augmente (uniquement cette carte). 
                     if (jouerEffet) {
                         GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, IDCardGame);
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_AUGMENTE_DIRECT:
                     // La puissance augmente directement, l'autre joueur ne peut pas répliquer à cette action
                     GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, IDCardGame);
-                    break; 
+                    break;
                 case Action.ActionEnum.TERRAIN_ASTRAL:
                     // On change l'ascendance du terrain en astral. 
                     if (jouerEffet) {
                         getGameManager().GetComponent<GameManager>().SetAscendanceTerrain(GameManager.AscendanceTerrain.ASTRALE);
-                    } else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber)); 
+                    }
+                    else if (j == 0) {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
                 case Action.ActionEnum.TERRAIN_MALEFIQUE:
                     // On change l'ascendance du terrain en maléfique. 
                     if (jouerEffet) {
                         getGameManager().GetComponent<GameManager>().SetAscendanceTerrain(GameManager.AscendanceTerrain.MALEFIQUE);
-                    } else if (j == 0) {
+                    }
+                    else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
                     break;
@@ -1186,15 +1209,42 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log("<color=green>CA PART222</color>");
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
                         _actions[j].properIntAction);
-                    } else if (j == 0) {
-                        Debug.Log("<color=green>CA PART</color>"); 
+                    }
+                    else if (j == 0) {
+                        Debug.Log("<color=green>CA PART</color>");
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
                     }
-                    break; 
+                    break;
+                case Action.ActionEnum.NATURE:
+                    break;
+                case Action.ActionEnum.CHANGER_NATURE_AUTRE_ENTITE:
+                    break;
+                case Action.ActionEnum.DETRUIRE_DIRECT:
+                    break;
+                case Action.ActionEnum.PUISSANCE_AUGMENTE_X_TOURS:
+                    break;
+                case Action.ActionEnum.ATTAQUE:
+                    break;
+                case Action.ActionEnum.RETOUR_MAIN_PROPRIETAIRE:
+                    if (jouerEffet) {
+                        StartCoroutine(RetourMain(CibleDejaChoisie));
+                    }
+                    else if (j == 0) {
+                        // On ne met l'effet dans la pile que si le 1er de la liste parce que dans tous les cas les autres seront joués
+                        // sinon. 
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    }
+                    break;
+                case Action.ActionEnum.CHANGER_POSITION_IMPOSSIBLE:
+                    break;
+                case Action.ActionEnum.CARTE_DOIT_ATTAQUER:
+                    break;
+                case Action.ActionEnum.NONE:
+                    break;
                 default:
                     Debug.LogWarning("Cet effet n'est pas géré");
                     break;
-                }
+            }
             if (jouerEffet) {
                 updateEffetActive(numeroEffet, effetListNumber);
             }
@@ -1315,19 +1365,22 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir à partir d'un objet parent (Transform). 
     /// </summary>
-    void ShowCardsForChoice(Transform _parent) {
+    void ShowCardsForChoice(Transform _parent, int nombreCartes) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         for (int k = 0; k < _parent.childCount; ++k) {
             AllCardsToChoose.Add(_parent.GetChild(k).gameObject);
         }
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject);
+            AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Chosissez " + nombreCartes.ToString() + 
+            " cartes", deactivateAfter:true);
+        ShowCardsMustBeActivated = true; 
     }
 
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir sur les champs de bataille des deux joueurs. 
+    /// <paramref name="stringPlus"/> String à rajouter potentiellement après choisissez n cartes</param>
     /// </summary>
-    void ShowCardsForChoiceChampBatailleDeuxJoueurs() {
+    void ShowCardsForChoiceChampBatailleDeuxJoueurs(int nombreCartes, string stringPlus="") {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         for (int k = 0; k < FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").childCount; ++k) {
             AllCardsToChoose.Add(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
@@ -1336,21 +1389,99 @@ public class Carte : NetworkBehaviourAntinomia {
             AllCardsToChoose.Add(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
         }
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject);
+            AllCardsToChoose, gameObject, deactivateAfter:true, stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", 
+            _nombreDeCartesAChoisir:nombreCartes);
+        ShowCardsMustBeActivated = true; 
     }
 
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir parmi toutes les cartes (sur le champ de bataille
     /// ou sur la sanctuaire) des deux joueurs. 
     /// </summary>
-    void ShowCardsForChoiceAllCartesDeuxJoueurs() {
+    void ShowCardsForChoiceAllCartesDeuxJoueurs(int nombreCartes) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         GameObject[] AllCardsBoardSanctuaire = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
         for (int i = 0; i < AllCardsBoardSanctuaire.Length; ++i) {
             AllCardsToChoose.Add(AllCardsBoardSanctuaire[i]); 
         }
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject);
+            AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Choisissez " + nombreCartes.ToString() + 
+            " cartes", deactivateAfter:true);
+        ShowCardsMustBeActivated = true; 
+    }
+
+    /// <summary>
+    /// Choisir des cartes par type de carte.
+    /// </summary>
+    /// <param name="properIntCondition">De la forme xx, avec x1 détermine le type de carte. 
+    /// avec 
+    /// 1 - AIR
+    /// 2 - EAU
+    /// 3 - FEU 
+    /// 4 - TERRE
+    /// 5 - NEUTRE
+    /// 6 - ASTRALE     -- TODO : A implémenter avec les nouvelles règles. 
+    /// 7 - MALEFIQUE   -- TODO : A implémenter avec les nouvelles règles. 
+    /// </param>
+    /// <param name="StateCarte">State de la carte : MAIN, SANCTUAIRE ou BOARD. </param>
+    void ShowCardsForChoiceType(int properIntCondition, Entite.State StateCarte=Entite.State.MAIN) {
+        List<GameObject> allCardsToChoose = new List<GameObject>();
+        GameObject[] AllCartesType = GameObject.FindGameObjectsWithTag("Main");
+        switch (StateCarte) {
+            case Entite.State.MAIN:
+                // AllCartesType = GameObject.FindGameObjectsWithTag("Main"); 
+                break;
+            case Entite.State.SANCTUAIRE:
+            case Entite.State.CHAMPBATAILLE:
+                AllCartesType = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
+                break;
+            default:
+                Debug.Log("Ce state est interdit"); 
+                break; 
+        }
+        for (int i = 0; i < AllCartesType.Length; i++) {
+            if (AllCartesType[i].GetComponent<CarteType>().thisCarteType == CarteType.Type.ENTITE) {
+                switch ((int)(properIntCondition / 10)) {
+                    case 1:
+                        if (AllCartesType[i].GetComponent<Entite>().carteElement == Entite.Element.AIR) {
+                            allCardsToChoose.Add(AllCartesType[i]); 
+                        }
+                        break;
+                    case 2:
+                        if (AllCartesType[i].GetComponent<Entite>().carteElement == Entite.Element.EAU) {
+                            allCardsToChoose.Add(AllCartesType[i]);
+                        }
+                        break;
+                    case 3:
+                        if (AllCartesType[i].GetComponent<Entite>().carteElement == Entite.Element.FEU) {
+                            allCardsToChoose.Add(AllCartesType[i]);
+                        }
+                        break;
+                    case 4:
+                        if (AllCartesType[i].GetComponent<Entite>().carteElement == Entite.Element.TERRE) {
+                            allCardsToChoose.Add(AllCartesType[i]);
+                        }
+                        break;
+                    case 5:
+                        Debug.LogWarning("A implémenter"); 
+                        break;
+                    case 6:
+                        Debug.LogWarning("A implémenter"); 
+                        break;
+                    case 7:
+                        Debug.LogWarning("A implémenter");
+                        break;
+                    default:
+                        Debug.LogWarning("Ce nombre devrait pas être possible");
+                        break; 
+                }
+            }
+        }
+
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
+            allCardsToChoose, gameObject, _nombreDeCartesAChoisir: properIntCondition%10, stringToDisplay: "Choisissez " + 
+            (properIntCondition % 10).ToString() + " cartes", deactivateAfter: true);
+        ShowCardsMustBeActivated = true;
     }
     
 
@@ -1519,6 +1650,11 @@ public class Carte : NetworkBehaviourAntinomia {
         }
         // L'effet a été joué à ce tour.
         reponseDemandeEffet = -1; 
+
+        if (ShowCardsMustBeActivated) {
+            ShowCardsMustBeActivated = false;
+            getGameManager().GetComponent<GameManager>().ActivateShowCards(); 
+        }
     }
 
     private void ReponseEffet(int response) {
@@ -1542,9 +1678,35 @@ public class Carte : NetworkBehaviourAntinomia {
                 "de gérer plusieurs changements de position. ");
         }
         else {
+            // TODO :  A Verifier. Ne fonctionne pas pour changer la position d'une carte adversaire à priori. 
             CartesChoisiesPourEffets[0].GetComponent<Entite>().ChangerPosition();
             Debug.Log("L'effet changement de position a été autorisé");
         }
+        CartesChoisiesPourEffets = null; 
+    }
+
+    /// <summary>
+    /// Retour d'une carte dans la main de son propriétaire. 
+    /// </summary>
+    /// <param name="CibleDejaChoisie"></param>
+    /// <returns></returns>
+    private IEnumerator RetourMain(bool CibleDejaChoisie = false) {
+        if (!CibleDejaChoisie) {
+            // Si les cibles n'ont pas déjà été choisies
+            yield return WaitForCardsChosen();
+        }
+
+        if (CartesChoisiesPourEffets.Count != 1) {
+            throw new Exception("Erreur dans la transmission des cartes. Cet effet ne permet pas encore" +
+                "de gérer plusieurs changements de position. ");
+        }
+        else {
+            // TODO :  A Verifier. 
+            CartesChoisiesPourEffets[0].GetComponent<Entite>().RenvoyerCarteMain();
+            Debug.Log("L'effet changement de position a été autorisé");
+        }
+
+
         CartesChoisiesPourEffets = null; 
     }
 
@@ -1638,7 +1800,7 @@ public class Carte : NetworkBehaviourAntinomia {
     private IEnumerator RevelerCarteEffet(int nombreCartes) {
 
         Debug.Log("On revele une carte à l'adversaire. ");
-        ShowCardsForChoice(Main.transform);
+        ShowCardsForChoice(Main.transform, nombreCartes);
         
         yield return WaitForCardsChosen();
         string[] AllCartesChoisiesString = new string[CartesChoisiesPourEffets.Count];
@@ -1839,7 +2001,7 @@ public class Carte : NetworkBehaviourAntinomia {
             Entite _carte = carteElement[i].GetComponent<Entite>();
             if (_carte.isFromLocalPlayer) {
                 // on peut directement changer la STAT depuis la carte. 
-                _carte.CmdAddStat(_intToAdd);
+                _carte.CmdAddStat(_intToAdd, 0);
             }
             else {
                 FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(_carte.IDCardGame,
