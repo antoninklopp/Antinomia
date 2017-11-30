@@ -8,6 +8,9 @@ using System;
 /// </summary>
 public class ChangementPuissance {
 
+    /// <summary>
+    /// Type de changement de puissance. 
+    /// </summary>
 	public enum Type {
         MULTIPLICATION, 
         ADDITION

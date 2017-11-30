@@ -749,11 +749,12 @@ public class Entite : Carte, ICarte {
                 GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "On ne peut pas invoquer de cartes pendant la phase de preparation");
                 return;
             }
-            Main.SendMessage("DeleteCard", gameObject);
-            ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
-            gameObject.tag = "BoardSanctuaire";
-
-            CmdChangePosition(State.CHAMPBATAILLE);
+            if (defairePile) {
+                Main.SendMessage("DeleteCard", gameObject);
+                ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
+                gameObject.tag = "BoardSanctuaire";
+                CmdChangePosition(State.CHAMPBATAILLE);
+            }
         } else {
             // TODO: Envoyer un message à l'utilisateur disant qu'il y a plus de 5 cartes sur le board. 
             GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Deja 5 cartes sur le board");
@@ -828,9 +829,9 @@ public class Entite : Carte, ICarte {
         switch (carteState) {
             case State.MAIN:
                 Main.SendMessage("AjouterCarteMain", gameObject);
-                ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
+                ChampBataille.SendMessage("CmdReordonnerCarte");
                 Sanctuaire.SendMessage("ReordonnerCarte");
-                gameObject.tag = "Main"; 
+                gameObject.tag = "Carte"; 
                 break; 
             case State.CHAMPBATAILLE:
                 Main.SendMessage("DeleteCard", gameObject);
@@ -1298,7 +1299,7 @@ public class Entite : Carte, ICarte {
 
     [ClientRpc]
     public void RpcAddStat(int _statToAdd, int IDCardGameChanged) {
-        puissance.AjouterChangementPuissance(new ChangementPuissance(ChangementPuissance.Type.MULTIPLICATION, 
+        puissance.AjouterChangementPuissance(new ChangementPuissance(ChangementPuissance.Type.ADDITION, 
             _statToAdd, IDCardGameChanged)); 
         if (puissance.RecupererPuissanceEntite() == STAT) {
             RpcResetToCardBase(); 
@@ -1449,7 +1450,7 @@ public class Entite : Carte, ICarte {
     /// <returns></returns>
     public override string GetInfoCarte() {
         string stringToReturn = "<color=red>" + Name + "</color>" + "\n" +
-            "STAT : " + STAT.ToString() + "\n" + "AKA : " + CoutAKA.ToString() + "\n"; 
+            "STAT : " + getPuissance().ToString() + "\n" + "AKA : " + CoutAKA.ToString() + "\n"; 
         if (carteElement == Element.AUCUN) {
             stringToReturn += "Ascendance : " + carteAscendance + "\n"; 
         } else {

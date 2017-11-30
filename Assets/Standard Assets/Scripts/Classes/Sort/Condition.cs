@@ -150,12 +150,6 @@ public class Condition {
         /// </summary>
         DOMINATION,
         /// <summary>
-        /// Si le terrain passe sous domination astrale ou malefique
-        /// 2 - domination astrale
-        /// 3 - Domination malefique
-        /// </summary>
-        PASSAGE_DOMINATION,
-        /// <summary>
         /// Lorsque le terrain changement de domination
         /// 1 - Sans domination
         /// 2 - domination astrale

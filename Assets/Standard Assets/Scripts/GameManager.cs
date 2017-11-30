@@ -268,14 +268,16 @@ public class GameManager : NetworkBehaviourAntinomia {
 
         // Si d'autres effets sont en cours, on ne peut pas changer de phase. 
         if (GameObject.Find("Pile") != null) {
-            DisplayMessage("Impossible de passer à une autre phase pour l'instant. "); 
+            DisplayMessage("Impossible de passer à une autre phase pour l'instant. ");
+            NextPhase.SetActive(true); 
             return;
         }
 
-        // On ne peut pas réagir lors après la phase finale. 
+        // On ne peut pas réagir lors après la phase d'initiation. 
         if (!defairePile && Phase != Player.Phases.INITIATION) {
             Debug.Log("On demande un changement de phase"); 
             AjouterChangementDePhasePile();
+            NextPhase.SetActive(false); 
         } else {
             GameObject PlayerObject = FindLocalPlayer();
 
@@ -301,6 +303,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                 PlayerObject.SendMessage("ChangeUIPhase", Phase);
                 StartNewPhase();
             }
+            NextPhase.SetActive(true); 
         }
 	}
 
@@ -566,7 +569,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                 else {
                     Debug.Log("Le joueur adverse a été attaqué");
                     if (STAT == 0) {
-                        OtherPlayerEntity.SendMessage("AttackPlayer", MyPlayerEntity.GetComponent<Entite>().STAT);
+                        OtherPlayerEntity.SendMessage("AttackPlayer", MyPlayerEntity.GetComponent<Entite>().getPuissance());
                     } else {
                         // On override la STAT. 
                         OtherPlayerEntity.SendMessage("AttackPlayer", STAT); 
@@ -1163,15 +1166,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                 // Une fois qu'il a fini ses actions on défait la pile. 
                 PauseButton.SetActive(false);
                 //On regarde s'il y a une pile d'effet en cours. 
-                if (GameObject.FindGameObjectWithTag("Pile") != null) {
-                    GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
-                    if (Pile.GetComponent<PileAppelEffet>().DernierEffetVientJoueur(FindLocalPlayer().GetComponent<Player>().PlayerID)) {
-                        // Si c'est le joueur qui a mis un effet en dernier dans la pile, on la défait. 
-                        AntinomiaLog("Après avoir mis le jeu en pause, je défais la pile");
-                        Pile.GetComponent<PileAppelEffet>().DefaireLaPile();
-                    } 
-                    //Sinon on ne fait rien. 
-                }
+                DefairePile(); 
 
             }
         } else {
@@ -1183,6 +1178,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                 DisplayInfo.GetComponent<Text>().text = "La partie a repris.";
                 StartCoroutine(DeactivateDisplayInfo());
                 PauseButton.SetActive(false);
+                DefairePile(); 
             }
         }
 
@@ -1194,6 +1190,18 @@ public class GameManager : NetworkBehaviourAntinomia {
             PauseButton.GetComponent<Image>().sprite = Play;
         }
         Debug.Log("game Is Actually paused.");
+    }
+
+    void DefairePile() {
+        if (GameObject.FindGameObjectWithTag("Pile") != null) {
+            GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
+            if (Pile.GetComponent<PileAppelEffet>().DernierEffetVientJoueur(FindLocalPlayer().GetComponent<Player>().PlayerID)) {
+                // Si c'est le joueur qui a mis un effet en dernier dans la pile, on la défait. 
+                AntinomiaLog("Après avoir mis le jeu en pause, je défais la pile");
+                Pile.GetComponent<PileAppelEffet>().DefaireLaPile();
+            }
+            //Sinon on ne fait rien. 
+        }
     }
 
     /// <summary>

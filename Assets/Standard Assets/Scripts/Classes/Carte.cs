@@ -811,8 +811,6 @@ public class Carte : NetworkBehaviourAntinomia {
                             return false; 
                         }
                         break;
-                    case Condition.ConditionEnum.PASSAGE_DOMINATION:
-                        break;
                     case Condition.ConditionEnum.CHANGEMENT_DOMINATION:
                         // S'il n'y a pas de changement de domination ou si le changement ne correspondau type maléfique/astral 
                         // demandé
@@ -1364,13 +1362,17 @@ public class Carte : NetworkBehaviourAntinomia {
 
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir à partir d'un objet parent (Transform). 
+    /// <paramref name="exceptThisCard"/>Si on ne veut pas que la carte courante soit prise en compte</param>
     /// </summary>
-    void ShowCardsForChoice(Transform _parent, int nombreCartes) {
+    void ShowCardsForChoice(Transform _parent, int nombreCartes, bool exceptThisCard = true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         for (int k = 0; k < _parent.childCount; ++k) {
-            AllCardsToChoose.Add(_parent.GetChild(k).gameObject);
+            if (!(exceptThisCard && gameObject == _parent.GetChild(k).gameObject)) {
+                AllCardsToChoose.Add(_parent.GetChild(k).gameObject);
+            }
         }
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").
+            gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Chosissez " + nombreCartes.ToString() + 
             " cartes", deactivateAfter:true);
         ShowCardsMustBeActivated = true; 
@@ -1380,15 +1382,23 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Montrer au joueur les cartes qu'il peut choisir sur les champs de bataille des deux joueurs. 
     /// <paramref name="stringPlus"/> String à rajouter potentiellement après choisissez n cartes</param>
     /// </summary>
-    void ShowCardsForChoiceChampBatailleDeuxJoueurs(int nombreCartes, string stringPlus="") {
+    void ShowCardsForChoiceChampBatailleDeuxJoueurs(int nombreCartes, string stringPlus="", bool exceptThisCard=true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
-        for (int k = 0; k < FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").childCount; ++k) {
-            AllCardsToChoose.Add(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
+        for (int k = 0; k < FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").
+            Find("CartesChampBatailleJoueur").childCount; ++k) {
+            AllCardsToChoose.Add(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").
+                Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
         }
-        for (int k = 0; k < FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").childCount; ++k) {
-            AllCardsToChoose.Add(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
+        for (int k = 0; k < FindLocalPlayer().transform.Find("ChampBatailleJoueur").
+            Find("CartesChampBatailleJoueur").childCount; ++k) {
+            if (!(exceptThisCard && gameObject == FindLocalPlayer().transform.Find("ChampBatailleJoueur").
+                Find("CartesChampBatailleJoueur").GetChild(k).gameObject)) {
+                AllCardsToChoose.Add(FindLocalPlayer().transform.Find("ChampBatailleJoueur").
+                Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
+            }
         }
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").
+            gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, deactivateAfter:true, stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", 
             _nombreDeCartesAChoisir:nombreCartes);
         ShowCardsMustBeActivated = true; 
@@ -1398,15 +1408,18 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Montrer au joueur les cartes qu'il peut choisir parmi toutes les cartes (sur le champ de bataille
     /// ou sur la sanctuaire) des deux joueurs. 
     /// </summary>
-    void ShowCardsForChoiceAllCartesDeuxJoueurs(int nombreCartes) {
+    void ShowCardsForChoiceAllCartesDeuxJoueurs(int nombreCartes, bool exceptThisCard = true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         GameObject[] AllCardsBoardSanctuaire = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
         for (int i = 0; i < AllCardsBoardSanctuaire.Length; ++i) {
-            AllCardsToChoose.Add(AllCardsBoardSanctuaire[i]); 
+            if (!(exceptThisCard && gameObject == AllCardsBoardSanctuaire[i])) {
+                AllCardsToChoose.Add(AllCardsBoardSanctuaire[i]);
+            }
         }
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Choisissez " + nombreCartes.ToString() + 
-            " cartes", deactivateAfter:true);
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.
+            GetComponent<ShowCards>().ShowCardsToChoose(
+            AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, 
+            stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", deactivateAfter:true);
         ShowCardsMustBeActivated = true; 
     }
 

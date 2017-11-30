@@ -194,6 +194,8 @@
     <Compile Include="Assets\Standard Assets\Scripts\ReadData\ReadXMLData.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ReadData\UILanguageString.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Shop\GameManagerShop.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Tests\LineRendererAttack.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Tests\LineRendererObject.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\WriteOutputFile.cs" />
   </ItemGroup>
   <ItemGroup>

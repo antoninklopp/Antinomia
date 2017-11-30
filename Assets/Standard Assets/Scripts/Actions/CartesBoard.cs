@@ -56,18 +56,10 @@ public class CartesBoard : NetworkBehaviourAntinomia {
 			AllCreaturesChampBataille [0].transform.localPosition = new Vector3 (0, 0, 0);
 		} else {
 			for (int i = 0; i < AllCreaturesChampBataille.Count; i++) {
-				// Sinon on les décale toutes vers la gauche et on insère à droite. 
-				//AllCreaturesChampBataille [i].transform.localPosition = 
-				//	new Vector3 (AllCreaturesChampBataille [i].transform.localPosition.x - Carte.GetComponent<BoxCollider2D>().size.x/2 - OffsetCarteChampBataille , 0, 0); 
-				// AllCreaturesChampBataille [i].transform.localPosition = 
-				//	new Vector3 (2*(-(int)AllCreaturesChampBataille.Count/2 + i)*CartePrefab.GetComponent<BoxCollider2D>().size.x*CartePrefab.transform.localScale.x - OffsetCarteChampBataille , 0, 0);
                 ChangePositionCarte(AllCreaturesChampBataille[i], new Vector3(2 * (-(int)AllCreaturesChampBataille.Count / 2 + i) * 
                     CartePrefab.GetComponent<BoxCollider2D>().size.x * CartePrefab.transform.localScale.x - OffsetCarteChampBataille, 0, 0)); 
 			}
-			// On insère la dernière carte à droite. 
-			//AllCreaturesChampBataille[AllCreaturesChampBataille.Count - 1].transform.localPosition = 
-			//	new Vector3(AllCreaturesChampBataille[AllCreaturesChampBataille.Count - 2].transform.localPosition.x + Carte.GetComponent<BoxCollider2D>().size.x + OffsetCarteChampBataille * 2, 0, 0);
-		}
+        }
 	}
 
 	void OnMouseDown(){
@@ -123,9 +115,17 @@ public class CartesBoard : NetworkBehaviourAntinomia {
     public static void ChangePositionCarte(GameObject Carte, Vector3 newPosition) {
         // Debug.Log("CHANGEMENT DE POSITION DE LA CARTE");
         // TODO A rectifier. 
-        Carte.GetComponent<Carte>().RepositionnerCarte(1, newPosition);
+        if (Carte.GetComponent<Carte>() != null) {
+            Carte.GetComponent<Carte>().RepositionnerCarte(1, newPosition);
+        } else {
+            Carte.transform.position = newPosition; 
+        }
     } 
 
+    /// <summary>
+    /// Récupérer toutes les cartes sur le champ de bataille. 
+    /// </summary>
+    /// <returns></returns>
     public List<GameObject> getCartesChampBataille() {
         AllCreaturesChampBataille = new List<GameObject>();
         foreach (Transform child in transform) {
@@ -134,6 +134,7 @@ public class CartesBoard : NetworkBehaviourAntinomia {
 
         return AllCreaturesChampBataille; 
     } 
+
 
     // [UnityTest]
     private bool checkIfCartesStateChampBataille() {

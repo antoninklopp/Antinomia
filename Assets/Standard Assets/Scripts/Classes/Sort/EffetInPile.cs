@@ -156,7 +156,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         // QUEL EST L'EFFET
         for (int i = 0; i < effetJoue.AllActionsEffet.Count; ++i) {
             phraseDecritEffet += effetJoue.AllActionsEffet[i].ActionAction.ToString() + " " +
-                effetJoue.AllActionsEffet[i].properIntAction + " ; "; 
+                effetJoue.AllActionsEffet[i].properIntAction.ToString() + " ; "; 
         }
 
         // A
