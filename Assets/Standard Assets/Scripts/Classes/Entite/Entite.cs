@@ -451,7 +451,9 @@ public class Entite : Carte, ICarte {
                     GameObject.Find("GameManager").SendMessage("DisplayMessage", "Une carte qui attaque doit etre sur le champ de bataille");
                 }
                 else {
-                    GameObject.Find("GameManager").SendMessage("AttackMyPlayer", gameObject);
+                    // GameObject.Find("GameManager").SendMessage("AttackMyPlayer", gameObject);
+                    StartCoroutine(AttackDrag()); 
+
                 }
             }
             else {
@@ -472,6 +474,27 @@ public class Entite : Carte, ICarte {
 #endif
         }
         // dragging = false;
+    }
+
+    private IEnumerator AttackDrag() {
+        gameObject.AddComponent<LineRendererAttack>();
+        GetComponent<LineRendererAttack>().OnBeginDragAttack();
+        while (GetComponent<LineRendererAttack>().estEnCours()) {
+            yield return new WaitForSeconds(0.1f); 
+        }
+        GameObject FinalTarget = GetComponent<LineRendererAttack>().GetFinalTarget();
+        GameObject.Find("GameManager").SendMessage("AttackMyPlayer", gameObject);
+        if (FinalTarget.transform.parent != null) {
+            // Dans le cas Image Joueur. 
+            FinalTarget = FinalTarget.transform.parent.gameObject;
+        }
+        GameObject.Find("GameManager").SendMessage("AttackOtherPlayer", FinalTarget);
+        Destroy(GetComponent<LineRendererAttack>());
+        GameObject[] Lines = GameObject.FindGameObjectsWithTag("Line");
+        //Deux lignes sont créées...
+        for (int i = 0; i < Lines.Length; i++) {
+            Destroy(Lines[i]);
+        }
     }
 
     /// <summary>

@@ -552,7 +552,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 		Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().carteElement; 
 		int multiplicateurDegatsMy = 1;
 
-		Debug.Log (OtherPlayerEntity.tag);
+		// Debug.Log (OtherPlayerEntity.tag);
 
         if (OtherPlayerEntity.tag == "Player") {
             /*

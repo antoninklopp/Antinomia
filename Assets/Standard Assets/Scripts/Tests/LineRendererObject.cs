@@ -15,23 +15,8 @@ public class LineRendererObject : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (isDragging) {
-            Dragging(); 
-        }
-        Debug.Log(isDragging); 
+        Dragging(); 
 	}
-
-    private void OnMouseDrag() {
-        isDragging = true; 
-    }
-
-    private void OnMouseDown() {
-        isDragging = true; 
-    }
-
-    private void OnMouseUp() {
-        isDragging = false; 
-    }
 
     /// <summary>
     /// Deplacer la carte. 
@@ -45,5 +30,16 @@ public class LineRendererObject : MonoBehaviour {
         MousePosition.z = 15;
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
         transform.position = mouseWorldPoint;
+    }
+
+    public GameObject[] FindAllColliders(float distance, Vector2 center) {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(center, distance);
+        Debug.Log(transform.position); 
+        Debug.Log(hitColliders.Length); 
+        GameObject[] allCollidersObject = new GameObject[hitColliders.Length]; 
+        for (int i = 0; i < hitColliders.Length; i++) {
+            allCollidersObject[i] = hitColliders[i].gameObject; 
+        }
+        return allCollidersObject; 
     }
 }
