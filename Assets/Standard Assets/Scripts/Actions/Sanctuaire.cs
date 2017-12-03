@@ -39,7 +39,7 @@ public class Sanctuaire : MonoBehaviour {
 		ReordonnerCarte ();
 	}
 
-	void ReordonnerCarte(){
+	public void ReordonnerCarte(){
 		/*
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.

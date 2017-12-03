@@ -1472,6 +1472,10 @@ public class GameManager : NetworkBehaviourAntinomia {
         }
     }
 
+    public void ReportBugs() {
+        Console.GetComponent<AntinomiaConsole>().addAllBugsToGameSparksDataBase(); 
+    }
+
     /// <summary>
     /// Add a log into the console. 
     /// </summary>
@@ -1617,6 +1621,11 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     public int getTour() {
         return Tour; 
+    }
+
+    public void ReactivateButtonPhase() {
+        NextPhase.SetActive(true);
+        Console.GetComponent<AntinomiaConsole>().ReportABug("Probleme de bouton de phase. Reactivé ici."); 
     }
 
 }

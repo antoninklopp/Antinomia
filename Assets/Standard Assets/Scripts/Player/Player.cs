@@ -355,7 +355,14 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="oID">ID de la carte dans la metaCollection</param>
 	[Command]
 	void CmdPiocherNouvelleCarte2(string oID){
-		GameObject CardToInstantiate = ObjectInfo.GetComponent<GetPlayerInfoGameSparks>().GetCardoID(); 
+        GameObject CardToInstantiate; 
+        try {
+            CardToInstantiate = ObjectInfo.GetComponent<GetPlayerInfoGameSparks>().GetCardoID();
+        } catch (MissingReferenceException e) {
+            Debug.LogWarning(e);
+            Debug.LogWarning("Warning, la carte n'existe plus ici");
+            return; 
+        }
         Debug.Log("Carte instanciee" + CardToInstantiate);
 
         Debug.Log("<color=green> ON PIOCHE LA CARTE ICI </color>"); 
@@ -753,29 +760,26 @@ public class Player : NetworkBehaviourAntinomia	 {
 		/*
 		 * Quand le joueur perd
 		 */ 
-		SceneManager.LoadScene ("MainMenu"); 
-		if (isServer) {
-			RpcOnPlayerWins (); 
-		} else {
-			CmdOnPlayerWins (); 
-		}
+		// SceneManager.LoadScene ("MainMenu");
+        CmdOnPlayerWins(); 
 	}
 
 	[Command]
 	void CmdOnPlayerWins(){
-		/*
+        /*
 		 * Quand le joueur perd, l'autre gagne. 
-		 */ 
-		SceneManager.LoadScene ("MainMenu"); 	
+		 */
+        // SceneManager.LoadScene ("MainMenu"); 	
+        RpcOnPlayerWins(); 
 	}
 
 	[ClientRpc]
 	void RpcOnPlayerWins(){
-		/*
+        /*
 		 * Quand le joueur perd, l'autre joueur gagne. 
-		 */ 
-
-		SceneManager.LoadScene ("MainMenu"); 
+		 */
+        getGameManager().GetComponent<GameManager>().ReportBugs();
+        SceneManager.LoadScene ("MainMenu");
 	}
 
     /// <summary>

@@ -51,7 +51,12 @@ public class Assistance : Carte, ICarte {
     private int clicked = 0;
 
     private bool dragging = false;
-    private Vector3 positionBeforeDragging; 
+    private Vector3 positionBeforeDragging;
+
+    /// <summary>
+    /// Le gameObject qui représente la liaison entre une entité et une assistance. 
+    /// </summary>
+    private GameObject LiaisonEntiteAssistance; 
 
     /// <summary>
     /// Carte Ciblee par un effet de l'assistance.
@@ -450,7 +455,9 @@ public class Assistance : Carte, ICarte {
 
         GetComponent<SpriteRenderer>().color = Color.white;
 
-        ProposerMettreJeuEnPause(); 
+        ProposerMettreJeuEnPause();
+
+        Destroy(LiaisonEntiteAssistance);
     }
 
     /// <summary>
@@ -488,7 +495,11 @@ public class Assistance : Carte, ICarte {
 
         GetComponent<ImageCardBattle>().setImage(shortCode);
 
-        GetComponent<SpriteRenderer>().color = Color.red; 
+        GetComponent<SpriteRenderer>().color = Color.red;
+
+        // Dessiner une ligne entre l'assistance et la carte. 
+        LiaisonEntiteAssistance = Resources.Load("Prefabs/LiaisonEntiteAssistance", typeof(GameObject)) as GameObject;
+        LiaisonEntiteAssistance.GetComponent<LineRendererAssistanceEntite>().setLine(carteAffectee, gameObject); 
     }
     
     /// <summary>

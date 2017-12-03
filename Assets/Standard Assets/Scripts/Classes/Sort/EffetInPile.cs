@@ -318,7 +318,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                 Transform Sanctuaire; 
                 Sanctuaire = FindPlayerWithID(PlayerIDAssocie).GetComponent<Player>().GetSanctuaireJoueur();
                 newCarte.transform.SetParent(Sanctuaire, false);
-                Sanctuaire.gameObject.GetComponent<CartesBoard>().CmdReordonnerCarte();
+                Sanctuaire.gameObject.GetComponent<Sanctuaire>().ReordonnerCarte();
                 newCarte.GetComponent<EntiteTemporaire>().carteState = Entite.State.SANCTUAIRE;
             }
         }

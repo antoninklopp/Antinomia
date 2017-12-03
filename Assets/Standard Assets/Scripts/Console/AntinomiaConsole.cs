@@ -31,12 +31,18 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
     /// <summary>
     /// Objet qui contient les logs.
     /// </summary>
-    private GameObject Content; 
+    private GameObject Content;
+
+    private ReportBug report; 
 
     public override void Start() {
         base.Start();
         Content = transform.Find("ConsoleView").Find("Viewport").Find("Content").gameObject;
-
+        if (PlayerPrefs.HasKey("user")) {
+            report = new ReportBug("Joueur " + PlayerPrefs.GetString("user"));
+        } else {
+            report = new ReportBug(); 
+        }
 
         DeactivateConsole(); 
     }
@@ -202,6 +208,24 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
                         InstantiateOneStringConsole("Le terrain peut être changé grâce aux paramètres: astral, malefique, none");
                         break; 
                 }
+                break;
+            // Ajouter un bug au rapport de bug. 
+            case "report":
+            case "bug":
+            case "report_bug":
+                string bug = ""; 
+                for (int i = 1; i < commandSplit.Length; i++) {
+                    bug += commandSplit[i] + " "; 
+                }
+                report.addBug(bug); 
+                break;
+            // Envoyer le rapport de bug. 
+            case "send_report":
+                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ReportBugs(); 
+                break;
+            case "activate_phase_button":
+            case "phase_button":
+                GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ReactivateButtonPhase(); 
                 break; 
             default:
                 AddStringToConsole("Cette fonction n'existe pas");
@@ -256,6 +280,22 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
             yield return new WaitForSeconds(0.1f); 
         }
         AddStringToConsole("Votre Ping aux serveurs google.fr : " + ping.time.ToString());
+    }
+
+    public void addAllBugsToGameSparksDataBase() {
+        string allBugs = report.getAllReport(); 
+        if (allBugs != null) {
+            gameObject.AddComponent<GetGlobalInfoGameSparks>();
+            StartCoroutine(GetComponent<GetGlobalInfoGameSparks>().WaitForComment(allBugs)); 
+        }
+    }
+
+    /// <summary>
+    /// Report un bug. 
+    /// </summary>
+    /// <param name="bug"></param>
+    public void ReportABug(string bug) {
+        report.addBug(bug);
     }
 
 }

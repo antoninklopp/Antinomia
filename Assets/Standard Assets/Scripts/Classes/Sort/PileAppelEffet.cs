@@ -159,6 +159,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                 switch (numeroEffet) {
                     case -2:
                         // On dépose une carte sur le board
+                        Debug.Log("Depose carte sur le board."); 
                         deposeCarte = 2;
                         break;
                     case -3:
