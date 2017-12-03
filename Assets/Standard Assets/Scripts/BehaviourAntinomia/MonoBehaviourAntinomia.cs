@@ -70,7 +70,7 @@ public class MonoBehaviourAntinomia : MonoBehaviour {
     /// <returns>Joueur local</returns>
     public GameObject FindLocalPlayer() {
         /*
-		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
+		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command(channel=0)]
 		 */
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
         if (Players[0].GetComponent<Player>().isLocalPlayer) {

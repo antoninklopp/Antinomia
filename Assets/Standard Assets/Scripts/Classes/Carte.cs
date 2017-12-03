@@ -1832,7 +1832,7 @@ public class Carte : NetworkBehaviourAntinomia {
             }
             AllCartesChoisiesString[i] = stringCartei;
         }
-        FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString); 
+        FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString, "Cartes de votre adversaire"); 
         CartesChoisiesPourEffets = null; 
     }
 

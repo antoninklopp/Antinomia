@@ -563,7 +563,7 @@ public class Sort : Carte, ICarte {
     /// <param name="_coutAKA">cout du Sort (inutile)</param>
     /// <param name="_Effet">Effets du sort (string à décortiquer)</param>
     /// <param name="_EffetToDisplay">Effets du sort (string compréhensible, à afficher)</param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcsetoID1(int _ID, string _oID, string _Name, string _shortCode, int _Niveau,
                                     int _coutAKA, string _Effet, string _EffetToDisplay) {
         // On peut peut-être tout faire passer par les arguments. 
@@ -594,7 +594,7 @@ public class Sort : Carte, ICarte {
     /// Destruction d'une carte sort. 
     /// </summary>
     /// <remarks>peut-être à inclure dans la classe parent "Carte"</remarks>
-    [Command]
+    [Command(channel=0)]
     void CmdDetruireCarte() {
         RpcDetruireCarte();
     }
@@ -603,7 +603,7 @@ public class Sort : Carte, ICarte {
     /// Detruire une carte.
     /// Execute sur les clients. 
     /// </summary>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcDetruireCarte() {
         clicked = 0; 
 

@@ -197,7 +197,9 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Cet objet permet de matérialiser l'attente qu'il reste au joueur afin de pouvoir faire pause. 
     /// </summary>
-    protected GameObject SliderPause; 
+    protected GameObject SliderPause;
+
+    private int nombreDeCartesChoisies = 0; 
 
 	/// <summary>
     /// Initialisation du GameManager
@@ -942,7 +944,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 		}
 		Debug.Log (AllCardsGiven.Count); 
 		// ShowCards.SendMessage ("ShowCardsToChoose", AllCardsGiven); 
-		FindLocalPlayer().GetComponent<Player>().CmdSendCards (AllCardsRandom);
+		FindLocalPlayer().GetComponent<Player>().CmdSendCards (AllCardsRandom, "Cartes de votre adversaire");
 	}
 
     /// <summary>
@@ -1368,6 +1370,9 @@ public class GameManager : NetworkBehaviourAntinomia {
             }
 
             ChoixCartesDebut.SetActive(false);
+            // On retient le nombre de cartes choisies pour le vérifier. 
+            nombreDeCartesChoisies = nombreCartes;
+            CheckBonNombreCartes(); 
         }
     }
 
@@ -1626,6 +1631,20 @@ public class GameManager : NetworkBehaviourAntinomia {
     public void ReactivateButtonPhase() {
         NextPhase.SetActive(true);
         Console.GetComponent<AntinomiaConsole>().ReportABug("Probleme de bouton de phase. Reactivé ici."); 
+    }
+
+    /// <summary>
+    /// Vérifier que le nombre de cartes piochées a été le bon.
+    /// </summary>
+    /// <param name="nombreCartes"></param>
+    public void CheckBonNombreCartes() {
+        int nombreCartes = FindLocalPlayer().GetComponent<Player>().GetMainJoueur().gameObject.
+            GetComponent<MainJoueur>().getNombreCartesMain(); 
+        if (nombreDeCartesChoisies == nombreCartes) {
+            Debug.LogWarning("Le nombre de cartes correspond. "); 
+        } else {
+            Debug.LogWarning("Le nombre de cartes ne correspond pas. "); 
+        }
     }
 
 }

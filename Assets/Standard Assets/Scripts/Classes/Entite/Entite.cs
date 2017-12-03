@@ -679,6 +679,7 @@ public class Entite : Carte, ICarte {
                                 }
                                 else {
                                     gameObject.tag = "BoardSanctuaire";
+                                    // Montrer x cartes à l'adversaire. 
                                     GameObject.Find("GameManager").SendMessage("InvocationElementaireAir", 2*x);
                                 }
                                 break;
@@ -784,7 +785,7 @@ public class Entite : Carte, ICarte {
         }
     }
 
-    [Command]
+    [Command(channel=0)]
     void CmdChangePosition(State newCarteState) {
 
         /* 
@@ -829,7 +830,7 @@ public class Entite : Carte, ICarte {
 
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcChangePosition(State newCarteState) {
 
         /* 
@@ -964,7 +965,7 @@ public class Entite : Carte, ICarte {
 
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcChangeParent() {
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
 
@@ -986,7 +987,7 @@ public class Entite : Carte, ICarte {
 
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcsetoID1(int _ID, string _oID, string _Name, string _shortCode, Entite.Ascendance _ascendance, Entite.Element _element, int _STAT,
                                     int _coutAKA, int _coutElementaire, string _AllEffetsString, string _AllEffetsStringToDisplay, 
                                     string _AllEffetsMalefiques, string _AllEffetsMalefiquesToDisplay, 
@@ -1016,7 +1017,7 @@ public class Entite : Carte, ICarte {
     }
 
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcsetoID2(string ID) {
         ObjectInfo = ObjectInfo.GetComponent<GetPlayerInfoGameSparks>().GetCardoID();
         Debug.Log(ObjectInfo.GetComponent<Entite>().Name);
@@ -1193,7 +1194,7 @@ public class Entite : Carte, ICarte {
     /// </summary>
     /// <param name="_newElement">Le nouvel élément que l'on associe à la carte.</param>
     /// <param name="change">true, si on change de la carte de base, false si on reset l'élément.</param>
-    [Command]
+    [Command(channel=0)]
     public void CmdChangeElement(Element _newElement, bool change) {
         /*
          * Envoi de l'information sur le serveur lorsque l'élément de la carte change. 
@@ -1260,7 +1261,7 @@ public class Entite : Carte, ICarte {
     /// FONCTION JAMAIS APPELEE
     /// </summary>
     /// <param name="newStat">Nouvelle stat</param>
-    [Command]
+    [Command(channel=0)]
     public void CmdChangeStat(int newStat) {
         /*
          * Fonction command
@@ -1273,7 +1274,7 @@ public class Entite : Carte, ICarte {
     /// Changer la stat d'une carte, lui ajouter de la valeur
     /// </summary>
     /// <param name="_statToAdd">Valeur à ajouter à la stat. </param>
-    //[Command]
+    //[Command(channel=0)]
     //public void CmdAddStat(int _statToAdd) {
         /*
          *  Même fonction que la précédente mais au lieu de changer la stat directement
@@ -1314,13 +1315,13 @@ public class Entite : Carte, ICarte {
     /// </summary>
     /// <param name="_statToAdd"></param>
     /// <param name="IDCardGameChanged">IDCardGame de la carte dont provient l'effet qui a créé un changement de puissance.</param>
-    [Command]
+    [Command(channel=0)]
     public void CmdAddStat(int _statToAdd, int IDCardGameChanged) {
         RpcAddStat(_statToAdd, IDCardGameChanged); 
     }
 
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcAddStat(int _statToAdd, int IDCardGameChanged) {
         puissance.AjouterChangementPuissance(new ChangementPuissance(ChangementPuissance.Type.ADDITION, 
             _statToAdd, IDCardGameChanged)); 
@@ -1336,7 +1337,7 @@ public class Entite : Carte, ICarte {
     /// Changer la valeur de la stat, la multiplier. 
     /// </summary>
     /// <param name="_multiplicateur">Valeur par laquelle multiplier la stat.</param>
-    //[Command]
+    //[Command(channel=0)]
     //public void CmdMultiplierStat(int _multiplicateur) {
     //    RpcMultiplierStat(_multiplicateur, 0);
     //    // STAT *= _multiplicateur;
@@ -1345,12 +1346,12 @@ public class Entite : Carte, ICarte {
     //    // Debug.Log("Multiplication des valeurs de la carte2");
     //}
 
-    [Command]
+    [Command(channel=0)]
     public void CmdMultiplierStat(int _multiplicateur, int IDCardGameChanged) {
         RpcMultiplierStat(_multiplicateur, 0);
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcMultiplierStat(int _multiplicateur, int IDCardGameChanged) {
         puissance.AjouterChangementPuissance(new ChangementPuissance(ChangementPuissance.Type.MULTIPLICATION, _multiplicateur,
             IDCardGameChanged));
@@ -1361,7 +1362,7 @@ public class Entite : Carte, ICarte {
         }
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcChangeFromCardBase() {
         /*
          * Lorsqu'une carte change de la carte de base à cause d'un effet,
@@ -1371,7 +1372,7 @@ public class Entite : Carte, ICarte {
         GetComponent<SpriteRenderer>().color = Color.green; 
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcResetToCardBase() {
         GetComponent<SpriteRenderer>().color = Color.white;
     }
@@ -1381,7 +1382,7 @@ public class Entite : Carte, ICarte {
     /// Fonction executée sur le serveur. 
     /// </summary>
     /// <param name="_carteAscendance">Ascendance de la carte qui change l'ascendance du terrain</param>
-    [Command]
+    [Command(channel=0)]
     void CmdChangeAscendanceTerrain(Entite.Ascendance _carteAscendance) {
         RpcChangeAscendanceTerrain(_carteAscendance); 
     }
@@ -1390,7 +1391,7 @@ public class Entite : Carte, ICarte {
     /// <see cref="CmdChangeAscendanceTerrain(Ascendance)"/>
     /// </summary>
     /// <param name="_carteAscendance"></param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcChangeAscendanceTerrain (Entite.Ascendance _carteAscendance){
         // Si la carte est astrale ou maléfique, on montre l'effet de terrain. 
         GameObject.FindGameObjectWithTag("GameManager").SendMessage("EffetTerrain", _carteAscendance);

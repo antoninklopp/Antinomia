@@ -135,7 +135,7 @@ public class CarteType : NetworkBehaviourAntinomia {
     /// Changer le type sur tous les clients.
     /// </summary>
     /// <param name="_type"></param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcSetType(Type _type) {
         /*
          * Ecrire le bon type sur tous les clients. 

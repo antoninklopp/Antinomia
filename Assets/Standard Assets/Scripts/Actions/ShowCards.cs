@@ -213,7 +213,7 @@ public class ShowCards : NetworkBehaviour {
 		}
 		
         if (ObjectAsking == null){
-            FindLocalPlayer().GetComponent<Player>().CmdSendCards (newList);
+            FindLocalPlayer().GetComponent<Player>().CmdSendCards (newList, "Cartes choisies");
         } else {
             // Debug.Log("Object Asking" + ObjectAsking.GetComponent<Entite>().Name); 
             ObjectAsking.SendMessage("CartesChoisies", AllCardsToReturnID); 
@@ -292,24 +292,27 @@ public class ShowCards : NetworkBehaviour {
 	}
 
     /// <summary>
-    /// Appelée pas le GameManager dans un [ClientRpc] pour montrer les cartes choisies par un joueur à l'autre.
+    /// Appelée pas le GameManager dans un [ClientRpc(channel=0)] pour montrer les cartes choisies par un joueur à l'autre.
     /// </summary>
     /// <param name="allCards"></param>
-    public void RpcShowCardsToOtherPlayer(string[] allCards) {
+    public void RpcShowCardsToOtherPlayer(string[] allCards, string message="") {
         AllCardsToShowOther = new List<string>();
         for (int i = 0; i < allCards.Length; ++i) {
             Debug.Log(allCards[i]);
             AllCardsToShowOther.Add(allCards[i]);
         }
         //AllCardsToShowOther = newListSync; 
-        Debug.Log("CARTES QUE J4AI CHOISIES");
+        Debug.Log("CARTES QUE J'AI CHOISIES");
         //FinShowCards (0.1f, AllCardsToShow); 
         StartCoroutine(ShowAllCardsChosen());
+
+        TextShowCards.SetActive(true);
+        TextShowCards.GetComponent<Text>().text = message;
     }
 
     GameObject FindLocalPlayer() {
         /*
-		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
+		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command(channel=0)]
 		 */
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
         if (Players[0].GetComponent<Player>().isLocalPlayer) {

@@ -168,7 +168,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 		}
 	}
 
-	[Command]
+	[Command(channel=0)]
 	public void CmdSpawnCard(){
 		GameObject.Find ("CartesMainJoueur1").SendMessage ("TirerCarte");
 	}
@@ -243,7 +243,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         CmdTestIfObjectInfoDestroyed(15); 
 	}
 
-    [Command]
+    [Command(channel=0)]
     void CmdTestIfObjectInfoDestroyed(int nombreEssais) {
         if(ObjectInfo != null) {
             Debug.Log("<color=red>L'Object Info n'a pas été détruit</color>");
@@ -254,7 +254,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         }
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcTestIfObjectInfoDestroyed(bool destroyed, int nombreEssais) {
         if (!isLocalPlayer) {
             return;
@@ -342,7 +342,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         return _liste;
     }
 
-	[Command]
+	[Command(channel=0)]
 	void CmdPiocherNouvelleCarte1(string oID){
 		ObjectInfo = new GameObject();
 		GetPlayerInfoGameSparks playerInfo = ObjectInfo.AddComponent<GetPlayerInfoGameSparks> ();
@@ -353,7 +353,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// 
     /// </summary>
     /// <param name="oID">ID de la carte dans la metaCollection</param>
-	[Command]
+	[Command(channel=0)]
 	void CmdPiocherNouvelleCarte2(string oID){
         GameObject CardToInstantiate; 
         try {
@@ -408,7 +408,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 		}
 	}
 
-	[Command] 
+	[Command(channel=0)] 
 	void CmdChangePhase(Phases newPhase){
 		/*
 		 * Changer la phase du client vers le serveur
@@ -456,12 +456,12 @@ public class Player : NetworkBehaviourAntinomia	 {
 
 	}
 
-	[Command]
+	[Command(channel=0)]
 	void CmdChangeTour(int newTour){
 		Tour = newTour; 
 	}
 
-	[ClientRpc]
+	[ClientRpc(channel=0)]
 	void RpcChangeTour(int newTour){
 		ChangementTour (newTour); 
 	}
@@ -487,7 +487,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
 	public void RpcSetNameOpponent(string name){
 		NomJoueur2.GetComponent<Text> ().text = name; 
 	}
@@ -519,7 +519,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 
     }
 
-	[Command]
+	[Command(channel=0)]
 	public void CmdSetName(string Name){
         /*
          * On veut transmettre à l'autre joueur le nom du player
@@ -541,7 +541,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Envoyer une carte au cimetiere. 
     /// </summary>
     /// <param name="ID">ID de la carte à détruire</param>
-	[Command]
+	[Command(channel=0)]
 	void CmdDetruireCarte(int ID){
 		/*
 		 * Lorsqu'on veut détruire une carte qui n'est pas du joueur local, 
@@ -561,7 +561,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Detruire la carte sur le client. 
     /// </summary>
     /// <param name="ID">IDCardGame de la carte</param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcDetruireCarte(int ID) {
         // Si cette méthode a été appelée c'est pour être éxécutée sur une carte qui n'était pas du joueur local.
         if (!isLocalPlayer) {
@@ -578,7 +578,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="ID">l'ID de la carte dans le partie</param>
     /// <param name="voidName">Le string de la méthode à utiliser</param>
     /// <param name="_intToUse">l'entier demandé par la méthode</param>
-    [Command]
+    [Command(channel=0)]
     public void CmdEnvoiMethodToServerCarteWithIntParameter(int ID, string voidName, int _intToUse, int playerID) {
         /*
          * Lorsqu'on veut appliquer un effet sur une carte qui n'appartient pas au joueur, 
@@ -597,7 +597,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         RpcEnvoiMethodToServerCarteWithIntParameter(ID, voidName, _intToUse, playerID); 
     }
 
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcEnvoiMethodToServerCarteWithIntParameter(int ID, string voidName, int _intToUse, int playerID) {
         if (isLocalPlayer) {
             // Le but est d'envoyer une méthode à l'autre joueur!
@@ -659,7 +659,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 	}
 
 	// ----- Mise à jour des informations sur le serveur. -------
-	[Command]
+	[Command(channel=0)]
 	void CmdSetPlayerPV(int newPV){
 		Debug.Log ("J'ai de nouveaux points de vie"); 
 		PlayerPV = newPV; 
@@ -670,7 +670,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 		GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ().setPlayerPVUI (PlayerID, PlayerPV); 
 	}
 
-	[Command]
+	[Command(channel=0)]
 	void CmdSetOtherPlayerLife(int newPV){
 		Debug.Log ("Salut je suis le joueur 1"); 
 		FindPlayerWithID (1).GetComponent<Player>().CmdSetPlayerPV(newPV); 
@@ -686,7 +686,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 		CmdChangeBothPlayerAKA (newAKA);
 	}
 
-	[Command]
+	[Command(channel=0)]
 	void CmdChangeBothPlayerAKA(int newAKA){
 		/*
 		 * On change l'AKA des deux joueurs sur le serveur. 
@@ -719,7 +719,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Changer l'AKA du joueur, sur le serveur
     /// </summary>
     /// <param name="AKA">Nouvelle valeur de l'AKA</param>
-	[Command]
+	[Command(channel=0)]
 	void CmdChangePlayerAKA(int AKA){
 		PlayerAKA = AKA; 
 	}
@@ -764,7 +764,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         CmdOnPlayerWins(); 
 	}
 
-	[Command]
+	[Command(channel=0)]
 	void CmdOnPlayerWins(){
         /*
 		 * Quand le joueur perd, l'autre gagne. 
@@ -773,7 +773,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         RpcOnPlayerWins(); 
 	}
 
-	[ClientRpc]
+	[ClientRpc(channel=0)]
 	void RpcOnPlayerWins(){
         /*
 		 * Quand le joueur perd, l'autre joueur gagne. 
@@ -787,9 +787,9 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Execute sur le serveur. 
     /// </summary>
     /// <param name="allCards">La liste des shortCodes des cartes à montrer. </param>
-    [Command]
-	public void CmdSendCards(string[] allCards){
-		RpcShowCardsToOtherPlayer (allCards); 
+    [Command(channel=0)]
+	public void CmdSendCards(string[] allCards, string message){
+		RpcShowCardsToOtherPlayer (allCards, message); 
 	}
 
     /// <summary>
@@ -797,10 +797,10 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Execute sur les clients
     /// </summary>
     /// <param name="allCards">La liste des shortCodes des cartes à montrer. </param>
-	[ClientRpc]
-	public void RpcShowCardsToOtherPlayer (string[] allCards){
+	[ClientRpc(channel=0)]
+	public void RpcShowCardsToOtherPlayer (string[] allCards, string message){
 		GameObject.FindGameObjectWithTag ("GameManager").transform.Find ("ShowCards").
-            gameObject.SendMessage ("RpcShowCardsToOtherPlayer", allCards);
+            gameObject.GetComponent<ShowCards>().RpcShowCardsToOtherPlayer(allCards, message);
     }
 
     /// <summary>
@@ -808,7 +808,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Execute sur le serveur.
     /// </summary>
     /// <param name="gameIsPaused"></param>
-    [Command]
+    [Command(channel=0)]
     public void CmdSetGameToPause(bool gameIsPaused) {
         // GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused = gameIsPaused;
         RpcSetGameToPause(gameIsPaused); 
@@ -819,7 +819,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Execute sur le client.
     /// </summary>
     /// <param name="gameIsPaused"></param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     private void RpcSetGameToPause(bool gameIsPaused) {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GameIsSetToPause(gameIsPaused); 
     }
@@ -830,7 +830,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// C'est-à-dire que si on peut réagir, le jeu est forcément "pas en pause"
     /// </summary>
     /// <param name="gameIsPaused"></param>
-    [Command]
+    [Command(channel=0)]
     public void CmdOnlySetPause(bool gameIsPaused) {
         RpcOnlySetPause(gameIsPaused); 
     }
@@ -838,7 +838,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <summary>
     /// <see cref="CmdOnlySetPause(bool)"/>
     /// </summary>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     private void  RpcOnlySetPause(bool gameIsPaused) {
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused = gameIsPaused; 
     }
@@ -846,7 +846,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <summary>
     /// Creer une nouvelle pile d'effet. 
     /// </summary>
-    [Command]
+    [Command(channel=0)]
     public void CmdCreerPile() {
         GameObject NouvellePile = Instantiate(PilePrefab); 
         NetworkServer.SpawnWithClientAuthority(NouvellePile, connectionToClient);
@@ -856,7 +856,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Detruire la pile une fois que tous les effets ont été executés. 
     /// </summary>
     /// <param name="Pile">La pile à détruire</param>
-    [Command]
+    [Command(channel=0)]
     public void CmdDetruirePile(GameObject Pile) {
         NetworkServer.Destroy(Pile); 
     }
@@ -864,7 +864,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <summary>
     /// Jouer l'effet si le joueur n'a pas autorité sur la pile
     /// </summary>
-    [Command]
+    [Command(channel=0)]
     public void CmdJouerEffet() {
         Debug.Log("CmdJouerEffet"); 
         RpcJouerEffet(PlayerID); 
@@ -874,7 +874,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Jouer effet si le joueur n'a pas autorité sur la pile. 
     /// </summary>
     /// <param name="playerID">ID du joueur qui n'a pas autorité.</param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcJouerEffet(int playerID) {
         AntinomiaLog("RpcJouerEffet"); 
         // Si on appelle cette la fonction, c'est forcément depuis le joueur local, 
@@ -893,7 +893,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="numeroEffet"></param>
     /// <param name="numeroListeEffet"></param>
     /// <param name="PlayerID"></param>
-    [Command]
+    [Command(channel=0)]
     public void CmdAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
         RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
@@ -907,7 +907,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="numeroEffet"></param>
     /// <param name="numeroListeEffet"></param>
     /// <param name="PlayerID"></param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
         GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible,
@@ -920,7 +920,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Fonction appelée sur le serveur. 
     /// </summary>
     /// <param name="PlayerID">ID du player qui appelle la fonction, ici le joueur X</param>
-    [Command]
+    [Command(channel=0)]
     public void CmdProposerDefaireLaPile(int PlayerID) {
         RpcProposerDefaireLaPile(PlayerID); 
     }
@@ -929,7 +929,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// equivalent sur le client de <see cref="CmdProposerDefaireLaPile(int)"/>
     /// </summary>
     /// <param name="PlayerID">ID du player qui appelle la fonction, ici le joueur X</param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcProposerDefaireLaPile(int PlayerID) {
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             StartCoroutine(getGameManager().GetComponent<GameManager>().ProposerDefaireLaPile()); 
@@ -942,7 +942,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Fonction appelée sur le serveur. 
     /// </summary>
     /// <param name="_ascendance">Nouvelle ascendance du terrain</param>
-    [Command]
+    [Command(channel=0)]
     public void CmdChangeAscendanceTerrain(GameManager.AscendanceTerrain _ascendance) {
         RpcChangeAscendanceTerrain(_ascendance); 
     }
@@ -952,7 +952,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <seealso cref="Entite.RpcChangeAscendanceTerrain(Entite.Ascendance)"/>
     /// </summary>
     /// <param name="_ascendance"></param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcChangeAscendanceTerrain(GameManager.AscendanceTerrain _ascendance) {
         GameObject.FindGameObjectWithTag("GameManager").SendMessage("EffetTerrain", _ascendance);
     }

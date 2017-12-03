@@ -404,7 +404,7 @@ public class Assistance : Carte, ICarte {
     /// Poser d'une assistance sur le terrain. 
     /// Fonction faite sur le serveur. 
     /// </summary>
-    [Command]
+    [Command(channel=0)]
     void CmdPoserAssistance() {
 
         RpcPoserAssistance(); 
@@ -415,7 +415,7 @@ public class Assistance : Carte, ICarte {
     /// Poser l'assistance. 
     /// Fonction appelée sur tous les clients. 
     /// </summary>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcPoserAssistance() {
 
         assistanceState = State.JOUEE;
@@ -435,7 +435,7 @@ public class Assistance : Carte, ICarte {
     /// Délier une assistance à une entité. Fonction appelée sur le serveur. 
     /// </summary>
     /// <param name="carteAffectee">L'entité à laquelle cette assistance est déliée</param>
-    [Command]
+    [Command(channel=0)]
     void CmdDelierAssistance(GameObject carteAffectee) {
         RpcDelierAssistance(carteAffectee); 
     }
@@ -444,7 +444,7 @@ public class Assistance : Carte, ICarte {
     /// Délier une assistance à une entité. Fonction appelée sur le chaque client. 
     /// </summary>
     /// <param name="carteAffectee">L'entité à laquelle cette assistance est déliée</param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcDelierAssistance(GameObject carteAffectee) {
         assistanceState = State.JOUEE;
         ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
@@ -464,7 +464,7 @@ public class Assistance : Carte, ICarte {
     /// Lier une assistance à une entité. Fonction appelée sur le serveur. 
     /// </summary>
     /// <param name="carteAffectee">L'entité à laquelle cette assistance est liée</param>
-    [Command]
+    [Command(channel=0)]
     void CmdLierAssistance(GameObject carteAffectee) {
         /*
          * Changement effectués sur le réseau. 
@@ -476,7 +476,7 @@ public class Assistance : Carte, ICarte {
     /// Lier une assistance à une entité. Fonction appelée sur le chaque client. 
     /// </summary>
     /// <param name="carteAffectee">L'entité à laquelle cette assistance est liée</param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcLierAssistance(GameObject carteAffectee) {
         
         assistanceState = State.ASSOCIE_A_CARTE;
@@ -593,7 +593,7 @@ public class Assistance : Carte, ICarte {
     /// <param name="_EffetString">Attribut de la carte. On parle ici des effets sous la forme à "décortiquer" et pas la forme 
     /// "compréhensible"</param>
     /// <param name="_EffetsToDisplay">Attribut de la carte. Forme compréhensible. </param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcsetoID(int _IDCardGame, string _oID, string _Name, string _shortCode,
         int _STAT, string _EffetString, string _EffetsToDisplay) {
         IDCardGame = _IDCardGame;
@@ -631,7 +631,7 @@ public class Assistance : Carte, ICarte {
     /// Detruire la carte. 
     /// Serveur. 
     /// </summary>
-    [Command]
+    [Command(channel=0)]
     void CmdDetruireCarte() {
 
         RpcDetruireCarte(); 
@@ -641,7 +641,7 @@ public class Assistance : Carte, ICarte {
     /// Detruire la carte. 
     /// Appelé sur tous les clients. 
     /// </summary>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     void RpcDetruireCarte() {
 
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;

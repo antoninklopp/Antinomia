@@ -37,7 +37,6 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
     public override void Start() {
         base.Start();
-        
     }
 
     /// <summary>
@@ -78,6 +77,8 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             FindLocalPlayer().GetComponent<Player>().CmdAjouterEffetALaPile(IDObjetEffet, 
                                         ListeIDCardGameCible, numeroEffet, numeroListeEffet, playerID);
         }
+
+        CmdEffetRecu(FindLocalPlayer().GetComponent<Player>().PlayerID); 
     }
 
     /// <summary>
@@ -88,7 +89,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">Le numero de l'effet dans la liste</param>
     /// <param name="numeroListeEffet">Le numero de la liste d'effets</param>
     /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
-    [Command]
+    [Command(channel=0)]
     void CmdAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
         RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
@@ -103,7 +104,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">Le numero de l'effet dans la liste</param>
     /// <param name="numeroListeEffet">Le numero de la liste d'effets</param>
     /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     public void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
 
@@ -243,7 +244,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="effetI"></param>
     /// <param name="_PlayerID"></param>
-    [Command]
+    [Command(channel=0)]
     private void CmdJouerEffetPile(int effetI, int _PlayerID) {
         Debug.Log("Serveur CmdJouerEffetPile"); 
         RpcJouerEffetPile(effetI, _PlayerID); 
@@ -255,7 +256,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="effetI"></param>
     /// <param name="_PlayerID"></param>
-    [ClientRpc]
+    [ClientRpc(channel=0)]
     private void RpcJouerEffetPile(int effetI, int _PlayerID) {
         AntinomiaLog("On joue l'effet"); 
         StartCoroutine(pileEffets[effetI].GetComponent<EffetInPile>().JouerEffet(_PlayerID)); 
@@ -310,13 +311,26 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         } else {
             return true; 
         }
-
-
     }
 
     public List<GameObject> GetPileEffets() {
         return pileEffets; 
     }
 
+    /// <summary>
+    /// Verification que l'information a bien été reçue par le joueur. 
+    /// </summary>
+    /// <param name="PlayerID">PlayerID du joueur qui a RECU l'effet. </param>
+    [Command(channel=0)]
+    public void CmdEffetRecu(int PlayerID) {
+        RpcEffetRecu(PlayerID); 
+    }
+
+    [ClientRpc(channel=0)]
+    public void RpcEffetRecu(int PlayerID) {
+        if(PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
+
+        }
+    }
     
 }

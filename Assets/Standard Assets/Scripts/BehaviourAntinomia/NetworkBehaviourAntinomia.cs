@@ -72,7 +72,7 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
     /// <returns>Joueur local</returns>
     public GameObject FindLocalPlayer() {
         /*
-		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command]
+		 * Trouver le joueur local, pour lui faire envoyer les fonctions [Command(channel=0)]
 		 */
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
         if (Players[0].GetComponent<Player>().isLocalPlayer) {
@@ -168,7 +168,7 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
     /// <returns>L'objet Player qui n'est pas celui du joueur local</returns>
     protected GameObject FindNotLocalPlayer() {
         /*
-		 * Trouver le joueur qui n'est pas local, pour lui faire envoyer les fonctions [Command]
+		 * Trouver le joueur qui n'est pas local, pour lui faire envoyer les fonctions [Command(channel=0)]
 		 */
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
         if (!Players[0].GetComponent<Player>().isLocalPlayer) {

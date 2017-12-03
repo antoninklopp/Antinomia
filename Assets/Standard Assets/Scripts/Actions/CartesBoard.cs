@@ -68,7 +68,7 @@ public class CartesBoard : NetworkBehaviourAntinomia {
 
 	}
 
-	[Command]
+	[Command(channel=0)]
 	void CmdCarteDeposee(GameObject NewCard){
 		/*
 		 * Depot d'une carte sur le board, pour l'instant aucune vérification n'est faite. 

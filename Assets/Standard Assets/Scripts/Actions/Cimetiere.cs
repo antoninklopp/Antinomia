@@ -57,7 +57,7 @@ public class Cimetiere : NetworkBehaviour {
     /// Deposer une carte dans le cimetiere
     /// </summary>
     /// <param name="NewCard">Objet carte déposé</param>
-	[Command]
+	[Command(channel=0)]
 	void CmdCarteDeposee(GameObject NewCard){
         /*
 		 * Depot d'une carte sur le board, pour l'instant aucune vérification n'est faite. 
