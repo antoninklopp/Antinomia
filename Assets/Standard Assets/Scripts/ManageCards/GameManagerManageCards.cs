@@ -44,7 +44,9 @@ public class GameManagerManageCards : MonoBehaviour {
     /// <summary>
     /// Liste de tous les boutons de decks. 
     /// </summary>
-    List<GameObject> allDecksButtonsList; 
+    List<GameObject> allDecksButtonsList;
+
+    private GameObject SupprimerDeck;
 
     // Use this for initialization
     void Start() {
@@ -54,6 +56,8 @@ public class GameManagerManageCards : MonoBehaviour {
         CardPrefab = GameObject.Find("Carte");
         ContentAllCards = GameObject.Find("ContentAllCards");
         ContentAllDecks = GameObject.Find("ContentAllDecks");
+        SupprimerDeck = GameObject.Find("SupprimerDeck");
+        SupprimerDeck.SetActive(false); 
 
         DecksButton = GameObject.Find("DecksButton");
 
@@ -303,8 +307,10 @@ public class GameManagerManageCards : MonoBehaviour {
             newButton.transform.SetParent(DecksButton.transform.Find("Viewport").Find("Content"), false);
             newButton.transform.Find("Text").gameObject.GetComponent<Text>().text = "DECK " + (i + 1).ToString();
             int number = i; 
+            // Changement de deck. 
             newButton.GetComponent<Button>().onClick.AddListener(delegate { changeDeckView(number + 1); });
-            newButton.GetComponent<Button>().onClick.AddListener(delegate { changeColorDeckButton(number); }); 
+            newButton.GetComponent<Button>().onClick.AddListener(delegate { changeColorDeckButton(number); });
+            
             allDecksButtonsList.Add(newButton); 
         }
     }
@@ -317,5 +323,32 @@ public class GameManagerManageCards : MonoBehaviour {
                 allDecksButtonsList[i].GetComponent<Image>().color = Color.white;
             }
         }
+    }
+
+    /// <summary>
+    /// Ajouter un deck au joueur
+    /// </summary>
+    public void AjouterDeck() {
+        // On crée un deck 
+        StartCoroutine(playerInfo.createDeckRoutine());
+        // On update l'UI, en laissant le deck courant. 
+        StartCoroutine(setAllDecks(currentDeckNumber)); 
+    }
+
+    public void RemoveDeck() {
+        // Il faut demander au joueur s'il est sûr de vouloir supprimer le deck. 
+        SupprimerDeck.SetActive(true);
+        SupprimerDeck.GetComponent<SupprimerDeck>().Supprimer(currentDeckNumber); 
+    }
+
+    /// <summary>
+    /// Recupère la réponse de supprimer deck après une demande de suppression par le joueur. 
+    /// </summary>
+    /// <param name="reponse">1 si oui, 2 si non</param>
+    public void ReponseRemoveDeck(int reponse) {
+        if (reponse == 1) {
+            playerInfo.removeDeck(currentDeckNumber); 
+        }
+        SupprimerDeck.SetActive(false); 
     }
 }

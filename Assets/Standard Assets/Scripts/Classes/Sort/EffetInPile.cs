@@ -263,7 +263,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                             // Sinon , il faut quand même réactiver la pile
                             getGameManager().GetComponent<GameManager>().ReactivateButtonPhase();
                         }
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(0.2f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
                         effetTermine = true;
                         yield break;

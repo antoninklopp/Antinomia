@@ -185,6 +185,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\GameManagerManageCards.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\ImageCard.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\RemoveCardFromDeck.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ManageCards\SupprimerDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\AttackMyPlayer.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\IA\IA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\IA\LogActionIA.cs" />

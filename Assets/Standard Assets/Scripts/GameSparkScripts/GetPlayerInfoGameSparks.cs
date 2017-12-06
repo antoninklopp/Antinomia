@@ -643,5 +643,20 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
         }
     }
 
+    public void removeDeck(int deckNumber) {
+        new GameSparks.Api.Requests.LogEventRequest()
+            .SetEventKey("removeDeck")
+            .SetEventAttribute("deckID", deckNumber)
+            .Send((response) => {
+                if (!response.HasErrors) {
+                    Debug.Log("Deck retiré " + response.ScriptData.GetInt("deck created").Value.ToString());
+                }
+                else {
+                    Debug.Log("Le deck n'a pas pu être retiré.");
+                }
+                finish = true;
+            });
+    }
+
 
 }
