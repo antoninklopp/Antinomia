@@ -153,7 +153,13 @@ public class GameManagerManageCards : MonoBehaviour {
 		int nombreCartesParLigne;
 #if (UNITY_ANDROID)
 		nombreCartesParLigne = (int)(longueurAllCards/longueurCartesAndroid);
-                ContentAllCards.GetComponent<GridLayoutGroup>().cellSize = new Vector2(longueurCartesAndroid, longueurCartesAndroid * rapportLongueurHauteurCarte); 
+                ContentAllCards.GetComponent<GridLayoutGroup>().cellSize = new Vector2(longueurCartesAndroid, longueurCartesAndroid * rapportLongueurHauteurCarte);
+
+        // On change la taille de l'objet qui accueille les cartes. 
+        ScrollView.transform.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(
+            ScrollView.transform.gameObject.GetComponent<RectTransform>().sizeDelta.x, longueurCartesAndroid *
+            rapportLongueurHauteurCarte * Cards.Count / nombreCartesParLigne); 
+
 #else
         if (Cards.Count == 0) {
             nombreCartesParLigne = (int)(longueurAllCards / longueurCartesOrdinateur);

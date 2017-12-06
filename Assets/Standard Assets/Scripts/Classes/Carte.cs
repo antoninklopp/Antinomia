@@ -503,7 +503,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="Cible">Si c'est un sort qui appelle la méthode, il peut déjà avoir une cible</param>
     /// <param name="nouveauTour">true si on vient de passer à un nouveau tour</param>
     public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false, 
-        bool nouveauTour=false, GameObject Cible=null, int numeroListEffet=0, int deposeCarte=0) {
+        bool nouveauTour=false, GameObject Cible=null, int numeroListEffet=0, int deposeCarte=0, bool changementDomination=false) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
             return; 
@@ -512,7 +512,7 @@ public class Carte : NetworkBehaviourAntinomia {
             // On regarde les effets un par un. 
             // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
             bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut, nouveauTour:nouveauTour,
-                                               Cible:Cible, deposeCarte:deposeCarte);
+                                               Cible:Cible, deposeCarte:deposeCarte, changementDomination:changementDomination);
             Debug.Log("<color=orange>" + effetOK.ToString() + "</Color>"); 
             if (effetOK) {
                 // Dans le cas où toutes les conditions sont réunies. 
@@ -1992,8 +1992,9 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Dans ce cas là, on appelle cette méthode. 
     /// Cette méthode est override dans la classe Entite <seealso cref="Entite.GererEffetsPonctuel"/>
     /// </summary>
-    public virtual void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false) {
-        GererEffets(AllEffets, _currentPhase:phase, debut:debut, numeroListEffet:0); 
+    public virtual void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false, 
+        bool changementDomination=false) {
+        GererEffets(AllEffets, _currentPhase:phase, debut:debut, numeroListEffet:0, changementDomination:changementDomination); 
     }
 
     /// <summary>

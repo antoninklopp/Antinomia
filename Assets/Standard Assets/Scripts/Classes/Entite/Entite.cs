@@ -1852,7 +1852,8 @@ public class Entite : Carte, ICarte {
     /// <summary>
     /// <see cref="Carte.GererEffetsPonctuel"/>
     /// </summary>
-    public override void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false) {
+    public override void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false, 
+        bool changementDomination=false) {
         base.GererEffetsPonctuel();
 
         GameManager.AscendanceTerrain _ascendanceTerrain = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain();
@@ -1874,7 +1875,8 @@ public class Entite : Carte, ICarte {
     /// <param name="phase"></param>
     /// <param name="debut"></param>
     /// <param name="deposeCarte"></param>
-    public void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false, int deposeCarte=0) {
+    public void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false, int deposeCarte=0, 
+        bool changementDomination=false) {
         GererEffets(AllEffets, _currentPhase: phase, debut: debut, numeroListEffet: 0, deposeCarte:deposeCarte);
 
         GameManager.AscendanceTerrain _ascendanceTerrain = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain();

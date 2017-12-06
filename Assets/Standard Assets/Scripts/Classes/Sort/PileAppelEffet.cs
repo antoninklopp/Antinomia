@@ -198,14 +198,15 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <summary>
     /// Defaire la pile d'effets. 
     /// </summary>
-    public void DefaireLaPile() {
-        StartCoroutine(JouerLesEffets()); 
+    /// <param name="jeuEnPause">true si le jeu a été mis en pause au moins une fois pendant le flux. </param>
+    public void DefaireLaPile(bool jeuEnPause=false) {
+        StartCoroutine(JouerLesEffets(jeuEnPause)); 
     }
 
     /// <summary>
     /// Quand tous les joueurs ont joué leurs effets successifs. 
     /// </summary>
-    private IEnumerator JouerLesEffets() {
+    private IEnumerator JouerLesEffets(bool jeuEnPause=false) {
 
         if (hasAuthority) {
             AntinomiaLog("J'ai autorité sur la pile");
@@ -213,7 +214,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             for (int i = CartesAssociees.Count - 1; i >= 0; --i) {
                 effetTermine = false;
                 Debug.Log("On joue un effet dans la boucle for ici."); 
-                CmdJouerEffetPile(i, FindLocalPlayer().GetComponent<Player>().PlayerID);
+                CmdJouerEffetPile(i, FindLocalPlayer().GetComponent<Player>().PlayerID, jeuEnPause:jeuEnPause);
                 while (!effetTermine) {
                     yield return new WaitForSeconds(0.1f);
                 }
@@ -245,9 +246,9 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="effetI"></param>
     /// <param name="_PlayerID"></param>
     [Command(channel=0)]
-    private void CmdJouerEffetPile(int effetI, int _PlayerID) {
+    private void CmdJouerEffetPile(int effetI, int _PlayerID, bool jeuEnPause) {
         Debug.Log("Serveur CmdJouerEffetPile"); 
-        RpcJouerEffetPile(effetI, _PlayerID); 
+        RpcJouerEffetPile(effetI, _PlayerID, jeuEnPause); 
     }
 
     /// <summary>
@@ -257,9 +258,9 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="effetI"></param>
     /// <param name="_PlayerID"></param>
     [ClientRpc(channel=0)]
-    private void RpcJouerEffetPile(int effetI, int _PlayerID) {
+    private void RpcJouerEffetPile(int effetI, int _PlayerID, bool jeuEnPause) {
         AntinomiaLog("On joue l'effet"); 
-        StartCoroutine(pileEffets[effetI].GetComponent<EffetInPile>().JouerEffet(_PlayerID)); 
+        StartCoroutine(pileEffets[effetI].GetComponent<EffetInPile>().JouerEffet(_PlayerID, jeuEnPause)); 
     }
 
     /// <summary>

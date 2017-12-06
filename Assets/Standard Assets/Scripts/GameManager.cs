@@ -1032,6 +1032,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     /// <summary>
     /// Montrer l'effet du terrain. 
+    /// Changer l'effet du terrain. 
     /// </summary>
     /// <param name="_ascendance">Ascnedance de la carte</param>
     void EffetTerrain(Entite.Ascendance _ascendance) {
@@ -1164,11 +1165,12 @@ public class GameManager : NetworkBehaviourAntinomia {
             if (gamePaused) {
 
             } else {
-                Debug.Log("Le jeu reprend. "); 
+                Debug.Log("Le jeu reprend"); 
                 // Une fois qu'il a fini ses actions on défait la pile. 
                 PauseButton.SetActive(false);
                 //On regarde s'il y a une pile d'effet en cours. 
-                DefairePile(); 
+                AntinomiaLog("Je défais la pile"); 
+                DefairePile(true); 
 
             }
         } else {
@@ -1180,7 +1182,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                 DisplayInfo.GetComponent<Text>().text = "La partie a repris.";
                 StartCoroutine(DeactivateDisplayInfo());
                 PauseButton.SetActive(false);
-                DefairePile(); 
+                DefairePile(true); 
             }
         }
 
@@ -1194,13 +1196,19 @@ public class GameManager : NetworkBehaviourAntinomia {
         Debug.Log("game Is Actually paused.");
     }
 
-    void DefairePile() {
+    /// <summary>
+    /// Defaire la pile des effets
+    /// </summary>
+    /// <param name="jeuEnPause">true si le jeu a été mis en pause. Si le jeu a été mis en pause, 
+    /// on empêche le changement de phase.</param>
+    void DefairePile(bool jeuEnPause = false) {
         if (GameObject.FindGameObjectWithTag("Pile") != null) {
             GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
             if (Pile.GetComponent<PileAppelEffet>().DernierEffetVientJoueur(FindLocalPlayer().GetComponent<Player>().PlayerID)) {
                 // Si c'est le joueur qui a mis un effet en dernier dans la pile, on la défait. 
                 AntinomiaLog("Après avoir mis le jeu en pause, je défais la pile");
-                Pile.GetComponent<PileAppelEffet>().DefaireLaPile();
+                Pile.GetComponent<PileAppelEffet>().DefaireLaPile(jeuEnPause);
+                AntinomiaLog("C'est moi qui défais la pile"); 
             }
             //Sinon on ne fait rien. 
         }
@@ -1521,12 +1529,12 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Regarder si certaines cartes peuvent jouer un ou plusieurs effet(s).
     /// </summary>
-    public void CheckAllEffetsCartes() {
+    public void CheckAllEffetsCartes(bool changementDomination = false) {
         GameObject[] AllEntites = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
         for (int i = 0; i < AllEntites.Length; ++i) {
             try {
                 if (AllEntites[i].GetComponent<Entite>().isFromLocalPlayer) {
-                    AllEntites[i].GetComponent<Entite>().GererEffetsPonctuel(Phase);
+                    AllEntites[i].GetComponent<Entite>().GererEffetsPonctuel(Phase, changementDomination:changementDomination);
                 }
             }
             catch (NullReferenceException e) {
@@ -1539,7 +1547,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             try {
                 if (AllAssistances[i].GetComponent<Assistance>().isFromLocalPlayer &&
                     AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.JOUEE) {
-                    AllAssistances[i].GetComponent<Assistance>().GererEffetsPonctuel(Phase);
+                    AllAssistances[i].GetComponent<Assistance>().GererEffetsPonctuel(Phase, changementDomination: changementDomination);
                 }
             }
             catch (NullReferenceException e) {

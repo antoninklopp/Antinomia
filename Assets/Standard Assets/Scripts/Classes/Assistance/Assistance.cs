@@ -104,12 +104,15 @@ public class Assistance : Carte, ICarte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
 
 #if (UNITY_ANDROID || UNITY_IOS)
-        InformationsSurLaCarte(); 
+        // InformationsSurLaCarte(); 
 #else
         CliqueSimpleCarte();
 #endif
     }
 
+    /// <summary>
+    /// Lorsque la souris ou le doigt est levé(e)
+    /// </summary>
     public void OnMouseUp() {
         Debug.Log(Vector3.Distance(positionBeforeDragging, transform.position));
 
@@ -132,7 +135,9 @@ public class Assistance : Carte, ICarte {
         dragging = false;
     }
 
-
+    /// <summary>
+    /// Lorsqu'on bouge la carte. 
+    /// </summary>
     public override void OnMouseDrag() {
 
         Vector3 MousePosition = Input.mousePosition;
@@ -149,6 +154,10 @@ public class Assistance : Carte, ICarte {
 #endif
     }
 
+    /// <summary>
+    /// Lors d'un clic sur la carte/ ou d'un drag pour android. 
+    /// </summary>
+    /// <param name="drag">la carte est-elle drag? </param>
     public void CliqueSimpleCarte(bool drag = false) {
         if (assistanceState == State.CIMETIERE) {
             return;
@@ -297,10 +306,10 @@ public class Assistance : Carte, ICarte {
         } else {
             GameObject Proche = Sort.CarteProche(gameObject);
             if (Proche != null) {
-                RecupererCarteJouerSort(Proche);
+                RecupererCarteJouerAssistance(Proche);
             }
             else {
-                DisplayMessage("Vous n'avez pas assez d'AKA pour jouer ce sort");
+                DisplayMessage("Impossible de jouer l'assistance.");
                 clicked = 0;
                 dragging = false;
                 Main.SendMessage("ReordonnerCarte");
@@ -308,7 +317,7 @@ public class Assistance : Carte, ICarte {
         }
     }
 
-    void RecupererCarteJouerSort(GameObject carteAffectee) {
+    void RecupererCarteJouerAssistance(GameObject carteAffectee) {
         /*
          * Cette fonction sera appelée par la carte sur laquelle le joueur aura cliqué après avoir cliqué sur le sort. 
          * 
@@ -334,7 +343,7 @@ public class Assistance : Carte, ICarte {
             CmdPoserAssistance();
 
             JouerEffetDeposeCarte();
-
+            Debug.Log("Detruire " + carteAffectee.GetComponent<Carte>().Name); 
             carteAffectee.SendMessage("DetruireCarte");
         }
         else if (assistanceState == State.JOUEE) {
@@ -498,7 +507,8 @@ public class Assistance : Carte, ICarte {
         GetComponent<SpriteRenderer>().color = Color.red;
 
         // Dessiner une ligne entre l'assistance et la carte. 
-        LiaisonEntiteAssistance = Resources.Load("Prefabs/LiaisonEntiteAssistance", typeof(GameObject)) as GameObject;
+        GameObject LineRendererPrefab = Resources.Load("Prefabs/LiaisonEntiteAssistance", typeof(GameObject)) as GameObject;
+        LiaisonEntiteAssistance = Instantiate(LineRendererPrefab); 
         LiaisonEntiteAssistance.GetComponent<LineRendererAssistanceEntite>().setLine(carteAffectee, gameObject); 
     }
     

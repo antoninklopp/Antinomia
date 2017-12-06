@@ -175,7 +175,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// A la fin de cette coroutine, les effets devront être parfaitement execute sur les deux machines. 
     /// </summary>
     /// <returns>NONE</returns>
-    public IEnumerator JouerEffet(int playerID) {
+    public IEnumerator JouerEffet(int playerID, bool jeuEnPause=false) {
         // On vérifie que c'est bien le joueur qui a créé l'effet qui le joue. 
         // Debug.Log(PlayerIDAssocie);
         // Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
@@ -252,15 +252,21 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         yield break;
                     // Passage à une nouvelle phase
                     case -4:
-                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GoToNextPhase(defairePile: true);
-                        AntinomiaLog("Appel à GoToNextPhase"); 
-                        Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
-                        Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour); 
-                        Debug.Log("On va à la prochaine phase"); 
+                        // Si le jeu a été mis en pause, on ne change pas de phase. 
+                        if (!jeuEnPause) {
+                            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GoToNextPhase(defairePile: true);
+                            AntinomiaLog("Appel à GoToNextPhase");
+                            // Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
+                            // Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour);
+                            // Debug.Log("On va à la prochaine phase");
+                        } else {
+                            // Sinon , il faut quand même réactiver la pile
+                            getGameManager().GetComponent<GameManager>().ReactivateButtonPhase();
+                        }
                         yield return new WaitForSeconds(0.5f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
-                        effetTermine = true; 
-                        yield break; 
+                        effetTermine = true;
+                        yield break;
                 }
 
                 yield return thisCarte.GetComponent<Carte>().GererActionsCoroutine(effetJoue.AllActionsEffet, numeroEffet,

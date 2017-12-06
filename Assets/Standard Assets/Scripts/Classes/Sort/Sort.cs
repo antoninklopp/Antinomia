@@ -675,11 +675,15 @@ public class Sort : Carte, ICarte {
     /// <returns>La carte la plus proche, ou null si aucune n'est assez proche. </returns>
     public static GameObject CarteProche(GameObject MaCarte, float distance=1f) {
         Carte[] AllCartes = FindObjectsOfType(typeof(Carte)) as Carte[];
-        List<GameObject> CartesProches = new List<GameObject>(); 
+        List<GameObject> CartesProches = new List<GameObject>();
+
+        Debug.Log(AllCartes.Length); 
 
         for (int i = 0; i < AllCartes.Length; i++) {
-            GameObject Carte = AllCartes[i].gameObject; 
-            if (Vector3.Distance(MaCarte.transform.position, Carte.transform.position) < distance) {
+            GameObject Carte = AllCartes[i].gameObject;
+            Debug.Log(Vector3.Distance(MaCarte.transform.position, Carte.transform.position)); 
+            if (Vector2.Distance(MaCarte.transform.position, Carte.transform.position) < distance && MaCarte != Carte) {
+                Debug.Log("Il y a une carte proche ici"); 
                 CartesProches.Add(Carte);
             }
         }

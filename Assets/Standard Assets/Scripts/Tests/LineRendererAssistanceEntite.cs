@@ -23,7 +23,7 @@ public class LineRendererAssistanceEntite : MonoBehaviour {
     /// <param name="Entite"></param>
     /// <param name="Assistance"></param>
     public void setLine(GameObject Entite, GameObject Assistance) {
-
+        lineRenderer = transform.GetChild(0).gameObject.GetComponent<LineRenderer>();
         lineRenderer.SetPosition(0, Entite.transform.position);
         lineRenderer.SetPosition(1, Assistance.transform.position);
 
