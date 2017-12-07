@@ -184,7 +184,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _sort.Niveau = data.GetInt("Niveau").Value;
             //_sort.Effet = data.GetString("Effet");
             //_sort.Condition = data.GetString("Condition");
-            _sort.Condition = data.GetString("Condition"); 
+            _sort.ConditionSort = data.GetString("Condition"); 
             _sort.stringToEffetList(data.GetString("Effet"));
             _sort.AllEffetsString = data.GetString("Effet");
             _sort.AllEffetsStringToDisplay = data.GetString("EffetString"); 

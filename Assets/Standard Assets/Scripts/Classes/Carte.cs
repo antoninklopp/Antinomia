@@ -786,7 +786,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         if (_conditions[j].properIntCondition > FindLocalPlayer().GetComponent<Player>().getAKA()) {
                             DisplayMessage("Vous n'avez pas assez d'AKA"); 
                             return false; 
-                        }
+                        } 
                         break;
                     case Condition.ConditionEnum.CARTE_DANS_SANCTUAIRE:
                         if (GetComponent<CarteType>().thisCarteType != CarteType.Type.ENTITE) {
@@ -1229,6 +1229,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     }
                     else if (j == 0) {
                         // On ne met l'effet dans la pile que si le 1er de la liste parce que dans tous les cas les autres seront joués
+                        // Comme ça, on ne met pas plusieurs effets dans la pile. 
                         // sinon. 
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
@@ -1239,6 +1240,12 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Action.ActionEnum.NONE:
                     break;
+                case Action.ActionEnum.PAYER_AKA:
+                    if (!jouerEffet) {
+                        // Comme c'est un cout à payer, on le paye directement, pas besoin de payer deux fois. 
+                        FindLocalPlayer().GetComponent<Player>().subtractAKA(_actions[j].properIntAction);
+                    }
+                    break; 
                 default:
                     Debug.LogWarning("Cet effet n'est pas géré");
                     break;

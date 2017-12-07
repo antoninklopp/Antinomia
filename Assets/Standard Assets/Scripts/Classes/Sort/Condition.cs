@@ -161,6 +161,10 @@ public class Condition {
         /// </summary>
         DECLARE_ATTAQUE,
         /// <summary>
+        /// Utile pour un sort, si un effet est global, l'effet a lieu sur toutes les cartes. 
+        /// </summary>
+        EFFET_GLOBAL, 
+        /// <summary>
         /// Aucune condition nécessaire
         /// </summary>
         NONE

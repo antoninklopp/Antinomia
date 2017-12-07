@@ -178,6 +178,12 @@ public class Action {
         /// </summary>
         CARTE_DOIT_ATTAQUER,
         /// <summary>
+        /// Cette action correspond à une condition qui a pour but de vérifier au préalable si le
+        /// joueur peut payer le cout en AKA. 
+        /// Payer un cout en AKA. 
+        /// </summary>
+        PAYER_AKA, 
+        /// <summary>
         /// Aucune action
         /// </summary>
         NONE

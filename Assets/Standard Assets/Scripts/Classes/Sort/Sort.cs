@@ -15,7 +15,7 @@ public class Sort : Carte, ICarte {
      /// Pour pouvoir être joué, un sort doit avoir un niveau inférieur ou égal à l'AKA rémanent calculé au début du tour.
      /// </summary>
     public int Niveau;
-    public string Condition;
+    public string ConditionSort;
     public int CoutAKA;
 
     private bool dragging;
@@ -145,7 +145,7 @@ public class Sort : Carte, ICarte {
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
 
 #if (UNITY_ANDROID || UNITY_IOS)
-        InformationsSurLaCarte(); 
+        // InformationsSurLaCarte(); 
 #else
         CliqueSimpleCarte(); 
 #endif
@@ -388,14 +388,27 @@ public class Sort : Carte, ICarte {
          * true sinon
          */
         // Gestion de l'effet1
-         if (!AllEffets[0].AllActionsEffet[0].isEffetTargetAll()) {
+        Debug.Log(AllEffets[0].AllConditionsEffet[0].ConditionCondition);
+         if (!hasEffetGlobal(0)) {
+            // Pas d'effet global. 
             return false; 
         } else {
-            GererEffets(AllEffets, debut: true); 
+            // Effet global 
+            GererEffets(AllEffets, debut: true);
+            Debug.Log("Cette carte a un effet sur plusieurs cartes. "); 
             CmdDetruireCarte(); 
             return true; 
         }
 
+    }
+
+    bool hasEffetGlobal(int numeroEffet) {
+        foreach (Condition cond in AllEffets[numeroEffet].AllConditionsEffet) {
+            if (cond.ConditionCondition == Condition.ConditionEnum.EFFET_GLOBAL) {
+                return true; 
+            }
+        }
+        return false; 
     }
 
     /// <summary>

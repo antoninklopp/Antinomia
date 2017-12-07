@@ -331,6 +331,9 @@ public class EffetInPile : NetworkBehaviourAntinomia {
 
     }
 
+    /// <summary>
+    /// Detruire les unités temporaires, créées par la pile. 
+    /// </summary>
     private void DestructionUnitesTemporaires() {
         EntiteTemporaire[] temporaires = FindObjectsOfType<EntiteTemporaire>();
         foreach (EntiteTemporaire temp in temporaires) {
