@@ -78,7 +78,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                                         ListeIDCardGameCible, numeroEffet, numeroListeEffet, playerID);
         }
 
-        CmdEffetRecu(FindLocalPlayer().GetComponent<Player>().PlayerID); 
+        // CmdEffetRecu(FindLocalPlayer().GetComponent<Player>().PlayerID); 
     }
 
     /// <summary>
@@ -95,6 +95,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
     }
 
+
     /// <summary>
     /// Ajouter un effet à la pile d'effet. 
     /// Appelé sur le client
@@ -104,8 +105,22 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">Le numero de l'effet dans la liste</param>
     /// <param name="numeroListeEffet">Le numero de la liste d'effets</param>
     /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
-    [ClientRpc(channel=0)]
+    [ClientRpc(channel = 0)]
     public void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
+                                      int numeroListeEffet, int PlayerID) {
+        AjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
+    }
+
+    /// <summary>
+    /// Ajouter un effet à la pile d'effet. 
+    /// Appelé sur le client
+    /// </summary>
+    /// <param name="IDObjetEffet">IDCardGame de la carte qui a créé l'effet</param>
+    /// <param name="ListeObjetsCible">Liste des IDCardGame des objets visés par l'effet</param>
+    /// <param name="numeroEffet">Le numero de l'effet dans la liste</param>
+    /// <param name="numeroListeEffet">Le numero de la liste d'effets</param>
+    /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
+    public void AjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
 
         GameObject NouveauEffetInPile = Instantiate(EffetInPilePrefab);
@@ -210,7 +225,8 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
         if (hasAuthority) {
             AntinomiaLog("J'ai autorité sur la pile");
-            int NombreEffet = CartesAssociees.Count; 
+            int NombreEffet = CartesAssociees.Count;
+            Debug.Log("Il y a " + NombreEffet.ToString() + " effets dans la pile"); 
             for (int i = CartesAssociees.Count - 1; i >= 0; --i) {
                 effetTermine = false;
                 Debug.Log("On joue un effet dans la boucle for ici."); 
@@ -221,18 +237,19 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                 yield return new WaitForSeconds(0.5f);
             }
 
-            if (NombreEffet != CartesAssociees.Count) {
-                // Si on a ajouté un effet dans la pile entre temps. 
-                StartCoroutine(JouerLesEffets());
-                Debug.Log("On recommence dans la méthode jouerEffets");
-            }
-            else {
+            //if (NombreEffet != CartesAssociees.Count) {
+            //    // Si on a ajouté un effet dans la pile entre temps. 
+            //    StartCoroutine(JouerLesEffets());
+            //    Debug.Log("On recommence dans la méthode jouerEffets");
+            //}
+            //else {
                 // Detruire l'objet pile. 
-                FindLocalPlayer().GetComponent<Player>().CmdDetruirePile(gameObject);
-            }
+            FindLocalPlayer().GetComponent<Player>().CmdDetruirePile(gameObject);
+            Debug.Log("<color=red> La pile devrait être détruite </color>"); 
+            //}
 
         } else {
-            // Si le dernier effet est chez quelqu'un qui n'a pas instancier la pile
+            // Si le dernier effet est chez quelqu'un qui n'a pas instancié la pile
             // On doit envoyer l'information à l'autre joueur de défaire la pile. 
             AntinomiaLog("Je n'ai pas autorité je passe à l'autre joueur."); 
             FindLocalPlayer().GetComponent<Player>().CmdJouerEffet(); 
@@ -274,8 +291,12 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <summary>
     /// Quand l'effet est termine on met effetTermine à true pour pouvoir faire l'effet Suivant.
     /// </summary>
-    void EffetTermine() {
-        effetTermine = true; 
+    public void EffetTermine() {
+        FindLocalPlayer().GetComponent<Player>().CmdSetEffetTermine(); 
+    }
+
+    public void setEffetTermineFromPlayer(bool termine) {
+        effetTermine = termine; 
     }
 
     /// <summary>

@@ -910,8 +910,22 @@ public class Player : NetworkBehaviourAntinomia	 {
     [ClientRpc(channel=0)]
     public void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
                                       int numeroListeEffet, int PlayerID) {
-        GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible,
+        GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().AjouterEffetALaPile(IDObjetEffet, ListeObjetsCible,
                                                                     numeroEffet, numeroListeEffet, PlayerID); 
+    }
+
+    /// <summary>
+    /// Dire qu'un effet est terminé, quand une pile n'a pas autorité. 
+    /// </summary>
+    [Command(channel = 0)]
+    public void CmdSetEffetTermine() {
+        RpcSetEffetTermine(); 
+    }
+
+    [ClientRpc(channel =0)]
+    public void RpcSetEffetTermine() {
+        GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
+        Pile.GetComponent<PileAppelEffet>().setEffetTermineFromPlayer(true); 
     }
 
     /// <summary>
@@ -1089,6 +1103,19 @@ public class Player : NetworkBehaviourAntinomia	 {
 
     public int getAKA() {
         return PlayerAKA; 
+    }
+
+    [Command(channel =0)]
+    public void CmdChoixCartesFini() {
+        RpcChoixCartesFini(); 
+    } 
+
+    [ClientRpc(channel =0)]
+    public void RpcChoixCartesFini() {
+        // la méthode ne doit être jouée que sur le joueur qui ne l'a pas envoyée. 
+        if (!isLocalPlayer) {
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ChoixAdversaireFini(); 
+        }
     }
 
 }

@@ -27,7 +27,7 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
     /// </summary>
     /// <param name="_ID_">IDCardGame de la carte recherchée</param>
     /// <returns>la carte si elle a été trouvée, crée une exception sinon. </returns>
-    public GameObject FindCardWithID(int _ID_) {
+    public static GameObject FindCardWithID(int _ID_) {
         /*
 		 * Trouver la carte avec la bonne ID. 
          * Doit être la même méthode que dans player (à relier). 
@@ -37,8 +37,12 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
 
         for (int i = 0; i < AllCartesType.Length; ++i) {
             GameObject NewCarte = AllCartesType[i].gameObject;
-            if (NewCarte.GetComponent<CarteType>().instanciee) {
-                AllCartes.Add(NewCarte);
+            if (NewCarte.GetComponent<EntiteTemporaire>() != null) {
+
+            } else {
+                if (NewCarte.GetComponent<CarteType>().instanciee) {
+                    AllCartes.Add(NewCarte);
+                }
             }
         }
 

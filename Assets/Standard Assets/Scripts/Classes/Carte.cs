@@ -1983,7 +1983,11 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="color">La couleur qu'on veut donner à la carte.</param>
     public void setColor(Color color) {
-        GetComponent<SpriteRenderer>().color = color; 
+        if (GetComponent<SpriteRenderer>() != null) {
+            GetComponent<SpriteRenderer>().color = color;
+        } else {
+            Debug.Log("Il n'y a pas de Sprite Renderer attaché à cet objet : " + Name); 
+        }
     }
 
     /// <summary>

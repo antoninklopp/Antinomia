@@ -23,7 +23,7 @@ public class Cimetiere : NetworkBehaviour {
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.
 		 */ 
-		print ("Reordonner Cimetiere");
+		Debug.Log ("Reordonner Cimetiere");
 
 		AllCreaturesCimetiere = new List<GameObject> (); 
 		foreach (Transform child in transform) {
@@ -75,6 +75,7 @@ public class Cimetiere : NetworkBehaviour {
 
         // Et on change le statut de la carte de main à cimetière. 
         if (NewCard.GetComponent<Entite>() != null) {
+            Debug.Log("La carte est maintenant au cimetiere"); 
             NewCard.SendMessage("setState", "CIMETIERE");
             NewCard.SendMessage("setClicked", false);
         }

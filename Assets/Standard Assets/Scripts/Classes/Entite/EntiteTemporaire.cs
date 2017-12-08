@@ -10,26 +10,17 @@ using UnityEngine;
 /// 
 /// Pour l'instant aucun effet n'est possible sur cette carte. 
 /// </summary>
-public class EntiteTemporaire : MonoBehaviour {
-
-    public string Name;
-    /// <summary>
-    /// IDCardGame de l'entité associée à cet carte. 
-    /// </summary>
-    public int IDCardGame;
-    public string shortCode;
+public class EntiteTemporaire : Carte {
 
     public Entite.State carteState; 
 
 	// Use this for initialization
-	void Start () {
+	public override void Start () {
 
 	}
-	
-	// Update is called once per frame
-	void Update () {
 
-	}
+    public override void OnMouseDown() {}
+    public override void OnMouseDrag() {}
 
     /// <summary>
     /// Définition d'une entité temporaire à partir d'une autre entité. 
@@ -55,8 +46,15 @@ public class EntiteTemporaire : MonoBehaviour {
         GetComponent<CarteType>().instanciee = false; 
     }
 
+    /// <summary>
+    /// Detruire l'entité temporaire.
+    /// </summary>
     public void DetruireTemporaire() {
         Destroy(gameObject); 
+    }
+
+    public GameObject getVraieEntite() {
+        return NetworkBehaviourAntinomia.FindCardWithID(IDCardGame); 
     }
     
 }

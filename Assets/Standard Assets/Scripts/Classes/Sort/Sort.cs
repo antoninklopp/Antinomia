@@ -302,7 +302,6 @@ public class Sort : Carte, ICarte {
                 Debug.Log("Cliqué une deuxième fois");
                 // CarteCibleeRayCast contient la référence de la carte qui est ciblee. 
                 Debug.Log("Je suis dans le raycast");
-
             }
             else {
                 // Display un message disant que le joueur n'a pas assez d'AKA pour jouer
@@ -314,9 +313,10 @@ public class Sort : Carte, ICarte {
         }
         // Si on a drag la carte
         else {
-            if (coutCarte <= FindLocalPlayer().GetComponent<Player>().PlayerAKA) {
+            if (coutCarte <= getGameManager().GetComponent<GameManager>().getAKAGlobalTour() || true) {
                 if (!ApplyEffectOnAll()) { // Si l'effet s'applique sur tous il est joué dans la fonction
-                    GameObject Proche = CarteProche(gameObject); 
+                    GameObject Proche = CarteProche(gameObject);
+                    Debug.Log(Proche.GetComponent<Carte>().Name); 
                     if (Proche != null) {
                         RecupererCarteJouerSort(Proche); 
                     } else {
@@ -367,6 +367,12 @@ public class Sort : Carte, ICarte {
         // On applique l'effet sur la carte. 
         // ApplyEffectOnCarte(carteAffectee);
 
+        // Ici, il faut regarder si l'entité est une entité temporaire.
+        if (CarteCiblee.GetComponent<EntiteTemporaire>() != null) {
+            // Si la carte est une carte temporaire. 
+            Debug.Log("La carte est une entité temporaire"); 
+            CarteCiblee = CarteCiblee.GetComponent<EntiteTemporaire>().getVraieEntite(); 
+        }
         GererEffets(AllEffets, Cible:CarteCiblee); 
 
         // Le sort a été joué. 
@@ -694,7 +700,7 @@ public class Sort : Carte, ICarte {
 
         for (int i = 0; i < AllCartes.Length; i++) {
             GameObject Carte = AllCartes[i].gameObject;
-            Debug.Log(Vector3.Distance(MaCarte.transform.position, Carte.transform.position)); 
+            Debug.Log(Vector2.Distance(MaCarte.transform.position, Carte.transform.position)); 
             if (Vector2.Distance(MaCarte.transform.position, Carte.transform.position) < distance && MaCarte != Carte) {
                 Debug.Log("Il y a une carte proche ici"); 
                 CartesProches.Add(Carte);

@@ -191,7 +191,8 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                 yield break; 
             }
 
-            if (FindCardWithID(IDObjectCardGame) != null || numeroEffet < 0) {
+            // if (FindCardWithID(IDObjectCardGame) != null || numeroEffet < 0) {
+            if (isCardAlive(IDObjectCardGame) || numeroEffet == -1 || numeroEffet == -4) {
                 Debug.Log("Depuis cette carte");
 
                 // On recrée la liste des cibles
@@ -269,19 +270,28 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         yield break;
                 }
 
+                Debug.Log("<color=yellow> On joue l'effet de cette carte </color>"); 
                 yield return thisCarte.GetComponent<Carte>().GererActionsCoroutine(effetJoue.AllActionsEffet, numeroEffet,
                                                                                                 EffetListNumber, CibleEffet);
-
+                yield return new WaitForSeconds(0.5f); 
+                Debug.Log("<color=yellow> L'effet joué par cette carte est terminé</color>"); 
                 effetTermine = true; 
             }
             else {
                 AntinomiaLog("La carte a été détruite");
+                effetTermine = true; 
             }
+            Debug.Log("<color=yellow> On passe à l'effet suivant. </color>");
             GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
 
-        }
+        } 
     }
 
+    /// <summary>
+    /// Gestion des effets ponctuels des cartes. 
+    /// </summary>
+    /// <param name="_carte"></param>
+    /// <param name="deposeCarte"></param>
     public void GererEffetsPonctuelPile(GameObject _carte, int deposeCarte=0) {
         switch (_carte.GetComponent<CarteType>().thisCarteType) {
             case CarteType.Type.ENTITE:
@@ -298,6 +308,9 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         }
     }
 
+    /// <summary>
+    /// Creation des entités temporaires. 
+    /// </summary>
     public void MontrerCartesDeplacement() {
         /*
          * Dans le cas où un effet est un déplacement de carte, 
@@ -339,6 +352,24 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         foreach (EntiteTemporaire temp in temporaires) {
             Destroy(temp.gameObject);
         }
+    }
+
+    public bool isCardAlive(int IDCardGame) {
+        if (FindCardWithID(IDCardGame) == null) {
+            return false; 
+        } else {
+            GameObject Card = FindCardWithID(IDCardGame);
+            Debug.Log("check " + Card.GetComponent<Carte>().Name + "vivante");
+            if (Card.GetComponent<Entite>() != null) {
+                Debug.Log(Card.GetComponent<Entite>().getState());
+            }
+            if ((Card.GetComponent<Entite>() != null) && (Card.GetComponent<Entite>().getState() == Entite.State.CIMETIERE)) {
+                return false; 
+            } else if ((Card.GetComponent<Sort>() != null) && (Card.GetComponent<Sort>().sortState == Sort.State.CIMETIERE)) {
+                return false; 
+            }
+        }
+        return true; 
     }
 
 }

@@ -61,7 +61,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// AKA sur le tour, c'est à dire à son niveau maximum au début du tour. 
     /// </summary>
-	int AKATour = 0;
+	private int AKATour = 0;
 #pragma warning restore CS0414 // Le champ 'GameManager.AKARemanent' est assigné, mais sa valeur n'est jamais utilisée
     // On ne peut lancer qu'un sort par tour. 
     public int sortLance = 0; 
@@ -199,7 +199,13 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     protected GameObject SliderPause;
 
-    private int nombreDeCartesChoisies = 0; 
+    private int nombreDeCartesChoisies = 0;
+
+    /// <summary>
+    /// Un objet qui prévient le joueur que son adversaire est encore en train 
+    /// de choisir ses cartes au début du tour. 
+    /// </summary>
+    private GameObject ChoixCartesAdversaire; 
 
 	/// <summary>
     /// Initialisation du GameManager
@@ -243,7 +249,9 @@ public class GameManager : NetworkBehaviourAntinomia {
         ProposerDefairePile.SetActive(false);
         // StartCoroutine(PiocheDebut (6)); 
         SliderPause = GameObject.Find("SliderPause");
-        SliderPause.SetActive(false); 
+        SliderPause.SetActive(false);
+        ChoixCartesAdversaire = GameObject.Find("ChoixCartesAdversaire");
+        ChoixCartesAdversaire.SetActive(false); 
 	}
 
 	IEnumerator CoroutineDebugPhase(){
@@ -1380,8 +1388,20 @@ public class GameManager : NetworkBehaviourAntinomia {
             ChoixCartesDebut.SetActive(false);
             // On retient le nombre de cartes choisies pour le vérifier. 
             nombreDeCartesChoisies = nombreCartes;
-            CheckBonNombreCartes(); 
+            CheckBonNombreCartes();
+
+            FindLocalPlayer().GetComponent<Player>().CmdChoixCartesFini(); 
+            if (ChoixCartesAdversaire != null) {
+                ChoixCartesAdversaire.SetActive(true);
+            }
         }
+    }
+
+    /// <summary>
+    /// Methode envoyée par l'adversaire pour dire qu'il a fini son choix de cartes. 
+    /// </summary>
+    public void ChoixAdversaireFini() {
+        Destroy(ChoixCartesAdversaire); 
     }
 
     /// <summary>
@@ -1653,6 +1673,14 @@ public class GameManager : NetworkBehaviourAntinomia {
         } else {
             Debug.LogWarning("Le nombre de cartes ne correspond pas. "); 
         }
+    }
+
+    /// <summary>
+    /// Récupérer l'AKA gobal sur le tour, c'est-à-dire sa valeur au début du tour. 
+    /// </summary>
+    /// <returns>AKATour</returns>
+    public int getAKAGlobalTour() {
+        return AKATour; 
     }
 
 }
