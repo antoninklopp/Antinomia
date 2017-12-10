@@ -226,6 +226,12 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
             case "activate_phase_button":
             case "phase_button":
                 GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ReactivateButtonPhase(); 
+                break;
+            // Changer les pvs deux deux joueurs.  
+            case "set_PV":
+            case "PV":
+            case "set_pv":
+                FindLocalPlayer().GetComponent<Player>().CmdSetPlayerPV(int.Parse(commandSplit[1]));
                 break; 
             default:
                 AddStringToConsole("Cette fonction n'existe pas");

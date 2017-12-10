@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; 
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement; 
 using System; 
 #if UNITY_EDITOR
 using UnityEditor; 
@@ -205,7 +206,12 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Un objet qui prévient le joueur que son adversaire est encore en train 
     /// de choisir ses cartes au début du tour. 
     /// </summary>
-    private GameObject ChoixCartesAdversaire; 
+    private GameObject ChoixCartesAdversaire;
+
+    /// <summary>
+    /// L'objet de la fin du jeu qui indique si le joueur a perdu ou gagné. 
+    /// </summary>
+    private GameObject EndGame; 
 
 	/// <summary>
     /// Initialisation du GameManager
@@ -251,7 +257,9 @@ public class GameManager : NetworkBehaviourAntinomia {
         SliderPause = GameObject.Find("SliderPause");
         SliderPause.SetActive(false);
         ChoixCartesAdversaire = GameObject.Find("ChoixCartesAdversaire");
-        ChoixCartesAdversaire.SetActive(false); 
+        ChoixCartesAdversaire.SetActive(false);
+        EndGame = GameObject.Find("EndGame");
+        EndGame.SetActive(false); 
 	}
 
 	IEnumerator CoroutineDebugPhase(){
@@ -1681,6 +1689,25 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <returns>AKATour</returns>
     public int getAKAGlobalTour() {
         return AKATour; 
+    }
+
+    /// <summary>
+    /// Retourner au menu principal.
+    /// </summary>
+    public void LoadMainMenu() {
+        SceneManager.LoadScene("MainMenu"); 
+    }
+
+    /// <summary>
+    /// Lors de la fin du jeu on indique au joueur s'il a gagné ou perdu. 
+    /// </summary>
+    public void EndOfTheGame(bool victory) {
+        EndGame.SetActive(true); 
+        if (victory) {
+            EndGame.transform.Find("Text").GetComponent<Text>().text = "Victoire"; 
+        } else {
+            EndGame.transform.Find("Text").GetComponent<Text>().text = "Défaite";
+        }
     }
 
 }

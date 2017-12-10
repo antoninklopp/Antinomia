@@ -390,7 +390,10 @@ public class Player : NetworkBehaviourAntinomia	 {
 	}
 
 
-
+    /// <summary>
+    /// Changer la phase sur l'UI. 
+    /// </summary>
+    /// <param name="newPhase"></param>
 	void ChangeUIPhase(Phases newPhase){
 		/*
 		 * Changer la variable synchronisée de la phase, côté client et serveur. 
@@ -653,14 +656,14 @@ public class Player : NetworkBehaviourAntinomia	 {
 
 		if (PlayerPV <= 0) {
 			// Le joueur a perdu. 
-			OnPlayerLoses(); 
+			OnPlayerLoses(PlayerID); 
 		}
 		Debug.Log ("UNE ATTAQUE"); 
 	}
 
 	// ----- Mise à jour des informations sur le serveur. -------
 	[Command(channel=0)]
-	void CmdSetPlayerPV(int newPV){
+	public void CmdSetPlayerPV(int newPV){
 		Debug.Log ("J'ai de nouveaux points de vie"); 
 		PlayerPV = newPV; 
 	}
@@ -670,8 +673,12 @@ public class Player : NetworkBehaviourAntinomia	 {
 		GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ().setPlayerPVUI (PlayerID, PlayerPV); 
 	}
 
+    /// <summary>
+    /// Attention méthode dangereuse. Il ne fait pas pouvoir faire ça depuis le joueur adverse. 
+    /// </summary>
+    /// <param name="newPV"></param>
 	[Command(channel=0)]
-	void CmdSetOtherPlayerLife(int newPV){
+	public void CmdSetOtherPlayerLife(int newPV){
 		Debug.Log ("Salut je suis le joueur 1"); 
 		FindPlayerWithID (1).GetComponent<Player>().CmdSetPlayerPV(newPV); 
 	}
@@ -687,7 +694,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 	}
 
 	[Command(channel=0)]
-	void CmdChangeBothPlayerAKA(int newAKA){
+	public void CmdChangeBothPlayerAKA(int newAKA){
 		/*
 		 * On change l'AKA des deux joueurs sur le serveur. 
 		 */ 
@@ -756,30 +763,45 @@ public class Player : NetworkBehaviourAntinomia	 {
 
 	// ---- Fin du jeu : Le joueur gagne ou perd. 
 
-	void OnPlayerLoses(){
+	public void OnPlayerLoses(int _PlayerID){
 		/*
 		 * Quand le joueur perd
 		 */ 
 		// SceneManager.LoadScene ("MainMenu");
-        CmdOnPlayerWins(); 
+        FindLocalPlayer().GetComponent<Player>().CmdOnPlayerWins(_PlayerID); 
 	}
 
+    /// <summary>
+    /// Le player ID est celui du joueur PERDANT.
+    /// </summary>
+    /// <param name="_PlayerID">PlayerID du joueur PERDANT</param>
 	[Command(channel=0)]
-	void CmdOnPlayerWins(){
+	void CmdOnPlayerWins(int _PlayerID) {
         /*
 		 * Quand le joueur perd, l'autre gagne. 
 		 */
         // SceneManager.LoadScene ("MainMenu"); 	
-        RpcOnPlayerWins(); 
+        RpcOnPlayerWins(_PlayerID); 
 	}
 
+    /// <summary>
+    /// <see cref="CmdOnPlayerWins(int)"/>
+    /// </summary>
+    /// <param name="_PlayerID">PlayerID du joueur PERDANT. </param>
 	[ClientRpc(channel=0)]
-	void RpcOnPlayerWins(){
+	void RpcOnPlayerWins(int _PlayerID) {
         /*
 		 * Quand le joueur perd, l'autre joueur gagne. 
 		 */
         getGameManager().GetComponent<GameManager>().ReportBugs();
-        SceneManager.LoadScene ("MainMenu");
+        Debug.Log("On tente de load la scene de victoire/c'est à dire menu. "); 
+        if (_PlayerID == FindLocalPlayer().GetComponent<Player>().PlayerID) {
+            // Dans ce cas, le joueur perd. 
+            getGameManager().GetComponent<GameManager>().EndOfTheGame(false); 
+        } else {
+            // Dans ce cas le joueur a gagné!
+            getGameManager().GetComponent<GameManager>().EndOfTheGame(true); 
+        }
 	}
 
     /// <summary>

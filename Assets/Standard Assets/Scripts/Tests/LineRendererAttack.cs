@@ -55,6 +55,7 @@ public class LineRendererAttack : MonoBehaviour {
         LineRendererPrefab = Resources.Load("Prefabs/AttackLine", typeof(GameObject)) as GameObject;
         Debug.Log("LineRendererPrefab"); 
         InstantiatedLine = Instantiate(LineRendererPrefab);
+        InstantiatedLine.SetActive(true); 
         lineRenderer = InstantiatedLine.transform.GetChild(0).gameObject.GetComponent<LineRenderer>();
         InstantiatedLine.transform.position = transform.position;
         enCours = true; 
