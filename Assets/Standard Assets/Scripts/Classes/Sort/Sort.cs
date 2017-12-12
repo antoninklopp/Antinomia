@@ -132,10 +132,6 @@ public class Sort : Carte, ICarte {
 
         base.OnMouseDown(); 
 
-        if (!isFromLocalPlayer) {
-            return; 
-        }
-
         if (sortState == State.CIMETIERE) {
             return;
         }
@@ -146,6 +142,9 @@ public class Sort : Carte, ICarte {
 
 #if (UNITY_ANDROID || UNITY_IOS)
         // InformationsSurLaCarte(); 
+        if (!isFromLocalPlayer && (getState() == State.JOUE)) {
+            InformationsSurLaCarte(); 
+        }
 #else
         CliqueSimpleCarte(); 
 #endif
@@ -652,7 +651,7 @@ public class Sort : Carte, ICarte {
     /// <summary>
     /// Lors d'un clic droit sur la carte. 
     /// </summary>
-    protected override void RightClickOnCarte() {
+    public override void RightClickOnCarte() {
         if (clicked != 0) {
             // Si un joueur fait un clic droit alors qu'il tient la carte en main, on remet la carte d'où elle vient. 
             clicked = 0;
@@ -727,6 +726,10 @@ public class Sort : Carte, ICarte {
             }
             return CarteLaPlusProche;
         }
+    }
+
+    public State getState() {
+        return sortState;
     }
 
 }

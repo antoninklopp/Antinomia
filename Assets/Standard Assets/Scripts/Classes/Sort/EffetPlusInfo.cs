@@ -8,7 +8,12 @@ using UnityEngine;
 public class EffetPlusInfo : Effet {
 
     public int numeroEffet = 0;
-    public int numeroListEffet = 0; 
+    public int numeroListEffet = 0;
+
+    /// <summary>
+    /// ID Card Game de la carte associee a l'effet
+    /// </summary>
+    public int IDCardGame = -1; 
 
     /// <summary>
     /// Constructeur de la classe EffetPlusInfo
@@ -21,7 +26,6 @@ public class EffetPlusInfo : Effet {
         AllConditionsEffet = effet.AllConditionsEffet;
         numeroEffet = _numeroEffet;
         numeroListEffet = _numeroListEffet; 
-
     }
 
     /// <summary>
@@ -42,6 +46,11 @@ public class EffetPlusInfo : Effet {
         int _numeroEffet, int _numeroListEffet)  : base (_AllConditions, _AllActions) {
         numeroEffet = _numeroEffet;
         numeroListEffet = _numeroListEffet; 
+    }
+
+    public EffetPlusInfo(Effet effet, int _numeroEffet, int _numeroListEffet, int _IDCardGame) : this (effet, _numeroEffet,
+        _numeroListEffet) {
+        IDCardGame = _IDCardGame; 
     }
 
 }

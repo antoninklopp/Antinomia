@@ -340,12 +340,15 @@ public class Entite : Carte, ICarte {
         Vector3 MousePosition = Input.mousePosition;
         MousePosition.z = 15;
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
-        // transform.position = mouseWorldPoint;
 
         PositionBeforeDragging = mouseWorldPoint; 
 
 #if (UNITY_ANDROID || UNITY_IOS)
         // InformationsSurLaCarte(); 
+        if (!isFromLocalPlayer && (getState() == State.CHAMPBATAILLE || getState() == State.SANCTUAIRE)) {
+            // Si c'est une carte de l'adversaire, on montre ses informations.
+            InformationsSurLaCarte(); 
+        }
 #else
         CliqueSimpleCarte(false);
 #endif
@@ -1644,7 +1647,7 @@ public class Entite : Carte, ICarte {
     /// <summary>
     /// Lors d'un clic droit sur la carte. 
     /// </summary>
-    protected override void RightClickOnCarte() {
+    public override void RightClickOnCarte() {
         if (clicked) {
             // Si un joueur fait un clic droit alors qu'il tient la carte en main, on remet la carte d'où elle vient. 
             clicked = false;

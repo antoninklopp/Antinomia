@@ -211,7 +211,19 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// L'objet de la fin du jeu qui indique si le joueur a perdu ou gagné. 
     /// </summary>
-    private GameObject EndGame; 
+    private GameObject EndGame;
+
+    /// <summary>
+    /// Grace à cette variable, on va pouvoir bloquer l'interaction du joueur avec le jeu. 
+    /// Pour appuyer sur le bouton continuer par exemple. 
+    /// </summary>
+    public static bool peutInteragir = true;
+
+    /// <summary>
+    /// Lors d'un clic sur le bouton pour pouvoir avoir les informations sur la carte, 
+    /// on rajoute sur mobile le check automatique des effets. 
+    /// </summary>
+    private int IDCardGameAttenteJouerEffet = -1; 
 
 	/// <summary>
     /// Initialisation du GameManager
@@ -1126,13 +1138,22 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="shortCode">shortCode de la carte</param>
     /// <param name="Info">l'Info à montrer</param>
-    public void ShowCarteInfo(string shortCode, string Info) {
+    /// <param name="Effet">Sur téléphone on peut proposer les effets depuis ici.</param>
+    public void ShowCarteInfo(string shortCode, string Info, int IDCardGame=-1) {
         /*
          * Afficher les informations liées à la carte. 
          */
 #if (UNITY_ANDROID || UNITY_IOS)
         InfoCarteBattlePhone.SetActive(true);
+        InfoCarteBattlePhone.transform.Find("PeutEtreJoue").gameObject.SetActive(false); 
         InfoCarteBattlePhone.GetComponent<InfoCarteBattle>().SetInfoCarte(shortCode, Info);
+        if (IDCardGame != -1) {
+            // Dans le cas où un effet peut être joué
+            InfoCarteBattlePhone.transform.Find("PeutEtreJoue").gameObject.SetActive(true);
+            InfoCarteBattlePhone.transform.Find("PeutEtreJoue").Find("Text").gameObject.GetComponent<Text>().text =
+                "Un effet peut etre joué ! ";  
+            IDCardGameAttenteJouerEffet = IDCardGame;
+        }
 #else 
         InfoCarteBattle.SetActive(true);
         InfoCarteBattle.GetComponent<InfoCarteBattle>().SetInfoCarte(shortCode, Info);
@@ -1140,11 +1161,25 @@ public class GameManager : NetworkBehaviourAntinomia {
     }
 
     /// <summary>
+    /// Retrouver l'effet que la carte peut jouer.
+    /// </summary>
+    public void ClicJouerEffetCarte() {
+        if (IDCardGameAttenteJouerEffet != -1) {
+            // On stocke pour ne pas perdre la valeur à l'appel de HideInfoCarte
+            int IDCardJoue = IDCardGameAttenteJouerEffet;
+            HideInfoCarte();
+            // On simule un clic droit sur la carte. 
+            FindCardWithID(IDCardJoue).GetComponent<Carte>().RightClickOnCarte(); 
+        }
+    }
+
+    /// <summary>
     /// Cacher le panneau qui montre les infos de la carte.
     /// </summary>
     public void HideInfoCarte() {
 #if (UNITY_ANDROID || UNITY_IOS)
-        InfoCarteBattlePhone.SetActive(false); 
+        InfoCarteBattlePhone.SetActive(false);
+        IDCardGameAttenteJouerEffet = -1; 
 #else 
         InfoCarteBattle.SetActive(false);
 #endif

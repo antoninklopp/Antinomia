@@ -105,6 +105,9 @@ public class Assistance : Carte, ICarte {
 
 #if (UNITY_ANDROID || UNITY_IOS)
         // InformationsSurLaCarte(); 
+        if(!isFromLocalPlayer && (getState() == State.ASSOCIE_A_CARTE || getState() == State.JOUEE)) {
+            InformationsSurLaCarte(); 
+        }
 #else
         CliqueSimpleCarte();
 #endif
@@ -702,6 +705,10 @@ public class Assistance : Carte, ICarte {
         } else {
             return false;
         }
+    }
+
+    public Assistance.State getState() {
+        return assistanceState; 
     }
 
 }

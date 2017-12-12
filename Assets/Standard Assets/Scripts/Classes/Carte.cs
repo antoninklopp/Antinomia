@@ -180,9 +180,9 @@ public class Carte : NetworkBehaviourAntinomia {
 
         checkIfLocalPlayerOnMousEnter();
 
-        if (!isFromLocalPlayer) {
-            return;
-        }
+        // if (!isFromLocalPlayer) {
+        //     return;
+        // }
 
         // Si un sort est en train d'être joué, on ne veut pas grossir la carte. 
         if (GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours != null) {
@@ -210,7 +210,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     public void OnMouseOver() {
         if (Input.GetMouseButtonDown(1)) {
-            RightClickOnCarte();
+            RightClickOnCarteAction();
         }
     }
 
@@ -291,8 +291,19 @@ public class Carte : NetworkBehaviourAntinomia {
         _text.GetComponent<TextMesh>().text = messageToDisplay; 
     }
 
+    /// <summary>
+    /// Montrer les informations d'une carte dans l'interface
+    /// </summary>
+    /// <param name="shortCode"></param>
+    /// <param name="messageToDisplay"></param>
     public virtual void DisplayInfoCarteGameManager(string shortCode="", string messageToDisplay = "") {
-        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCarteInfo(shortCode, messageToDisplay);
+        if (CheckForEffet().Count != 0) {
+            // Dans le cas où il y a des effets à jouer
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCarteInfo(shortCode, messageToDisplay, 
+                IDCardGame);
+        } else {
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCarteInfo(shortCode, messageToDisplay);
+        }
     }
 
     /// <summary>
@@ -1603,11 +1614,16 @@ public class Carte : NetworkBehaviourAntinomia {
         StartCoroutine(GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame()); 
     }
 
+    protected void RightClickOnCarteAction() {
+#if (!UNITY_ANDROID || !UNITY_IOS)
+        RightClickOnCarte(); 
+#endif
+    }
+
     /// <summary>
     /// Lorsqu'on détecte un clic droit, on permet au joueur de jouer l'effet de la carte. 
     /// </summary>
-    protected virtual void RightClickOnCarte() {
-#if (!UNITY_ANDROID || !UNITY_IOS)
+    public virtual void RightClickOnCarte() {
         // Dans le cas d'un clic droit. 
         Debug.Log("On check" + Name);
         List<EffetPlusInfo> effetPropose = CheckForEffet(); 
@@ -1615,7 +1631,6 @@ public class Carte : NetworkBehaviourAntinomia {
             Debug.Log("Proposer Effets"); 
             ProposerEffets(effetPropose);
         }
-#endif
     }
 
     /// <summary>
