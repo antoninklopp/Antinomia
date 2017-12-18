@@ -21,21 +21,27 @@ public class RegisterPlayer : MonoBehaviour{
     /// <param name="password">L'ancien nom du joueur (peut-être pour un changement de compte)</param>
 	public void RegisterPlayerSetup(string displayName, string userName, string password){
 		// register a new Player
-		print ("Registering Player..."); 
+		Debug.Log ("Registering Player..."); 
 		new GameSparks.Api.Requests.RegistrationRequest()
 			.SetDisplayName(displayName)
 			.SetUserName(userName)
 			.SetPassword(password)
 			.Send(( response ) => {
 				if(!response.HasErrors){
-					print("Player Registered \n User Name: " + response.DisplayName); 
+					print("Player Registered \n User Name: " + response.DisplayName);
 				} else {
                     errorRegistrationName = true; 
 					print("Error registering Player... \n " + response.Errors.JSON.ToString()); 
 				}
-			}); 
+                finish = true;
+            }); 
 	}
 
+    /// <summary>
+    /// Authentification d'un joueur. 
+    /// </summary>
+    /// <param name="userName"></param>
+    /// <param name="password"></param>
 	public void AuthorizePlayer(string userName, string password){
 		// Authentification of a player
 		print ("Authorizing Player..."); 
@@ -69,7 +75,7 @@ public class RegisterPlayer : MonoBehaviour{
 	}
 
     public IEnumerator RegisterPlayerRoutine(string userName, string password) {
-        RegisterPlayerSetup(userName, password, userName);
+        RegisterPlayerSetup(userName, userName, password);
         while (!finish) {
             yield return new WaitForSeconds(0.2f);
         }

@@ -142,7 +142,7 @@ public class IA : Player {
             // première carte élémentaire. 
             for (int i = 0; i < CartesMain.Count; i++) {
                 if (CartesMain[i].GetComponent<CarteType>().thisCarteType == CarteType.Type.ENTITE) {
-                    if (CartesMain[i].GetComponent<Entite>().carteAscendance == Entite.Ascendance.ELEMENTAIRE) {
+                    if (CartesMain[i].GetComponent<Entite>().EntiteNature == Entite.Nature.ELEMENTAIRE) {
                         // Si la carte est une carte élémentaire. 
                         CartesMain[i].GetComponent<Entite>().MoveToSanctuaire();
                         // On ne peut invoquer qu'une seule carte. 

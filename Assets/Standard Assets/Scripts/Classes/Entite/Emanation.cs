@@ -34,8 +34,8 @@ public class Emanation : Entite {
         IDCardGame = _ID;
         Name = _Name;
         CoutAKA = _CoutAKA;
-        carteElement = _carteElement;
-        carteAscendance = _carteAscendance;
+        EntiteElement = _carteElement;
+        EntiteAscendance = _carteAscendance;
         // Pour l'instant chaque carte n'a qu'une seule capacité. 
         canGoBig = true;
     }

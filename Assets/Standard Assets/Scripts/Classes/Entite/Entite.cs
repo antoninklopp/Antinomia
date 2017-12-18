@@ -24,14 +24,27 @@ public class Entite : Carte, ICarte {
     // pour le debug, on écrira à un endroit le nom de la capacite
     private GameObject WriteCapacite;
 
+    public enum Classe {
+        // TODO : Implémenter les classes ici. 
+        DRAGON, 
+        SORCIER, 
+        BETE_MARINE, 
+        AUTRE
+    };
+
+    public enum Nature {
+        PRIMORDIAL, 
+        NEUTRE,
+        ELEMENTAIRE
+    };
+
     /// <summary>
     /// L'ascendance de la carte. 
     /// </summary>
     public enum Ascendance {
         ASTRALE,
-        NEUTRE,
         MALEFIQUE,
-        ELEMENTAIRE
+        NONE
     };
 
     /// <summary>
@@ -42,7 +55,7 @@ public class Entite : Carte, ICarte {
         EAU,
         FEU,
         TERRE,
-        AUCUN
+        NONE
     };
 
     /// <summary>
@@ -94,9 +107,22 @@ public class Entite : Carte, ICarte {
     [SyncVar(hook ="ChangeStat")]
     public int STAT;
     public int CoutAKA;
+
+    /// <summary>
+    /// Nature de l'entité
+    /// </summary>
+    private Nature entiteNature; 
+
+    /// <summary>
+    /// L'élément de la carte.
+    /// </summary>
     [SyncVar(hook = "ChangeElement")]
-    public Element carteElement;
-    public Ascendance carteAscendance;
+    private Element entiteElement;
+
+    /// <summary>
+    /// L'ascendance de la carte. 
+    /// </summary>
+    private Ascendance entiteAscendance;
 
     /// <summary>
     /// Puissance de l'entité.
@@ -167,8 +193,8 @@ public class Entite : Carte, ICarte {
         IDCardGame = _ID;
         Name = _Name;
         CoutAKA = _CoutAKA;
-        carteElement = _carteElement;
-        carteAscendance = _carteAscendance;
+        EntiteElement = _carteElement;
+        EntiteAscendance = _carteAscendance;
         // Pour l'instant chaque carte n'a qu'une seule capacité. 
         canGoBig = true;
     }
@@ -260,6 +286,36 @@ public class Entite : Carte, ICarte {
 #pragma warning restore CS0169 // Le champ 'Carte._animator' n'est jamais utilisé
 
     public Sprite dosCarte;
+
+    public Element EntiteElement {
+        get {
+            return entiteElement;
+        }
+
+        set {
+            entiteElement = value;
+        }
+    }
+
+    public Ascendance EntiteAscendance {
+        get {
+            return entiteAscendance;
+        }
+
+        set {
+            entiteAscendance = value;
+        }
+    }
+
+    public Nature EntiteNature {
+        get {
+            return entiteNature;
+        }
+
+        set {
+            entiteNature = value;
+        }
+    }
 
     public override void Start() {
         base.Start();
@@ -554,7 +610,7 @@ public class Entite : Carte, ICarte {
         base.CreateBigCard(
             Name + "\n" +
             "STAT" + STAT.ToString() + "\n" +
-            "Nature" + carteElement.ToString());
+            "Nature" + EntiteElement.ToString());
 
         BigCard.GetComponent<Entite>().carteState = State.BIGCARD;
 
@@ -642,9 +698,9 @@ public class Entite : Carte, ICarte {
                     return;
                 } else {
                     Debug.Log("INVOCATION ELEMENTAIRE");
-                    if (carteAscendance == Ascendance.ELEMENTAIRE) {
+                    if (EntiteNature == Nature.ELEMENTAIRE) {
                         int x = coutElementaire; 
-                        switch (carteElement) {
+                        switch (EntiteElement) {
                             case Element.FEU:
                                 // Enlever 10x points de vie au joueur. 
                                 if (FindLocalPlayer().GetComponent<Player>().PlayerPV < 40 * x) {
@@ -739,9 +795,9 @@ public class Entite : Carte, ICarte {
             // Lorsqu'on défait la pile on ne s'occupe pas des phases parce qu'elles ont été traitées lors de la création
             // de "l'effet" dans la pile. 
             if (carteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2) || defairePile) {
-                if (carteAscendance == Ascendance.MALEFIQUE && cardAstraleOnChampBatailleOrSanctuaire()) {
+                if (EntiteAscendance == Ascendance.MALEFIQUE && cardAstraleOnChampBatailleOrSanctuaire()) {
                     GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Il y a une carte astrale sur le board");
-                } else if (carteAscendance == Ascendance.ASTRALE && cardMalefiqueOnChampBatailleOrSanctuaire()) {
+                } else if (EntiteAscendance == Ascendance.ASTRALE && cardMalefiqueOnChampBatailleOrSanctuaire()) {
                     GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Il y a une carte maléfique sur le board");
                 } else if (FindLocalPlayer().GetComponent<Player>().PlayerAKA < CoutAKA) {
                     // Si le joueur n'a pas assez d'AKA pour mettre la carte sur le board
@@ -759,8 +815,11 @@ public class Entite : Carte, ICarte {
                         GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "AKA utilisé: " + CoutAKA.ToString());
                         FindLocalPlayer().SendMessage("subtractAKA", CoutAKA);
 
-                        if ((carteAscendance == Ascendance.MALEFIQUE) || (carteAscendance == Ascendance.ASTRALE)) {
-                            CmdChangeAscendanceTerrain(carteAscendance);
+                        if (EntiteAscendance == Ascendance.MALEFIQUE) {
+                            CmdChangeAscendanceTerrain("MALEFIQUE"); 
+                        }
+                        else if (EntiteAscendance == Ascendance.ASTRALE) {
+                            CmdChangeAscendanceTerrain("ASTRALE");
                         }
                     }
                 }
@@ -909,7 +968,7 @@ public class Entite : Carte, ICarte {
         if (((Players[0].GetComponent<Player>().isLocalPlayer && Players[0].GetComponent<Player>().isServer) ||
             (Players[1].GetComponent<Player>().isLocalPlayer && Players[1].GetComponent<Player>().isServer)) && netId.Value != 0) {
             // Dans le cas d'une instantiation d'une carte sur le réseau.
-            RpcsetoID1(IDCardGame, oID, Name, shortCode, carteAscendance, carteElement, STAT, CoutAKA, coutElementaire, 
+            RpcsetoID1(IDCardGame, oID, Name, shortCode, EntiteAscendance, EntiteElement, STAT, CoutAKA, coutElementaire, 
                 AllEffetsString, AllEffetsStringToDisplay, AllEffetsMalefiqueString, AllEffetsMalefiqueStringToDisplay, 
                 AllEffetsAstralString, AllEffetsAstralStringToDisplay);
             // Inutile normalement.
@@ -1003,8 +1062,8 @@ public class Entite : Carte, ICarte {
         Name = _Name;
         shortCode = _shortCode;
         carteState = State.MAIN;
-        carteElement = _element;
-        carteAscendance = _ascendance;
+        EntiteElement = _element;
+        EntiteAscendance = _ascendance;
         STAT = _STAT;
         CoutAKA = _coutAKA;
         coutElementaire = _coutElementaire;
@@ -1064,8 +1123,8 @@ public class Entite : Carte, ICarte {
             LocalPlayer.SendMessage("DetruireCarte", IDCardGame);
         }
 
-        if ((carteAscendance == Ascendance.MALEFIQUE) || (carteAscendance == Ascendance.ASTRALE)) {
-            CmdChangeAscendanceTerrain(Ascendance.NEUTRE); 
+        if ((EntiteAscendance == Ascendance.MALEFIQUE) || (EntiteAscendance == Ascendance.ASTRALE)) {
+            CmdChangeAscendanceTerrain("NEUTRE"); 
         }
 
         // GererEffetsMort(); 
@@ -1081,8 +1140,8 @@ public class Entite : Carte, ICarte {
         Debug.Log("STAT : " + STAT.ToString());
         Debug.Log("ID : " + IDCardGame.ToString());
         Debug.Log("AKA : " + CoutAKA.ToString());
-        Debug.Log("carteElement : " + carteElement.ToString());
-        Debug.Log("carteAscendance : " + carteAscendance.ToString());
+        Debug.Log("carteElement : " + EntiteElement.ToString());
+        Debug.Log("carteAscendance : " + EntiteAscendance.ToString());
 
         Debug.Log(" ---------- FIN INFO CARTE ------------");
     }
@@ -1157,7 +1216,7 @@ public class Entite : Carte, ICarte {
 		 */
         GameObject[] AllCardsPlayed = GetAllCardsPlayed();
         for (int i = 0; i < AllCardsPlayed.Length; ++i) {
-            if (AllCardsPlayed[i].GetComponent<Entite>().carteAscendance == Ascendance.ASTRALE) {
+            if (AllCardsPlayed[i].GetComponent<Entite>().EntiteAscendance == Ascendance.ASTRALE) {
                 return true;
             }
         }
@@ -1171,7 +1230,7 @@ public class Entite : Carte, ICarte {
 		 */
         GameObject[] AllCardsPlayed = GetAllCardsPlayed();
         for (int i = 0; i < AllCardsPlayed.Length; ++i) {
-            if (AllCardsPlayed[i].GetComponent<Entite>().carteAscendance == Ascendance.MALEFIQUE) {
+            if (AllCardsPlayed[i].GetComponent<Entite>().EntiteAscendance == Ascendance.MALEFIQUE) {
                 return true;
             }
         }
@@ -1204,7 +1263,7 @@ public class Entite : Carte, ICarte {
          * le booléen change est true lorsque la carte change 
          * il est false si l'on revient à la carte de base. 
          */ 
-        carteElement = _newElement;
+        EntiteElement = _newElement;
         // On indique visuellement que la carte a changé.
         if (change) {
             RpcChangeFromCardBase();
@@ -1219,7 +1278,7 @@ public class Entite : Carte, ICarte {
          * lors d'un changement sur la valeur de Element carteElement
          * hook
          */
-        carteElement = newElement;
+        EntiteElement = newElement;
         // TODO: Montrer au joueur que la carte est changée. 
     }
 
@@ -1237,13 +1296,13 @@ public class Entite : Carte, ICarte {
            .SetEventAttribute("ID", oID)
            .Send((response) => {
                if (!response.HasErrors) {
-                   carteElement = GetPlayerInfoGameSparks.stringToElement(response.ScriptData.GetString("Element")); 
+                   EntiteElement = GetPlayerInfoGameSparks.stringToElement(response.ScriptData.GetString("Element")); 
                } else {
                    throw new Exception("Impossible de reset l'element de la carte. "); 
                }
 
            });
-        CmdChangeElement(carteElement, false); 
+        CmdChangeElement(EntiteElement, false); 
     }
 
     /// <summary>
@@ -1384,20 +1443,20 @@ public class Entite : Carte, ICarte {
     /// Changer l'ascendance du terrain. 
     /// Fonction executée sur le serveur. 
     /// </summary>
-    /// <param name="_carteAscendance">Ascendance de la carte qui change l'ascendance du terrain</param>
+    /// <param name="nature">Ascendance de la carte qui change l'ascendance du terrain</param>
     [Command(channel=0)]
-    void CmdChangeAscendanceTerrain(Entite.Ascendance _carteAscendance) {
-        RpcChangeAscendanceTerrain(_carteAscendance); 
+    void CmdChangeAscendanceTerrain(string nature) {
+        RpcChangeAscendanceTerrain(nature); 
     }
 
     /// <summary>
     /// <see cref="CmdChangeAscendanceTerrain(Ascendance)"/>
     /// </summary>
-    /// <param name="_carteAscendance"></param>
+    /// <param name="nature"></param>
     [ClientRpc(channel=0)]
-    void RpcChangeAscendanceTerrain (Entite.Ascendance _carteAscendance){
+    void RpcChangeAscendanceTerrain (string nature){
         // Si la carte est astrale ou maléfique, on montre l'effet de terrain. 
-        GameObject.FindGameObjectWithTag("GameManager").SendMessage("EffetTerrain", _carteAscendance);
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().EffetTerrain(nature);
     }
 
     /// <summary>
@@ -1478,11 +1537,11 @@ public class Entite : Carte, ICarte {
     public override string GetInfoCarte() {
         string stringToReturn = "<color=red>" + Name + "</color>" + "\n" +
             "STAT : " + getPuissance().ToString() + "\n" + "AKA : " + CoutAKA.ToString() + "\n"; 
-        if (carteElement == Element.AUCUN) {
-            stringToReturn += "Ascendance : " + carteAscendance + "\n"; 
+        if (EntiteElement == Element.NONE) {
+            stringToReturn += "Ascendance : " + EntiteAscendance + "\n"; 
         } else {
             stringToReturn += "Ascendance : ELEMENTAIRE" + "\n" +
-                "Element : " + carteElement + "\n"; 
+                "Element : " + EntiteElement + "\n"; 
         }
 
         List<string> noneStrings = new List<string>(){"None", " ", ""};
@@ -1735,7 +1794,7 @@ public class Entite : Carte, ICarte {
                     if (allEffetsInPile[i].GetComponent<EffetInPile>().numeroEffet == -3
                         && allEffetsInPile[i].GetComponent<EffetInPile>().ObjetEffet.GetComponent<Carte>().isFromLocalPlayer) {
                         Debug.Log("Ici c'est bon"); 
-                        switch (allEffetsInPile[i].GetComponent<EffetInPile>().ObjetEffet.GetComponent<Entite>().carteElement) {
+                        switch (allEffetsInPile[i].GetComponent<EffetInPile>().ObjetEffet.GetComponent<Entite>().EntiteElement) {
                             case Element.AIR:
                                 if (element == 1) {
                                     return true;
@@ -1825,7 +1884,7 @@ public class Entite : Carte, ICarte {
     /// 0 si ni faible ni forte
     /// 1 si forte
     /// -1 si faible</returns>
-    public int estForteFaceA(Element _elementAutreEntite, Ascendance _ascendanceAutreEntite) {
+    public int estForteFaceA(Element _elementAutreEntite, Nature _natureAutreEntite) {
         if (ForteFaceAElement.Count == 0) {
             return 0; 
         } else {
@@ -1838,9 +1897,9 @@ public class Entite : Carte, ICarte {
                     } else {
                         return -1; 
                     }
-                } else if (ForteFaceAElement[i] == 5 && _ascendanceAutreEntite == Ascendance.NEUTRE) {
+                } else if (ForteFaceAElement[i] == 5 && _natureAutreEntite == Nature.NEUTRE) {
                     return 1; 
-                } else if (ForteFaceAElement[i] == -5 && _ascendanceAutreEntite == Ascendance.NEUTRE) {
+                } else if (ForteFaceAElement[i] == -5 && _natureAutreEntite == Nature.NEUTRE) {
                     return -1; 
                 }
             }
@@ -1849,7 +1908,7 @@ public class Entite : Carte, ICarte {
     }
 
     public int estForteFaceA(GameObject AutreEntite) {
-        return estForteFaceA(AutreEntite.GetComponent<Entite>().carteElement, AutreEntite.GetComponent<Entite>().carteAscendance); 
+        return estForteFaceA(AutreEntite.GetComponent<Entite>().EntiteElement, AutreEntite.GetComponent<Entite>().EntiteNature); 
     }
 
     /// <summary>

@@ -108,8 +108,17 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _carte.STAT = data.GetInt("STAT").Value;
             _carte.shortCode = data.GetString("shortCode");
             _carte.Name = data.GetString("name");
-            _carte.carteAscendance = stringToAscendance(data.GetString("Element"));
-            _carte.carteElement = stringToElement(data.GetString("Element"));
+            // Il faut maintenant récupérer les éléments de la base de données qui sont sous la forme
+            // Nature : Nature/Ascendance/Element
+            Debug.Log(_carte.Name); 
+            string[] informationsNature = data.GetString("Nature").Split('/');
+            try {
+                _carte.EntiteNature = stringToNature(informationsNature[0], _carte.Name);
+                _carte.EntiteAscendance = stringToAscendance(informationsNature[1]);
+                _carte.EntiteElement = stringToElement(informationsNature[2]);
+            } catch (IndexOutOfRangeException e) {
+                Debug.LogWarning(e + "Il y a un probleme dans la base de données."); 
+            }
             _carte.stringToEffetList(data.GetString("Effet"));
             _carte.stringToEffetAstral(data.GetString("Astral"));
             _carte.stringToEffetMalefique(data.GetString("Malefique"));
@@ -146,8 +155,15 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _carte.STAT = data.GetInt("STAT").Value;
             _carte.shortCode = data.GetString("shortCode");
             _carte.Name = data.GetString("name");
-            _carte.carteAscendance = stringToAscendance(data.GetString("Element"));
-            _carte.carteElement = stringToElement(data.GetString("Element"));
+            string[] informationsNature = data.GetString("Nature").Split('/');
+            try {
+                _carte.EntiteNature = stringToNature(informationsNature[0]);
+                _carte.EntiteAscendance = stringToAscendance(informationsNature[1]);
+                _carte.EntiteElement = stringToElement(informationsNature[2]);
+            }
+            catch (IndexOutOfRangeException e) {
+                Debug.LogWarning(e + "Il y a un probleme dans la base de données.");
+            }
             _carte.stringToEffetList(data.GetString("Effet"));
             _carte.stringToEffetAstral(data.GetString("Astral"));
             _carte.stringToEffetMalefique(data.GetString("Malefique"));
@@ -524,7 +540,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		 * 
 		 */
 
-		Entite.Element _element = Entite.Element.AUCUN; 
+		Entite.Element _element = Entite.Element.NONE; 
 		switch (ElementString) {
 		case "FEU":
 			_element = Entite.Element.FEU; 
@@ -540,7 +556,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 			break; 
 		default:
 			// Si la carte est neutre, astrale ou maléfique. 
-			_element = Entite.Element.AUCUN; 
+			_element = Entite.Element.NONE; 
 			break; 
 		}
 
@@ -552,11 +568,8 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		 * Transformer le string récupéré en un carte.Ascendance. 
 		 * 
 		 */
-		Entite.Ascendance _ascendance = Entite.Ascendance.NEUTRE; 
+		Entite.Ascendance _ascendance = Entite.Ascendance.NONE; 
 		switch (AscendanceString) {
-		case "NEUTRE":
-			_ascendance = Entite.Ascendance.NEUTRE; 
-			break; 
 		case "ASTRALE":
 			_ascendance = Entite.Ascendance.ASTRALE; 
 			break; 
@@ -565,12 +578,38 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 			break; 
 		default:
 			// Si la carte est élémentaire (dans nature, il y aura écrit, FEU, TERRE, AIR ou EAU); 
-			_ascendance = Entite.Ascendance.ELEMENTAIRE; 
+			_ascendance = Entite.Ascendance.NONE; 
 			break; 
 		}
 
 		return _ascendance; 
 	}
+
+    /// <summary>
+    /// Transforme un string nature en enum
+    /// </summary>
+    /// <param name="NatureString"></param>
+    /// <param name="pourDebug">Nom de la carte pour la debug. </param>
+    /// <returns></returns>
+    public Entite.Nature stringToNature(string NatureString, string pourDebug="") {
+        Entite.Nature _nature = Entite.Nature.NEUTRE;
+        switch (NatureString) {
+            case "ELEMENTAIRE":
+                _nature = Entite.Nature.ELEMENTAIRE;
+                break;
+            case "PRIMORDIAL":
+                _nature = Entite.Nature.PRIMORDIAL;
+                break;
+            case "NEUTRE":
+                _nature = Entite.Nature.NEUTRE;
+                break;
+            default:
+                throw new Exception("Nature inconnue. Vérifiez dans la base de données " + NatureString + " carte " + 
+                    pourDebug);
+        }
+
+        return _nature; 
+    }
 
 	public Dictionary<Capacite, int> stringToCapacitesDictionnary(string stringCapacite){
 		/*

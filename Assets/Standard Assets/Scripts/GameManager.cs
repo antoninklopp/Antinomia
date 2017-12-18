@@ -578,8 +578,8 @@ public class GameManager : NetworkBehaviourAntinomia {
 
         Debug.Log(MyPlayerEntity); 
 
-		Entite.Ascendance AscendanceMyEntity = MyPlayerEntity.GetComponent<Entite> ().carteAscendance; 
-		Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().carteElement; 
+		Entite.Ascendance AscendanceMyEntity = MyPlayerEntity.GetComponent<Entite> ().EntiteAscendance; 
+		Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().EntiteElement; 
 		int multiplicateurDegatsMy = 1;
 
 		// Debug.Log (OtherPlayerEntity.tag);
@@ -676,11 +676,11 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <returns>en [0], mon entité, en [1] l'entité adverse. </returns>
     private List<int> CalculMultiplicateurs(GameObject MyPlayerEntity, GameObject OtherPlayerEntity) {
 
-        Entite.Ascendance AscendanceOtherEntity = OtherPlayerEntity.GetComponent<Entite>().carteAscendance;
-        Entite.Element ElementOther = OtherPlayerEntity.GetComponent<Entite>().carteElement;
+        Entite.Nature NatureOtherEntity = OtherPlayerEntity.GetComponent<Entite>().EntiteNature;
+        Entite.Element ElementOther = OtherPlayerEntity.GetComponent<Entite>().EntiteElement;
 
-        Entite.Ascendance AscendanceMyEntity = MyPlayerEntity.GetComponent<Entite>().carteAscendance;
-        Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().carteElement;
+        Entite.Nature NatureMyEntity = MyPlayerEntity.GetComponent<Entite>().EntiteNature;
+        Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().EntiteElement;
 
         List<int> MultiplicateursRetour = new List<int>();
         // On ajoute 1 comme multiplicateur de base de mon entité
@@ -689,16 +689,16 @@ public class GameManager : NetworkBehaviourAntinomia {
         int MultiplicateurEntiteOther = 1;
 
         // On regarde d'abord les ascendances des deux entités. 
-        if (AscendanceMyEntity == Entite.Ascendance.NEUTRE || AscendanceOtherEntity == Entite.Ascendance.NEUTRE) {
+        if (NatureMyEntity == Entite.Nature.NEUTRE || NatureOtherEntity == Entite.Nature.NEUTRE) {
             // Si un des elements est neutre, l'autre n'est ni fort ni faible face à lui. 
         }
-        else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity != Entite.Ascendance.ELEMENTAIRE) {
+        else if (NatureMyEntity == Entite.Nature.ELEMENTAIRE && NatureOtherEntity != Entite.Nature.ELEMENTAIRE) {
             MultiplicateurMyEntite = 2;
         }
-        else if (AscendanceMyEntity != Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
+        else if (NatureMyEntity != Entite.Nature.ELEMENTAIRE && NatureOtherEntity == Entite.Nature.ELEMENTAIRE) {
             MultiplicateurEntiteOther = 2;
         }
-        else if (AscendanceMyEntity == Entite.Ascendance.ELEMENTAIRE && AscendanceOtherEntity == Entite.Ascendance.ELEMENTAIRE) {
+        else if (NatureMyEntity == Entite.Nature.ELEMENTAIRE && NatureOtherEntity == Entite.Nature.ELEMENTAIRE) {
             // SI les deux sont élémentaires
 
             // vérifier ici les condition aux limites avec les derniers éléments à chaque fois. 
@@ -1063,7 +1063,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Changer l'effet du terrain. 
     /// </summary>
     /// <param name="_ascendance">Ascnedance de la carte</param>
-    void EffetTerrain(Entite.Ascendance _ascendance) {
+    void EffetTerrain(AscendanceTerrain _ascendance) {
         /*
          * On montre l'effet de terrain par un effet de particule,
          * Noires dans le cas d'un effet maléfique,
@@ -1074,13 +1074,13 @@ public class GameManager : NetworkBehaviourAntinomia {
 
         GameManager.AscendanceTerrain previousAscendance = ascendanceTerrain; 
 
-        if (_ascendance == Entite.Ascendance.MALEFIQUE) {
+        if (_ascendance == AscendanceTerrain.MALEFIQUE) {
             ascendanceTerrain = AscendanceTerrain.MALEFIQUE; 
             EffetParticuleTerrain.SetActive(true);
 #pragma warning disable CS0618 // 'ParticleSystem.startColor' est obsolète : 'startColor property is deprecated. Use main.startColor instead.'
             EffetParticuleTerrain.GetComponent<ParticleSystem>().startColor = Color.black; 
 #pragma warning restore CS0618 // 'ParticleSystem.startColor' est obsolète : 'startColor property is deprecated. Use main.startColor instead.'
-        } else if (_ascendance == Entite.Ascendance.ASTRALE) {
+        } else if (_ascendance == AscendanceTerrain.MALEFIQUE) {
             ascendanceTerrain = AscendanceTerrain.ASTRALE;
             EffetParticuleTerrain.SetActive(true);
 #pragma warning disable CS0618 // 'ParticleSystem.startColor' est obsolète : 'startColor property is deprecated. Use main.startColor instead.'
@@ -1101,18 +1101,19 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <see cref="EffetTerrain(Entite.Ascendance)"/>
     /// </summary>
     /// <param name="_ascendanceTerrain">Nouvelle ascendance du terrain.</param>
-    void EffetTerrain(AscendanceTerrain _ascendanceTerrain) {
+    public void EffetTerrain(string nature) {
         // ascendanceTerrain = _ascendanceTerrain;
 
-        switch (_ascendanceTerrain) {
-            case AscendanceTerrain.ASTRALE:
-                EffetTerrain(Entite.Ascendance.ASTRALE); 
+        switch (nature) {
+            case "ASTRALE":
+            case "ASTRAL":
+                EffetTerrain(AscendanceTerrain.ASTRALE); 
                 break;
-            case AscendanceTerrain.MALEFIQUE:
-                EffetTerrain(Entite.Ascendance.MALEFIQUE);
+            case "MALEFIQUE":
+                EffetTerrain(AscendanceTerrain.MALEFIQUE);
                 break;
-            case AscendanceTerrain.NONE:
-                EffetTerrain(Entite.Ascendance.NEUTRE);
+            case "NEUTRE":
+                EffetTerrain(AscendanceTerrain.NONE);
                 break; 
         }
     }

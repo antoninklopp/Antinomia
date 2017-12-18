@@ -29,7 +29,7 @@ namespace LanguageModule {
                 // Si le fichier n'existe pas. 
                 textAsset = (TextAsset)Resources.Load("XmlData/" + "English" + "/" + nomFichier, typeof(TextAsset));
             }
-            Debug.Log(textAsset); 
+            // Debug.Log(textAsset); 
             xmlDoc.LoadXml(textAsset.text);
             XmlNodeList transformList = xmlDoc.GetElementsByTagName(stringShortCode)[0].ChildNodes;
             string toReturn = xmlDoc.SelectSingleNode("transforms/" + stringShortCode).InnerText;

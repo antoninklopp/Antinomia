@@ -319,7 +319,7 @@ public class Carte : NetworkBehaviourAntinomia {
         List<GameObject> AllEntiteElement = new List<GameObject>();
         GameObject[] AllEntiteJoues = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
         for (int i = 0; i < AllEntiteJoues.Length; ++i) {
-            if (AllEntiteJoues[i].GetComponent<Entite>().carteElement == _element
+            if (AllEntiteJoues[i].GetComponent<Entite>().EntiteElement == _element
                 && AllEntiteJoues[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE) {
                 AllEntiteElement.Add(AllEntiteJoues[i]);
             }
@@ -1474,22 +1474,22 @@ public class Carte : NetworkBehaviourAntinomia {
             if (AllCartesType[i].GetComponent<CarteType>().thisCarteType == CarteType.Type.ENTITE) {
                 switch ((int)(properIntCondition / 10)) {
                     case 1:
-                        if (AllCartesType[i].GetComponent<Entite>().carteElement == Entite.Element.AIR) {
+                        if (AllCartesType[i].GetComponent<Entite>().EntiteElement == Entite.Element.AIR) {
                             allCardsToChoose.Add(AllCartesType[i]); 
                         }
                         break;
                     case 2:
-                        if (AllCartesType[i].GetComponent<Entite>().carteElement == Entite.Element.EAU) {
+                        if (AllCartesType[i].GetComponent<Entite>().EntiteElement == Entite.Element.EAU) {
                             allCardsToChoose.Add(AllCartesType[i]);
                         }
                         break;
                     case 3:
-                        if (AllCartesType[i].GetComponent<Entite>().carteElement == Entite.Element.FEU) {
+                        if (AllCartesType[i].GetComponent<Entite>().EntiteElement == Entite.Element.FEU) {
                             allCardsToChoose.Add(AllCartesType[i]);
                         }
                         break;
                     case 4:
-                        if (AllCartesType[i].GetComponent<Entite>().carteElement == Entite.Element.TERRE) {
+                        if (AllCartesType[i].GetComponent<Entite>().EntiteElement == Entite.Element.TERRE) {
                             allCardsToChoose.Add(AllCartesType[i]);
                         }
                         break;
