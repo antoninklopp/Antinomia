@@ -314,7 +314,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 		 * Melange des cartes dans le deck. 
 		 */ 
 		Deck DeckRandom = new Deck (); 
-		DeckRandom.number = CardDeck.number; 
+		DeckRandom.Number = CardDeck.Number; 
 
 		int random; 
 		int index = 0;

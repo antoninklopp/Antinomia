@@ -111,17 +111,20 @@ public class Entite : Carte, ICarte {
     /// <summary>
     /// Nature de l'entité
     /// </summary>
+    [SerializeField]
     private Nature entiteNature; 
 
     /// <summary>
     /// L'élément de la carte.
     /// </summary>
     [SyncVar(hook = "ChangeElement")]
+    [SerializeField]
     private Element entiteElement;
 
     /// <summary>
     /// L'ascendance de la carte. 
     /// </summary>
+    [SerializeField]
     private Ascendance entiteAscendance;
 
     /// <summary>
@@ -698,8 +701,12 @@ public class Entite : Carte, ICarte {
                     return;
                 } else {
                     Debug.Log("INVOCATION ELEMENTAIRE");
+                    Debug.Log(EntiteNature);
+                    Debug.Log(entiteNature); 
                     if (EntiteNature == Nature.ELEMENTAIRE) {
-                        int x = coutElementaire; 
+                        int x = coutElementaire;
+                        Debug.Log("elementaire");
+                        Debug.Log(EntiteElement);
                         switch (EntiteElement) {
                             case Element.FEU:
                                 // Enlever 10x points de vie au joueur. 
@@ -965,12 +972,15 @@ public class Entite : Carte, ICarte {
 
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
 
+        Debug.Log("La nature est " + EntiteNature.ToString()); 
+
         if (((Players[0].GetComponent<Player>().isLocalPlayer && Players[0].GetComponent<Player>().isServer) ||
             (Players[1].GetComponent<Player>().isLocalPlayer && Players[1].GetComponent<Player>().isServer)) && netId.Value != 0) {
             // Dans le cas d'une instantiation d'une carte sur le réseau.
+            Debug.Log("La nature est " + EntiteNature.ToString());
             RpcsetoID1(IDCardGame, oID, Name, shortCode, EntiteAscendance, EntiteElement, STAT, CoutAKA, coutElementaire, 
                 AllEffetsString, AllEffetsStringToDisplay, AllEffetsMalefiqueString, AllEffetsMalefiqueStringToDisplay, 
-                AllEffetsAstralString, AllEffetsAstralStringToDisplay);
+                AllEffetsAstralString, AllEffetsAstralStringToDisplay, entiteNature);
             // Inutile normalement.
             // RpcChangeParent (); 
         } // else {
@@ -1053,7 +1063,8 @@ public class Entite : Carte, ICarte {
     void RpcsetoID1(int _ID, string _oID, string _Name, string _shortCode, Entite.Ascendance _ascendance, Entite.Element _element, int _STAT,
                                     int _coutAKA, int _coutElementaire, string _AllEffetsString, string _AllEffetsStringToDisplay, 
                                     string _AllEffetsMalefiques, string _AllEffetsMalefiquesToDisplay, 
-                                    string _AllEffetsAstrals, string _AllEffetsAstralToDisplay) {
+                                    string _AllEffetsAstrals, string _AllEffetsAstralToDisplay, 
+                                    Entite.Nature nature) {
 
         // On peut peut-être tout faire passer par les arguments. 
         // IDCardGame = _ID;
@@ -1075,7 +1086,8 @@ public class Entite : Carte, ICarte {
         AllEffetsMalefiqueStringToDisplay = _AllEffetsMalefiquesToDisplay;
         stringToEffetList(_AllEffetsString);
         stringToEffetAstral(_AllEffetsAstrals);
-        stringToEffetMalefique(_AllEffetsMalefiques); 
+        stringToEffetMalefique(_AllEffetsMalefiques);
+        EntiteNature = nature; 
     }
 
 

@@ -440,8 +440,6 @@ public class Carte : NetworkBehaviourAntinomia {
     public Effet stringToEffet(string _effetString) {
         Effet newEffet = new Effet();
         string ConditionList = _effetString.Split('!')[0];
-        Debug.Log(Name);
-        Debug.Log(_effetString); 
         string ActionList = _effetString.Split('!')[1];
 
         newEffet.AllActionsEffet = stringToActionList(ActionList);

@@ -95,11 +95,10 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
     /// <param name="data">L'information</param>
     /// <param name="ID"></param>
     void GSDataToCard(GameObject newCarte, GSData data, string ID="") {
-        Debug.Log(newCarte); 
         if (newCarte.GetComponent<CarteType>() != null) {
             newCarte.GetComponent<CarteType>().setTypeFromString(data.GetString("type"));
         } else {
-            Debug.Log("Le Composant n'a pas été trouvé");
+            // Debug.Log("Le Composant n'a pas été trouvé");
         }
         if (data.GetString("type") == "entité" || data.GetString("type") == "entite") {
             // Dans le cas d'une carte entité
@@ -110,7 +109,6 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _carte.Name = data.GetString("name");
             // Il faut maintenant récupérer les éléments de la base de données qui sont sous la forme
             // Nature : Nature/Ascendance/Element
-            Debug.Log(_carte.Name); 
             string[] informationsNature = data.GetString("Nature").Split('/');
             try {
                 _carte.EntiteNature = stringToNature(informationsNature[0], _carte.Name);
@@ -607,7 +605,6 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
                 throw new Exception("Nature inconnue. Vérifiez dans la base de données " + NatureString + " carte " + 
                     pourDebug);
         }
-
         return _nature; 
     }
 
