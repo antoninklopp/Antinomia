@@ -256,6 +256,8 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
     /// <param name="CardPrefab">Carte à instancier</param>
     /// <returns>None</returns>
 	public IEnumerator WaitForPlayerCards(GameObject CardPrefab){
+        // On réinitialise la liste de cartes au cas où le script de récupération ait été appelé avant
+        deck = new List<GameObject>();
 		Debug.Log ("WaitForPlayerCards"); 
 		LoadPlayerCards (CardPrefab); 
 		while (!finish) {

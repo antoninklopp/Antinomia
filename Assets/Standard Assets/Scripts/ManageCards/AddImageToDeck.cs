@@ -52,8 +52,10 @@ public class AddImageToDeck : MonoBehaviour, IDropHandler {
         } else if (GetComponent<Sort>() != null) {
             cardName = objectAdded.GetComponent<Sort>().Name;
         }
-		int deckNumber = GameObject.Find ("GameManager").GetComponent<GameManagerManageCards> ().currentDeckNumber; 
-		CardAddedText.GetComponent<Text> ().text = "Nouvelle Carte Ajoutée" + cardName + " au deck " + deckNumber.ToString(); 
+		int deckNumber = GameObject.Find ("GameManager").GetComponent<GameManagerManageCards> ().currentDeckNumber;
+        if (CardAddedText != null) {
+            CardAddedText.GetComponent<Text>().text = "Nouvelle Carte Ajoutée" + cardName + " au deck " + deckNumber.ToString();
+        }
 
 		GameManagerObject.GetComponent<GameManagerManageCards>().AjoutCarte(objectAdded, deckNumber); 
 		GameManagerObject.SendMessage("ReorganiseDeckCards", deckNumber); 

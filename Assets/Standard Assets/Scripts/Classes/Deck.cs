@@ -146,4 +146,8 @@ public class Deck {
     public string deckRecommande() {
         return null; 
     }
+
+    public void ResetDeck() {
+        Cartes = new List<GameObject>(); 
+    }
 }

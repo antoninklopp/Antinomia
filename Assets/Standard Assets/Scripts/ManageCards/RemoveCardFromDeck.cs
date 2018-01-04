@@ -43,8 +43,10 @@ public class RemoveCardFromDeck : MonoBehaviour, IDropHandler {
 
 	void EnleverCarte(GameObject objectAdded){
 		string cardName = GetName(objectAdded); 
-		int deckNumber = GameObject.Find ("GameManager").GetComponent<GameManagerManageCards> ().currentDeckNumber; 
-		CardRemovedText.GetComponent<Text> ().text = "Carte" + cardName + " enlevée du deck " + deckNumber.ToString(); 
+		int deckNumber = GameObject.Find ("GameManager").GetComponent<GameManagerManageCards> ().currentDeckNumber;
+        if (CardRemovedText != null) {
+            CardRemovedText.GetComponent<Text>().text = "Carte" + cardName + " enlevée du deck " + deckNumber.ToString();
+        }
 
 		GameManagerObject.GetComponent<GameManagerManageCards>().EnleverCarte(objectAdded, deckNumber); 
 		GameManagerObject.SendMessage("ReorganiseDeckCards", deckNumber); 

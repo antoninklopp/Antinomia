@@ -34,10 +34,10 @@ public class DeckInfo : MonoBehaviour {
             "INFORMATIONS SUR LE DECK \n\n" +
             "Nombre de cartes " + deck.getNombreCartes().ToString()  + "\n" +
             deckEstComplet + "\n\n" + 
-            "Nombre d'élémentaires FEU " + elementaires[Entite.Element.FEU].ToString() + "\n" +
-            "Nombre d'élémentaires AIR " + elementaires[Entite.Element.AIR].ToString() + "\n" +
-            "Nombre d'élémentaires EAU " + elementaires[Entite.Element.EAU].ToString() + "\n" +
-            "Nombre d'élémentaires TERRE " + elementaires[Entite.Element.TERRE].ToString() + "\n" +
+            "élémentaires FEU " + elementaires[Entite.Element.FEU].ToString() + "\n" +
+            "élémentaires AIR " + elementaires[Entite.Element.AIR].ToString() + "\n" +
+            "élémentaires EAU " + elementaires[Entite.Element.EAU].ToString() + "\n" +
+            "élémentaires TERRE " + elementaires[Entite.Element.TERRE].ToString() + "\n" +
             "Nombre d'entités " + deck.getNombreEntites().ToString() + "\n" +
             "Nombre de sorts " + deck.getNombreSorts().ToString() + "\n" + 
             "Nombre d'assistances " + deck.getNombreAssistances().ToString() + "\n";
@@ -50,7 +50,7 @@ public class DeckInfo : MonoBehaviour {
     /// </summary>
     /// <returns></returns>
     private IEnumerator DisableInfo() {
-        yield return new WaitForSeconds(7f);
+        yield return new WaitForSeconds(4f);
         if (gameObject.activeSelf) {
             gameObject.SetActive(false);
         }

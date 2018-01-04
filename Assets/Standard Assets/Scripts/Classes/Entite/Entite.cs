@@ -1986,7 +1986,7 @@ public class Entite : Carte, ICarte {
         try {
             return puissance.RecupererPuissanceEntite();
         } catch (NullReferenceException e) {
-            Debug.LogWarning("NullReferenceException ici " + e.ToString());
+            // Debug.LogWarning("NullReferenceException ici " + e.ToString());
             return STAT; 
         }
     }

@@ -12,7 +12,10 @@ public class CardCardManager : MonoBehaviour {
 
 	Entite CarteScript;
     Sort SortScript;
-    Assistance AssistanceScript; 
+    Assistance AssistanceScript;
+
+    public Shader blackAndWhite;
+    private Shader baseShader; 
 
 	// La carte zoom associée à laquelle on envoie les informations
 	public GameObject CarteZoom; 
@@ -58,4 +61,23 @@ public class CardCardManager : MonoBehaviour {
                 AssistanceScript.GetInfoCarte());
         }
 	}
+
+    public void MakeBlackAndWhite() {
+        baseShader = GetComponent<Image>().material.shader;
+        GetComponent<Image>().material = Instantiate(Resources.Load("Material/NormalMaterial") as Material); 
+        GetComponent<Image>().material.shader = blackAndWhite;
+        // Si on a pas assez de cartes, on la rend "intouchable"
+        // Pour ne pas s'embeteer à faire des vérifications tout le temps de si la carte est dispo
+        GetComponent<Button>().interactable = false;
+        GetComponent<CanvasGroup>().interactable = false;
+        GetComponent<Image>().raycastTarget = false;
+    }
+
+    public void MakeColored() {
+        // S'il y a assez de cartes, on la rend "touchable"
+        GetComponent<Image>().material = Instantiate(Resources.Load("Material/NormalMaterial") as Material);
+        GetComponent<Button>().interactable = true;
+        GetComponent<CanvasGroup>().interactable = true;
+        GetComponent<Image>().raycastTarget = true;
+    }
 }
