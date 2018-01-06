@@ -47,7 +47,6 @@ public class Assistance : Carte, ICarte {
     /// </summary>
     public int STAT;
 
-
     private int clicked = 0;
 
     private bool dragging = false;

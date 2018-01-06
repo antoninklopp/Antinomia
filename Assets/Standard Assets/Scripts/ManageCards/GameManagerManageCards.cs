@@ -17,7 +17,7 @@ public class GameManagerManageCards : MonoBehaviour {
     /// <summary>
     /// Dictionnaire des cartes uniques
     /// </summary>
-    Dictionary<string, List<GameObject>> uniqueCards; 
+    private Dictionary<string, List<GameObject>> uniqueCards; 
 
     GameObject CarteZoom; 
 	GameObject AllCards;
@@ -76,14 +76,31 @@ public class GameManagerManageCards : MonoBehaviour {
     private GameObject DeckInfoObject;
 
     /// <summary>
-    /// S'il y a un filtre en cours 
+    /// Nom du deck.
     /// </summary>
-    private CarteType.Type typeFiltre;
+    private GameObject DeckName;
 
     /// <summary>
-    /// Liste des filtres élémentaires 
+    /// Boutons de confirmation de changement de nom du deck. 
     /// </summary>
-    private GameObject ListeFiltreElementaires; 
+    private GameObject BoutonsConfirmationDeck;
+
+    /// <summary>
+    /// Bouton pour faire defiler les deck et pouvoir en changer. 
+    /// </summary>
+    private GameObject DefilerDeck;
+
+    public Dictionary<string, List<GameObject>> UniqueCards {
+        get {
+            return uniqueCards;
+        }
+
+        set {
+            uniqueCards = value;
+        }
+    }
+
+    public GameObject ListeFiltreElementaires; 
 
     // Use this for initialization
     void Start() {
@@ -100,8 +117,13 @@ public class GameManagerManageCards : MonoBehaviour {
         DeckInfoObject = GameObject.Find("DeckInfo");
         DeckInfoObject.SetActive(false);
 
+        DeckName = GameObject.Find("DeckName");
+        BoutonsConfirmationDeck = GameObject.Find("BoutonsConfirmationDeck");
+        BoutonsConfirmationDeck.SetActive(false);
+
+        DefilerDeck = GameObject.Find("DefilerDeck");
         ListeFiltreElementaires = GameObject.Find("FiltresElementaires");
-        ListeFiltreElementaires.SetActive(false); 
+        ListeFiltreElementaires.SetActive(false);
 
         longueurAllCards = ContentAllCards.transform.parent.parent.gameObject.GetComponent<RectTransform>().sizeDelta.x;
 
@@ -130,9 +152,9 @@ public class GameManagerManageCards : MonoBehaviour {
         // On attent l'arrivée des données. 
         // yield return new WaitForSeconds (1f); 
 
-        uniqueCards = getAllUniqueCards(AllCards); 
+        UniqueCards = getAllUniqueCards(AllCards); 
 
-        ReorganiseCardsInScrollView (ContentAllCards, uniqueCards, 0f, initialize : true);
+        ReorganiseCardsInScrollView (ContentAllCards, UniqueCards, 0f, initialize : true);
         
 	}
 
@@ -186,12 +208,22 @@ public class GameManagerManageCards : MonoBehaviour {
 		}
 
         currentDeckNumber = deckNumber;
+        // On montre aussi le nom du nouveau deck.
+        Debug.Log("Le nom de ce deck " + allDecksGlobal[deckNumber - 1].Nom); 
+        if (allDecksGlobal[deckNumber - 1].Nom != null) {
+            DeckName.GetComponent<InputField>().text = allDecksGlobal[deckNumber - 1].Nom;
+        } else {
+            DeckName.GetComponent<InputField>().text = ""; 
+        }
+        BoutonsConfirmationDeck.SetActive(false); 
         ReorganiseCardsInScrollView (ContentAllDecks, allDecksGlobal [deckNumber - 1].Cartes, 225f);
         // On update aussi toutes les cartes en fonction du nombre qui ont été enlevées dans le deck qu'on est 
         // en train de regarder. 
-        ReorganiseCardsInScrollView (ContentAllCards, uniqueCards, 0, false);
+        ReorganiseCardsInScrollView (ContentAllCards, UniqueCards, 0, false);
 
-        DisplayDeckInfo(deckNumber); 
+        DisplayDeckInfo(deckNumber);
+        // Une fois que le joueur a choisi son nouveau deck on enlève de sa vue. 
+        FaireDefilerDeck(false); 
 	}
 
     /// <summary>
@@ -200,7 +232,7 @@ public class GameManagerManageCards : MonoBehaviour {
     /// <param name="ScrollView"></param>
     /// <param name="Cards"></param>
     /// <param name="yStartPosition"></param>
-	void ReorganiseCardsInScrollView(GameObject ScrollView, List<GameObject> Cards, float yStartPosition, 
+	public void ReorganiseCardsInScrollView(GameObject ScrollView, List<GameObject> Cards, float yStartPosition, 
             bool unique=false){
 
         PutCardsInScrollView(ScrollView, Cards, yStartPosition); 
@@ -214,13 +246,18 @@ public class GameManagerManageCards : MonoBehaviour {
         }
     }
 
+    public void ReorganizeCardsInAllCardsUnique() {
+        ReorganiseCardsInScrollView(ContentAllCards, UniqueCards, 0); 
+    }
+
     /// <summary>
     /// Mettre la liste de cartes dans la scrollView
     /// </summary>
     /// <param name="ScrollView"></param>
     /// <param name="Cards">Liste de cartes à insérer</param>
     /// <param name="yStartPosition"></param>
-    void PutCardsInScrollView(GameObject ScrollView, List<GameObject> Cards, float yStartPosition) {
+    /// <param name="reorganize">Si on doit réorganiser la scollView</param>
+    private void PutCardsInScrollView(GameObject ScrollView, List<GameObject> Cards, float yStartPosition, bool reorganize=false) {
         longueurAllCards = ScrollView.transform.parent.parent.gameObject.GetComponent<RectTransform>().sizeDelta.x;
         Debug.Log("On met les cartes dans la scrollView " + ScrollView.name); 
 
@@ -233,6 +270,15 @@ public class GameManagerManageCards : MonoBehaviour {
         for (int i = 0; i < Cards.Count; ++i) {
             Cards[i].SetActive(true); 
             Cards[i].transform.SetParent(ScrollView.transform, false);
+        }
+
+        // Si les cartes sont déjà dans la scrollview, exemple : tri par puissance, tri par AKA
+        // On change tous les siblings index. 
+        if (reorganize) {
+            for (int i = 0; i < Cards.Count; i++) {
+                Debug.Log("Je change les index : " + Cards[i].GetComponent<Carte>().Name + " " + i.ToString()); 
+                Cards[i].transform.SetSiblingIndex(i); 
+            }
         }
         
         int nombreCartesParLigne;
@@ -316,10 +362,13 @@ public class GameManagerManageCards : MonoBehaviour {
 				newDraggedObject.GetComponent<RectTransform> ().localScale = draggedObject.GetComponent<RectTransform> ().localScale; 
 				listAllCards.Insert (i, newDraggedObject); 
 				listAllCards.Remove (draggedObject);
+
+                UniqueCards[draggedObject.GetComponent<Carte>().Name].Remove(draggedObject);
+                UniqueCards[newDraggedObject.GetComponent<Carte>().Name].Insert(0, newDraggedObject);
+
                 newDraggedObject.transform.SetParent(ContentAllCards.transform, false);
-                newDraggedObject.transform.SetSiblingIndex(indexSibling); 
-				// ReorganiseCardsInScrollView (ContentAllCards, listAllCards, 0f); 
-				break; 
+                newDraggedObject.transform.SetSiblingIndex(indexSibling);
+                break; 
 			}
 		}
 	}
@@ -349,7 +398,7 @@ public class GameManagerManageCards : MonoBehaviour {
         Debug.Log("Carte trouvée " + carteTrouvee); 
         int index = CarteTemporaire.transform.GetSiblingIndex();
         Debug.Log("sibling index" + index.ToString()); 
-        // Destroy(CarteTemporaire);
+        Destroy(CarteTemporaire);
         Card.transform.SetParent(ContentAllCards.transform, false);
         Card.transform.SetSiblingIndex(index); 
     }
@@ -363,19 +412,27 @@ public class GameManagerManageCards : MonoBehaviour {
 	public void AjoutCarte(GameObject NouvelleCarte, int deckNumber){ 
 		Debug.Log ("APPPEL DE LA FONCTION");
         // on recherche une des cartes qui n'est pas déjà dans le deck 
-        foreach (GameObject g in uniqueCards[NouvelleCarte.GetComponent<Carte>().Name]) {
+        GameObject CarteAAjouterAuDeck = null; 
+        foreach (GameObject g in UniqueCards[NouvelleCarte.GetComponent<Carte>().Name]) {
             // Si on en trouve une, on l'ajoute
             if (CheckIfCardNotInDeck(deckNumber, g)) {
                 // Ajout dans l'objet Deck
-                allDecksGlobal[deckNumber - 1].AjouterCarte(g);
+                CarteAAjouterAuDeck = g; 
+                // allDecksGlobal[deckNumber - 1].AjouterCarte(g); La carte est ajoutée 5 lignes en dessous. 
                 // Ajout dans la base de données. 
                 playerInfo.AddCardToDeck(GetIDAllCards(g), deckNumber);
                 break; 
             } 
         }
-
-        ReplaceCardScrollViewAllCards(NouvelleCarte);
-        ReorganiseCardsInScrollView(ContentAllCards, uniqueCards, 0);
+        Destroy(NouvelleCarte); 
+        if (CarteAAjouterAuDeck != null) {
+            GameObject Carte = Instantiate(CarteAAjouterAuDeck);
+            Carte.transform.SetParent(ContentAllDecks.transform, false);
+            allDecksGlobal[currentDeckNumber - 1].AjouterCarte(Carte);
+        }
+        // ReplaceCardScrollViewAllCards(NouvelleCarte);
+        ReorganiseCardsInScrollView(ContentAllCards, UniqueCards, 0, true);
+        ReorganiseCardsInScrollView(ContentAllDecks, allDecksGlobal[currentDeckNumber - 1].Cartes, 0); 
 		Debug.Log ("Carte Ajoutee au deck " + deckNumber.ToString ()); 
 	}
 
@@ -410,8 +467,11 @@ public class GameManagerManageCards : MonoBehaviour {
 		playerInfo.RemoveCardFromDeck (GetIDAllCards(AncienneCarte), deckNumber); 
 		Debug.Log ("NP"); 
 
-		Destroy (AncienneCarte); 
-	}
+		Destroy (AncienneCarte);
+
+        ReorganiseCardsInScrollView(ContentAllCards, UniqueCards, 0, true);
+        ReorganiseCardsInScrollView(ContentAllDecks, allDecksGlobal[currentDeckNumber - 1].Cartes, 0);
+    }
 
     /// <summary>
     /// Retourner au menu. 
@@ -550,215 +610,83 @@ public class GameManagerManageCards : MonoBehaviour {
     }
 
     /// <summary>
-    /// Rechercher des cartes et les mettre dans le scrollView
-    /// </summary>
-    /// <param name="research"></param>
-    public void RechercheCarte(string research) {
-        List<GameObject> CartesCorres = CartesCorrespondantes(research);
-        PutCardsInScrollView(ContentAllCards, CartesCorres, 0); 
-    }
-
-    /// <summary>
-    /// Recuperer la liste des cartes qui correspondent à une recherche du joueur
-    /// </summary>
-    /// <param name="research"></param>
-    /// <returns></returns>
-    private List<GameObject> CartesCorrespondantes(string research) {
-        List<GameObject> listeCartes = new List<GameObject>(); 
-        foreach (KeyValuePair<string, List<GameObject>> cartesUniques in uniqueCards) {
-            if ((getStringWithoutAccent(cartesUniques.Key).IndexOf(getStringWithoutAccent(research)) != -1) 
-                && ((typeFiltre == CarteType.Type.AUCUN)
-                || ((cartesUniques.Value[0].GetComponent<Carte>().GetType() == typeof(Entite) && typeFiltre == CarteType.Type.ENTITE)
-                || (cartesUniques.Value[0].GetComponent<Carte>().GetType() == typeof(Sort) && typeFiltre == CarteType.Type.SORT)
-                || (cartesUniques.Value[0].GetComponent<Carte>().GetType() == typeof(Assistance) && typeFiltre == CarteType.Type.ASSISTANCE))
-                )){
-                listeCartes.Add(cartesUniques.Value[0]); 
-            }
-        }
-        return listeCartes; 
-    }
-
-    public static string getStringWithoutAccent(string accentedStr) {
-        byte[] tempBytes;
-        tempBytes = System.Text.Encoding.GetEncoding("ISO-8859-8").GetBytes(accentedStr);
-        string asciiStr = System.Text.Encoding.UTF8.GetString(tempBytes);
-        return asciiStr; 
-    }
-
-    /// <summary>
-    /// Filtrer les cartes selon un type d'entité. 
-    /// Methode appelé par un bouton de sélection. 
-    /// </summary>
-    /// <param name="type"></param>
-    public void FiltreType(string type) {
-        CarteType.Type typeCarte = CarteType.Type.AUCUN;
-        GameObject BoutonPresse = null; 
-        switch (type) {
-            case "entite":
-                typeCarte = CarteType.Type.ENTITE;
-                BoutonPresse = GameObject.Find("FiltreEntite"); 
-                break; 
-            case "sort":
-                typeCarte = CarteType.Type.SORT;
-                BoutonPresse = GameObject.Find("FiltreSort");
-                break; 
-            case "assistance":
-                typeCarte = CarteType.Type.ASSISTANCE;
-                BoutonPresse = GameObject.Find("FiltreAssistance");
-                break;
-            default:
-                Debug.LogError("Il y a une erreur dans le type d'entité\n" +
-                    "Type d'entité inexistant.");
-                return;
-        }
-
-        typeFiltre = typeCarte; 
-
-        if (BoutonPresse.GetComponent<Image>().color == Color.green) {
-            // Le filtre est actif
-            // on le desactive
-            BoutonPresse.GetComponent<Image>().color = Color.white;
-            ReorganiseCardsInScrollView(ContentAllCards, uniqueCards, 0, initialize : true);
-            typeFiltre = CarteType.Type.AUCUN; 
-        } else {
-            // Le filtre n'est pas actif. 
-            BoutonPresse.GetComponent<Image>().color = Color.green;
-            // On desactive les couleurs d'autres filtres si ils étaient actifs
-            GameObject Filtres = GameObject.Find("FiltresCartes");
-            for (int i = 0; i < Filtres.transform.childCount; i++) {
-                if (Filtres.transform.GetChild(i).gameObject != BoutonPresse) {
-                    Filtres.transform.GetChild(i).GetComponent<Image>().color = Color.white;
-                }
-            }
-            List<GameObject> CartesTypes = CartesCorrespondantesType(typeCarte);
-            Debug.Log("Ce filtrage a amené " + CartesTypes.Count + " cartes");
-            ReorganiseCardsInScrollView(ContentAllCards, CartesTypes, 0, unique : true);
-
-            if (type == "entite") {
-                StartCoroutine(AfficherFiltresElementaires());
-            }
-
-        }
-    }
-
-    /// <summary>
-    /// Recupérer les cartes qui correspondent à un type précis. 
-    /// </summary>
-    /// <param name="typeCarte"></param>
-    /// <returns></returns>
-    private List<GameObject> CartesCorrespondantesType(CarteType.Type typeCarte) {
-        List<GameObject> listeCartes = new List<GameObject>();
-        foreach (KeyValuePair<string, List<GameObject>> cartesUniques in uniqueCards) {
-            if ((cartesUniques.Value[0].GetComponent<Carte>().GetType() == typeof(Entite) && typeCarte == CarteType.Type.ENTITE) ||
-                (cartesUniques.Value[0].GetComponent<Carte>().GetType() == typeof(Sort) && typeCarte == CarteType.Type.SORT) ||
-                (cartesUniques.Value[0].GetComponent<Carte>().GetType() == typeof(Assistance) && typeCarte == CarteType.Type.ASSISTANCE)) {
-                listeCartes.Add(cartesUniques.Value[0]);
-            }
-        }
-        return listeCartes; 
-    }
-
-    /// <summary>
     /// Afficher les informations sur un deck lors d'un clique sur le changemennt de deck.
     /// Les informations sont masquées après 10 secondes
     /// </summary>
     /// <param name="deckNumber">Numero du deck de 1 à n</param>
     private void DisplayDeckInfo(int deckNumber) {
-        DeckInfoObject.SetActive(true);
-        DeckInfoObject.GetComponent<DeckInfo>().setDeckInfo(allDecksGlobal[deckNumber - 1]); 
-    }
-
-    /// <summary>
-    /// Filtrer les entités par type d'élémentaires. 
-    /// </summary>
-    /// <param name="filtre"></param>
-    public void FiltreElementaire(string filtre) {
-        // Dans le cas du filtre d'une entité élementaire
-        if (filtre == "TERRE" || filtre == "EAU" || filtre == "FEU" || filtre == "AIR") {
-            Entite.Element elementFiltre = Entite.Element.NONE; 
-            switch (filtre) {
-                case "TERRE":
-                    elementFiltre = Entite.Element.TERRE; 
-                    break;
-                case "FEU":
-                    elementFiltre = Entite.Element.FEU; 
-                    break;
-                case "EAU":
-                    elementFiltre = Entite.Element.EAU; 
-                    break;
-                case "AIR":
-                    elementFiltre = Entite.Element.AIR; 
-                    break;
-                default:
-                    Debug.LogError("Ce cas ne peut pas arriver");
-                    break; 
-            }
-
-            PutCardsInScrollView(ContentAllCards, CartesCorrespondantesElement(elementFiltre), 0); 
-        } else if (filtre == "ASTRAL" || filtre == "MALEFIQUE") {
-            Entite.Ascendance ascendanceFiltre = Entite.Ascendance.NONE;
-            if (filtre == "ASTRAL"){
-                ascendanceFiltre = Entite.Ascendance.ASTRALE; 
-            } else {
-                ascendanceFiltre = Entite.Ascendance.MALEFIQUE; 
-            }
-            PutCardsInScrollView(ContentAllCards, CartesCorrespondantesAscendance(ascendanceFiltre), 0); 
-        } else {
-            throw new Exception("Ce filtre n'existe pas"); 
-        }
-
-        ListeFiltreElementaires.SetActive(false); 
-
-    }
-
-    /// <summary>
-    /// Récupérer toutes les cartes d'un élément donné
-    /// </summary>
-    /// <param name="element"></param>
-    /// <returns></returns>
-    private List<GameObject> CartesCorrespondantesElement(Entite.Element element) {
-        List<GameObject> entites = CartesCorrespondantesType(CarteType.Type.ENTITE);
-        List<GameObject> elementList = new List<GameObject>(); 
-        foreach (GameObject g in entites) {
-            if (g.GetComponent<Entite>().EntiteElement == element) {
-                elementList.Add(g); 
-            }
-        }
-        return elementList; 
-    }
-
-    /// <summary>
-    /// Récupérer toutes les cartes d'une ascendance donnée. 
-    /// </summary>
-    /// <param name="ascendance"></param>
-    /// <returns></returns>
-    private List<GameObject> CartesCorrespondantesAscendance(Entite.Ascendance ascendance) {
-        List<GameObject> entites = CartesCorrespondantesType(CarteType.Type.ENTITE);
-        List<GameObject> ascendanceList = new List<GameObject>(); 
-        foreach(GameObject g in entites) {
-            if (g.GetComponent<Entite>().EntiteAscendance == ascendance) {
-                ascendanceList.Add(g); 
-            }
-        }
-        return ascendanceList; 
-    }
-
-    private IEnumerator AfficherFiltresElementaires() {
-        ListeFiltreElementaires.SetActive(true);
-        yield return new WaitForSeconds(3f);
-        if (!ListeFiltreElementaires.activeInHierarchy) {
-            ListeFiltreElementaires.SetActive(false); 
-        }
+    DeckInfoObject.SetActive(true);
+    DeckInfoObject.GetComponent<DeckInfo>().setDeckInfo(allDecksGlobal[deckNumber - 1]); 
     }
 
     /// <summary>
     /// Enlever toutes les cartes d'un deck. 
     /// </summary>
     /// <param name="deckNumber"></param>
-    private void clearDeck(int deckNumber) {
-        foreach (GameObject g in allDecksGlobal[deckNumber - 1].Cartes) {
+    public void clearDeck() {
+        foreach (GameObject g in allDecksGlobal[currentDeckNumber - 1].Cartes) {
             Destroy(g); 
         }
-        allDecksGlobal[deckNumber - 1].ResetDeck(); 
+        allDecksGlobal[currentDeckNumber - 1].ResetDeck();
+        playerInfo.clearDeck(currentDeckNumber); 
+    }
+
+    /// <summary>
+    /// Lorsque le jouer veut changer le nom du deck. 
+    /// </summary>
+    public void ChangementNomDeck() {
+        if (!BoutonsConfirmationDeck.activeInHierarchy) {
+            BoutonsConfirmationDeck.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// Dans le cas d'un changement de deck. 
+    /// Pour que le changement soit effectif, il faut confirmer le changement. 
+    /// Grâce à un des deux boutons qui apparaissent à un chanegement de lettre. 
+    /// </summary>
+    /// <param name="changer"></param>
+    public void ChangerNomDeck(bool changer) {
+        // Dans le cas d'une confirmation
+        if (changer) {
+            playerInfo.changerNomDeck(currentDeckNumber, DeckName.GetComponent<InputField>().text);
+            Debug.Log("le nouveau nom du deck" + DeckName.GetComponent<InputField>().text); 
+            allDecksGlobal[currentDeckNumber - 1].Nom = DeckName.GetComponent<InputField>().text; 
+        } 
+        // Dans le cas où le joueur ne veut pas poursuivre le changement de nom
+        else {
+            DeckName.GetComponent<InputField>().text = allDecksGlobal[currentDeckNumber - 1].Nom; 
+        }
+        BoutonsConfirmationDeck.SetActive(false); 
+    }
+
+    /// <summary>
+    /// Montrer les decks possibles au joueur. 
+    /// </summary>
+    public void FaireDefilerDeck(bool defiler=false) {
+        // Dans le cas où le joueur voit déjà les decks.c
+        if (DefilerDeck.transform.Find("Image").gameObject.GetComponent<Image>().color == Color.red) {
+            float deckButtonHeight = DecksButton.transform.Find("Viewport").Find("Content").gameObject.
+                GetComponent<GridLayoutGroup>().cellSize.y;
+            DecksButton.GetComponent<RectTransform>().sizeDelta = new Vector2(DecksButton.GetComponent<RectTransform>().sizeDelta.x
+                , deckButtonHeight);
+            DefilerDeck.transform.Find("Image").gameObject.GetComponent<Image>().color = Color.white;
+
+        } else {
+            int nombreDeDecks = allDecksGlobal.Count;
+            float deckButtonHeight = DecksButton.transform.Find("Viewport").Find("Content").gameObject.
+                GetComponent<GridLayoutGroup>().cellSize.y;
+            DecksButton.GetComponent<RectTransform>().sizeDelta = new Vector2(DecksButton.GetComponent<RectTransform>().sizeDelta.x
+                , nombreDeDecks * deckButtonHeight + 10);
+            DefilerDeck.transform.Find("Image").gameObject.GetComponent<Image>().color = Color.red; 
+        }
+    }
+
+    public void PutCardsInAllCards(List<GameObject> Cartes, bool reorganize) {
+        PutCardsInScrollView(ContentAllCards, Cartes, 0, reorganize); 
+    }
+
+    public void PutCardsInAllDecks(List<GameObject> Cartes, bool reorganize) {
+        PutCardsInScrollView(ContentAllDecks, Cartes, 0, reorganize);
     }
 }

@@ -17,7 +17,7 @@ public class RechercheCarte : MonoBehaviour {
         // quand il y a un inputField. 
 #if !(UNITY_ANDROID || UNITY_IOS)
         string textSearch = GetComponent<InputField>().text;
-        GameObject.Find("GameManager").GetComponent<GameManagerManageCards>().RechercheCarte(textSearch);
+        GameObject.Find("GameManager").GetComponent<TriFiltreEditor>().RechercheCarte(textSearch);
 #endif
     }
 
@@ -26,6 +26,6 @@ public class RechercheCarte : MonoBehaviour {
     /// </summary>
     public void FinEdition() {
         string textSearch = GetComponent<InputField>().text;
-        GameObject.Find("GameManager").GetComponent<GameManagerManageCards>().RechercheCarte(textSearch);
+        GameObject.Find("GameManager").GetComponent<TriFiltreEditor>().RechercheCarte(textSearch);
     }
 }

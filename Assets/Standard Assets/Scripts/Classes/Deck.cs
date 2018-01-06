@@ -20,6 +20,11 @@ public class Deck {
     /// </summary>
     private int number;
 
+    /// <summary>
+    /// Nom du deck. 
+    /// </summary>
+    private string nom; 
+
     public int Number {
         get {
             return number;
@@ -28,6 +33,20 @@ public class Deck {
         set {
             number = value;
         }
+    }
+
+    public string Nom {
+        get {
+            return nom;
+        }
+
+        set {
+            nom = value;
+        }
+    }
+
+    public Deck(List<GameObject> newCartes, int thisNumber, string nom) : this(newCartes, thisNumber) {
+        Nom = nom; 
     }
 
     public Deck(List<GameObject> newCartes, int thisNumber) : this(){
@@ -150,4 +169,56 @@ public class Deck {
     public void ResetDeck() {
         Cartes = new List<GameObject>(); 
     }
-}
+
+    /// <summary>
+    /// Trier les cartes d'un deck selon certains critères. 
+    /// </summary>
+    public List<GameObject> TrierDeckCritere(string critere) {
+        switch (critere) {
+            case "AKA":
+                return TrierParAKA();
+            case "Puissance":
+            case "puissance":
+                return TrierParPuissance();
+            case "nom":
+            case "Name":
+                return TrierParNom(); 
+
+        }
+        return null; 
+    }
+
+    /// <summary>
+    /// On trie les cartes par AKA. 
+    /// Comme seules les cartes ont cette attribut, on met les sorts et les assistances à la fin.
+    /// </summary>
+    /// <returns></returns>
+    public List<GameObject> TrierParAKA() {
+        for (int i = 0; i < Cartes.Count; i++) {
+            for (int j = 0; j < i; j++) {
+                if ((Cartes[j].GetType() == typeof(Sort) || Cartes[j].GetType() == typeof(Assistance)) 
+                    && Cartes[i].GetType() == typeof(Entite)) {
+                    GameObject Carte = Cartes[i];
+                    Cartes[i] = Cartes[j];
+                    Cartes[j] = Carte; 
+                } else if ((Cartes[j].GetType() == typeof(Entite) && Cartes[i].GetType() == typeof(Entite)) && 
+                    Cartes[j].GetComponent<Entite>().CoutAKA > Cartes[i].GetComponent<Entite>().CoutAKA) {
+                    GameObject Carte = Cartes[i];
+                    Cartes[i] = Cartes[j];
+                    Cartes[j] = Carte;
+                }
+            }
+        }
+        return Cartes;
+    }
+
+    public List<GameObject> TrierParPuissance() {
+        Debug.LogError("A implementer"); 
+        return Cartes; 
+    }
+
+    public List<GameObject> TrierParNom() {
+        Debug.LogError("A implementer"); 
+        return Cartes; 
+    }
+ }

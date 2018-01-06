@@ -58,7 +58,7 @@ public class AddImageToDeck : MonoBehaviour, IDropHandler {
         }
 
 		GameManagerObject.GetComponent<GameManagerManageCards>().AjoutCarte(objectAdded, deckNumber); 
-		GameManagerObject.SendMessage("ReorganiseDeckCards", deckNumber); 
+		// GameManagerObject.SendMessage("ReorganiseDeckCards", deckNumber); 
 	}
 
 	void ReorganiseCardsInScrollView(GameObject ScrollView, List<GameObject> Cards, float yStartPosition){

@@ -1780,9 +1780,6 @@ public class Entite : Carte, ICarte {
         return false;
     }
 
-
-
-
     /// <summary>
     /// TODO : utiliser la propriété int des enums? 
     /// element to int:

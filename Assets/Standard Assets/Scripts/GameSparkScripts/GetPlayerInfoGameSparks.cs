@@ -320,9 +320,11 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
                     // Iteration sur chaque deck. 
 					for (int j = 0; j < dataList.Count; j++){
 						List<GameObject> CartesDeck = new List<GameObject>(); 
-						int numeroDeck = 0; 
-
-						numeroDeck = dataList[j].GetInt("number").Value; 
+						int numeroDeck = 0;
+                        string nomDeck = null; 
+						numeroDeck = dataList[j].GetInt("number").Value;
+                        nomDeck = dataList[j].GetString("name");
+                        Debug.Log("Nom depuis le playerInfo " + dataList[j].JSON); 
 						List<GSData> Cartes = dataList[j].GetGSDataList("cards"); 
 
                         // Iteration sur chaque carte du deck. 
@@ -336,7 +338,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
                             newCarte.SetActive(false); 
 							CartesDeck.Add (newCarte); 
 						} 
-						Deck thisDeck = new Deck(CartesDeck, numeroDeck);
+						Deck thisDeck = new Deck(CartesDeck, numeroDeck, nomDeck);
 						allDecks.Add(thisDeck); 
 					}
 					finish = true; 	
@@ -681,6 +683,10 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Supprimer un deck. 
+    /// </summary>
+    /// <param name="deckNumber"></param>
     public void removeDeck(int deckNumber) {
         new GameSparks.Api.Requests.LogEventRequest()
             .SetEventKey("removeDeck")
@@ -691,6 +697,46 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
                 }
                 else {
                     Debug.Log("Le deck n'a pas pu être retiré.");
+                }
+                finish = true;
+            });
+    }
+
+    /// <summary>
+    /// Enlever toutes les cartes d'un deck 
+    /// </summary>
+    /// <param name="deckNumber"></param>
+    public void clearDeck(int deckNumber) {
+        new GameSparks.Api.Requests.LogEventRequest()
+            .SetEventKey("resetDeck")
+            .SetEventAttribute("deckID", deckNumber)
+            .Send((response) => {
+                if (!response.HasErrors) {
+                    Debug.Log("Deck clear " + response.ScriptData.GetInt("reset").Value.ToString());
+                }
+                else {
+                    Debug.Log("Le deck n'a pas pu être clear.");
+                }
+                finish = true;
+            });
+    }
+
+    /// <summary>
+    /// Changer le nom d'un deck
+    /// </summary>
+    /// <param name="deckNumber">Numéro du deck</param>
+    /// <param name="nomDeck">Le nouveau nom du deck</param>
+    public void changerNomDeck(int deckNumber, string nomDeck) {
+        new GameSparks.Api.Requests.LogEventRequest()
+            .SetEventKey("renameDeck")
+            .SetEventAttribute("deckID", deckNumber)
+            .SetEventAttribute("name", nomDeck)
+            .Send((response) => {
+                if (!response.HasErrors) {
+                    Debug.Log("Deck renamesd " + response.ScriptData.GetString("name").ToString());
+                }
+                else {
+                    Debug.Log("Le deck n'a pas pu être clear.");
                 }
                 finish = true;
             });
