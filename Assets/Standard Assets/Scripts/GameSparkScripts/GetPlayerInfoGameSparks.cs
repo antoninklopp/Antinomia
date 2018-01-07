@@ -357,6 +357,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
     /// <param name="deckNumber"></param>
     /// <returns></returns>
 	public IEnumerator WaitForPlayerDecks(GameObject CardPrefab, int deckNumber=0){
+        allDecks = new List<Deck>(); 
 		LoadPlayerDecks (CardPrefab, deckNumber); 
 		while (!finish) {
 			yield return new WaitForSeconds (0.05f); 
@@ -681,6 +682,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
         while (!finish) {
             yield return new WaitForSeconds(0.1f); 
         }
+        finish = false; 
     }
 
     /// <summary>
@@ -693,13 +695,22 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             .SetEventAttribute("deckID", deckNumber)
             .Send((response) => {
                 if (!response.HasErrors) {
-                    Debug.Log("Deck retiré " + response.ScriptData.GetInt("deck created").Value.ToString());
+                    // Debug.Log("Deck retiré " + response.ScriptData.GetInt("deck created").Value.ToString());
                 }
                 else {
                     Debug.Log("Le deck n'a pas pu être retiré.");
                 }
                 finish = true;
             });
+    }
+
+    public IEnumerator removeDeckRoutine(int deckNumber) {
+        finish = false;
+        removeDeck(deckNumber);
+        while (!finish) {
+            yield return new WaitForSeconds(0.1f); 
+        }
+        finish = false;
     }
 
     /// <summary>
@@ -709,12 +720,13 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
     public void clearDeck(int deckNumber) {
         new GameSparks.Api.Requests.LogEventRequest()
             .SetEventKey("resetDeck")
-            .SetEventAttribute("deckID", deckNumber)
+            .SetEventAttribute("number", deckNumber)
             .Send((response) => {
                 if (!response.HasErrors) {
                     Debug.Log("Deck clear " + response.ScriptData.GetInt("reset").Value.ToString());
                 }
                 else {
+                    Debug.Log(response.JSONData); 
                     Debug.Log("Le deck n'a pas pu être clear.");
                 }
                 finish = true;

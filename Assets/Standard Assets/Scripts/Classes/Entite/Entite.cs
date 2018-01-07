@@ -106,6 +106,10 @@ public class Entite : Carte, ICarte {
     /// </summary>
     [SyncVar(hook ="ChangeStat")]
     public int STAT;
+
+    /// <summary>
+    /// Cout en AKA de la carte
+    /// </summary>
     public int CoutAKA;
 
     /// <summary>

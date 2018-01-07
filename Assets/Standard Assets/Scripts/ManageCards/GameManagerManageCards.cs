@@ -90,6 +90,12 @@ public class GameManagerManageCards : MonoBehaviour {
     /// </summary>
     private GameObject DefilerDeck;
 
+    /// <summary>
+    /// Info sur le numero du deck courant. 
+    /// Remplace les boutons de decks une fois le deck choisi. 
+    /// </summary>
+    private GameObject currentDeckInfoNumber; 
+
     public Dictionary<string, List<GameObject>> UniqueCards {
         get {
             return uniqueCards;
@@ -122,6 +128,7 @@ public class GameManagerManageCards : MonoBehaviour {
         BoutonsConfirmationDeck.SetActive(false);
 
         DefilerDeck = GameObject.Find("DefilerDeck");
+        currentDeckInfoNumber = GameObject.Find("CurrentDeckNumber"); 
         ListeFiltreElementaires = GameObject.Find("FiltresElementaires");
         ListeFiltreElementaires.SetActive(false);
 
@@ -186,9 +193,20 @@ public class GameManagerManageCards : MonoBehaviour {
 				}
 			}
 		}
+
+        Debug.Log("nombre de deck" + allDecks.Count);
+        Debug.Log("deck demande " + deckNumber); 
 		ReorganiseCardsInScrollView (ContentAllDecks, allDecks[deckNumber - 1].Cartes, 225f);
 
+        AfficherNumeroDeck(currentDeckNumber); 
+
         StartCoroutine(setAllCards());
+    }
+
+    public void AfficherNumeroDeck(int numeroDeck) {
+        DecksButton.SetActive(false);
+        currentDeckInfoNumber.SetActive(true);
+        currentDeckInfoNumber.transform.Find("Text").gameObject.GetComponent<Text>().text = "DECK " + numeroDeck.ToString(); 
     }
 
     /// <summary>
@@ -247,7 +265,7 @@ public class GameManagerManageCards : MonoBehaviour {
     }
 
     public void ReorganizeCardsInAllCardsUnique() {
-        ReorganiseCardsInScrollView(ContentAllCards, UniqueCards, 0); 
+        ReorganiseCardsInScrollView(ContentAllCards, UniqueCards, 0, true); 
     }
 
     /// <summary>
@@ -276,7 +294,6 @@ public class GameManagerManageCards : MonoBehaviour {
         // On change tous les siblings index. 
         if (reorganize) {
             for (int i = 0; i < Cards.Count; i++) {
-                Debug.Log("Je change les index : " + Cards[i].GetComponent<Carte>().Name + " " + i.ToString()); 
                 Cards[i].transform.SetSiblingIndex(i); 
             }
         }
@@ -289,7 +306,7 @@ public class GameManagerManageCards : MonoBehaviour {
         // On change la taille de l'objet qui accueille les cartes. 
         ScrollView.transform.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(
             ScrollView.transform.gameObject.GetComponent<RectTransform>().sizeDelta.x, longueurCartesAndroid *
-            rapportLongueurHauteurCarte * Cards.Count / nombreCartesParLigne); 
+            rapportLongueurHauteurCarte * Cards.Count / nombreCartesParLigne + 200f); 
 
 #else
         if (Cards.Count == 0) {
@@ -303,7 +320,7 @@ public class GameManagerManageCards : MonoBehaviour {
         // On change la taille de l'objet qui accueille les cartes. 
         ScrollView.transform.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(
             ScrollView.transform.gameObject.GetComponent<RectTransform>().sizeDelta.x, longueurCartesOrdinateur *
-            rapportLongueurHauteurCarte * Cards.Count / nombreCartesParLigne);
+            rapportLongueurHauteurCarte * Cards.Count / nombreCartesParLigne + 200f); // 100f rajouté artificiellement
 #endif
     }
 
@@ -493,6 +510,14 @@ public class GameManagerManageCards : MonoBehaviour {
     /// Créer les boutons de decks. 
     /// </summary>
     public void SetButtonsDecks() {
+        // On enleve tous les boutons actifs dans la hierarchie avant : 
+        int count = 0;
+        foreach (Transform t in DecksButton.transform.Find("Viewport").Find("Content")) {
+            Destroy(t.gameObject);
+            count++; 
+        }
+        Debug.Log("On a detruit " + count + " boutons"); 
+        // on ajoute les nouveaux boutons ensuite. 
         allDecksButtonsList = new List<GameObject>(); 
         for (int i = 0; i < deckNumberTotal; i++) {
             GameObject newButton = Instantiate(DeckButtonPrefab);
@@ -522,11 +547,19 @@ public class GameManagerManageCards : MonoBehaviour {
     /// </summary>
     public void AjouterDeck() {
         // On crée un deck 
-        StartCoroutine(playerInfo.createDeckRoutine());
-        // On update l'UI, en laissant le deck courant. 
-        StartCoroutine(setAllDecks(currentDeckNumber)); 
+        StartCoroutine(AjouterDeckRoutine());
     }
 
+    private IEnumerator AjouterDeckRoutine() {
+        yield return playerInfo.createDeckRoutine();
+
+        // On update l'UI, en laissant le deck courant. 
+        StartCoroutine(setAllDecks(currentDeckNumber));
+    }
+
+    /// <summary>
+    /// Enlever un deck au joueur
+    /// </summary>
     public void RemoveDeck() {
         // Il faut demander au joueur s'il est sûr de vouloir supprimer le deck. 
         SupprimerDeck.SetActive(true);
@@ -539,9 +572,15 @@ public class GameManagerManageCards : MonoBehaviour {
     /// <param name="reponse">1 si oui, 2 si non</param>
     public void ReponseRemoveDeck(int reponse) {
         if (reponse == 1) {
-            playerInfo.removeDeck(currentDeckNumber); 
+            StartCoroutine(RemoveDeckOKRoutine()); 
         }
         SupprimerDeck.SetActive(false); 
+    }
+
+    private IEnumerator RemoveDeckOKRoutine() {
+        yield return playerInfo.removeDeckRoutine(currentDeckNumber);
+        // On reset la vie du deck.
+        yield return setAllDecks(1); 
     }
 
     /// <summary>
@@ -615,8 +654,8 @@ public class GameManagerManageCards : MonoBehaviour {
     /// </summary>
     /// <param name="deckNumber">Numero du deck de 1 à n</param>
     private void DisplayDeckInfo(int deckNumber) {
-    DeckInfoObject.SetActive(true);
-    DeckInfoObject.GetComponent<DeckInfo>().setDeckInfo(allDecksGlobal[deckNumber - 1]); 
+        DeckInfoObject.SetActive(true);
+        DeckInfoObject.GetComponent<DeckInfo>().setDeckInfo(allDecksGlobal[deckNumber - 1]); 
     }
 
     /// <summary>
@@ -664,21 +703,25 @@ public class GameManagerManageCards : MonoBehaviour {
     /// Montrer les decks possibles au joueur. 
     /// </summary>
     public void FaireDefilerDeck(bool defiler=false) {
-        // Dans le cas où le joueur voit déjà les decks.c
+        // Dans le cas où le joueur voit déjà les decks
         if (DefilerDeck.transform.Find("Image").gameObject.GetComponent<Image>().color == Color.red) {
+            AfficherNumeroDeck(currentDeckNumber);
             float deckButtonHeight = DecksButton.transform.Find("Viewport").Find("Content").gameObject.
                 GetComponent<GridLayoutGroup>().cellSize.y;
             DecksButton.GetComponent<RectTransform>().sizeDelta = new Vector2(DecksButton.GetComponent<RectTransform>().sizeDelta.x
                 , deckButtonHeight);
             DefilerDeck.transform.Find("Image").gameObject.GetComponent<Image>().color = Color.white;
-
-        } else {
+        }
+        // Dans le cas où on ne voit pas les decks. 
+        else {
+            currentDeckInfoNumber.SetActive(false);
+            DecksButton.SetActive(true);
             int nombreDeDecks = allDecksGlobal.Count;
             float deckButtonHeight = DecksButton.transform.Find("Viewport").Find("Content").gameObject.
                 GetComponent<GridLayoutGroup>().cellSize.y;
             DecksButton.GetComponent<RectTransform>().sizeDelta = new Vector2(DecksButton.GetComponent<RectTransform>().sizeDelta.x
                 , nombreDeDecks * deckButtonHeight + 10);
-            DefilerDeck.transform.Find("Image").gameObject.GetComponent<Image>().color = Color.red; 
+            DefilerDeck.transform.Find("Image").gameObject.GetComponent<Image>().color = Color.red;
         }
     }
 

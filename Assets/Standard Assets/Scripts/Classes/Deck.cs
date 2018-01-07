@@ -221,4 +221,20 @@ public class Deck {
         Debug.LogError("A implementer"); 
         return Cartes; 
     }
+
+    /// <summary>
+    /// Calcul de l'AKA moyen du deck
+    /// </summary>
+    /// <returns>AKA moyen du deck. </returns>
+    public float AKAMoyen() {
+        float total = 0f;
+        int nombreEntites = 0; 
+        foreach(GameObject g in Cartes) {
+            if (g.GetComponent<Carte>().GetType() == typeof(Entite)) {
+                total += g.GetComponent<Entite>().CoutAKA;
+                nombreEntites++; 
+            }
+        }
+        return total / nombreEntites;
+    }
  }

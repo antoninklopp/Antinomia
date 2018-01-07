@@ -32,15 +32,16 @@ public class DeckInfo : MonoBehaviour {
         // Recuperation de l'objet Texte
         transform.GetChild(0).gameObject.GetComponent<Text>().text =
             "INFORMATIONS SUR LE DECK \n\n" +
-            "Nombre de cartes " + deck.getNombreCartes().ToString()  + "\n" +
-            deckEstComplet + "\n\n" + 
+            "Nombre de cartes " + deck.getNombreCartes().ToString() + "\n" +
+            deckEstComplet + "\n\n" +
             "élémentaires FEU " + elementaires[Entite.Element.FEU].ToString() + "\n" +
             "élémentaires AIR " + elementaires[Entite.Element.AIR].ToString() + "\n" +
             "élémentaires EAU " + elementaires[Entite.Element.EAU].ToString() + "\n" +
             "élémentaires TERRE " + elementaires[Entite.Element.TERRE].ToString() + "\n" +
             "Nombre d'entités " + deck.getNombreEntites().ToString() + "\n" +
-            "Nombre de sorts " + deck.getNombreSorts().ToString() + "\n" + 
-            "Nombre d'assistances " + deck.getNombreAssistances().ToString() + "\n";
+            "Nombre de sorts " + deck.getNombreSorts().ToString() + "\n" +
+            "Nombre d'assistances " + deck.getNombreAssistances().ToString() + "\n\n" +
+            "Cout moyen en AKA " + deck.AKAMoyen() + "\n"; 
         
         StartCoroutine(DisableInfo());
     }

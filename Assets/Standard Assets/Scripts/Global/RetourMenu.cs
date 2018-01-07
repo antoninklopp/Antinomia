@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class RetourMenu : MonoBehaviour {
 
     public void RetourMenuBouton() {
-        SceneManager.LoadScene("Menu"); 
+        SceneManager.LoadScene("MainMenu"); 
     }
 
 }
