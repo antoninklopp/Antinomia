@@ -398,6 +398,8 @@
     <Compile Include="Assets\Standard Assets\Scripts\Log\GameManagerLogIn.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Log\GameManagerRegistration.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\MainMenu\GameManagerMainMenu.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\MainMenu\VersionNote.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\MainMenu\VersionNoteHandler.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\AddImageToDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\CardCardManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\CarteZoom.cs" />

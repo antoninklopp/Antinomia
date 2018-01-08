@@ -175,6 +175,9 @@ public class GameManagerManageCards : MonoBehaviour {
 		 * Inventaire des decks, situé en bas. 
 		 */
 
+        // On update le currentDeckNumber
+        currentDeckNumber = deckNumber; 
+
         Debug.Log("DECKS"); 
 		yield return playerInfo.WaitForPlayerDecks (CardPrefab); 
 		List<Deck> allDecks = playerInfo.GetAllDecks (CardPrefab);

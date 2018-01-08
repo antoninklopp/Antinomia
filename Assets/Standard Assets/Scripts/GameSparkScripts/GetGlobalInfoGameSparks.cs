@@ -9,12 +9,7 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
     /// <summary>
     /// Note de version. 
     /// </summary>
-    string VersionNote = "";
-
-    /// <summary>
-    /// Numéro de la version. 
-    /// </summary>
-    string VersionNumber;
+    VersionNote _VersionNote;
 
     /// <summary>
     /// Commentaire OK dit si le commentaire a bien été envoyé. 
@@ -22,7 +17,9 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
     /// 0 si le commentaire n'a pas encore été soumis
     /// 1 si l'envoie a réussi. 
     /// </summary>
-    int commentaireOK = 0; 
+    int commentaireOK = 0;
+
+    bool finish = false; 
 
     /// <summary>
     /// Récupérer la note de version (et le numéro de la version) 
@@ -31,20 +28,18 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
     /// <param name="start">true si on est au début du jeu (si le joueur a déjà lancé le jeu depuis
     /// la nouvelle version, on ne lui montrera pas la note de version), false sinon (le joueur veut
     /// explicitement voir la note de version).</param>
-    public void GetVersionNote(bool start=true) {
+    public void LoadVersionNote(bool start=true) {
         new GameSparks.Api.Requests.LogEventRequest()
             .SetEventKey("getLastVersionNote")
             .Send((response) => {
 
                 if (!response.HasErrors) {
-                    VersionNumber = response.ScriptData.GetString("VersionNumber"); 
-                    // Si le joueur a déjà vu cette note truede version.
-                    if (PlayerPrefs.HasKey(VersionNumber) && !start){
-                        VersionNote = "None"; 
-                    } else {
-                        VersionNote = response.ScriptData.GetString("VersionNote");
-                        PlayerPrefs.SetString(VersionNumber, "true"); 
-                    }
+                    _VersionNote = new VersionNote(
+                        response.ScriptData.GetString("VersionNumber"),
+                        response.ScriptData.GetString("VersionNote"),
+                        response.ScriptData.GetString("UpdateNecessary")
+                    ); 
+                    finish = true; 
                 }
             }); 
     }
@@ -54,19 +49,20 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
     /// </summary>
     /// <param name="start"></param>
     /// <returns></returns>
-    public IEnumerator WaitForVersionNotes(bool start=true) {
-        GetVersionNote(start);
-        while(VersionNote == "") {
+    public IEnumerator WaitForVersionNote(bool start=true) {
+        LoadVersionNote(start);
+        while(!finish) {
             yield return new WaitForSeconds(0.05f); 
         }
+        finish = false; 
     }
 
     /// <summary>
     /// Récupérer la note de version
     /// </summary>
     /// <returns>note de la version</returns>
-    public string getVersionNote() {
-        return VersionNote; 
+    public VersionNote GetVersionNote() {
+        return _VersionNote; 
     }
 
     /// <summary>
