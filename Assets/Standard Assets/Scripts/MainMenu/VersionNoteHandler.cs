@@ -13,6 +13,7 @@ public class VersionNoteHandler : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
         playerInfo = GetComponent<GetGlobalInfoGameSparks>();
         StartCoroutine(GetVersion()); 
 	}
@@ -25,6 +26,7 @@ public class VersionNoteHandler : MonoBehaviour {
             // Alors le joueur a déjà vu la note de version
             gameObject.SetActive(false);
         } else {
+            GetComponent<RectTransform>().localPosition = new Vector2(0, 0);
             transform.Find("VersionNumber").gameObject.GetComponent<Text>().text = "Version Number : " +
                 lastVersionNote.VersionNumber;
             transform.Find("VersionInformation").gameObject.GetComponent<Text>().text = "Version Information : " +

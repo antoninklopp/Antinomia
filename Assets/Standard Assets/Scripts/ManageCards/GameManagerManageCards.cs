@@ -36,7 +36,7 @@ public class GameManagerManageCards : MonoBehaviour {
 	GameObject ContentAllDecks; 
 
 #pragma warning disable CS0414 // Le champ 'GameManagerManageCards.longueurCartesAndroid' est assigné, mais sa valeur n'est jamais utilisée
-	private float longueurCartesAndroid = 70f; 
+	private float longueurCartesAndroid = 55f; 
 #pragma warning restore CS0414 // Le champ 'GameManagerManageCards.longueurCartesAndroid' est assigné, mais sa valeur n'est jamais utilisée
 	private float longueurCartesOrdinateur = 35f;
 	private float longueurAllCards;

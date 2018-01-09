@@ -66,14 +66,6 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
     }
 
     /// <summary>
-    /// Récupérer le numéro de la version. 
-    /// </summary>
-    /// <returns>Numéro de la dernière version.</returns>
-    public string getVersionNumber() {
-        return VersionNumber; 
-    }
-
-    /// <summary>
     /// Si un joueur de la beta veut faire un commentaire. 
     /// </summary>
     /// <param name="comment">Le texte du commentaire.</param>
