@@ -19,7 +19,9 @@ public class GameManagerMainMenu : MonoBehaviour {
 	public bool choixDeck = false; 
 	GameObject BuildVersion;
 
-    GameObject IA; 
+    GameObject IA;
+
+    GameObject Test; 
 
 	// Use this for initialization
 	void Start () {
@@ -31,6 +33,7 @@ public class GameManagerMainMenu : MonoBehaviour {
         BuildVersion.GetComponent<Text> ().text = "Connected as : " + 
             PlayerPrefs.GetString("user") + "\nBuild version : " + Application.version; 
         IA.SetActive(false);
+        Test.SetActive(false); 
 #endif
     }
 
@@ -97,5 +100,9 @@ public class GameManagerMainMenu : MonoBehaviour {
 
     public void SceneIAvIA() {
         SceneManager.LoadScene("IAvIA");
+    }
+
+    public void SceneTest() {
+        SceneManager.LoadScene("TestCartes"); 
     }
 }

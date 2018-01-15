@@ -27,8 +27,20 @@ public class Carte : NetworkBehaviourAntinomia {
     /// L'ID est le numéro d'identification de la carte sur la partie. La première carte instanciée sur le serveur aura un ID de 1, la suivante de 2, etc...
     /// </summary>
     public int IDCardGame;
+
+    /// <summary>
+    /// ShortCode de la carte (invariable selon les langues). 
+    /// </summary>
     public string shortCode;
+
+    /// <summary>
+    /// Nom de la carte (change selon les langues).
+    /// </summary>
     public string Name;
+
+    /// <summary>
+    /// Description (inutilisée pour l'instant). 
+    /// </summary>
     public string description;
 
     /// <summary> 
@@ -320,7 +332,7 @@ public class Carte : NetworkBehaviourAntinomia {
         GameObject[] AllEntiteJoues = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
         for (int i = 0; i < AllEntiteJoues.Length; ++i) {
             if (AllEntiteJoues[i].GetComponent<Entite>().EntiteElement == _element
-                && AllEntiteJoues[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE) {
+                && AllEntiteJoues[i].GetComponent<Entite>().EntiteState == Entite.State.CHAMPBATAILLE) {
                 AllEntiteElement.Add(AllEntiteJoues[i]);
             }
         }
@@ -782,7 +794,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         break;
                     case Condition.ConditionEnum.CARTE_SUR_CHAMP_BATAILLE:
                         // Si la carte n'est pas sur le champ de bataille on s'arrête. 
-                        if (GetComponent<Entite>().carteState != Entite.State.CHAMPBATAILLE) {
+                        if (GetComponent<Entite>().EntiteState != Entite.State.CHAMPBATAILLE) {
                             return false;
                         }
                         break;
@@ -800,7 +812,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.CARTE_DANS_SANCTUAIRE:
                         if (GetComponent<CarteType>().thisCarteType != CarteType.Type.ENTITE) {
                             return false; 
-                        } else if (GetComponent<Entite>().carteState != Entite.State.SANCTUAIRE) {
+                        } else if (GetComponent<Entite>().EntiteState != Entite.State.SANCTUAIRE) {
                             return false; 
                         }
                         break;
@@ -1058,7 +1070,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log(3);
                         if (CartesLocales[i].GetComponent<Entite>() != null) {
                             Debug.Log(CartesLocales[i].GetComponent<Entite>().Name);
-                            if (CartesLocales[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE) {
+                            if (CartesLocales[i].GetComponent<Entite>().EntiteState == Entite.State.CHAMPBATAILLE) {
                                 CartesLocales[i].GetComponent<Entite>().CmdMultiplierStat(_actions[j].properIntAction, 0);
                             }
                         }
@@ -1525,8 +1537,8 @@ public class Carte : NetworkBehaviourAntinomia {
         GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
         for (int i = 0; i < AllCartes.Length; ++i) {
             if (AllCartes[i].GetComponent<Carte>().isFromLocalPlayer && 
-                ((AllCartes[i].GetComponent<Entite>().carteState == Entite.State.SANCTUAIRE)
-                || AllCartes[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE)) {
+                ((AllCartes[i].GetComponent<Entite>().EntiteState == Entite.State.SANCTUAIRE)
+                || AllCartes[i].GetComponent<Entite>().EntiteState == Entite.State.CHAMPBATAILLE)) {
                 CartesLocal.Add(AllCartes[i]); 
             }
         }
@@ -1552,8 +1564,8 @@ public class Carte : NetworkBehaviourAntinomia {
         GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("Carte");
         for (int i = 0; i < AllCartes.Length; ++i) {
             if (!AllCartes[i].GetComponent<Carte>().isFromLocalPlayer &&
-                ((AllCartes[i].GetComponent<Entite>().carteState == Entite.State.SANCTUAIRE)
-                || AllCartes[i].GetComponent<Entite>().carteState == Entite.State.CHAMPBATAILLE)) {
+                ((AllCartes[i].GetComponent<Entite>().EntiteState == Entite.State.SANCTUAIRE)
+                || AllCartes[i].GetComponent<Entite>().EntiteState == Entite.State.CHAMPBATAILLE)) {
                 CartesLocal.Add(AllCartes[i]);
             }
         }

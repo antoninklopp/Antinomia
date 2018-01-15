@@ -115,16 +115,11 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
             // Utilise lors de l'attaque directe sur un joueur.
             return -1; 
         }
-        switch (Carte.GetComponent<CarteType>().thisCarteType) {
-            case CarteType.Type.ENTITE:
-                return Carte.GetComponent<Entite>().IDCardGame;
-            case CarteType.Type.ASSISTANCE:
-                return Carte.GetComponent<Assistance>().IDCardGame;
-            case CarteType.Type.SORT:
-                return Carte.GetComponent<Sort>().IDCardGame;
-            default:
-                throw new Exception("Ce type de carte n'existe pas");
-        }
+
+        Debug.Log(Carte.GetComponent<CarteType>());
+        Debug.Log(Carte);
+        Debug.Log(Carte.GetComponent<Carte>().Name); 
+        return Carte.GetComponent<Carte>().IDCardGame; 
     }
 
     /// <summary>

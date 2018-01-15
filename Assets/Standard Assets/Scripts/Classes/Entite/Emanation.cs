@@ -47,31 +47,31 @@ public class Emanation : Entite {
     public override void setState(string newState) {
         switch (newState) {
             case "MAIN":
-                carteState = State.MAIN;
+                EntiteState = State.MAIN;
                 // Dans le cas d'un retour à la main, on détruit la carte. 
                 DetruireCarte();
                 break;
             case "DECK":
-                carteState = State.DECK;
+                EntiteState = State.DECK;
                 // Dans le cas d'un retour sur le deck, on détruit la carte. 
                 DetruireCarte();
                 break;
             case "BAN":
-                carteState = State.BAN;
+                EntiteState = State.BAN;
                 // Dans le cas d'un ban, on détruit la carte. 
                 DetruireCarte();
                 break;
             case "BOARD":
-                carteState = State.CHAMPBATAILLE;
+                EntiteState = State.CHAMPBATAILLE;
                 // On remet la bonne image pour la carte, dans le cas où la carte était de dos.
                 GetComponent<ImageCardBattle>().setImage(shortCode);
                 break;
             case "SANCTUAIRE":
-                carteState = State.SANCTUAIRE;
+                EntiteState = State.SANCTUAIRE;
                 GetComponent<ImageCardBattle>().setImage(shortCode);
                 break;
             case "CIMETIERE":
-                carteState = State.CIMETIERE;
+                EntiteState = State.CIMETIERE;
                 break;
         }
     }

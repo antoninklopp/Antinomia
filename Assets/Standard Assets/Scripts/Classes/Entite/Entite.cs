@@ -214,11 +214,11 @@ public class Entite : Carte, ICarte {
 		* Pour que ce soit plus clair lors de la création.
 		*/
     }
-    
+
     /// <summary>
     /// State de la carte
     /// </summary>
-    public State carteState = State.DECK;
+    private State entiteState = State.DECK;
 
     /// <summary>
     /// Track si l'utilisateur a cliqué sur la carte ou pas. 
@@ -244,7 +244,7 @@ public class Entite : Carte, ICarte {
     // Définition de la récupération de ces éléments.
 
     public State getState() {
-        return carteState;
+        return EntiteState;
     }
 
     /// <summary>
@@ -254,25 +254,25 @@ public class Entite : Carte, ICarte {
     public virtual void setState(string newState) {
         switch (newState) {
             case "MAIN":
-                carteState = State.MAIN;
+                EntiteState = State.MAIN;
                 break;
             case "BOARD":
-                carteState = State.CHAMPBATAILLE;
+                EntiteState = State.CHAMPBATAILLE;
                 // On remet la bonne image pour la carte, dans le cas où la carte était de dos.
                 GetComponent<ImageCardBattle>().setImage(shortCode);
                 break;
             case "SANCTUAIRE":
-                carteState = State.SANCTUAIRE;
+                EntiteState = State.SANCTUAIRE;
                 GetComponent<ImageCardBattle>().setImage(shortCode);
                 break;
             case "CIMETIERE":
-                carteState = State.CIMETIERE;
+                EntiteState = State.CIMETIERE;
                 break;
             case "DECK":
-                carteState = State.DECK;
+                EntiteState = State.DECK;
                 break;
             case "BAN":
-                carteState = State.BAN;
+                EntiteState = State.BAN;
                 break; 
         }
     }
@@ -324,6 +324,19 @@ public class Entite : Carte, ICarte {
         }
     }
 
+    /// <summary>
+    /// L'état de l'entité. 
+    /// </summary>
+    public State EntiteState {
+        get {
+            return entiteState;
+        }
+
+        set {
+            entiteState = value;
+        }
+    }
+
     public override void Start() {
         base.Start();
         //_animator = GetComponent<Animator> ();
@@ -359,7 +372,7 @@ public class Entite : Carte, ICarte {
     public override void checkIfLocalPlayerOnMousEnter() {
 
         if (!isFromLocalPlayer) {
-            carteState = State.ADVERSAIRE;
+            EntiteState = State.ADVERSAIRE;
         }
     }
 
@@ -423,7 +436,7 @@ public class Entite : Carte, ICarte {
     private void CliqueSimpleCarte(bool drag=false) {
         ResetLocalScale();
 
-        if (carteState == State.CIMETIERE) {
+        if (EntiteState == State.CIMETIERE) {
             return;
         }
 
@@ -475,9 +488,9 @@ public class Entite : Carte, ICarte {
                 return;
             }
             if (!clicked && (((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PREPARATION &&
-                    (carteState == State.CHAMPBATAILLE || carteState == State.SANCTUAIRE)))
+                    (EntiteState == State.CHAMPBATAILLE || EntiteState == State.SANCTUAIRE)))
                     || ((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE1 ||
-                    GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) && carteState == State.MAIN))) {
+                    GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) && EntiteState == State.MAIN))) {
                 GetComponent<SpriteRenderer>().enabled = true;
                 Destroy(BigCard);
                 clicked = true;
@@ -513,7 +526,7 @@ public class Entite : Carte, ICarte {
             }
             if (isFromLocalPlayer && hasAttacked == 0) {
                 // pour pouvoir attaquer il faut que la carte n'ait pas déjà attaqué. 
-                if (carteState != State.CHAMPBATAILLE) {
+                if (EntiteState != State.CHAMPBATAILLE) {
                     GameObject.Find("GameManager").SendMessage("DisplayMessage", "Une carte qui attaque doit etre sur le champ de bataille");
                 }
                 else {
@@ -523,7 +536,7 @@ public class Entite : Carte, ICarte {
                 }
             }
             else {
-                if (carteState != State.CHAMPBATAILLE) {
+                if (EntiteState != State.CHAMPBATAILLE) {
                     GameObject.Find("GameManager").SendMessage("DisplayMessage", "Vous ne pouvez attaquer qu'une carte sur le champ de bataille!");
                 }
                 else {
@@ -549,11 +562,14 @@ public class Entite : Carte, ICarte {
             yield return new WaitForSeconds(0.1f); 
         }
         GameObject FinalTarget = GetComponent<LineRendererAttack>().GetFinalTarget();
+
         GameObject.Find("GameManager").SendMessage("AttackMyPlayer", gameObject);
-        if (FinalTarget.transform.parent != null) {
-            // Dans le cas Image Joueur. 
+
+        // Dans le cas Image Joueur. 
+        if (FinalTarget.name.Equals("ImagePlayer")) {
             FinalTarget = FinalTarget.transform.parent.gameObject;
         }
+
         GameObject.Find("GameManager").SendMessage("AttackOtherPlayer", FinalTarget);
         Destroy(GetComponent<LineRendererAttack>());
         GameObject[] Lines = GameObject.FindGameObjectsWithTag("Line");
@@ -619,7 +635,7 @@ public class Entite : Carte, ICarte {
             "STAT" + STAT.ToString() + "\n" +
             "Nature" + EntiteElement.ToString());
 
-        BigCard.GetComponent<Entite>().carteState = State.BIGCARD;
+        BigCard.GetComponent<Entite>().EntiteState = State.BIGCARD;
 
     }
 
@@ -647,14 +663,14 @@ public class Entite : Carte, ICarte {
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
 
         Debug.Log("POSITION");
-        Debug.Log(carteState);
+        Debug.Log(EntiteState);
         float yMinChampBataille = ChampBataille.transform.position.y - ChampBataille.GetComponent<BoxCollider2D>().size.y / 2;
         float yMaxChampBataille = ChampBataille.transform.position.y + ChampBataille.GetComponent<BoxCollider2D>().size.y / 2;
 
         float yMinSanctuaire = Sanctuaire.transform.position.y - ChampBataille.GetComponent<BoxCollider2D>().size.y / 2;
         float yMaxSanctuaire = Sanctuaire.transform.position.y + ChampBataille.GetComponent<BoxCollider2D>().size.y / 2;
 
-        switch (carteState) {
+        switch (EntiteState) {
             case State.MAIN:
                 if (transform.position.y < yMaxChampBataille && transform.position.y > yMinChampBataille) {
                     // Si la carte est déposée sur le board, depuis la main.
@@ -688,7 +704,7 @@ public class Entite : Carte, ICarte {
                 break;
         }
         
-        CmdChangePosition(carteState);
+        CmdChangePosition(EntiteState);
     }
 
     public void MoveToSanctuaire(Player.Phases currentPhase=Player.Phases.INITIATION, bool defairePile=false) {
@@ -698,7 +714,7 @@ public class Entite : Carte, ICarte {
             // On ne peut invoquer d'entités que lors des phases principales
             // Lorsqu'on défait la pile on ne s'occupe pas des phases parce qu'elles ont été traitées lors de la création
             // de "l'effet" dans la pile. 
-            if (carteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2 || defairePile)) {
+            if (EntiteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2 || defairePile)) {
                 // Le joueur ne peut pas invoquer plus d'une carte avec un coût élémentaire par tour. 
                 // On peut aussi payer des niveaux de couts différents selon l'élément de l'entité. 
                 if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().nombreInvocationsSanctuaire >= 1) {
@@ -778,7 +794,7 @@ public class Entite : Carte, ICarte {
                 // Car on ne peut pas bouger de cartes pendant les phases principales
                 GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "On ne peut pas bouger de cartes pendant la phase principale");
                 return;
-            } else if (currentPhase == Player.Phases.PREPARATION && carteState == State.MAIN) {
+            } else if (currentPhase == Player.Phases.PREPARATION && EntiteState == State.MAIN) {
                 GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "On ne peut pas invoquer de cartes pendant la phase de preparation");
                 return;
             }
@@ -805,7 +821,8 @@ public class Entite : Carte, ICarte {
             // On ne peut invoquer des entités que lors des phases principales
             // Lorsqu'on défait la pile on ne s'occupe pas des phases parce qu'elles ont été traitées lors de la création
             // de "l'effet" dans la pile. 
-            if (carteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2) || defairePile) {
+            if (EntiteState == State.MAIN && (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2) || 
+                (defairePile && EntiteState == State.MAIN)) {
                 if (EntiteAscendance == Ascendance.MALEFIQUE && cardAstraleOnChampBatailleOrSanctuaire()) {
                     GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Il y a une carte astrale sur le board");
                 } else if (EntiteAscendance == Ascendance.ASTRALE && cardMalefiqueOnChampBatailleOrSanctuaire()) {
@@ -837,12 +854,18 @@ public class Entite : Carte, ICarte {
                 // On regarde les effets de la carte. 
                 Debug.Log("<color=purple>Effets de la carte</color>"); 
                 GererEffets(AllEffets, debut:true);
+            } else if (currentPhase == Player.Phases.PREPARATION && EntiteState == State.SANCTUAIRE) {
+                // Si on veut faire sanctuaire -> champ de bataille.
+                if (!defairePile) {
+                    MettreEffetDansLaPile(new List<GameObject>(), -2);
+                    return; 
+                } 
             } else if (currentPhase == Player.Phases.PRINCIPALE1 || currentPhase == Player.Phases.PRINCIPALE2) {
                 // Si la phase en cours est la phase principale et la carte ne vient pas de la main, on fait return, 
                 // Car on ne peut pas bouger de cartes pendant les phases principales
                 GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "On ne peut pas bouger de cartes pendant la phase principale");
                 return;
-            } else if (currentPhase == Player.Phases.PREPARATION && carteState == State.MAIN) {
+            } else if (currentPhase == Player.Phases.PREPARATION && EntiteState == State.MAIN) {
                 GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "On ne peut pas invoquer de cartes pendant la phase de preparation");
                 return;
             }
@@ -921,9 +944,9 @@ public class Entite : Carte, ICarte {
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
-        carteState = newCarteState;
+        EntiteState = newCarteState;
         // il faut maintenant mettre à jour les position. 
-        switch (carteState) {
+        switch (EntiteState) {
             case State.MAIN:
                 Main.SendMessage("AjouterCarteMain", gameObject);
                 ChampBataille.SendMessage("CmdReordonnerCarte");
@@ -993,7 +1016,7 @@ public class Entite : Carte, ICarte {
 
         yield return new WaitForSeconds(0.1f);
 
-        if (carteState != State.MAIN) {
+        if (EntiteState != State.MAIN) {
             Debug.Log("<color=purple>Probleme pas de state Main, et pas sorti </color>"); 
         }
 
@@ -1076,7 +1099,7 @@ public class Entite : Carte, ICarte {
         Debug.Log(_oID);
         Name = _Name;
         shortCode = _shortCode;
-        carteState = State.MAIN;
+        EntiteState = State.MAIN;
         EntiteElement = _element;
         EntiteAscendance = _ascendance;
         STAT = _STAT;
@@ -1131,7 +1154,7 @@ public class Entite : Carte, ICarte {
             /*
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
 			 */
-            CmdChangePosition(carteState);
+            CmdChangePosition(EntiteState);
         } else {
             // Si on est pas sur le player local. 
             Debug.Log("N'est pas le local Player");
@@ -1590,8 +1613,7 @@ public class Entite : Carte, ICarte {
     public override List<EffetPlusInfo> CheckForEffet() {
         // Il faut que l'entité soit dans le main ou dans le sanctuaire pour pouvoir utiliser son effet. 
         List<EffetPlusInfo> effetPlayable = new List<EffetPlusInfo>(); 
-        Debug.Log("On check 2 "); 
-        if (carteState == State.CHAMPBATAILLE || carteState == State.SANCTUAIRE) {
+        if (EntiteState == State.CHAMPBATAILLE || EntiteState == State.SANCTUAIRE) {
             // On vérifie les effets que le joueur peut jouer, lors de son tour ou lors du tour de son adversaire uniquement.
             // Pas les effets en réponse à des actions. 
             Debug.Log("On vérifie les effets normaux"); 
@@ -1607,9 +1629,7 @@ public class Entite : Carte, ICarte {
                     Debug.Log("<color=red>" + AllEffets[i].AllConditionsEffet[0].TourCondition.ToString() + "</color>"); 
                 }
             }
-
-            Debug.Log("Ici");
-            Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain()); 
+            
             if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GetAscendanceTerrain() ==
                 GameManager.AscendanceTerrain.ASTRALE) {
                 Debug.Log("On vérifie les effets astraux"); 
@@ -1649,6 +1669,8 @@ public class Entite : Carte, ICarte {
             }
 
         }
+
+        Debug.Log("On a check les effets de " + Name);
 
         return effetPlayable;
     }
@@ -1727,7 +1749,7 @@ public class Entite : Carte, ICarte {
             // Si un joueur fait un clic droit alors qu'il tient la carte en main, on remet la carte d'où elle vient. 
             clicked = false;
             // on remet la carte à sa bonne place. 
-            RpcChangePosition(carteState);
+            RpcChangePosition(EntiteState);
             return;
         }
         base.RightClickOnCarte();
@@ -1972,7 +1994,7 @@ public class Entite : Carte, ICarte {
     /// </summary>
     /// <returns></returns>
     public override bool isCarteInMain() {
-        if (carteState == State.MAIN) {
+        if (EntiteState == State.MAIN) {
             return true; 
         } else {
             return false;

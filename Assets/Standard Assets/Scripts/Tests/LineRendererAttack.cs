@@ -93,7 +93,7 @@ public class LineRendererAttack : MonoBehaviour {
                 Debug.Log("La dernière position " + lastPosition);
                 Debug.Log("position de l'objet " + allObjectsOverlap[i].transform.position); 
             }
-            if (distance < 0) {
+            if (distance < 0 || distance > 1) {
                 break; 
             }
             if (allObjectsOverlap.Length > 2) {
@@ -106,7 +106,7 @@ public class LineRendererAttack : MonoBehaviour {
                 FinalTarget = allObjectsOverlap[1];
                 break; 
             } else {
-                break;
+                distance += 0.1f; 
             }
         }
     }

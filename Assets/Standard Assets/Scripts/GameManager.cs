@@ -307,7 +307,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         if (!defairePile && Phase != Player.Phases.INITIATION) {
             Debug.Log("On demande un changement de phase"); 
             AjouterChangementDePhasePile();
-            NextPhase.SetActive(false); 
+            // NextPhase.SetActive(false); 
         } else {
             GameObject PlayerObject = FindLocalPlayer();
 
@@ -536,7 +536,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 		MyPlayerEntity = MyPlayer; 
 		// On s'assure qu'il n'y ait pas d'autre fleches rouges
 		Destroy(GameObject.FindGameObjectWithTag ("Marque"));
-		Instantiate (HitPrefab, MyPlayer.transform.position, MyPlayer.transform.rotation); 
+		// Instantiate (HitPrefab, MyPlayer.transform.position, MyPlayer.transform.rotation); 
 	}
 
     /// <summary>
@@ -549,6 +549,12 @@ public class GameManager : NetworkBehaviourAntinomia {
 		 */ 
 		OtherPlayerEntity = OtherPlayer; 
 
+        // Si la carte est inexistante
+        if (OtherPlayer == null) {
+            Debug.LogError("Il n'y a pas de cartes");
+            DisplayMessage("Impossible de trouver la carte à attaquer");
+            return; 
+        }
 		Attack (); 
 	}
 
@@ -575,8 +581,6 @@ public class GameManager : NetworkBehaviourAntinomia {
             OtherPlayerEntity = _OtherPlayerEntity;
             Debug.Log("On a override tout ça."); 
         }
-
-        Debug.Log(MyPlayerEntity); 
 
 		Entite.Ascendance AscendanceMyEntity = MyPlayerEntity.GetComponent<Entite> ().EntiteAscendance; 
 		Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().EntiteElement; 
@@ -624,9 +628,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             }
         }
         else {
-            /*
-			 * Si l'entité attaquée est une carte du joueur adverse.  
-			 */
+            // Si l'entité attaquée est une ENTITE du joueur adverse. 
             if (JouerEffet) {
 
                 List<int> Multiplicateurs = CalculMultiplicateurs(MyPlayerEntity, OtherPlayerEntity); 
@@ -1080,7 +1082,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 #pragma warning disable CS0618 // 'ParticleSystem.startColor' est obsolète : 'startColor property is deprecated. Use main.startColor instead.'
             EffetParticuleTerrain.GetComponent<ParticleSystem>().startColor = Color.black; 
 #pragma warning restore CS0618 // 'ParticleSystem.startColor' est obsolète : 'startColor property is deprecated. Use main.startColor instead.'
-        } else if (_ascendance == AscendanceTerrain.MALEFIQUE) {
+        } else if (_ascendance == AscendanceTerrain.ASTRALE) {
             ascendanceTerrain = AscendanceTerrain.ASTRALE;
             EffetParticuleTerrain.SetActive(true);
 #pragma warning disable CS0618 // 'ParticleSystem.startColor' est obsolète : 'startColor property is deprecated. Use main.startColor instead.'

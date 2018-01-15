@@ -424,6 +424,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Tests\LineRendererAssistanceEntite.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\LineRendererAttack.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\LineRendererObject.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Tests\TestCartes\TestCartes.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\TestShaders.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\WriteOutputFile.cs" />
   </ItemGroup>
@@ -440,6 +441,14 @@
     <None Include="Assets\GameSparks\link.xml" />
     <None Include="Assets\Lobby\Documentation.txt" />
     <None Include="Assets\Lobby\Instruction.txt" />
+    <None Include="Assets\Resources\TestCartes\Astral harbinger.txt" />
+    <None Include="Assets\Resources\TestCartes\Evil harbinger.txt" />
+    <None Include="Assets\Resources\TestCartes\Gift of Akasha.txt" />
+    <None Include="Assets\Resources\TestCartes\Guerrier de l&apos;avalanche.txt" />
+    <None Include="Assets\Resources\TestCartes\Kid of the trad wind.txt" />
+    <None Include="Assets\Resources\TestCartes\Magnanimity of Saakha.txt" />
+    <None Include="Assets\Resources\TestCartes\Uncertain trade.txt" />
+    <None Include="Assets\Resources\TestCartes\glutton of the depth.txt" />
     <None Include="Assets\Resources\WaitForCardoID.txt" />
     <None Include="Assets\Resources\XmlData\English\comment.xml" />
     <None Include="Assets\Resources\XmlData\English\global.xml" />
