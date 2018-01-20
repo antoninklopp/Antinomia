@@ -85,6 +85,56 @@ public class GetGlobalInfoGameSparks : MonoBehaviour {
             }); 
     }
 
+    /// <summary>
+    /// Rapporter une erreur.
+    /// </summary>
+    /// <param name="message"></param>
+    public void ReportError(string message) {
+        DateTime date = new DateTime();
+        new GameSparks.Api.Requests.LogEventRequest()
+            .SetEventKey("addAnError")
+            .SetEventAttribute("message", message)
+            .SetEventAttribute("date", date.ToString())
+            .Send((response) => {
+                if (!response.HasErrors) {
+                    Debug.Log("L'erreur a bien été rapportée"); 
+                } else {
+                    Debug.Log("Erreur lors du rapport du probleme"); 
+                }
+            }); 
+    }
+
+    /// <summary>
+    /// <see cref="ReportError(string)"/>
+    /// Rapporter une erreur avec plus d'informations.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="phase"></param>
+    /// <param name="NomCarte"></param>
+    /// <param name="autreInformation"></param>
+    public void ReportError(string message = "", Player.Phases phase=Player.Phases.INITIATION, string NomCarte="", 
+        string autreInformation = "") {
+        ReportError(
+            "Nom de la carte : " + NomCarte + "\n" +
+            "Phase : " + phase.ToString() + "\n" +
+            "Message : " + message + "\n" + 
+            "Autres Informations : " + autreInformation
+            ); 
+    }
+
+    /// <summary>
+    /// <see cref="ReportError(string)"/>
+    /// Rapporter une erreur à partir d'une exception du jeu. 
+    /// </summary>
+    /// <param name="excep"></param>
+    public void ReportError(Exception excep) {
+        ReportError(excep.ToString()); 
+    }
+
+    public void ReportError(Exception excep, string message) {
+        ReportError(excep.ToString() + "\n" + message); 
+    }
+
     public IEnumerator WaitForComment(string comment) {
         MakeABetaComment(comment); 
         while(commentaireOK == 0) {

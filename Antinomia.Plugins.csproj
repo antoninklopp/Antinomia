@@ -380,6 +380,9 @@
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\DataBaseLogin.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\GameManagerLoginUser.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\LoginGUI.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Exception\CardNotFoundException.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Exception\UnknownCardException.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Exception\UnusualBehaviourException.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameManagerIA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GameSparksManager.cs" />

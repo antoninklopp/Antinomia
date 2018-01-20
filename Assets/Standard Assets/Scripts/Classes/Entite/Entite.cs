@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using AntinomiaException; 
 
 /// <summary>
 /// Hérite de la classe Carte. 
@@ -1370,46 +1371,6 @@ public class Entite : Carte, ICarte {
          */
         STAT = newStat;
     }
-
-    /// <summary>
-    /// Changer la stat d'une carte, lui ajouter de la valeur
-    /// </summary>
-    /// <param name="_statToAdd">Valeur à ajouter à la stat. </param>
-    //[Command(channel=0)]
-    //public void CmdAddStat(int _statToAdd) {
-        /*
-         *  Même fonction que la précédente mais au lieu de changer la stat directement
-         *  on ajoute simplement le nombre _statToAdd à la stat courante. 
-         */
-
-        // RpcAddStat(_statToAdd, 0); 
-        // STAT += _statToAdd;
-        // On regarde si la carte revient à son état initial (on remet la carte en blanc)
-        // Ou si elle change (on la met en vert). 
-
-        // REDEFINITION DE LA METHODE APRES CHANGEMENT DE LA NOTION DE PUISSANCE 27/11/2017
-        //new GameSparks.Api.Requests.LogEventRequest()
-        //   .SetEventKey("getSTATFromCardByID")
-        //   .SetEventAttribute("ID", oID)
-        //   .Send((response) => {
-        //       if (!response.HasErrors) {
-        //           // La stat récupérée
-        //           int getSTAT = response.ScriptData.GetInt("STAT").Value;
-        //           if (getSTAT == STAT) {
-        //               // Dans ce cas on a remis la carte dans son état de base
-        //               RpcResetToCardBase(); 
-        //           } else {
-        //               RpcChangeFromCardBase();
-        //           }
-        //       }
-        //       else { 
-        //           // Dans le cas où ça bug on ne fait rien pour l'instant.
-        //           // TODO: A implémenter. 
-        //           throw new Exception("Impossible de reset l'element de la carte. ");
-        //       }
-
-        //   });
-    // }
 
     /// <summary>
     /// 
