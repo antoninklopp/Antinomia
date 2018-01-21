@@ -708,10 +708,16 @@ public class Entite : Carte, ICarte {
         CmdChangePosition(EntiteState);
     }
 
+    /// <summary>
+    /// Envoyer une entité dans le sanctuaire. 
+    /// </summary>
+    /// <param name="currentPhase"></param>
+    /// <param name="defairePile"></param>
     public void MoveToSanctuaire(Player.Phases currentPhase=Player.Phases.INITIATION, bool defairePile=false) {
         // Lorsque qu'une carte est mise sur le sanctuaire
         // Le state est changé par l'objet sanctuaire
-        if (Sanctuaire.GetComponent<Sanctuaire>().getNumberCardsSanctuaire() < 2) {
+        // Il ne peut pas y avoir plus de deux entités sur le sanctuaire (on laisse la possibilité de passer dans la fonction si on défait la pile).
+        if (Sanctuaire.GetComponent<Sanctuaire>().getNumberCardsSanctuaire() < 2 || defairePile) {
             // On ne peut invoquer d'entités que lors des phases principales
             // Lorsqu'on défait la pile on ne s'occupe pas des phases parce qu'elles ont été traitées lors de la création
             // de "l'effet" dans la pile. 

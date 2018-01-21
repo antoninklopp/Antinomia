@@ -535,6 +535,10 @@ public class GameManagerManageCards : MonoBehaviour {
         }
     }
     
+    /// <summary>
+    /// Changer la couleur d'un bouton de deck. 
+    /// </summary>
+    /// <param name="number"></param>
     public void changeColorDeckButton(int number) {
         for (int i = 0; i < allDecksButtonsList.Count; i++) {
             if (i == number) {

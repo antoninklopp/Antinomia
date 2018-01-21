@@ -703,11 +703,12 @@ public class GameManager : NetworkBehaviourAntinomia {
         else if (NatureMyEntity == Entite.Nature.ELEMENTAIRE && NatureOtherEntity == Entite.Nature.ELEMENTAIRE) {
             // SI les deux sont élémentaires
 
-            // vérifier ici les condition aux limites avec les derniers éléments à chaque fois. 
-            if (ElementMy - ElementOther == 1) {
+            // vérifier ici les condition aux limites avec les derniers éléments à chaque fois.
+            // On en peut pour l'instant pas gérer les forces de terre et air avec les les enums. 
+            if ((ElementMy - ElementOther == 1 )|| (ElementMy == Entite.Element.AIR && ElementOther == Entite.Element.TERRE)) {
                 MultiplicateurEntiteOther = 2;
             }
-            else if (ElementOther - ElementMy == 1) {
+            else if ((ElementOther - ElementMy == 1) || (ElementMy == Entite.Element.TERRE && ElementOther == Entite.Element.AIR)) {
                 MultiplicateurMyEntite = 2;
             }
         }
