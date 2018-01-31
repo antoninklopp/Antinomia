@@ -250,7 +250,7 @@ public class TriFiltreEditor : MonoBehaviour {
             }
             ResetFiltres();
             filtreAscendance = ascendanceFiltre; 
-            PutCardsInScrollView("allCatds", CartesCorrespondantesAscendance(ascendanceFiltre), true);
+            PutCardsInScrollView("allCards", CartesCorrespondantesAscendance(ascendanceFiltre), true);
         }
         else {
             throw new Exception("Ce filtre n'existe pas");

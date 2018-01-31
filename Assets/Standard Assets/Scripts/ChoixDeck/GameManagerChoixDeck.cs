@@ -7,6 +7,10 @@ using UnityEngine.UI;
 /// <summary>
 /// GameManager lors de la scène du choix du deck.
 /// Gère les éléments de UI.
+/// 
+/// 
+/// TODO : Il faudra checker que les decks sont bien conformes avant de pouvoir lancer la game. 
+/// En beta, on impose au moins 10 cartes. 
 /// </summary>
 public class GameManagerChoixDeck : MonoBehaviour {
 
@@ -47,12 +51,20 @@ public class GameManagerChoixDeck : MonoBehaviour {
     /// </summary>
     private GetPlayerInfoGameSparks playerInfo;
 
+    /// <summary>
+    /// Le panel Info du deck
+    /// </summary>
+    private GameObject panelInfo; 
+
 	// Use this for initialization
 	void Start () {
         SetLastChoixDeck();
         AllDecksButtonsContent = GameObject.Find("AllDecks").transform.Find("Viewport").Find("Content").gameObject;
         AllCardsContent = GameObject.Find("AllCards").transform.Find("Viewport").Find("Content").gameObject; 
-        playerInfo = GetComponent<GetPlayerInfoGameSparks>(); 
+        playerInfo = GetComponent<GetPlayerInfoGameSparks>();
+        panelInfo = GameObject.Find("DeckInfo");
+
+        SetLastChoixDeck(); 
 
         StartCoroutine(GetDecks());
 	}
@@ -75,7 +87,8 @@ public class GameManagerChoixDeck : MonoBehaviour {
         }
 
         SetButtonsDecks();
-        changeDeckView(choixDeck); 
+        changeDeckView(choixDeck);
+        changeColorDeckButton(choixDeck - 1); 
     }
 
     /// <summary>
@@ -83,6 +96,11 @@ public class GameManagerChoixDeck : MonoBehaviour {
     /// Fonction appelée par le bouton Battle. 
     /// </summary>
 	public void Go(){
+        if (allDecks[choixDeck - 1].getNombreCartes() < 10) {
+            return;
+        }
+
+
 		PlayerPrefs.SetInt ("ChoixDeck", choixDeck); 
 		SceneManager.LoadScene ("SimpleLobby");
 
@@ -153,6 +171,11 @@ public class GameManagerChoixDeck : MonoBehaviour {
             }
         }
 
+        Debug.Log("On a changé la view");
+        Debug.Log("Numero du deck " + choixDeck); 
+
         choixDeck = deckNumber;
+        panelInfo.SetActive(true); 
+        panelInfo.GetComponent<DeckInfo>().setDeckInfo(allDecks[deckNumber - 1]); 
     }
 }
