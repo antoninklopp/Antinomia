@@ -283,3 +283,7 @@ Antinomia.apk
 /2017-10-25_193008
 /Release_1.zip
 /Antinomia22_01.zip
+
+#.exe
+*.exe
+*.dll

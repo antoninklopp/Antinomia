@@ -214,7 +214,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 
         int nombreDeCartesMain = transform.Find("MainJoueur").Find("CartesMainJoueur").childCount; 
         if (CardDeck.Cartes.Count != 0) {
-            oID = CardDeck.Cartes[0].GetComponent<Entite>().oID;
+            oID = CardDeck.Cartes[0].GetComponent<Carte>().oID;
             // TestConnection(); 
             Debug.Log("On pioche une carte"); 
             CmdPiocherNouvelleCarte1(oID);

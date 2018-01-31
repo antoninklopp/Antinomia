@@ -410,6 +410,9 @@ namespace Prototype.NetworkLobby
         {
             base.OnClientDisconnect(conn);
             ChangeTo(mainMenuPanel);
+            // Override Antonin. 
+            // Lors de la deconnexion d'un joueur. 
+            SceneManager.LoadScene("MainMenu"); 
         }
 
         public override void OnClientError(NetworkConnection conn, int errorCode)

@@ -113,7 +113,11 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         numeroEffet = _numeroEffet; 
         etatEffet = 1;
         setPlayerIDAssociee(playerID);
-        ObjetEffet = FindCardWithID(_IDCardGame); 
+
+        if (numeroEffet != -4) {
+            // Pour un changement de phase, il n'y a pas de cartes associées
+            ObjetEffet = FindCardWithID(_IDCardGame);
+        }
 
         PhraseDecritEffet = CreerPhraseDecritEffet();
 

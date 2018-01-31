@@ -1650,16 +1650,16 @@ public class Entite : Carte, ICarte {
     /// Update les effets lorsque le terrain change d'ascendance.
     /// </summary>
     /// <param name="_ascendance">la nouvelle ascendance du terrain. </param>
-    public void updateChangementAscendaceTerrain(GameManager.AscendanceTerrain _ascendance, 
-                                                    GameManager.AscendanceTerrain _previousAscendance=GameManager.AscendanceTerrain.NONE) {
+    public void UpdateChangementAscendaceTerrain(GameManager.AscendanceTerrain _ascendance, 
+                              GameManager.AscendanceTerrain _previousAscendance=GameManager.AscendanceTerrain.NONE) {
         Debug.Log(_ascendance);
         Debug.Log(_previousAscendance);
         switch (_ascendance) {
             case GameManager.AscendanceTerrain.MALEFIQUE:
-                GererEffets(AllEffetsMalefique, debut:true, numeroListEffet:2); 
+                GererEffets(AllEffetsMalefique, changementDomination:true, numeroListEffet:2); 
                 break;
             case GameManager.AscendanceTerrain.ASTRALE:
-                GererEffets(AllEffetsAstral, debut:true, numeroListEffet:1);
+                GererEffets(AllEffetsAstral, changementDomination:true, numeroListEffet:1);
                 break;
             case GameManager.AscendanceTerrain.NONE:
                 if (_previousAscendance == GameManager.AscendanceTerrain.ASTRALE) {

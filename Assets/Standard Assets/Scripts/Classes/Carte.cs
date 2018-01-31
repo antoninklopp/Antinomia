@@ -654,23 +654,18 @@ public class Carte : NetworkBehaviourAntinomia {
     /// 2 si on depose une carte sur le champ de bataille</param>
     /// <param name="choixJoueur">Si le joueur a fait un clic droit sur la carte et veut intentionellement jouer
     /// un effet lié à cette carte</param>
+    /// <param name="changementDomination">True lorsque le terrain vient de changer de domination.</param>
     public bool GererConditions(List<Condition> _conditions, Player.Phases _currentPhase = Player.Phases.INITIATION,
                                     bool estMort = false, bool debut = false, bool nouveauTour = false, GameObject Cible=null, 
                                     int deposeCarte=0, bool choixJoueur=false, bool changementDomination=false) {
-        /*
-         * Regarde si toutes les conditions sont ok pour un effet. 
-         * Retourne true si c'est le cas, false sinon
-         * 
-         */
         bool effetOK = true;
         for (int j = 0; j < _conditions.Count; ++j) {
-            //if (!_conditions[j].dependsOnPhase) {
-            //    // Si l'effet ne dépend pas d'une phase, il n'y pas de raison
-            //    breakAKA
-            //}
             Debug.Log(_conditions[j].dependsOnPhase);
             Debug.Log(_currentPhase);
-            Debug.Log(_conditions[j].PhaseCondition); 
+            Debug.Log(_conditions[j].PhaseCondition);
+            Debug.Log("Changement Domination " + changementDomination.ToString());
+            Debug.Log("Debut " + debut.ToString());
+            Debug.Log("ProperInt " + _conditions[j].properIntCondition.ToString()); 
             if (_conditions[j].dependsOnPhase &&
                 _currentPhase != _conditions[j].PhaseCondition) {
                 // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
@@ -684,7 +679,7 @@ public class Carte : NetworkBehaviourAntinomia {
                   && (FindLocalPlayer().GetComponent<Player>().PlayerID ==
                   GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour)) {
                 // La condition de tour n'est pas remplie, on passe donc à l'effet suivant. 
-                Debug.Log("Pas le bon tour"); 
+                Debug.Log("Pas le bon tour");
                 return false;
             }
             else if (debut && (_conditions[j].intCondition > 100)) {
@@ -700,23 +695,27 @@ public class Carte : NetworkBehaviourAntinomia {
                 // Si on est pas sur une obligatoire et que le joueur n'a pas choisi de la jouée, on sort de là. 
                 // L'action obligatoire ne sera marquée que sur la première carte
                 Debug.Log("L'action n'est pas obligatoire" + Name);
-                Debug.Log(_conditions[j].intCondition); 
-                return false; 
+                Debug.Log(_conditions[j].intCondition);
+                return false;
             }
             else if (_conditions[j].utilisePourCeTour) {
                 // DisplayMessage("Cet effet a déjà été utilisé pour ce tour. ");
-                Debug.Log("Cet effet a déjà été utilisé pour ce tour."); 
+                Debug.Log("Cet effet a déjà été utilisé pour ce tour.");
                 return false;
             } else if (estMort && (_conditions[j].ConditionCondition != Condition.ConditionEnum.MORT)) {
                 // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditions lors de
                 // la mort d'une carte. 
-                Debug.Log("La carte n'a pas d'effets de mort"); 
-                return false; 
+                Debug.Log("La carte n'a pas d'effets de mort");
+                return false;
             } else if (changementDomination && (_conditions[j].ConditionCondition != Condition.ConditionEnum.CHANGEMENT_DOMINATION)) {
                 // Il faut TOUJOURS mettre la condition de changement de domination en premier. 
+                return false;
+            } else if ((!changementDomination && !debut) && _conditions[j].intCondition < 100) {
+                // Si le numero de l'effet est inférieur à 100, on est sur un effet unique. 
+                // Il ne peut donc être target que par un changement de domination ou le debut d'une carte. 
+                Debug.Log("On est ici"); 
                 return false; 
-            }
-            else {
+            } else {
                 Debug.Log("<color=green>Verification de conditions </color>");
                 // if (_conditions[j].ActionObligatoire) {
                 // Dans le cas d'une action obligatoire. 
