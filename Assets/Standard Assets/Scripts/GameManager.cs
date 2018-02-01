@@ -1096,7 +1096,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 
         GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
         for (int i = 0; i < AllCartes.Length; ++i) {
-            AllCartes[i].GetComponent<Entite>().UpdateChangementAscendaceTerrain(ascendanceTerrain, previousAscendance); 
+            AllCartes[i].GetComponent<Entite>().UpdateChangementAscendanceTerrain(ascendanceTerrain, previousAscendance); 
         }
     }
 

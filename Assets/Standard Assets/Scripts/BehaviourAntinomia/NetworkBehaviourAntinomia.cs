@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using System; 
+using System;
+using AntinomiaException; 
 
 /// <summary>
 /// Certains éléments et surtout méthodes sont communs/essentiels pour
@@ -67,7 +68,7 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
             }
         }
 
-        return null; 
+        throw new CardNotFoundException("Impossible de trouver la carte"); 
     }
 
     /// <summary>

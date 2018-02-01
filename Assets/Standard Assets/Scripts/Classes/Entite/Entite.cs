@@ -1015,11 +1015,7 @@ public class Entite : Carte, ICarte {
             RpcsetoID1(IDCardGame, oID, Name, shortCode, EntiteAscendance, EntiteElement, STAT, CoutAKA, coutElementaire, 
                 AllEffetsString, AllEffetsStringToDisplay, AllEffetsMalefiqueString, AllEffetsMalefiqueStringToDisplay, 
                 AllEffetsAstralString, AllEffetsAstralStringToDisplay, entiteNature);
-            // Inutile normalement.
-            // RpcChangeParent (); 
-        } // else {
-        //    yield break; 
-        //}
+        } 
 
         yield return new WaitForSeconds(0.1f);
 
@@ -1650,16 +1646,21 @@ public class Entite : Carte, ICarte {
     /// Update les effets lorsque le terrain change d'ascendance.
     /// </summary>
     /// <param name="_ascendance">la nouvelle ascendance du terrain. </param>
-    public void UpdateChangementAscendaceTerrain(GameManager.AscendanceTerrain _ascendance, 
+    public void UpdateChangementAscendanceTerrain(GameManager.AscendanceTerrain _ascendance, 
                               GameManager.AscendanceTerrain _previousAscendance=GameManager.AscendanceTerrain.NONE) {
         Debug.Log(_ascendance);
         Debug.Log(_previousAscendance);
         switch (_ascendance) {
             case GameManager.AscendanceTerrain.MALEFIQUE:
-                GererEffets(AllEffetsMalefique, changementDomination:true, numeroListEffet:2); 
+                // On regarde d'abord s'il y a des changements dans les effets normaux avec changement de domination
+                GererEffets(AllEffets, changementDomination:true, numeroListEffet:0);
+                // Puis les effets malefique
+                GererEffets(AllEffetsMalefique, debut: true, numeroListEffet: 2);
                 break;
             case GameManager.AscendanceTerrain.ASTRALE:
-                GererEffets(AllEffetsAstral, changementDomination:true, numeroListEffet:1);
+                GererEffets(AllEffets, changementDomination:true, numeroListEffet:0);
+                // Puis les effets astraux
+                GererEffets(AllEffetsAstral, debut: true, numeroListEffet: 1); 
                 break;
             case GameManager.AscendanceTerrain.NONE:
                 if (_previousAscendance == GameManager.AscendanceTerrain.ASTRALE) {

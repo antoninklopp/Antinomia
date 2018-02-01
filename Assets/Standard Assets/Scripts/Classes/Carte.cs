@@ -691,8 +691,8 @@ public class Carte : NetworkBehaviourAntinomia {
                 // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
                 Debug.Log("Le tour n'est pas bon.");
                 return false;
-            } else if (!_conditions[j].ActionObligatoire && !choixJoueur && j == 0) {
-                // Si on est pas sur une obligatoire et que le joueur n'a pas choisi de la jouée, on sort de là. 
+            } else if (!_conditions[0].ActionObligatoire && !choixJoueur && j == 0) {
+                // Si on est pas sur une obligatoire et que le joueur n'a pas choisi de la jouer, on sort de là. 
                 // L'action obligatoire ne sera marquée que sur la première carte
                 Debug.Log("L'action n'est pas obligatoire" + Name);
                 Debug.Log(_conditions[j].intCondition);
@@ -707,8 +707,9 @@ public class Carte : NetworkBehaviourAntinomia {
                 // la mort d'une carte. 
                 Debug.Log("La carte n'a pas d'effets de mort");
                 return false;
-            } else if (changementDomination && (_conditions[j].ConditionCondition != Condition.ConditionEnum.CHANGEMENT_DOMINATION)) {
+            } else if (changementDomination && (_conditions[0].ConditionCondition != Condition.ConditionEnum.CHANGEMENT_DOMINATION)) {
                 // Il faut TOUJOURS mettre la condition de changement de domination en premier. 
+                Debug.Log("Changement de domination"); 
                 return false;
             } else if ((!changementDomination && !debut) && _conditions[j].intCondition < 100) {
                 // Si le numero de l'effet est inférieur à 100, on est sur un effet unique. 
@@ -834,6 +835,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.CHANGEMENT_DOMINATION:
                         // S'il n'y a pas de changement de domination ou si le changement ne correspondau type maléfique/astral 
                         // demandé
+                        Debug.Log("Proper int condition : " + _conditions[j].properIntCondition); 
                         if (!changementDomination ||  
                             (_conditions[j].properIntCondition == 1 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
                             GameManager.AscendanceTerrain.NONE) ||
@@ -1544,6 +1546,9 @@ public class Carte : NetworkBehaviourAntinomia {
 
         GameObject[] AllAssistances = GameObject.FindGameObjectsWithTag("Assistance");
         for (int i = 0; i < AllAssistances.Length; ++i) {
+            if (AllAssistances[i].GetComponent<Assistance>() == null) {
+                Debug.Log("Composant Assistance null"); 
+            }
             if (AllAssistances[i].GetComponent<Carte>().isFromLocalPlayer &&
                 (AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.ASSOCIE_A_CARTE)) {
                 CartesLocal.Add(AllAssistances[i]);

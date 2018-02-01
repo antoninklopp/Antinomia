@@ -37,7 +37,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// <summary>
     /// IDCardGame de l'objet qui produit l'effet.
     /// </summary>
-    public int IDObjectCardGame; 
+    public int IDObjectCardGame = -1; 
 
     /// <summary>
     /// Les cibles de l'effet
@@ -181,21 +181,17 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// <returns>NONE</returns>
     public IEnumerator JouerEffet(int playerID, bool jeuEnPause=false) {
         // On vérifie que c'est bien le joueur qui a créé l'effet qui le joue. 
-        // Debug.Log(PlayerIDAssocie);
-        // Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
         DestructionUnitesTemporaires();
         if (PlayerIDAssocie == FindLocalPlayer().GetComponent<Player>().PlayerID) {
             Debug.Log("On joue l'effet depuis chez ce joueur");
             // Dans certains cas, changement de phase par exemple, 
             // aucune carte n'a demandé l'effet. 
-
             if (effetTermine) {
                 // Si l'effeta déjà été joué
                 GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
                 yield break; 
             }
-
-            // if (FindCardWithID(IDObjectCardGame) != null || numeroEffet < 0) {
+            
             if (isCardAlive(IDObjectCardGame) || numeroEffet == -1 || numeroEffet == -4) {
                 Debug.Log("Depuis cette carte");
 
@@ -358,8 +354,15 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         }
     }
 
+    /// <summary>
+    /// On regarde si la carte est encore vivante. 
+    /// </summary>
+    /// <param name="IDCardGame"></param>
+    /// <returns></returns>
     public bool isCardAlive(int IDCardGame) {
-        if (FindCardWithID(IDCardGame) == null) {
+        if (IDCardGame == -1 || numeroEffet == -4) {
+            return false;
+        } else if (FindCardWithID(IDCardGame) == null) {
             return false; 
         } else {
             GameObject Card = FindCardWithID(IDCardGame);
@@ -368,9 +371,10 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                 Debug.Log(Card.GetComponent<Entite>().getState());
             }
             if ((Card.GetComponent<Entite>() != null) && (Card.GetComponent<Entite>().getState() == Entite.State.CIMETIERE)) {
-                return false; 
-            } else if ((Card.GetComponent<Sort>() != null) && (Card.GetComponent<Sort>().sortState == Sort.State.CIMETIERE)) {
-                return false; 
+                return false;
+            }
+            else if ((Card.GetComponent<Sort>() != null) && (Card.GetComponent<Sort>().sortState == Sort.State.CIMETIERE)) {
+                return false;
             }
         }
         return true; 
