@@ -16,9 +16,21 @@ public class Effet {
      * avec Effet1 => Condition1 ; Condition2 ; Condition3 ; ... ! Action1 ; Action2 ; Action3 ; ... . 
      * 
      */
+     
+    protected string effetString; 
 
     public List<Condition> AllConditionsEffet = new List<Condition>();
     public List<Action> AllActionsEffet = new List<Action>();
+
+    public string EffetString {
+        get {
+            return effetString;
+        }
+
+        set {
+            effetString = value;
+        }
+    }
 
     public Effet () {
 
@@ -27,6 +39,10 @@ public class Effet {
     public Effet(List<Condition> AllCondiditonsEffet, List<Action> AllActionsEffet) {
         this.AllConditionsEffet = AllCondiditonsEffet;
         this.AllActionsEffet = AllActionsEffet; 
+    }
+
+    public override string ToString() {
+        return effetString; 
     }
 
 

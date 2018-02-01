@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text; 
 
 /// <summary>
 /// Un effet avec plus d'informations notamment sur sa provenance
@@ -8,24 +9,30 @@ using UnityEngine;
 public class EffetPlusInfo : Effet {
 
     public int numeroEffet = 0;
+
     public int numeroListEffet = 0;
 
     /// <summary>
     /// ID Card Game de la carte associee a l'effet
     /// </summary>
-    public int IDCardGame = -1; 
+    public int IDCardGame = -1;
 
     /// <summary>
     /// Constructeur de la classe EffetPlusInfo
     /// </summary>
     /// <param name="effet"></param>
-    /// <param name="_numeroEffet"></param>
-    /// <param name="_numeroListEffet"></param>
+    /// <param name="_numeroEffet">Numero de l'effet dans la liste</param>
+    /// <param name="_numeroListEffet">Numero de la liste
+    /// 0 : si effets normaux
+    /// 1 : si effets astraux
+    /// 2 : si effets maléfiques</param>
     public EffetPlusInfo(Effet effet, int _numeroEffet, int _numeroListEffet) {
         AllActionsEffet = effet.AllActionsEffet;
         AllConditionsEffet = effet.AllConditionsEffet;
         numeroEffet = _numeroEffet;
-        numeroListEffet = _numeroListEffet; 
+        numeroListEffet = _numeroListEffet;
+        EffetString = effet.EffetString;
+        Debug.Log(effet); 
     }
 
     /// <summary>

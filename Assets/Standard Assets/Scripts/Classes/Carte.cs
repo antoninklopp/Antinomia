@@ -192,9 +192,9 @@ public class Carte : NetworkBehaviourAntinomia {
 
         checkIfLocalPlayerOnMousEnter();
 
-        // if (!isFromLocalPlayer) {
-        //     return;
-        // }
+        if (!isFromLocalPlayer) {
+            return;
+        }
 
         // Si un sort est en train d'être joué, on ne veut pas grossir la carte. 
         if (GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours != null) {
@@ -441,6 +441,39 @@ public class Carte : NetworkBehaviourAntinomia {
             Effet _effet = stringToEffet(AllEffetsStringList[i]);
             AllEffets.Add(_effet);
         }
+    }
+
+    /// <summary>
+    /// On recupere dans allEffetsString, 
+    /// tous les effets sous forme de string qui seront présentés au joueur, 
+    /// et on les sépare pour chaque effet.
+    /// Ils seront séparés par des ;
+    /// </summary>
+    /// <param name="allEffetsString"></param>
+    public void stringToEffetString(string allEffetsString) {
+        if (allEffetsString == "None" || allEffetsString == "" || allEffetsString == " ") {
+            AllEffetsStringToDisplay = allEffetsString;
+            return;
+        }
+
+        string[] AllEffetsStringList = allEffetsString.Split(';');
+        int count = 0;
+        for (int i = 0; i < AllEffetsStringList.Length && i < AllEffets.Count; i++) {
+            AllEffets[i].EffetString = AllEffetsStringList[i];
+            count = i + 1;
+        }
+
+        // Si il y a moins d'effets listés en string que d'effets donnés en langage "machine", 
+        // On désigne les derniers effets "machines" correspondant au dernier effet string
+        if (count < AllEffets.Count) {
+            for (int i = count; i < AllEffets.Count; i++) {
+                AllEffets[i].EffetString = AllEffetsStringList[count];
+            }
+        }
+
+        // On remplace les ; par des . pour plus de clarté pour l'utilisateur. 
+        // WARNING : On ne peut donc pas mettre le caractère ';' dans les string d'explications d'effets. 
+        AllEffetsStringToDisplay = allEffetsString.Replace(';', '.');
     }
 
     /// <summary>
@@ -1097,7 +1130,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Action.ActionEnum.REVELER_CARTE:
                     // Le joueur révèle une carte de sa main.
-                    StartCoroutine(RevelerCarteEffet(_actions[j].properIntAction));
+                    StartCoroutine(RevelerCarteEffetRoutine(_actions[j].properIntAction));
                     break;
                 case Action.ActionEnum.REVELER_CARTE_ADVERSAIRE:
                     // L'adversaire doit révéler une carte. 
@@ -1547,7 +1580,8 @@ public class Carte : NetworkBehaviourAntinomia {
         GameObject[] AllAssistances = GameObject.FindGameObjectsWithTag("Assistance");
         for (int i = 0; i < AllAssistances.Length; ++i) {
             if (AllAssistances[i].GetComponent<Assistance>() == null) {
-                Debug.Log("Composant Assistance null"); 
+                Debug.Log("Composant Assistance null");
+                continue; 
             }
             if (AllAssistances[i].GetComponent<Carte>().isFromLocalPlayer &&
                 (AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.ASSOCIE_A_CARTE)) {
@@ -1681,6 +1715,10 @@ public class Carte : NetworkBehaviourAntinomia {
         StartCoroutine(WaitForResponseEffetPropose(effetPropose[0])); 
     }
 
+    protected virtual void GetEffetFromCarte() {
+
+    }
+
     /// <summary>
     /// Attendre la réponse du joueur après qu'on lui ait proposé de jouer un effet.
     /// </summary>
@@ -1694,6 +1732,11 @@ public class Carte : NetworkBehaviourAntinomia {
             Debug.Log("<color=orange>Reponse Pas Ok</color>"); 
         } else {
             Debug.Log("<color=orange> Reponse OK </color>");
+            string messageEffet =
+                "Le joueur adverse joue : \n" +
+                effetPropose.ToString() + "\nde la carte " + Name;
+            Debug.LogWarning("Info Donnée : " + messageEffet); 
+            FindLocalPlayer().GetComponent<Player>().CmdInformerEffet(messageEffet); 
             GererActions(effetPropose.AllActionsEffet, numeroEffet:effetPropose.numeroEffet, 
                 effetListNumber:effetPropose.numeroListEffet); 
         }
@@ -1843,10 +1886,19 @@ public class Carte : NetworkBehaviourAntinomia {
     }
 
     /// <summary>
+    /// Fonction uniquement utile à lancer la routine <see cref="RevelerCarteEffetRoutine(int)"/>
+    /// Utile lorsqu'on envoie une action à faire à l'autre joueur. 
+    /// </summary>
+    /// <param name="nombreCartes"></param>
+    private void RevelerCarteEffet(int nombreCartes) {
+        StartCoroutine(RevelerCarteEffetRoutine(nombreCartes)); 
+    }
+
+    /// <summary>
     /// Révéler des cartes à son adversaire. 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator RevelerCarteEffet(int nombreCartes) {
+    private IEnumerator RevelerCarteEffetRoutine(int nombreCartes) {
 
         Debug.Log("On revele une carte à l'adversaire. ");
         ShowCardsForChoice(Main.transform, nombreCartes);

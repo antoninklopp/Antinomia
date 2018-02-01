@@ -223,7 +223,12 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Lors d'un clic sur le bouton pour pouvoir avoir les informations sur la carte, 
     /// on rajoute sur mobile le check automatique des effets. 
     /// </summary>
-    private int IDCardGameAttenteJouerEffet = -1; 
+    private int IDCardGameAttenteJouerEffet = -1;
+
+    /// <summary>
+    /// Informations sur un effet de l'adversaire
+    /// </summary>
+    private GameObject InfoEffetTransmis; 
 
 	/// <summary>
     /// Initialisation du GameManager
@@ -271,7 +276,9 @@ public class GameManager : NetworkBehaviourAntinomia {
         ChoixCartesAdversaire = GameObject.Find("ChoixCartesAdversaire");
         ChoixCartesAdversaire.SetActive(false);
         EndGame = GameObject.Find("EndGame");
-        EndGame.SetActive(false); 
+        EndGame.SetActive(false);
+        InfoEffetTransmis = GameObject.Find("InfoEffetTransmis");
+        InfoEffetTransmis.SetActive(false); 
 	}
 
 	IEnumerator CoroutineDebugPhase(){
@@ -1623,10 +1630,17 @@ public class GameManager : NetworkBehaviourAntinomia {
         }
     }
 
-
+    /// <summary>
+    /// Montrer les carte pour un effet. 
+    /// </summary>
+    /// <param name="_AllCardsGiven"></param>
+    /// <param name="_ObjectAsking"></param>
+    /// <param name="stringToDisplay"></param>
+    /// <param name="_nombreDeCartesAChoisir"></param>
     public void ShowCardsForEffect(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking = null, string stringToDisplay = "",
                                     int _nombreDeCartesAChoisir = 1) {
-        ShowCards.GetComponent<ShowCards>().ShowCardsToChoose(_AllCardsGiven, _ObjectAsking, stringToDisplay, _nombreDeCartesAChoisir); 
+        ShowCards.GetComponent<ShowCards>().ShowCardsToChoose(_AllCardsGiven, _ObjectAsking, stringToDisplay, _nombreDeCartesAChoisir, 
+            deactivateAfter : true); 
     }
 
     public void ActivateShowCards(bool activate=true) {
@@ -1747,6 +1761,17 @@ public class GameManager : NetworkBehaviourAntinomia {
         } else {
             EndGame.transform.Find("Text").GetComponent<Text>().text = "Défaite";
         }
+    }
+
+    public void AfficherInfoEffetTransmis(string message) {
+        StartCoroutine(AfficherInfoEffetTransmisRoutine(message)); 
+    }
+
+    private IEnumerator AfficherInfoEffetTransmisRoutine(string message) {
+        InfoEffetTransmis.SetActive(true);
+        InfoEffetTransmis.GetComponent<Text>().text = message;
+        yield return new WaitForSeconds(2f);
+        InfoEffetTransmis.SetActive(false); 
     }
 
 }

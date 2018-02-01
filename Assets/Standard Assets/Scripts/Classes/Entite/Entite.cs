@@ -1111,12 +1111,12 @@ public class Entite : Carte, ICarte {
         AllEffetsAstralString = _AllEffetsAstrals;
         AllEffetsAstralStringToDisplay = _AllEffetsAstralToDisplay;
         AllEffetsString = _AllEffetsString;
-        AllEffetsStringToDisplay = _AllEffetsStringToDisplay;
-        AllEffetsMalefiqueString = _AllEffetsMalefiques;
-        AllEffetsMalefiqueStringToDisplay = _AllEffetsMalefiquesToDisplay;
         stringToEffetList(_AllEffetsString);
         stringToEffetAstral(_AllEffetsAstrals);
         stringToEffetMalefique(_AllEffetsMalefiques);
+        stringToEffetAstralString(_AllEffetsStringToDisplay);
+        stringToEffetMalefiqueString(_AllEffetsMalefiquesToDisplay);
+        stringToEffetString(_AllEffetsStringToDisplay); 
         EntiteNature = nature; 
     }
 
@@ -1533,6 +1533,70 @@ public class Entite : Carte, ICarte {
     }
 
     /// <summary>
+    /// On recupere dans allEffetsString, 
+    /// tous les effets sous forme de string qui seront présentés au joueur, 
+    /// et on les sépare pour chaque effet.
+    /// Ils seront séparés par des ;
+    /// </summary>
+    /// <param name="allEffetsString"></param>
+    public void stringToEffetMalefiqueString(string allEffetsString) {
+        if (allEffetsString == "None" || allEffetsString == "" || allEffetsString == " ") {
+            AllEffetsMalefiqueStringToDisplay = allEffetsString; 
+            return; 
+        }
+
+        string[] AllEffetsStringList = allEffetsString.Split(';');
+        int count = 0; 
+        for (int i = 0; i < AllEffetsStringList.Length && i < AllEffetsMalefique.Count; i++) {
+            AllEffetsMalefique[i].EffetString = AllEffetsStringList[i];
+            count = i; 
+        }
+
+        // Si il y a moins d'effets listés en string que d'effets donnés en langage "machine", 
+        // On désigne les derniers effets "machines" correspondant au dernier effet string
+        if (count < AllEffetsMalefique.Count) {
+            for (int i = count; i < AllEffetsMalefique.Count; i++) {
+                AllEffetsMalefique[i].EffetString = AllEffetsStringList[count]; 
+            }
+        }
+
+        // On remplace les ; par des . pour plus de clarté pour l'utilisateur. 
+        AllEffetsMalefiqueStringToDisplay = allEffetsString.Replace(';', '.');
+    }
+
+    /// <summary>
+    /// On recupere dans allEffetsString, 
+    /// tous les effets sous forme de string qui seront présentés au joueur, 
+    /// et on les sépare pour chaque effet.
+    /// Ils seront séparés par des ;
+    /// </summary>
+    /// <param name="allEffetsString"></param>
+    public void stringToEffetAstralString(string allEffetsString) {
+        if (allEffetsString == "None" || allEffetsString == "" || allEffetsString == " ") {
+            AllEffetsAstralStringToDisplay = allEffetsString;
+            return;
+        }
+
+        string[] AllEffetsStringList = allEffetsString.Split(';');
+        int count = 0;
+        for (int i = 0; i < AllEffetsStringList.Length && i < AllEffetsAstral.Count; i++) {
+            AllEffetsAstral[i].EffetString = AllEffetsStringList[i];
+            count = i;
+        }
+
+        // Si il y a moins d'effets listés en string que d'effets donnés en langage "machine", 
+        // On désigne les derniers effets "machines" correspondant au dernier effet string
+        if (count < AllEffetsAstral.Count) {
+            for (int i = count; i < AllEffetsAstral.Count; i++) {
+                AllEffetsAstral[i].EffetString = AllEffetsStringList[count];
+            }
+        }
+
+        // On remplace les ; par des . pour plus de clarté pour l'utilisateur. 
+        AllEffetsAstralStringToDisplay = allEffetsString.Replace(';', '.');
+    }
+
+    /// <summary>
     /// <see cref="Carte.GetInfoCarte"/>
     /// </summary>
     /// <returns></returns>
@@ -1587,6 +1651,7 @@ public class Entite : Carte, ICarte {
                         // Si l'effet n'a pas déjà été joué à ce tour. 
                         Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
                         effetPlayable.Add(new EffetPlusInfo(AllEffets[i], i, 0));
+                        Debug.Log(AllEffets[i]);
                     } 
                 } else {
                     Debug.Log("<color=red>" + AllEffets[i].AllConditionsEffet[0].TourCondition.ToString() + "</color>"); 
@@ -1603,6 +1668,7 @@ public class Entite : Carte, ICarte {
                         if (GererConditions(AllEffetsAstral[i].AllConditionsEffet, choixJoueur: true)) {
                             // Si l'effet n'a pas déjà été joué à ce tour. 
                             Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
+                            Debug.Log(AllEffetsAstral[i]); 
                             effetPlayable.Add(new EffetPlusInfo(AllEffetsAstral[i], i, 1));
                         } else {
                             Debug.Log("Impossible"); 

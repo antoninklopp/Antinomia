@@ -593,7 +593,7 @@ public class Sort : Carte, ICarte {
         Niveau = _Niveau;
         CoutAKA = _coutAKA;
         AllEffetsString = _Effet;
-        AllEffetsStringToDisplay = _EffetToDisplay; 
+        stringToEffetString(_EffetToDisplay);
         stringToEffetList(_Effet); 
         //OnStartAuthority (); 
     }

@@ -615,7 +615,7 @@ public class Assistance : Carte, ICarte {
         STAT = _STAT;
         AllEffetsString = _EffetString;
         assistanceState = State.MAIN;
-        AllEffetsStringToDisplay = _EffetsToDisplay; 
+        stringToEffetString(_EffetsToDisplay);
 
         stringToEffetList(_EffetString);
 

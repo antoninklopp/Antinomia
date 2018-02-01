@@ -102,31 +102,31 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
         }
         if (data.GetString("type") == "entité" || data.GetString("type") == "entite") {
             // Dans le cas d'une carte entité
-            Entite _carte = newCarte.AddComponent<Entite>();
-            _carte.coutElementaire = data.GetInt("COUT").Value;
-            _carte.STAT = data.GetInt("STAT").Value;
-            _carte.shortCode = data.GetString("shortCode");
-            _carte.Name = data.GetString("name");
+            Entite _entite = newCarte.AddComponent<Entite>();
+            _entite.coutElementaire = data.GetInt("COUT").Value;
+            _entite.STAT = data.GetInt("STAT").Value;
+            _entite.shortCode = data.GetString("shortCode");
+            _entite.Name = data.GetString("name");
             // Il faut maintenant récupérer les éléments de la base de données qui sont sous la forme
             // Nature : Nature/Ascendance/Element
             string[] informationsNature = data.GetString("Nature").Split('/');
             try {
-                _carte.EntiteNature = stringToNature(informationsNature[0], _carte.Name);
-                _carte.EntiteAscendance = stringToAscendance(informationsNature[1]);
-                _carte.EntiteElement = stringToElement(informationsNature[2]);
+                _entite.EntiteNature = stringToNature(informationsNature[0], _entite.Name);
+                _entite.EntiteAscendance = stringToAscendance(informationsNature[1]);
+                _entite.EntiteElement = stringToElement(informationsNature[2]);
             } catch (IndexOutOfRangeException e) {
                 Debug.LogWarning(e + "Il y a un probleme dans la base de données."); 
             }
-            _carte.stringToEffetList(data.GetString("Effet"));
-            _carte.stringToEffetAstral(data.GetString("Astral"));
-            _carte.stringToEffetMalefique(data.GetString("Malefique"));
-            _carte.AllEffetsAstralStringToDisplay = data.GetString("AstralString");
-            _carte.AllEffetsMalefiqueStringToDisplay = data.GetString("MalefiqueString");
-            _carte.AllEffetsStringToDisplay = data.GetString("EffetString");
-            _carte.AllEffetsString = data.GetString("Effet");
-            _carte.AllEffetsAstralString = data.GetString("Astral");
-            _carte.AllEffetsMalefiqueString = data.GetString("Malefique"); 
-            _carte.CoutAKA = data.GetInt("AKA").Value;
+            _entite.stringToEffetList(data.GetString("Effet"));
+            _entite.stringToEffetAstral(data.GetString("Astral"));
+            _entite.stringToEffetMalefique(data.GetString("Malefique"));
+            _entite.stringToEffetAstralString(data.GetString("AstralString"));
+            _entite.stringToEffetMalefiqueString(data.GetString("MalefiqueString"));
+            _entite.stringToEffetString(data.GetString("EffetString"));
+            _entite.AllEffetsString = data.GetString("Effet");
+            _entite.AllEffetsAstralString = data.GetString("Astral");
+            _entite.AllEffetsMalefiqueString = data.GetString("Malefique"); 
+            _entite.CoutAKA = data.GetInt("AKA").Value;
 
             if (data.GetString("oID") != null) {
                 /*
@@ -136,14 +136,14 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
                  * Mais elle n'est plus nécessaire une fois la carte jouée et instanciée. 
                  */ 
                 //Debug.Log(data.GetInt("card_ID").Value);
-                _carte.oID = data.GetString("oID");
-                _carte.IDAllCards = data.GetInt("card_ID").Value;
+                _entite.oID = data.GetString("oID");
+                _entite.IDAllCards = data.GetInt("card_ID").Value;
             }
             if (ID != "") {
                 // L'oID de la carte peut être utile dans le cas où on aurait changé des élements sur la carte 
                 // et qu'on voudrait récupérer les infos de base. 
                 //Debug.Log("On set l'OID de la carte" + ID);
-                _carte.oID = ID;
+                _entite.oID = ID;
             }
         } else if (data.GetString("type") == "emanation") {
             // Dans le cas d'une carte entité
@@ -165,9 +165,9 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _carte.stringToEffetList(data.GetString("Effet"));
             _carte.stringToEffetAstral(data.GetString("Astral"));
             _carte.stringToEffetMalefique(data.GetString("Malefique"));
-            _carte.AllEffetsAstralStringToDisplay = data.GetString("AstralString");
-            _carte.AllEffetsMalefiqueStringToDisplay = data.GetString("MalefiqueString");
-            _carte.AllEffetsStringToDisplay = data.GetString("EffetString");
+            _carte.stringToEffetAstralString(data.GetString("AstralString"));
+            _carte.stringToEffetMalefiqueString(data.GetString("MalefiqueString"));
+            _carte.stringToEffetString(data.GetString("EffetString"));
             _carte.AllEffetsString = data.GetString("Effet");
             _carte.AllEffetsAstralString = data.GetString("Astral");
             _carte.AllEffetsMalefiqueString = data.GetString("Malefique");
@@ -201,7 +201,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _sort.ConditionSort = data.GetString("Condition"); 
             _sort.stringToEffetList(data.GetString("Effet"));
             _sort.AllEffetsString = data.GetString("Effet");
-            _sort.AllEffetsStringToDisplay = data.GetString("EffetString"); 
+            _sort.stringToEffetString(data.GetString("EffetString"));
 
             if (data.GetString("oID") != null) {
                 _sort.IDAllCards = data.GetInt("card_ID").Value;
@@ -215,7 +215,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             _assistance.STAT = data.GetInt("STAT").Value;
             _assistance.stringToEffetList(data.GetString("Effet"));
             _assistance.AllEffetsString = data.GetString("Effet");
-            _assistance.AllEffetsStringToDisplay = data.GetString("EffetString"); 
+            _assistance.stringToEffetString(data.GetString("EffetString"));
             if (data.GetString("oID") != null) {
                 _assistance.IDAllCards = data.GetInt("card_ID").Value;
                 _assistance.oID = data.GetString("oID");

@@ -593,12 +593,11 @@ public class Player : NetworkBehaviourAntinomia	 {
     [ClientRpc(channel=0)]
     public void RpcEnvoiMethodToServerCarteWithIntParameter(int ID, string voidName, int _intToUse, int playerID) {
         if (isLocalPlayer) {
-            // Le but est d'envoyer une méthode à l'autre joueur!
-            // Donc pas au joueur local!
             return; 
         }
         GameObject LaCarteSurLeServeur = FindCardWithID(ID);
         LaCarteSurLeServeur.SendMessage(voidName, _intToUse);
+        AntinomiaLog("On a bien envoyé la methode"); 
         Debug.Log("La méthode " + voidName + " a été éxecutée sur le serveur"); 
     }
 
@@ -811,6 +810,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="allCards">La liste des shortCodes des cartes à montrer. </param>
 	[ClientRpc(channel=0)]
 	public void RpcShowCardsToOtherPlayer (string[] allCards, string message){
+        AntinomiaLog("On montre les cartes choisies"); 
 		GameObject.FindGameObjectWithTag ("GameManager").transform.Find ("ShowCards").
             gameObject.GetComponent<ShowCards>().RpcShowCardsToOtherPlayer(allCards, message);
     }
@@ -1130,4 +1130,16 @@ public class Player : NetworkBehaviourAntinomia	 {
         }
     }
 
+    [Command(channel = 0)]
+    public void CmdInformerEffet(string message) {
+        RpcInformerEffet(message); 
+    }
+
+    [ClientRpc(channel = 0)]
+    public void RpcInformerEffet(string message) {
+        if (isLocalPlayer) {
+            return; 
+        }
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().AfficherInfoEffetTransmis(message); 
+    }
 }
