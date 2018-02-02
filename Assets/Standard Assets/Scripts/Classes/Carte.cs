@@ -571,6 +571,7 @@ public class Carte : NetworkBehaviourAntinomia {
             if (debut && _allEffets[i].AllConditionsEffet[0].ConditionCondition == Condition.ConditionEnum.CHOIX_DEPOSE) {
                 List<EffetPlusInfo> effets = new List<EffetPlusInfo>();
                 effets.Add(new EffetPlusInfo(_allEffets[i], i, numeroListEffet));
+                Debug.Log("<color=red>On propose l'effet</color>"); 
                 ProposerEffets(effets);
                 continue;
             }
@@ -767,6 +768,9 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.NONE:
                         // Dans le cas où il n'y a aucune condition. 
                         return true;
+                    case Condition.ConditionEnum.CHOIX_DEPOSE:
+                        // Cette condition aura été catch plus haut.
+                        return false; 
                     case Condition.ConditionEnum.CARTES_CIMETIERE:
                         if (FindLocalPlayer().transform.Find("Cimetiere").
                             Find("CartesCimetiere").gameObject.GetComponent<Cimetiere>().NombreDeCartesDansCimetiere() <
@@ -1092,7 +1096,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         SacrifierCarteEntite();
                     }
-                    else {
+                    else if (j == 0){
                         InformerSacrifierCarteEntite(numeroEffet, effetListNumber);
                     }
                     break;
@@ -1136,7 +1140,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     // Ceci devrait être dans les conditions. 
                     // PAS TOUJOURS
                     if (jouerEffet) {
-                        StartCoroutine(DefausserEffet());
+                        Debug.Log("Defausser"); 
+                        StartCoroutine(DefausserEffet(action:true, nombreCartes:_actions[j].properIntAction));
                     } else if (j == 0){
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
@@ -1715,19 +1720,16 @@ public class Carte : NetworkBehaviourAntinomia {
     public virtual void ProposerEffets(List<EffetPlusInfo> effetPropose) {
         // Proposer au joueur de pouvoir jouer un effet. 
         string toDisplay = ""; 
-        //for (int j = 0; j < AllEffets[effetPropose].AllActionsEffet.Count; ++j) {
-        //    Debug.Log("<color=green>" + AllEffets[effetPropose].AllActionsEffet[j].ActionAction.ToString() + "</color>"); 
-        //    toDisplay += AllEffets[effetPropose].AllActionsEffet[j].ActionAction.ToString(); 
-        //}
-        //GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposerEffetJoueur(toDisplay, gameObject);
-        //StartCoroutine(WaitForResponseEffetPropose(effetPropose)); 
 
         for (int j = 0; j < effetPropose.Count; j++) {
-            for (int i = 0; i < effetPropose[j].AllActionsEffet.Count; i++) {
-                toDisplay += effetPropose[j].AllActionsEffet[i].ActionAction.ToString() + " ; ";
-            }
+            toDisplay = effetPropose[j].ToString(); 
+            //for (int i = 0; i < effetPropose[j].AllActionsEffet.Count; i++) {
+            //    toDisplay += effetPropose[j].AllActionsEffet[i].ActionAction.ToString() + " ; ";
+            //}
         }
+        Debug.Log("On propose effer");
         // Pour l'instant on ne propose qu'un seul effet
+        reponseDemandeEffet = 0; 
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposerEffetJoueur(toDisplay, gameObject);
         StartCoroutine(WaitForResponseEffetPropose(effetPropose[0])); 
     }
@@ -1746,7 +1748,7 @@ public class Carte : NetworkBehaviourAntinomia {
             yield return new WaitForSeconds(0.2f); 
         }
         if (reponseDemandeEffet == 1) {
-            Debug.Log("<color=orange>Reponse Pas Ok</color>"); 
+            Debug.Log("<color=orange>Reponse Pas Ok</color>");
         } else {
             Debug.Log("<color=orange> Reponse OK </color>");
             string messageEffet =
@@ -1889,9 +1891,14 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// EFFET: Defausser une ou plusieurs cartes.
     /// </summary>
+    /// <param name="action">Si on est dans une action, les cartes à choisir ne sont pas déjà displya, il faut le faire
+    /// nous même</param>
     /// <returns></returns>
-    private IEnumerator DefausserEffet(bool CibleDejaChoisie = false) {
+    private IEnumerator DefausserEffet(bool CibleDejaChoisie = false, bool action=false, int nombreCartes=1) {
         Debug.Log("<color=green>Ici on se defausse d'une carte</color>"); 
+        if (action) {
+            ShowCardsForChoice(Main.transform, nombreCartes);
+        }
         if (!CibleDejaChoisie) {
             // Si les cibles n'ont pas déjà été choisies
             yield return WaitForCardsChosen();

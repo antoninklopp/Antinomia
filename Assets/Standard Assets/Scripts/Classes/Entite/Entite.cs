@@ -864,7 +864,8 @@ public class Entite : Carte, ICarte {
                 }
                 // On regarde les effets de la carte. 
                 Debug.Log("<color=purple>Effets de la carte</color>"); 
-                GererEffets(AllEffets, debut:true);
+                // Deja géré à la sortie de la pile
+                // GererEffets(AllEffets, debut:true);
             } else if (currentPhase == Player.Phases.PREPARATION && EntiteState == State.SANCTUAIRE) {
                 // Si on veut faire sanctuaire -> champ de bataille.
                 if (!defairePile) {
@@ -1069,6 +1070,9 @@ public class Entite : Carte, ICarte {
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
+        if (IDCardGame == 0) {
+            Destroy(gameObject); 
+        }
     }
 
     [ClientRpc(channel=0)]

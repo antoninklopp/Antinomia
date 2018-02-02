@@ -240,17 +240,9 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                 }
                 yield return new WaitForSeconds(0.5f);
             }
-
-            //if (NombreEffet != CartesAssociees.Count) {
-            //    // Si on a ajouté un effet dans la pile entre temps. 
-            //    StartCoroutine(JouerLesEffets());
-            //    Debug.Log("On recommence dans la méthode jouerEffets");
-            //}
-            //else {
-                // Detruire l'objet pile. 
+            
             FindLocalPlayer().GetComponent<Player>().CmdDetruirePile(gameObject);
             Debug.Log("<color=red> La pile devrait être détruite </color>"); 
-            //}
 
         } else {
             // Si le dernier effet est chez quelqu'un qui n'a pas instancié la pile
