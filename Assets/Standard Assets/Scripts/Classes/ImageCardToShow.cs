@@ -60,7 +60,6 @@ public class ImageCardToShow : MonoBehaviour {
 	}
 
 	public void setOnIntListener(int _intCarte){
-
 		intCarte = _intCarte; 
 	}
 

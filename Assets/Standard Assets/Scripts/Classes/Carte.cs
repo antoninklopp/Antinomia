@@ -228,7 +228,7 @@ public class Carte : NetworkBehaviourAntinomia {
 
     public virtual void OnMouseDown() {
         if (!isFromLocalPlayer) {
-            // return; 
+            return; 
         } 
         if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused 
             && !GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().IPausedTheGame) {
@@ -240,7 +240,7 @@ public class Carte : NetworkBehaviourAntinomia {
 
     public virtual void OnMouseDrag() {
         if (!isFromLocalPlayer) {
-            // return; 
+            return; 
         }
     }
 
@@ -1433,10 +1433,11 @@ public class Carte : NetworkBehaviourAntinomia {
                 AllCardsToChoose.Add(_parent.GetChild(k).gameObject);
             }
         }
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").
-            gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Chosissez " + nombreCartes.ToString() + 
-            " cartes", deactivateAfter:true);
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ActivateShowCards(true); 
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
+            gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
+            AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Choisissez " + nombreCartes.ToString() + 
+            " cartes", deactivateAfter:false);
         ShowCardsMustBeActivated = true; 
     }
 
@@ -1459,8 +1460,8 @@ public class Carte : NetworkBehaviourAntinomia {
                 Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
             }
         }
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").
-            gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
+            gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, deactivateAfter:true, stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", 
             _nombreDeCartesAChoisir:nombreCartes);
         ShowCardsMustBeActivated = true; 
@@ -1478,8 +1479,8 @@ public class Carte : NetworkBehaviourAntinomia {
                 AllCardsToChoose.Add(AllCardsBoardSanctuaire[i]);
             }
         }
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.
-            GetComponent<ShowCards>().ShowCardsToChoose(
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.
+            GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, 
             stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", deactivateAfter:true);
         ShowCardsMustBeActivated = true; 
@@ -1553,7 +1554,7 @@ public class Carte : NetworkBehaviourAntinomia {
             }
         }
 
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ShowCards").gameObject.GetComponent<ShowCards>().ShowCardsToChoose(
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
             allCardsToChoose, gameObject, _nombreDeCartesAChoisir: properIntCondition%10, stringToDisplay: "Choisissez " + 
             (properIntCondition % 10).ToString() + " cartes", deactivateAfter: true);
         ShowCardsMustBeActivated = true;
@@ -1610,6 +1611,9 @@ public class Carte : NetworkBehaviourAntinomia {
 
         GameObject[] AllAssistances = GameObject.FindGameObjectsWithTag("Assistance");
         for (int i = 0; i < AllAssistances.Length; ++i) {
+            if (AllAssistances[i].GetComponent<Assistance>() == null) {
+                continue; 
+            }
             if (!AllAssistances[i].GetComponent<Carte>().isFromLocalPlayer &&
                 (AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.ASSOCIE_A_CARTE)) {
                 CartesLocal.Add(AllAssistances[i]);
@@ -1890,7 +1894,8 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Utile lorsqu'on envoie une action à faire à l'autre joueur. 
     /// </summary>
     /// <param name="nombreCartes"></param>
-    private void RevelerCarteEffet(int nombreCartes) {
+    public void RevelerCarteEffet(int nombreCartes) {
+        AntinomiaLog("On revele une carte"); 
         StartCoroutine(RevelerCarteEffetRoutine(nombreCartes)); 
     }
 
@@ -1900,24 +1905,14 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <returns></returns>
     private IEnumerator RevelerCarteEffetRoutine(int nombreCartes) {
 
-        Debug.Log("On revele une carte à l'adversaire. ");
+        AntinomiaLog("On revele une carte à l'adversaire. ");
         ShowCardsForChoice(Main.transform, nombreCartes);
+        AntinomiaLog(Main); 
         
         yield return WaitForCardsChosen();
         string[] AllCartesChoisiesString = new string[CartesChoisiesPourEffets.Count];
         for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
-            string stringCartei = ""; 
-            switch (CartesChoisiesPourEffets[i].GetComponent<CarteType>().thisCarteType) {
-                case CarteType.Type.ENTITE:
-                    stringCartei = CartesChoisiesPourEffets[i].GetComponent<Entite>().shortCode;
-                    break;
-                case CarteType.Type.ASSISTANCE:
-                    stringCartei = CartesChoisiesPourEffets[i].GetComponent<Assistance>().shortCode;
-                    break;
-                case CarteType.Type.SORT:
-                    stringCartei = CartesChoisiesPourEffets[i].GetComponent<Sort>().shortCode;
-                    break;
-            }
+            string stringCartei = CartesChoisiesPourEffets[i].GetComponent<Carte>().shortCode; 
             AllCartesChoisiesString[i] = stringCartei;
         }
         FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString, "Cartes de votre adversaire"); 

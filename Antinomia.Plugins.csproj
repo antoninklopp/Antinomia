@@ -337,6 +337,7 @@
     <Compile Include="Assets\Standard Assets\CrossPlatformInput\Scripts\VirtualInput.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Actions\Ban.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Actions\CartesBoard.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Actions\ChooseCards.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Actions\Cimetiere.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Actions\ClickBan.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Actions\ClickCimetiere.cs" />

@@ -20,7 +20,7 @@ public class GameManagerIA : GameManager {
         Capacite_Effet = GameObject.Find("Capacite_Effet");
         setNamePhaseUI(Phase);
         setTour(Tour);
-        ShowCards = GameObject.Find("ShowCards");
+        ChooseCardsObject = GameObject.Find("ChooseCards");
         CartesCimetiere = transform.Find("CartesCimetiere").gameObject;
         CarteBaseCimetiere = CartesCimetiere.transform.GetChild(0).GetChild(0).GetChild(0).gameObject;
         CarteBaseCimetiere.SetActive(false);

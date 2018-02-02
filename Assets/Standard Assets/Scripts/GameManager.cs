@@ -105,7 +105,15 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
 	public int nombreInvocationsSanctuaire = 0; 
 
-	protected GameObject ShowCards;
+    /// <summary>
+    /// Objet qui permet de choisir des cartes (pour des effets ou pour les montrer à votre adversaire). 
+    /// </summary>
+	protected GameObject ChooseCardsObject;
+
+    /// <summary>
+    /// Objet qui permet de voir les cartes choisies par l'adversaire par exemple. 
+    /// </summary>
+    private GameObject ShowCardsObject; 
 
     /// <summary>
     ///  Cette variable permet de savoir si un sort est en train d'être jouer.
@@ -246,7 +254,8 @@ public class GameManager : NetworkBehaviourAntinomia {
 		Capacite_Effet = GameObject.Find ("Capacite_Effet"); 
 		setNamePhaseUI (Phase); 
 		setTour (Tour); 
-		ShowCards = GameObject.Find ("ShowCards");
+		ChooseCardsObject = GameObject.Find ("ChooseCards");
+        ShowCardsObject = GameObject.Find("ShowCards"); 
         CartesCimetiere = transform.Find("CartesCimetiere").gameObject;
         CarteBaseCimetiere = CartesCimetiere.transform.GetChild(0).GetChild(0).GetChild(0).gameObject;
         CarteBaseCimetiere.SetActive(false); 
@@ -1588,7 +1597,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         Transform CartesMain = FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"); 
         for (int i = 0; i < CartesMain.childCount; ++i) {
             GameObject Carte = CartesMain.GetChild(i).gameObject;
-            Carte.SendMessage("CartePeutJouer", Phase); 
+            Carte.SendMessage("CartePeutJouer", Phase);
         }
     }
 
@@ -1637,18 +1646,29 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <param name="_ObjectAsking"></param>
     /// <param name="stringToDisplay"></param>
     /// <param name="_nombreDeCartesAChoisir"></param>
-    public void ShowCardsForEffect(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking = null, string stringToDisplay = "",
+    public void ChooseCardsForEffect(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking = null, string stringToDisplay = "",
                                     int _nombreDeCartesAChoisir = 1) {
-        ShowCards.GetComponent<ShowCards>().ShowCardsToChoose(_AllCardsGiven, _ObjectAsking, stringToDisplay, _nombreDeCartesAChoisir, 
+        ChooseCardsObject.GetComponent<ChooseCards>().ShowCardsToChoose(_AllCardsGiven, _ObjectAsking, stringToDisplay, _nombreDeCartesAChoisir, 
             deactivateAfter : true); 
     }
 
     public void ActivateShowCards(bool activate=true) {
-        ShowCards.SetActive(activate);
+        ChooseCardsObject.SetActive(true);
+        Debug.Log("ShowCards is active"); 
         // On permet au joueur d'interagir. 
         if (activate) {
-            ShowCards.GetComponent<ShowCards>().PermettreInteraction();
+            ChooseCardsObject.GetComponent<ChooseCards>().PermettreInteraction();
         }
+    }
+
+    public void ShowCardsToPlayer(string message, string[] CardsGiven) {
+        ShowCardsObject.SetActive(true);
+        ShowCardsObject.GetComponent<ShowCards>().ShowCardsToPlayer(message, CardsGiven); 
+    }
+
+    public void ShowCardsToPlayer(string[] CardsGiven) {
+        ShowCardsObject.SetActive(true);
+        ShowCardsObject.GetComponent<ShowCards>().ShowCardsToPlayer(CardsGiven);
     }
 
     /// <summary>
@@ -1695,7 +1715,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             // Le joueur doit avoir 7 cartes ou moins à la fin du tour. 
             List<GameObject> cartesMain =
                 Player.transform.Find("MainJoueur").Find("CartesMainJoueur").gameObject.GetComponent<MainJoueur>().getCartesMain();
-            ShowCardsForEffect(
+            ChooseCardsForEffect(
                 cartesMain,
                 _ObjectAsking : gameObject, 
                 stringToDisplay: "Vous avez plus de 7 cartes en main, choisissez celle dont vous voulez vous séparer.", 

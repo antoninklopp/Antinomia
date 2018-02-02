@@ -810,9 +810,8 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="allCards">La liste des shortCodes des cartes à montrer. </param>
 	[ClientRpc(channel=0)]
 	public void RpcShowCardsToOtherPlayer (string[] allCards, string message){
-        AntinomiaLog("On montre les cartes choisies"); 
-		GameObject.FindGameObjectWithTag ("GameManager").transform.Find ("ShowCards").
-            gameObject.GetComponent<ShowCards>().RpcShowCardsToOtherPlayer(allCards, message);
+        AntinomiaLog("On montre les cartes choisies");
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCardsToPlayer(message, allCards); 
     }
 
     /// <summary>
