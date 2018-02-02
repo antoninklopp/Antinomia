@@ -565,6 +565,16 @@ public class Carte : NetworkBehaviourAntinomia {
         for (int i = 0; i < _allEffets.Count; ++i) {
             // On regarde les effets un par un. 
             // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
+
+            // Il faut gérer indépendamment le cas où le joueur doit faire un choix à la depose de la carte.
+            // TODO : A mieux gérer? 
+            if (debut && _allEffets[i].AllConditionsEffet[0].ConditionCondition == Condition.ConditionEnum.CHOIX_DEPOSE) {
+                List<EffetPlusInfo> effets = new List<EffetPlusInfo>();
+                effets.Add(new EffetPlusInfo(_allEffets[i], i, numeroListEffet));
+                ProposerEffets(effets);
+                continue;
+            }
+
             bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut, nouveauTour:nouveauTour,
                                                Cible:Cible, deposeCarte:deposeCarte, changementDomination:changementDomination);
             Debug.Log("<color=orange>" + effetOK.ToString() + "</Color>"); 
@@ -1072,8 +1082,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction));
                         DisplayMessage("Pioche " + _actions[j].properIntAction.ToString() + " carte");
                         Debug.Log("<color=purple> Piocher une carte </color>");
-                    }
-                    else if (j == 0) {
+                    } else if (j == 0) {
                         MettreEffetDansLaPile(null, numeroEffet, effetListNumber);
                     }
                     break;
@@ -1125,8 +1134,12 @@ public class Carte : NetworkBehaviourAntinomia {
                     // Il faut d'abord choisir une carte de la main du joueur. 
 
                     // Ceci devrait être dans les conditions. 
-                    // ShowCardsForChoice(Main.transform, _actions[j].properIntAction, "Defaussez les");
-                    StartCoroutine(DefausserEffet());
+                    // PAS TOUJOURS
+                    if (jouerEffet) {
+                        StartCoroutine(DefausserEffet());
+                    } else if (j == 0){
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    }
                     break;
                 case Action.ActionEnum.REVELER_CARTE:
                     // Le joueur révèle une carte de sa main.
@@ -1878,6 +1891,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     /// <returns></returns>
     private IEnumerator DefausserEffet(bool CibleDejaChoisie = false) {
+        Debug.Log("<color=green>Ici on se defausse d'une carte</color>"); 
         if (!CibleDejaChoisie) {
             // Si les cibles n'ont pas déjà été choisies
             yield return WaitForCardsChosen();

@@ -165,6 +165,10 @@ public class Condition {
         /// </summary>
         EFFET_GLOBAL, 
         /// <summary>
+        /// Choix c'un effet à la depose. 
+        /// </summary>
+        CHOIX_DEPOSE, 
+        /// <summary>
         /// Aucune condition nécessaire
         /// </summary>
         NONE

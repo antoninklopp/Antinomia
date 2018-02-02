@@ -408,11 +408,11 @@ public class Entite : Carte, ICarte {
 		 */
         Debug.Log("DOWN"); 
 
-        base.OnMouseDown();
+        base.OnMouseDown(); 
 
         if (!isFromLocalPlayer) {
-            return;
-        }
+            return; 
+        } 
 
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
@@ -1118,7 +1118,7 @@ public class Entite : Carte, ICarte {
         stringToEffetList(_AllEffetsString);
         stringToEffetAstral(_AllEffetsAstrals);
         stringToEffetMalefique(_AllEffetsMalefiques);
-        stringToEffetAstralString(_AllEffetsStringToDisplay);
+        stringToEffetAstralString(_AllEffetsAstralToDisplay);
         stringToEffetMalefiqueString(_AllEffetsMalefiquesToDisplay);
         stringToEffetString(_AllEffetsStringToDisplay); 
         EntiteNature = nature; 

@@ -63,10 +63,13 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         AntinomiaLog("On ajoute un effet à la pile dans effetInPile");
         AntinomiaLog(ObjetEffet); 
         int IDObjetEffet = GetObjetIDCardGame(ObjetEffet);
-        // On crée une liste qui regroupe les IDCardGame des cibles. 
-        int[] ListeIDCardGameCible = new int[ObjetCible.Count]; 
-        for (int i = 0; i < ObjetCible.Count; ++i) {
-            ListeIDCardGameCible[i] = GetObjetIDCardGame(ObjetCible[i]); 
+        int[] ListeIDCardGameCible = null;
+        if (ObjetCible != null) {
+            // On crée une liste qui regroupe les IDCardGame des cibles. 
+            ListeIDCardGameCible = new int[ObjetCible.Count];
+            for (int i = 0; i < ObjetCible.Count; ++i) {
+                ListeIDCardGameCible[i] = GetObjetIDCardGame(ObjetCible[i]);
+            }
         }
 
         // Un joueur ne pourra ajouter qu'un effet de ses propres cartes! 
