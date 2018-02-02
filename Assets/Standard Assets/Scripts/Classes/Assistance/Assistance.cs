@@ -98,7 +98,11 @@ public class Assistance : Carte, ICarte {
         /*
          * Lors d'un click sur la carte. 
          */
-        base.OnMouseDown(); 
+        base.OnMouseDown();
+
+        if (!isFromLocalPlayer) {
+            return;
+        }
 
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
 

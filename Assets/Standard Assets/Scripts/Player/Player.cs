@@ -230,7 +230,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
         yield return new WaitForSeconds(0.1f);
         // L'objet a été détruit donc c'est bon.
-        CmdTestIfObjectInfoDestroyed(15); 
+        CmdTestIfObjectInfoDestroyed(30); 
 	}
 
     [Command(channel=0)]

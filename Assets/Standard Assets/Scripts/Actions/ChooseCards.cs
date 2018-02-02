@@ -90,6 +90,8 @@ public class ChooseCards : NetworkBehaviour {
 		 * On crée toutes les images à partir de la carte. 
 		 */
 
+        DetruireCartesPrevious(); 
+
         nombreDeCartesAChoisir = _nombreDeCartesAChoisir; 
         effetEnCours = true; 
 
@@ -110,7 +112,8 @@ public class ChooseCards : NetworkBehaviour {
 		}
 		for (int i = 0; i < AllShortCodes.Count; ++i) {
 			// On crée d'abord toutes les cartes
-			GameObject newCarte = Instantiate(CartePrefab); 
+			GameObject newCarte = Instantiate(CartePrefab);
+            newCarte.SetActive(true); 
 			// Ensuite on met leur position avec une demi carte entre chaque carte. 
 			newCarte.transform.SetParent(transform); 
 			// newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
@@ -282,11 +285,10 @@ public class ChooseCards : NetworkBehaviour {
 		/*
 		 * Arrêter de montrer les cartes. 
 		 */ 
-		Debug.Log ("je détruis les cartes"); 
 		Debug.Log (AllCardsToDestroy.Count); 
 		yield return new WaitForSeconds (nbSeconds); 
 		for (int i = 0; i < transform.childCount; ++i) {
-			if (FiniButton != transform.GetChild (i).gameObject) {
+			if (FiniButton != transform.GetChild (i).gameObject && transform.GetChild(i).gameObject.activeSelf) {
 				Destroy (transform.GetChild (i).gameObject); 
 			}
 		}
@@ -321,6 +323,17 @@ public class ChooseCards : NetworkBehaviour {
         }
         else {
             return Players[1];
+        }
+    }
+
+    /// <summary>
+    /// On detruit les cartes présentes précedemment. 
+    /// </summary>
+    private void DetruireCartesPrevious() {
+        foreach (Transform t in transform) {
+            if (t.gameObject.activeSelf) {
+                Destroy(t.gameObject); 
+            }
         }
     }
 

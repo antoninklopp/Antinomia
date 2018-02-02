@@ -232,7 +232,7 @@ public class Carte : NetworkBehaviourAntinomia {
         } 
         if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().gameIsPaused 
             && !GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().IPausedTheGame) {
-            // Pas d'interaction possible, si le joueur n'a pas mis le jeu en pause, mais qu'il est en pause. 
+            // Pas d'interaction ible, spossi le joueur n'a pas mis le jeu en pause, mais qu'il est en pause. 
             // DisplayMessage("Votre adversaire a mis le jeu en pause");
             // return; 
         }

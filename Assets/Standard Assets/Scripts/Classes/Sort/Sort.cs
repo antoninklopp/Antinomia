@@ -130,7 +130,11 @@ public class Sort : Carte, ICarte {
          * Lors d'un clic sur la carte
          */
 
-        base.OnMouseDown(); 
+        base.OnMouseDown();
+
+        if (!isFromLocalPlayer) {
+            return;
+        }
 
         if (sortState == State.CIMETIERE) {
             return;

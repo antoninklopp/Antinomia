@@ -408,7 +408,11 @@ public class Entite : Carte, ICarte {
 		 */
         Debug.Log("DOWN"); 
 
-        base.OnMouseDown(); 
+        base.OnMouseDown();
+
+        if (!isFromLocalPlayer) {
+            return;
+        }
 
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
