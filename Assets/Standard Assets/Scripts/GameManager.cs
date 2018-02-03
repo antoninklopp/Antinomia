@@ -1652,13 +1652,17 @@ public class GameManager : NetworkBehaviourAntinomia {
             deactivateAfter : true); 
     }
 
-    public void ActivateShowCards(bool activate=true) {
+    public void ActivateChooseCards(bool activate=true) {
         ChooseCardsObject.SetActive(true);
         Debug.Log("ShowCards is active"); 
         // On permet au joueur d'interagir. 
         if (activate) {
             ChooseCardsObject.GetComponent<ChooseCards>().PermettreInteraction();
         }
+    }
+
+    public void DesactivateChooseCards() {
+        ChooseCardsObject.SetActive(false);
     }
 
     public void ShowCardsToPlayer(string message, string[] CardsGiven) {

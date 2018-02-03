@@ -1655,7 +1655,7 @@ public class Entite : Carte, ICarte {
             for (int i = 0; i < AllEffets.Count; ++i) {
                 if (AllEffets[i].AllConditionsEffet[0].TourCondition != Condition.Tour.NONE) {
                     // S'il vérifie les conditions
-                    if (GererConditions(AllEffets[i].AllConditionsEffet, choixJoueur:true)) {
+                    if (GererConditions(AllEffets[i].AllConditionsEffet, choixJoueur:true, jouerDirect:false)) {
                         // Si l'effet n'a pas déjà été joué à ce tour. 
                         Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
                         effetPlayable.Add(new EffetPlusInfo(AllEffets[i], i, 0));
@@ -1673,7 +1673,7 @@ public class Entite : Carte, ICarte {
                     if (AllEffetsAstral[i].AllConditionsEffet[0].TourCondition != Condition.Tour.NONE) {
                         // S'il vérifie les conditions
 
-                        if (GererConditions(AllEffetsAstral[i].AllConditionsEffet, choixJoueur: true)) {
+                        if (GererConditions(AllEffetsAstral[i].AllConditionsEffet, choixJoueur: true, jouerDirect: false)) {
                             // Si l'effet n'a pas déjà été joué à ce tour. 
                             Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
                             Debug.Log(AllEffetsAstral[i]); 
@@ -1693,7 +1693,7 @@ public class Entite : Carte, ICarte {
                 for (int i = 0; i < AllEffetsMalefique.Count; ++i) {
                     if (AllEffetsMalefique[i].AllConditionsEffet[0].TourCondition != Condition.Tour.NONE) {
                         // S'il vérifie les conditions
-                        if (GererConditions(AllEffetsMalefique[i].AllConditionsEffet, choixJoueur: true)) {
+                        if (GererConditions(AllEffetsMalefique[i].AllConditionsEffet, choixJoueur: true, jouerDirect: false)) {
                             // Si l'effet n'a pas déjà été joué à ce tour. 
                             Debug.Log("<color=red>Il y a ici une condition qui peut être jouée</color>");
                             effetPlayable.Add(new EffetPlusInfo(AllEffetsMalefique[i], i, 2));
@@ -1706,6 +1706,10 @@ public class Entite : Carte, ICarte {
             }
 
         }
+
+
+        // il faut desactiver le choix de cartes dans le cas où il a été trigger par une condition.  
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().DesactivateChooseCards(); 
 
         Debug.Log("On a check les effets de " + Name);
 

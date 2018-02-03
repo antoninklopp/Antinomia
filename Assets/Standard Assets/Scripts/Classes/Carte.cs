@@ -309,6 +309,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="shortCode"></param>
     /// <param name="messageToDisplay"></param>
     public virtual void DisplayInfoCarteGameManager(string shortCode="", string messageToDisplay = "") {
+#if (UNITY_ANDROID || UNITY_IOS)
         if (CheckForEffet().Count != 0) {
             // Dans le cas où il y a des effets à jouer
             GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCarteInfo(shortCode, messageToDisplay, 
@@ -316,6 +317,9 @@ public class Carte : NetworkBehaviourAntinomia {
         } else {
             GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCarteInfo(shortCode, messageToDisplay);
         }
+#else
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCarteInfo(shortCode, messageToDisplay);
+#endif
     }
 
     /// <summary>
@@ -699,17 +703,14 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="choixJoueur">Si le joueur a fait un clic droit sur la carte et veut intentionellement jouer
     /// un effet lié à cette carte</param>
     /// <param name="changementDomination">True lorsque le terrain vient de changer de domination.</param>
+    /// <param name="jouerDirect">Si on propose l'effet au joueur, 
+    /// on ne veut pas jouer la condition directement. </param>
     public bool GererConditions(List<Condition> _conditions, Player.Phases _currentPhase = Player.Phases.INITIATION,
                                     bool estMort = false, bool debut = false, bool nouveauTour = false, GameObject Cible=null, 
-                                    int deposeCarte=0, bool choixJoueur=false, bool changementDomination=false) {
+                                    int deposeCarte=0, bool choixJoueur=false, bool changementDomination=false, bool jouerDirect=true) {
         bool effetOK = true;
         for (int j = 0; j < _conditions.Count; ++j) {
-            Debug.Log(_conditions[j].dependsOnPhase);
-            Debug.Log(_currentPhase);
-            Debug.Log(_conditions[j].PhaseCondition);
-            Debug.Log("Changement Domination " + changementDomination.ToString());
-            Debug.Log("Debut " + debut.ToString());
-            Debug.Log("ProperInt " + _conditions[j].properIntCondition.ToString()); 
+            Debug.Log("Int COndition" + _conditions[j].intCondition.ToString());
             if (_conditions[j].dependsOnPhase &&
                 _currentPhase != _conditions[j].PhaseCondition) {
                 // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
@@ -726,7 +727,7 @@ public class Carte : NetworkBehaviourAntinomia {
                 Debug.Log("Pas le bon tour");
                 return false;
             }
-            else if (debut && (_conditions[j].intCondition > 100)) {
+            else if (debut && (_conditions[j].intCondition >= 100)) {
                 // L'effet dépend donc d'une phase. 
                 Debug.Log("Cette effet dépend d'une phase particulière.");
                 return false;
@@ -782,28 +783,45 @@ public class Carte : NetworkBehaviourAntinomia {
                         // Permettre au joueur de choisir un élément.
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
+                        // Si on ne veut pas jouer la condition directement, il faut s'arrêter et ne pas proposer
+                        // à l'utilisateur de choisir une carte
+                        if (!jouerDirect) {
+                            break;
+                        }
                         if (checkCibleNull(Cible)) {
                             ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
                         }
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
+                        if (!jouerDirect) {
+                            break;
+                        }
                         if (checkCibleNull(Cible)) {
                             ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
                                 _conditions[j].properIntCondition);
                         }
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
+                        if (!jouerDirect) {
+                            break;
+                        }
                         if (checkCibleNull(Cible)) {
                             ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
                                 _conditions[j].properIntCondition);
                         }
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
+                        if (!jouerDirect) {
+                            break;
+                        }
                         if (checkCibleNull(Cible)) {
                             ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition);
                         }
                         break;
                     case Condition.ConditionEnum.DEFAUSSER:
+                        if (!jouerDirect) {
+                            break;
+                        }
                         ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
                             _conditions[j].properIntCondition);
                         break;
@@ -908,11 +926,63 @@ public class Carte : NetworkBehaviourAntinomia {
                 // On fait donc un break et passe à l'effet suivant. 
                 //   break;
                 //}
-                Debug.Log("<color=gree>effet est OK</color>");
+                Debug.Log("<color=green>effet est OK</color>");
             }
         }
         Debug.Log(effetOK);
         return effetOK;
+    }
+
+    /// <summary>
+    /// Gerer un effet après que le joueur ait choisi de l'éxecuter
+    /// Il n'y a donc plus besoin de check que les effets sont bien possibles à jouer (cela 
+    /// a été fait précedemment). 
+    /// Il suffit de gerer des conditions comme un choix de cartes par exemple. 
+    /// </summary>
+    /// <returns>On retourne true s'il y a besoin d'attendre pour que la condition soit entièrement remplie. </returns>
+    public bool GererConditionsApresChoix(List<Condition> _conditions, GameObject Cible=null) {
+        for (int j = 0; j < _conditions.Count; j++) {
+            switch (_conditions[j].ConditionCondition) {
+                case Condition.ConditionEnum.CHOIX_ELEMENT:
+                    // Permettre au joueur de choisir un élément.
+                    return true; 
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
+                    if (checkCibleNull(Cible)) {
+                        ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
+                        return true; 
+                    }
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
+                    if (checkCibleNull(Cible)) {
+                        ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                            _conditions[j].properIntCondition);
+                        return true;
+                    }
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
+                    if (checkCibleNull(Cible)) {
+                        ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                            _conditions[j].properIntCondition);
+                        return true; 
+                    }
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
+                    if (checkCibleNull(Cible)) {
+                        ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition);
+                        return true;
+                    }
+                    break;
+                case Condition.ConditionEnum.DEFAUSSER:
+                    ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
+                        _conditions[j].properIntCondition);
+                    return true; 
+                    break;
+            }
+        }
+        // Dans les autres cas, pas besoin d'attendre
+        return false; 
+
     }
 
 
@@ -1061,14 +1131,10 @@ public class Carte : NetworkBehaviourAntinomia {
                     }
                     break;
                 case Action.ActionEnum.DETRUIRE:
-                    /*
-                        * Il faut d'abord choisir une carte puis la détruire.
-                        */
-                    DisplayMessage("Choisissez une carte et détruisez la");
                     if (jouerEffet) {
                         StartCoroutine(DetruireEffet(CibleDejaChoisie));
-                    }
-                    else if (j == 0) {
+                    } else if (j == 0) {
+                        Debug.Log("On met l'effet dans la pile"); 
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
                     break;
@@ -1451,7 +1517,7 @@ public class Carte : NetworkBehaviourAntinomia {
                 AllCardsToChoose.Add(_parent.GetChild(k).gameObject);
             }
         }
-        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ActivateShowCards(true); 
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ActivateChooseCards(true); 
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
             gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Choisissez " + nombreCartes.ToString() + 
@@ -1698,7 +1764,7 @@ public class Carte : NetworkBehaviourAntinomia {
         Debug.Log("On check" + Name);
         List<EffetPlusInfo> effetPropose = CheckForEffet(); 
         if (effetPropose.Count != 0) {
-            Debug.Log("Proposer Effets"); 
+            Debug.Log("Proposer Effets");
             ProposerEffets(effetPropose);
         }
     }
@@ -1755,17 +1821,30 @@ public class Carte : NetworkBehaviourAntinomia {
                 "Le joueur adverse joue : \n" +
                 effetPropose.ToString() + "\nde la carte " + Name;
             Debug.LogWarning("Info Donnée : " + messageEffet); 
-            FindLocalPlayer().GetComponent<Player>().CmdInformerEffet(messageEffet); 
+            FindLocalPlayer().GetComponent<Player>().CmdInformerEffet(messageEffet);
+            // Dans le cas où il y a une condition telle qu'un choix de cartes
+            if (GererConditionsApresChoix(effetPropose.AllConditionsEffet)) {
+                yield return WaitForCardsChosen();
+                ShowCardsMustBeActivated = false; 
+            }
+            
             GererActions(effetPropose.AllActionsEffet, numeroEffet:effetPropose.numeroEffet, 
-                effetListNumber:effetPropose.numeroListEffet); 
+                effetListNumber:effetPropose.numeroListEffet, CibleDejaChoisie:true); 
         }
         // L'effet a été joué à ce tour.
         reponseDemandeEffet = -1; 
 
         if (ShowCardsMustBeActivated) {
             ShowCardsMustBeActivated = false;
-            getGameManager().GetComponent<GameManager>().ActivateShowCards(); 
+            getGameManager().GetComponent<GameManager>().ActivateChooseCards(); 
         }
+    }
+
+    /// <summary>
+    /// On peut avoir mis dans 
+    /// </summary>
+    private void checkIfShowCardsMustBeActivated() {
+
     }
 
     private void ReponseEffet(int response) {
