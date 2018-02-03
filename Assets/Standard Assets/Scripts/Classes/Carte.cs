@@ -1429,9 +1429,6 @@ public class Carte : NetworkBehaviourAntinomia {
         GererActions(_actionsCarte, numeroEffet, effetListNumber, jouerEffet:true, CibleDejaChoisie:true);
 
         yield break; 
-        //while (nombreEffets != 0) {
-        //    yield return new WaitForSeconds(0.05f); 
-        //}
     }
 
     /// <summary>

@@ -34,7 +34,7 @@ public class MainJoueur : NetworkBehaviourAntinomia {
     /// <summary>
     /// Reordonner les cartes dans la main. 
     /// </summary>
-	void ReordonnerCarte(){
+	public void ReordonnerCarte(){
 		/*
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.
@@ -72,7 +72,7 @@ public class MainJoueur : NetworkBehaviourAntinomia {
 		}
 	}
 
-	void ReordonnerAutreCarte(){
+	public void ReordonnerAutreCarte(){
 		/*
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.

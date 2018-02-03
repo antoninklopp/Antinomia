@@ -174,6 +174,7 @@ public class Sort : Carte, ICarte {
                 clicked = 0;
                 canGoBig = true;
                 // TODO: Display Message qui dit qu'un sort a déjà été lancé.
+                Main.GetComponent<MainJoueur>().ReordonnerCarte(); 
                 DisplayMessage("Un sort a déjà été lancé à ce tour."); 
             }
         }
@@ -405,7 +406,8 @@ public class Sort : Carte, ICarte {
             // Effet global 
             GererEffets(AllEffets, debut: true);
             Debug.Log("Cette carte a un effet sur plusieurs cartes. "); 
-            CmdDetruireCarte(); 
+            DetruireCarte();
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().sortLance += 1;
             return true; 
         }
 
@@ -609,6 +611,7 @@ public class Sort : Carte, ICarte {
     }
 
     public override void DetruireCarte() {
+        Debug.Log("On detruit le sort"); 
         CmdDetruireCarte(); 
     }
 

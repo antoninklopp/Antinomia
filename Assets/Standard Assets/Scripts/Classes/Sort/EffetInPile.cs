@@ -187,7 +187,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
             // Dans certains cas, changement de phase par exemple, 
             // aucune carte n'a demandé l'effet. 
             if (effetTermine) {
-                // Si l'effeta déjà été joué
+                // Si l'effet déjà été joué
                 GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
                 yield break; 
             }
@@ -373,9 +373,11 @@ public class EffetInPile : NetworkBehaviourAntinomia {
             if ((Card.GetComponent<Entite>() != null) && (Card.GetComponent<Entite>().getState() == Entite.State.CIMETIERE)) {
                 return false;
             }
-            else if ((Card.GetComponent<Sort>() != null) && (Card.GetComponent<Sort>().sortState == Sort.State.CIMETIERE)) {
-                return false;
-            }
+            // Attention : Un sort peut etre joué alors qu'il est au cimetière.
+
+            // else if ((Card.GetComponent<Sort>() != null) && (Card.GetComponent<Sort>().sortState == Sort.State.CIMETIERE)) {
+            //     return false;
+            //}
         }
         return true; 
     }
