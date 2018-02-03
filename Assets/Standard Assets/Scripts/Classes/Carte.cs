@@ -1235,38 +1235,39 @@ public class Carte : NetworkBehaviourAntinomia {
                     FindLocalPlayer().GetComponent<Player>().addAKA(_actions[j].properIntAction);
                     break;
                 case (Action.ActionEnum.NATURE_AIR):
-                    if (!jouerEffet) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    if (jouerEffet) {
+                        StartCoroutine(ChangerNatureEffet(Entite.Element.AIR, CibleDejaChoisie));
                     }
                     else if (j == 0) {
-                        StartCoroutine(ChangerNatureEffet(Entite.Element.AIR, CibleDejaChoisie));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
                     Debug.Log("Element de la carte changé en AIR");
                     break;
                 case (Action.ActionEnum.NATURE_EAU):
-                    if (!jouerEffet) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    if (jouerEffet) {
+                        StartCoroutine(ChangerNatureEffet(Entite.Element.EAU, CibleDejaChoisie));
                     }
                     else if (j == 0) {
-                        StartCoroutine(ChangerNatureEffet(Entite.Element.EAU, CibleDejaChoisie));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
                     Debug.Log("Element de la carte changé en EAU");
                     break;
                 case (Action.ActionEnum.NATURE_FEU):
-                    if (!jouerEffet) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    if (jouerEffet) {
+                        StartCoroutine(ChangerNatureEffet(Entite.Element.FEU, CibleDejaChoisie));
+
                     }
                     else if (j == 0) {
-                        StartCoroutine(ChangerNatureEffet(Entite.Element.FEU, CibleDejaChoisie));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
                     Debug.Log("Element de la carte changé en FEU");
                     break;
                 case (Action.ActionEnum.NATURE_TERRE):
-                    if (!jouerEffet) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                    if (jouerEffet) {
+                        StartCoroutine(ChangerNatureEffet(Entite.Element.TERRE, CibleDejaChoisie));
                     }
                     else if (j == 0) {
-                        StartCoroutine(ChangerNatureEffet(Entite.Element.TERRE, CibleDejaChoisie));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
                     Debug.Log("Element de la carte changé en TERRE");
                     break;

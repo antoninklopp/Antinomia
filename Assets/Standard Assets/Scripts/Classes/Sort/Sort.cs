@@ -376,7 +376,7 @@ public class Sort : Carte, ICarte {
             Debug.Log("La carte est une entité temporaire"); 
             CarteCiblee = CarteCiblee.GetComponent<EntiteTemporaire>().getVraieEntite(); 
         }
-        GererEffets(AllEffets, Cible:CarteCiblee); 
+        GererEffets(AllEffets, Cible:CarteCiblee, debut:true); 
 
         // Le sort a été joué. 
         clicked = 0;
@@ -453,7 +453,7 @@ public class Sort : Carte, ICarte {
     /// on updatera le sort à chaque tour afin de rendre par exemple un element d'origine à sa carte si celui-ci a été modifié. 
     /// A appeler à chaque début de tour.
     /// </summary>
-    void updateSortNewTurn() {
+    void UpdateSortNewTurn() {
         /* 
          */ 
          if (AllEffets.Count == 0) {

@@ -1026,8 +1026,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                 Destroy(Content.transform.GetChild(i).gameObject); 
             }
         }
-
-        CarteBaseCimetiere.SetActive(true); 
+        
         Debug.Log(CarteBaseCimetiere); 
 
         for (int i = 0; i < allCartesCimetiere.Count; ++i) {
@@ -1036,10 +1035,10 @@ public class GameManager : NetworkBehaviourAntinomia {
             // NouvelleCarte.AddComponent<Carte>(); 
             NouvelleCarte.SendMessage("setImage", allCartesCimetiere[i].GetComponent<Entite>().shortCode);
             Debug.Log("1 carte instanciée dans le cimetière");
-            NouvelleCarte.transform.SetParent(Content.transform, false); 
+            NouvelleCarte.transform.SetParent(Content.transform, false);
+            NouvelleCarte.SetActive(true); 
         }
-
-        CarteBaseCimetiere.SetActive(false);
+        
     }
 
     /// <summary>
