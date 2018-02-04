@@ -343,6 +343,8 @@ public class Entite : Carte, ICarte {
         //_animator = GetComponent<Animator> ();
         // Attention à ces déclarations!!
 
+        def = new EntiteDefinition(); 
+
         localScaleCard = Mathf.Abs(transform.localScale.x);
         canGoBig = true;
         WriteCapacite = GameObject.Find("Capacite_Effet");

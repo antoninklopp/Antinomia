@@ -108,6 +108,8 @@ public class Sort : Carte, ICarte {
         localScaleCard = Mathf.Abs(transform.localScale.x);
         canGoBig = true;
 
+        def = new SortDefinition(); 
+
         if (GetComponent<RectTransform>() == null) {
             // Si l'element est UI pas besoin de setUp la carte
             StartCoroutine(SetUpCard());

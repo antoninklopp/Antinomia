@@ -77,6 +77,8 @@ public class Assistance : Carte, ICarte {
         localScaleCard = Mathf.Abs(transform.localScale.x);
         canGoBig = true;
 
+        def = new AssistanceDefinition(); 
+
         if (GetComponent<RectTransform>() == null) {
             // Si l'element est UI pas besoin de setUp la carte
             StartCoroutine(SetUpCard());

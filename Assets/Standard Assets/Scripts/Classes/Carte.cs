@@ -117,7 +117,12 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// True si l'objet ShowCards doit être activé
     /// </summary>
-    private bool ShowCardsMustBeActivated; 
+    private bool ShowCardsMustBeActivated;
+
+    /// <summary>
+    /// Definition de la carte pour savoir si son type.
+    /// </summary>
+    protected CarteDefinition def; 
 
     // Use this for initialization
     public override void Start () {
