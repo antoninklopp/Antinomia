@@ -343,7 +343,7 @@ public class Entite : Carte, ICarte {
         //_animator = GetComponent<Animator> ();
         // Attention à ces déclarations!!
 
-        def = new EntiteDefinition(); 
+        Def = new EntiteDefinition(); 
 
         localScaleCard = Mathf.Abs(transform.localScale.x);
         canGoBig = true;
@@ -450,7 +450,14 @@ public class Entite : Carte, ICarte {
         // S'il y a un sort en cours. 
         Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().SortEnCours);
         if (GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours != null) {
-            GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours.SendMessage("RecupererCarteJouerSort", gameObject);
+            GameObject CarteRecup = GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours;
+            if (CarteRecup.GetComponent<Carte>().Def.IsSort()) { 
+                CarteRecup.GetComponent<Sort>().RecupererCarteJouerSort(gameObject);
+            } else if (CarteRecup.GetComponent<Carte>().Def.IsAssistance()) {
+                CarteRecup.GetComponent<Assistance>().RecupererCarteJouerAssistance(gameObject); 
+            } else {
+                throw new UnusualBehaviourException("Comportement inattendu, doit être Assistance ou Sort"); 
+            }
             Debug.Log("Le sort a été joué.");
             return;
         }
@@ -733,13 +740,8 @@ public class Entite : Carte, ICarte {
                 if (GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().nombreInvocationsSanctuaire >= 1) {
                     return;
                 } else {
-                    Debug.Log("INVOCATION ELEMENTAIRE");
-                    Debug.Log(EntiteNature);
-                    Debug.Log(entiteNature); 
                     if (EntiteNature == Nature.ELEMENTAIRE) {
                         int x = coutElementaire;
-                        Debug.Log("elementaire");
-                        Debug.Log(EntiteElement);
                         switch (EntiteElement) {
                             case Element.FEU:
                                 // Enlever 10x points de vie au joueur. 

@@ -36,6 +36,10 @@ public class CarteType : NetworkBehaviourAntinomia {
         /// </summary>
         ENTITE_TEMPORAIRE, 
         /// <summary>
+        /// Equivalent d'une entité temporaire pour les assistances. 
+        /// </summary>
+        ASSISTANCE_TEMPORAIRE,
+        /// <summary>
         /// La carte n'est d'aucun type. 
         /// </summary>
         AUCUN

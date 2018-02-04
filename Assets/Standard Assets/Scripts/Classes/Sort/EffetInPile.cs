@@ -147,7 +147,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
         } else if (numeroEffet == -3) {
             return ObjetEffet.GetComponent<Entite>().Name + " se déplace au sanctuaire"; 
         } else if (numeroEffet == -2) {
-            return ObjetEffet.GetComponent<Entite>().Name + " se déplace sur le champ de Batailles";
+            return ObjetEffet.GetComponent<Carte>().Name + " se déplace sur le champ de Batailles";
         }
 
         try {
@@ -232,7 +232,11 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                     // Déplacement vers le champ de bataille. 
                     case -2:
                         // On dépose la carte sur le champ de bataille. 
-                        thisCarte.GetComponent<Entite>().MoveToChampBataille(defairePile: true);
+                        if (thisCarte.GetComponent<Carte>().Def.IsEntite()) {
+                            thisCarte.GetComponent<Entite>().MoveToChampBataille(defairePile: true);
+                        } else if (thisCarte.GetComponent<Carte>().Def.IsAssistance()) {
+                            thisCarte.GetComponent<Assistance>().CmdPoserAssistance(); 
+                        }
                         // TODO: Ici il faudra vérifier que la carte a bien été bougée. 
                         yield return new WaitForSeconds(0.5f);
                         // On joue les effets de dépose de la carte. 

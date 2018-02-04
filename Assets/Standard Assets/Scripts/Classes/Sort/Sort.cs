@@ -108,7 +108,7 @@ public class Sort : Carte, ICarte {
         localScaleCard = Mathf.Abs(transform.localScale.x);
         canGoBig = true;
 
-        def = new SortDefinition(); 
+        Def = new SortDefinition(); 
 
         if (GetComponent<RectTransform>() == null) {
             // Si l'element est UI pas besoin de setUp la carte
@@ -347,7 +347,7 @@ public class Sort : Carte, ICarte {
     /// Et ces cartes appellent ensuite cette fonction.
     /// </summary>
     /// <param name="carteAffectee"></param>
-    void RecupererCarteJouerSort(GameObject carteAffectee) {
+    public void RecupererCarteJouerSort(GameObject carteAffectee) {
         /*
          * Cette fonction sera appelée par la carte sur laquelle le joueur aura cliqué après avoir cliqué sur le sort. 
          * 

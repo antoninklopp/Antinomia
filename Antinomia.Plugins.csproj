@@ -354,6 +354,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\ChoixGame\ChoixGameManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Assistance\Assistance.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Assistance\AssistanceDefinition.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\Assistance\AssistanceTemporaire.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Assistance\EffetAssistance.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Assistance\EntiteAssocieeAssistance.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Capacite.cs" />

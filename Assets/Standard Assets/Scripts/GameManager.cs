@@ -1345,6 +1345,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     /// <summary>
     /// Montrer au joueur pendant combien de temps il peut encore faire pause.
+    /// ANIMATION
     /// </summary>
     /// <returns></returns>
     IEnumerator ShowTimeSpendPause(float time) {

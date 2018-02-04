@@ -122,7 +122,17 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// Definition de la carte pour savoir si son type.
     /// </summary>
-    protected CarteDefinition def; 
+    protected CarteDefinition def;
+
+    public CarteDefinition Def {
+        get {
+            return def;
+        }
+
+        set {
+            def = value;
+        }
+    }
 
     // Use this for initialization
     public override void Start () {

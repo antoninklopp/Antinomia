@@ -77,7 +77,7 @@ public class Assistance : Carte, ICarte {
         localScaleCard = Mathf.Abs(transform.localScale.x);
         canGoBig = true;
 
-        def = new AssistanceDefinition(); 
+        Def = new AssistanceDefinition(); 
 
         if (GetComponent<RectTransform>() == null) {
             // Si l'element est UI pas besoin de setUp la carte
@@ -325,7 +325,7 @@ public class Assistance : Carte, ICarte {
         }
     }
 
-    void RecupererCarteJouerAssistance(GameObject carteAffectee) {
+    public void RecupererCarteJouerAssistance(GameObject carteAffectee) {
         /*
          * Cette fonction sera appelée par la carte sur laquelle le joueur aura cliqué après avoir cliqué sur le sort. 
          * 
@@ -347,10 +347,11 @@ public class Assistance : Carte, ICarte {
 
 
         if (assistanceState == State.MAIN) {
-            // Dans le cas où la carte est encore dans la main. 
-            CmdPoserAssistance();
+            MettreEffetDansLaPile(new List<GameObject>(), -2); 
 
-            JouerEffetDeposeCarte();
+            // Dans le cas où la carte est encore dans la main. 
+            // CmdPoserAssistance();
+            
             Debug.Log("Detruire " + carteAffectee.GetComponent<Carte>().Name); 
             carteAffectee.SendMessage("DetruireCarte");
         }
@@ -422,7 +423,7 @@ public class Assistance : Carte, ICarte {
     /// Fonction faite sur le serveur. 
     /// </summary>
     [Command(channel=0)]
-    void CmdPoserAssistance() {
+    public void CmdPoserAssistance() {
 
         RpcPoserAssistance(); 
 
