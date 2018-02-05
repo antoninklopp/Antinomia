@@ -33,12 +33,14 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
 		 * Trouver la carte avec la bonne ID. 
          * Doit être la même méthode que dans player (à relier). 
 		 */
+
+        Debug.Log("Cherche Carte ID : " + _ID_.ToString()); 
         CarteType[] AllCartesType = FindObjectsOfType(typeof(CarteType)) as CarteType[];
         List<GameObject> AllCartes = new List<GameObject>();
-
+        
         for (int i = 0; i < AllCartesType.Length; ++i) {
             GameObject NewCarte = AllCartesType[i].gameObject;
-            if (NewCarte.GetComponent<EntiteTemporaire>() != null) {
+            if ((NewCarte.GetComponent<EntiteTemporaire>() != null) || (NewCarte.GetComponent<AssistanceTemporaire>() != null)) {
 
             } else {
                 if (NewCarte.GetComponent<CarteType>().instanciee) {
@@ -49,22 +51,8 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
 
         for (int i = 0; i < AllCartes.Count; ++i) {
             // On cherche la carte avec le bon ID
-            switch (AllCartes[i].GetComponent<CarteType>().thisCarteType) {
-                case CarteType.Type.ASSISTANCE:
-                    if (AllCartes[i].GetComponent<Assistance>().IDCardGame == _ID_) {
-                        return AllCartes[i];
-                    }
-                    break;
-                case CarteType.Type.SORT:
-                    if (AllCartes[i].GetComponent<Sort>().IDCardGame == _ID_) {
-                        return AllCartes[i];
-                    }
-                    break;
-                case CarteType.Type.ENTITE:
-                    if (AllCartes[i].GetComponent<Entite>().IDCardGame == _ID_) {
-                        return AllCartes[i];
-                    }
-                    break;
+            if (AllCartes[i].GetComponent<Carte>().IDCardGame == _ID_) {
+                return AllCartes[i];
             }
         }
 

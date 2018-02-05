@@ -129,6 +129,8 @@ public class CarteType : NetworkBehaviourAntinomia {
                 DetruireComposant(Type.ASSISTANCE);
                 break;
             case Type.ENTITE_TEMPORAIRE:
+                break;
+            case Type.ASSISTANCE_TEMPORAIRE:
                 break; 
             default:
                 throw new Exception("Cette carte n'a pas de type");

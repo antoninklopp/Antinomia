@@ -47,8 +47,6 @@ public class ImageCardBattle : MonoBehaviour {
 
         GetComponent<SpriteRenderer>().sprite = AllImages[0];
 
-        Debug.Log(name); 
-        Debug.LogWarning("La face de la carte n'a pas été trouvée"); 
 		//throw new Exception ("La face de la carte n'a pas été trouvée" + name); 
 	}
 

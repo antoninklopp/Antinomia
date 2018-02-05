@@ -2194,6 +2194,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     public virtual void GererEffetsPonctuel(Player.Phases phase = Player.Phases.INITIATION, bool debut=false, 
         bool changementDomination=false) {
+        Debug.Log("GererEffetsPonctuels"); 
         GererEffets(AllEffets, _currentPhase:phase, debut:debut, numeroListEffet:0, changementDomination:changementDomination); 
     }
 

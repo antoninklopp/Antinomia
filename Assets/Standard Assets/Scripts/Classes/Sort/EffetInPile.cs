@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using System; 
+using System;
+using AntinomiaException;
 
 /// <summary>
 /// Effet que l'on peut rajouter dans une pile. 
@@ -116,7 +117,9 @@ public class EffetInPile : NetworkBehaviourAntinomia {
 
         if (numeroEffet != -4) {
             // Pour un changement de phase, il n'y a pas de cartes associées
-            ObjetEffet = FindCardWithID(_IDCardGame);
+            if (FindCardWithID(_IDCardGame) != null) {
+                ObjetEffet = FindCardWithID(_IDCardGame);
+            }
         }
 
         PhraseDecritEffet = CreerPhraseDecritEffet();
@@ -235,6 +238,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         if (thisCarte.GetComponent<Carte>().Def.IsEntite()) {
                             thisCarte.GetComponent<Entite>().MoveToChampBataille(defairePile: true);
                         } else if (thisCarte.GetComponent<Carte>().Def.IsAssistance()) {
+                            Debug.Log("Je suis une assistance"); 
                             thisCarte.GetComponent<Assistance>().CmdPoserAssistance(); 
                         }
                         // TODO: Ici il faudra vérifier que la carte a bien été bougée. 
@@ -297,6 +301,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// <param name="_carte"></param>
     /// <param name="deposeCarte"></param>
     public void GererEffetsPonctuelPile(GameObject _carte, int deposeCarte=0) {
+        Debug.Log(_carte.GetComponent<CarteType>().thisCarteType); 
         switch (_carte.GetComponent<CarteType>().thisCarteType) {
             case CarteType.Type.ENTITE:
                 _carte.GetComponent<Entite>().GererEffetsPonctuel(debut: true, deposeCarte: deposeCarte);
@@ -328,14 +333,23 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                 EntiteTemporaire _entiteTemporaire = newCarte.AddComponent<EntiteTemporaire>();
                 _entiteTemporaire.setInfoEntiteTemporaire(_entite);
                 Destroy(_entite);
-            }
+            } else if (newCarte.GetComponent<CarteType>().thisCarteType == CarteType.Type.ASSISTANCE) {
+                Assistance _assist = newCarte.GetComponent<Assistance>();
+                AssistanceTemporaire _assistTemporaire = newCarte.AddComponent<AssistanceTemporaire>();
+                _assistTemporaire.setInfoEntiteTemporaire(_assist);
+                Destroy(_assist);
+            } 
             if (numeroEffet == -2) {
                 // Deplacement vers le board. 
                 Transform ChampBataille; 
                 ChampBataille= FindPlayerWithID(PlayerIDAssocie).GetComponent<Player>().GetChampBatailleJoueur();
                 newCarte.transform.SetParent(ChampBataille, false);
                 ChampBataille.gameObject.GetComponent<CartesBoard>().CmdReordonnerCarte();
-                newCarte.GetComponent<EntiteTemporaire>().carteState = Entite.State.CHAMPBATAILLE; 
+                if (newCarte.GetComponent<CarteType>().thisCarteType == CarteType.Type.ENTITE) {
+                    newCarte.GetComponent<EntiteTemporaire>().carteState = Entite.State.CHAMPBATAILLE;
+                } else if (newCarte.GetComponent<CarteType>().thisCarteType == CarteType.Type.ASSISTANCE) {
+                    newCarte.GetComponent<AssistanceTemporaire>().carteState = Assistance.State.JOUEE;
+                } 
             } else if (numeroEffet == -3) {
                 // Deplacement vers le sanctuaire. 
                 Transform Sanctuaire; 
@@ -352,8 +366,15 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// Detruire les unités temporaires, créées par la pile. 
     /// </summary>
     private void DestructionUnitesTemporaires() {
+        // on detruit les entités temporaires
         EntiteTemporaire[] temporaires = FindObjectsOfType<EntiteTemporaire>();
         foreach (EntiteTemporaire temp in temporaires) {
+            Destroy(temp.gameObject);
+        }
+
+        // Et les assistances Temporaire
+        AssistanceTemporaire[] temporaires2 = FindObjectsOfType<AssistanceTemporaire>();
+        foreach (AssistanceTemporaire temp in temporaires2) {
             Destroy(temp.gameObject);
         }
     }

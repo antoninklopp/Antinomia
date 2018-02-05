@@ -16,7 +16,7 @@ public class EntiteTemporaire : Carte {
 
 	// Use this for initialization
 	public override void Start () {
-
+        Def = new EntiteDefinition(); 
 	}
 
     public override void OnMouseDown() {}

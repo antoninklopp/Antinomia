@@ -8,7 +8,7 @@ public class AssistanceTemporaire : Carte {
 
     // Use this for initialization
     public override void Start() {
-
+        Def = new AssistanceDefinition(); 
     }
 
     public override void OnMouseDown() { }

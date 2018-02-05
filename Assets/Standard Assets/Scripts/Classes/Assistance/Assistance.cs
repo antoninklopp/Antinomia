@@ -347,12 +347,12 @@ public class Assistance : Carte, ICarte {
 
 
         if (assistanceState == State.MAIN) {
-            MettreEffetDansLaPile(new List<GameObject>(), -2); 
+            MettreEffetDansLaPile(new List<GameObject>(), -2);
 
             // Dans le cas où la carte est encore dans la main. 
             // CmdPoserAssistance();
             
-            Debug.Log("Detruire " + carteAffectee.GetComponent<Carte>().Name); 
+            Debug.Log("Detruire " + carteAffectee.GetComponent<Carte>().Name);
             carteAffectee.SendMessage("DetruireCarte");
         }
         else if (assistanceState == State.JOUEE) {
@@ -435,7 +435,8 @@ public class Assistance : Carte, ICarte {
     /// </summary>
     [ClientRpc(channel=0)]
     void RpcPoserAssistance() {
-
+        // On pose l'assistance. 
+        Debug.Log("On pose l'assistance");
         assistanceState = State.JOUEE;
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
@@ -447,6 +448,7 @@ public class Assistance : Carte, ICarte {
         GetComponent<BoxCollider2D>().enabled = true;
 
         ProposerMettreJeuEnPause(); 
+        
     }
 
     /// <summary>
@@ -546,15 +548,14 @@ public class Assistance : Carte, ICarte {
             RpcsetoID(IDCardGame, oID, Name, shortCode, STAT, AllEffetsString, AllEffetsStringToDisplay);
             // Inutile normalement.
             // RpcChangeParent (); 
-        } else {
-            yield break; 
         }
 
         // Ici il faut attendre les infos, et pas attendre un temps fini. 
         yield return new WaitForSeconds(0.1f);
 
         if (assistanceState != State.MAIN) {
-            Debug.Log("<color=purple> Probleme ici, la carte aurait avoir le State Main</color>"); 
+            Debug.Log("<color=purple> Probleme ici, la carte aurait avoir le State Main</color>");
+            // yield break; 
         }
 
         // Debug.Log(netId.ToString() + hasAuthority.ToString());
@@ -598,6 +599,10 @@ public class Assistance : Carte, ICarte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+
+        if (IDCardGame == 0) {
+            Destroy(gameObject);
+        }
     }
 
     /// <summary>

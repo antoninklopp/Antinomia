@@ -531,10 +531,6 @@ public class Sort : Carte, ICarte {
 
         yield return new WaitForSeconds(0.1f);
 
-        if (sortState != State.MAIN) {
-            yield break;
-        }
-
         // Debug.Log(netId.ToString() + hasAuthority.ToString());
 
         // l'ID de la carte a la même valeur que l'ID réseau donnée par unity.
@@ -576,6 +572,10 @@ public class Sort : Carte, ICarte {
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+
+        if (IDCardGame == 0) {
+            Destroy(gameObject);
+        }
     }
 
     /// <summary>

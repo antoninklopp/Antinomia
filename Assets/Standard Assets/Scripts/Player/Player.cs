@@ -375,6 +375,8 @@ public class Player : NetworkBehaviourAntinomia	 {
             // Ici la carte n'est pas arrivée "à temps" à l'objet. Il faut donc rappeler cette fonction
             Debug.LogWarning(e);
             Debug.Log("La carte n'a pas pu être instanciée");
+        } catch (NullReferenceException e) {
+
         }
         Destroy(CardToInstantiate); 
 	}
