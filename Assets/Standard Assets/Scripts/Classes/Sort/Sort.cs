@@ -132,9 +132,10 @@ public class Sort : Carte, ICarte {
          * Lors d'un clic sur la carte
          */
 
+        // TODO : Empecher les interactions quand elles doivent être empechees. 
         base.OnMouseDown();
 
-        if (!isFromLocalPlayer) {
+        if (!isFromLocalPlayer && sortState == State.MAIN) {
             return;
         }
 
@@ -221,6 +222,11 @@ public class Sort : Carte, ICarte {
     /// Drag de la carte
     /// </summary>
     public override void OnMouseDrag() {
+
+        if (!isFromLocalPlayer) {
+            return;
+        }
+
         Vector3 MousePosition = Input.mousePosition;
         MousePosition.z = 15;
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
@@ -239,6 +245,11 @@ public class Sort : Carte, ICarte {
     /// Lorsqu'on relache le clic sur une carte
     /// </summary>
     public void OnMouseUp() {
+
+        if (!isFromLocalPlayer && sortState == State.MAIN) {
+            return;
+        }
+
         Vector3 MousePosition = Input.mousePosition;
         MousePosition.z = 15;
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);

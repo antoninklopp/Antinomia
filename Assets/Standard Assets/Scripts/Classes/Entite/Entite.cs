@@ -412,7 +412,7 @@ public class Entite : Carte, ICarte {
 
         base.OnMouseDown(); 
 
-        if (!isFromLocalPlayer) {
+        if (!isFromLocalPlayer && entiteState == State.MAIN) {
             return; 
         } 
 
@@ -598,6 +598,10 @@ public class Entite : Carte, ICarte {
     /// </summary>
     public override void OnMouseDrag() {
 
+        if (!isFromLocalPlayer) {
+            return;
+        }
+
         Vector3 MousePosition = Input.mousePosition;
         MousePosition.z = 15;
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
@@ -620,6 +624,11 @@ public class Entite : Carte, ICarte {
 		 * 
 		 * TODO: Implémenter cette phase lors du drap and drop. 
 		 */
+
+        if (!isFromLocalPlayer && entiteState == State.MAIN) {
+            return;
+        }
+
         Vector3 MousePosition = Input.mousePosition;
         MousePosition.z = 15;
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);

@@ -102,7 +102,7 @@ public class Assistance : Carte, ICarte {
          */
         base.OnMouseDown();
 
-        if (!isFromLocalPlayer) {
+        if (!isFromLocalPlayer && assistanceState == State.MAIN) {
             return;
         }
 
@@ -122,6 +122,11 @@ public class Assistance : Carte, ICarte {
     /// Lorsque la souris ou le doigt est levé(e)
     /// </summary>
     public void OnMouseUp() {
+
+        if (!isFromLocalPlayer && assistanceState == State.MAIN) {
+            return;
+        }
+
         Debug.Log(Vector3.Distance(positionBeforeDragging, transform.position));
 
         Vector3 MousePosition = Input.mousePosition;
@@ -147,6 +152,10 @@ public class Assistance : Carte, ICarte {
     /// Lorsqu'on bouge la carte. 
     /// </summary>
     public override void OnMouseDrag() {
+
+        if (!isFromLocalPlayer) {
+            return;
+        }
 
         Vector3 MousePosition = Input.mousePosition;
         MousePosition.z = 15;
