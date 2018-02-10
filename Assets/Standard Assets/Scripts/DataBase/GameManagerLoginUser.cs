@@ -26,11 +26,20 @@ public class GameManagerLoginUser : MonoBehaviour {
 		InputFieldPassword = GameObject.Find ("Password"); 
 
 		SaveLoginsOnDevice _save = new SaveLoginsOnDevice (); 
+        // Dans ce cas on laisse l'image du début
 		if (_save.isOnePlayerAuthenticated()) {
+            Destroy(InputFieldLogin);
+            Destroy(InputFieldPassword);
+            Destroy(Result);
+            Destroy(GameObject.Find("CreerCompte")); 
 			List<string> _logins = _save.getLogin (); 
 			StartCoroutine (OnClickResultRoutine (_logins [0], _logins [1])); 
 			loginsOnDevice = true; 
-		}
+		} else {
+            if (GameObject.Find("ObjectIntro") != null) {
+                Destroy(GameObject.Find("ObjectIntro")); 
+            }
+        }
 	}
 	
 	// Update is called once per frame
@@ -74,14 +83,23 @@ public class GameManagerLoginUser : MonoBehaviour {
             //GetPlayerInfoGameSparks playerInfo = gameObject.GetComponent<GetPlayerInfoGameSparks> (); 
             yield return new WaitForSeconds (0.5f); 
 			PlayerPrefs.SetString ("user", login); 
-			Result.transform.GetChild (0).gameObject.GetComponent<Text> ().text = "CONNECTED"; 
+            if (Result != null) {
+			    Result.transform.GetChild (0).gameObject.GetComponent<Text> ().text = "CONNECTED"; 
+            }
 			if (!loginsOnDevice && rememberLogins) {
 				SaveLoginsOnDevice _save = new SaveLoginsOnDevice (); 
 				_save.SaveLoginInfos (login, password);
             }
             SceneManager.LoadScene("MainMenu");
         } else {
-			Result.transform.GetChild (0).gameObject.GetComponent<Text> ().text = "IMPOSSIBLE"; 
+            if (Result != null) {
+			    Result.transform.GetChild (0).gameObject.GetComponent<Text> ().text = "IMPOSSIBLE";
+            } else {
+                // Erreur interne, on demandera au joueur de se reconnecter la prochaine fois
+                SaveLoginsOnDevice _save = new SaveLoginsOnDevice ();
+                _save.DisconnectPlayer();
+                Application.Quit(); 
+            }
 		}  
 #endif
     }

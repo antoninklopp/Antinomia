@@ -401,6 +401,8 @@
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\SaveLoginsOnDevice.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Global\RetourMenu.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Interfaces\ICarte.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Introduction\DontDestroyObjectIntro.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Introduction\GoNextSceneAfterIntro.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Introduction\Introduction.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Lobby\LobbyMatchMakingAuto.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Lobby\LobbyPlayer.cs" />

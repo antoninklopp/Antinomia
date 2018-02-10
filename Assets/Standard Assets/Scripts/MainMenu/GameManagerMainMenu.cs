@@ -25,6 +25,9 @@ public class GameManagerMainMenu : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        if (GameObject.Find("ObjectIntro") != null) {
+            Destroy(GameObject.Find("ObjectIntro")); 
+        }
 		BuildVersion = GameObject.Find ("BuildVersion");
         IA = GameObject.Find("IAvIA"); 
 #if UNITY_EDITOR

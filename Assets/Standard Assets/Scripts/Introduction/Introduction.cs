@@ -14,7 +14,7 @@ public class Introduction : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Antinomia = GameObject.Find ("Antinomia"); 
-		StartCoroutine (FadeName ());
+		// StartCoroutine (FadeName ());
 	}
 	
 	// Update is called once per frame
