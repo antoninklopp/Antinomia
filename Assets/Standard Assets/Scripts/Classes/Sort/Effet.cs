@@ -45,5 +45,18 @@ public class Effet {
         return effetString; 
     }
 
+    /// <summary>
+    /// Pour un sort il peut être nécessaire de choisir plusieurs cartes. 
+    /// Il faut donc regarder si lors d'un sort, il n'est pas nécessaire de devoir jouer plusieurs cartes.
+    /// </summary>
+    public int CartesNecessairesSort() {
+        foreach (Condition c in AllConditionsEffet) {
+            if (Array.IndexOf(new int[]{0, 1, 2, 3, 7, 8, 9}, c.ConditionCondition) != -1) {
+                return c.properIntCondition; 
+            }
+        }
+        return 1; 
+    }
+
 
 }

@@ -56,65 +56,81 @@ public class Condition {
     public enum ConditionEnum {
         /// <summary>
         /// Choix d'une entité sur le terrain
+        /// Condition 0
         /// </summary>
         CHOIX_ENTITE_TERRAIN,
         /// <summary>
+        /// Condition 1
         /// Choix d'une entité sur le champ de bataille du joueur
         /// </summary>
         CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR,
         /// <summary>
+        /// Condition 2
         /// Choix d'une entite sur le champ de bataille de l'adversaire
         /// </summary>
         CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE,
         /// <summary>
+        /// Condition 3
         /// Choix d'une entite sur un des deux champ de bataille. 
         /// </summary>
         CHOIX_ENTITE_CHAMP_BATAILLE,
         /// <summary>
+        /// Condition 4
         /// Defausser une ou plusieurs cartes de sa main.  
         /// </summary>
         DEFAUSSER,
         /// <summary>
+        /// Condition 5
         /// Avoir au moins x cartes dans le cimetière
         /// </summary>
         CARTES_CIMETIERE,
         /// <summary>
+        /// Condition 6
         ///  Avoir x cartes de moins que l'adversaire. 
         /// </summary>
         DELTA,
         /// <summary>
+        /// Condition 7
         /// Choix d'un element dans le cas où on veut changer l'élément d'une carte par exemple.
         /// </summary>
-        CHOIX_ELEMENT, 
+        CHOIX_ELEMENT,
         /// <summary>
+        /// Condition 8
         /// Choisir une entité neutre de l'adversaire
         /// </summary>
-        CHOIX_ENTITE_NEUTRE_ADVERSAIRE, 
+        CHOIX_ENTITE_NEUTRE_ADVERSAIRE,
         /// <summary>
+        /// Condition 9
         /// Choisir une entité neutre du joueur
         /// </summary>
         CHOIX_ENTITE_NEUTRE_JOUEUR,
         /// <summary>
+        /// Condition 10
         /// Sacrifier une carte
         /// </summary>
-        SACRIFIER_CARTE, 
+        SACRIFIER_CARTE,
         /// <summary>
+        /// Condition 11
         /// Lors de la destruction de la carte
         /// </summary>
         MORT,
         /// <summary>
+        /// Condition 12
         /// Payer un cout en AKA
         /// </summary>
-        PAYER_AKA, 
+        PAYER_AKA,
         /// <summary>
+        /// Condition 13
         /// Si la carte est sur le champ de bataille.
         /// </summary>
         CARTE_SUR_CHAMP_BATAILLE,
         /// <summary>
+        /// Condition 14
         /// Si la carte est dans le sanctuaire.
         /// </summary>
-        CARTE_DANS_SANCTUAIRE, 
+        CARTE_DANS_SANCTUAIRE,
         /// <summary>
+        /// Condition 15
         /// Ici l'entier correspond au type de coût élémentaire payer
         /// int  = :
         /// 0 : n'importe quel coût élémentaire
@@ -334,6 +350,17 @@ public class Condition {
                         ((TourCondition == Tour.TOUR_NOT_LOCAL) && (!isTourJoueurLocal))){
             utilisePourCeTour = false; 
         } 
+    }
+
+    public override bool Equals(object obj) {
+        if (obj.GetType() != typeof(Condition)) {
+            return false; 
+        }
+        Condition c = (Condition)obj; 
+        if (c.ConditionCondition == this.ConditionCondition && c.properIntCondition == this.properIntCondition) {
+            return true; 
+        }
+        return false; 
     }
 
 

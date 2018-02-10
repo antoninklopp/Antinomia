@@ -884,7 +884,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.PAYER_AKA:
                         // On vérifie que le joueur a assez d'AKA 
                         if (_conditions[j].properIntCondition > FindLocalPlayer().GetComponent<Player>().getAKA()) {
-                            DisplayMessage("Vous n'avez pas assez d'AKA"); 
+                            DisplayMessage("Vous n'avez pas assez d'AKA");
+                            Debug.Log("Impossible de payer l'AKA"); 
                             return false; 
                         } 
                         break;
@@ -908,6 +909,9 @@ public class Carte : NetworkBehaviourAntinomia {
                             GameManager.AscendanceTerrain.ASTRALE) ||
                             (_conditions[j].properIntCondition == 3 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
                             GameManager.AscendanceTerrain.MALEFIQUE)) {
+                            Debug.Log("Mauvaise condition de domination");
+                            Debug.Log(_conditions[j].properIntCondition);
+                            Debug.Log(getGameManager().GetComponent<GameManager>().ascendanceTerrain); 
                             return false; 
                         }
                         break;
@@ -926,7 +930,8 @@ public class Carte : NetworkBehaviourAntinomia {
                         }
                         break;
                     case Condition.ConditionEnum.DECLARE_ATTAQUE:
-                        if (!CheckIfCarteDeclareAttaque()) {
+                        Debug.Log("La carte ne déclare pas d'attaque"); 
+                        if (!CheckIfCarteDeclareAttaque(_conditions)) {
                             return false; 
                         } 
                         break;
@@ -1328,7 +1333,15 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.PUISSANCE_AUGMENTE:
                     // La puissance de cette carte augmente (uniquement cette carte). 
                     if (jouerEffet) {
-                        GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, IDCardGame);
+                        // Si il n'y a pas de cible c'est sa propre puissance qui augmente
+                        if (CartesChoisiesPourEffets.Count == 0) {
+                            GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, IDCardGame);
+                        } else {
+                            // Sinon c'est celle des autres. 
+                            foreach (GameObject g in CartesChoisiesPourEffets) {
+                                g.GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, g.GetComponent<Carte>().IDCardGame);
+                            }
+                        }
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
@@ -1395,9 +1408,11 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.NONE:
                     break;
                 case Action.ActionEnum.PAYER_AKA:
-                    if (!jouerEffet) {
+                    if (jouerEffet) {
                         // Comme c'est un cout à payer, on le paye directement, pas besoin de payer deux fois. 
                         FindLocalPlayer().GetComponent<Player>().subtractAKA(_actions[j].properIntAction);
+                    } else if (j == 0) {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
                     break; 
                 default:
@@ -1482,7 +1497,7 @@ public class Carte : NetworkBehaviourAntinomia {
         return false;
     }
 
-    protected virtual bool CheckIfCarteDeclareAttaque() {
+    protected virtual bool CheckIfCarteDeclareAttaque(List<Condition> condition) {
         return false; 
     }
     
@@ -2274,5 +2289,45 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Bannir une carte. 
     /// </summary>
     public virtual void BannirCarte() { }
+
+    /// <summary>
+    /// Renvoie true, si l'utilisateur peut interagir avec la carte. 
+    /// Renvoie false sinon. 
+    /// </summary>
+    /// <returns></returns>
+    protected bool PeutInteragir(bool stateMain=false, bool stateChampBatailleSanctuaire=false) {
+        // Si on est pas sur android, on ne peut pas du tout interagir avec les cartes adverses. 
+#if !(UNITY_ANDROID || UNITY_IOS)
+        if (!isFromLocalPlayer){
+            return false; 
+        }
+#endif
+        // Interaction impossible, on ne peut pas regarder la main adversaire
+        if (!isFromLocalPlayer && stateMain) {
+            return false; 
+        }
+
+        // Interaction impossible, on ne peut pas deplacer de cartes quand ce n'est pas son tour, sauf si 
+        // c'est à notre tour de repondre à un effet
+        if (getGameManager().GetComponent<GameManager>().getTour() != FindLocalPlayer().GetComponent<Player>().PlayerID &&
+            GameObject.FindGameObjectWithTag("Pile") == null) {
+            return false; 
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Renvoie true si le jouer peut avoir des informations sur la carte en question. 
+    /// Sinon renvoie false
+    /// </summary>
+    /// <returns></returns>
+    protected bool PeutRegarder(bool stateMain=false) {
+        if (!isFromLocalPlayer && stateMain) {
+            return false; 
+        }
+
+        return true; 
+    }
 
 }

@@ -408,13 +408,12 @@ public class Entite : Carte, ICarte {
 		 * 
 		 * TODO: Implémenter également un drag and drop. 
 		 */
-        Debug.Log("DOWN"); 
 
         base.OnMouseDown(); 
 
-        if (!isFromLocalPlayer && entiteState == State.MAIN) {
+        if (!PeutInteragir(entiteState == State.MAIN, (entiteState == State.CHAMPBATAILLE || entiteState == State.SANCTUAIRE))) {
             return; 
-        } 
+        }
 
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
@@ -1927,20 +1926,46 @@ public class Entite : Carte, ICarte {
     /// On regarde si une carte ne déclare pas d'attaque.
     /// </summary>
     /// <returns></returns>
-    protected override bool CheckIfCarteDeclareAttaque() {
+    protected override bool CheckIfCarteDeclareAttaque(List<Condition> conditions) {
         Debug.Log("On regarde si une attaque a été déclarée");
         if (GameObject.FindGameObjectWithTag("Pile") != null) {
             GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
             List<GameObject> allEffetsInPile = Pile.GetComponent<PileAppelEffet>().GetPileEffets();
             for (int i = 0; i < allEffetsInPile.Count; ++i) {
                 if (allEffetsInPile[i].GetComponent<EffetInPile>().numeroEffet == -1 && 
-                    allEffetsInPile[i].GetComponent<EffetInPile>().PlayerIDAssocie == FindLocalPlayer().GetComponent<Player>().PlayerID) {
+                    allEffetsInPile[i].GetComponent<EffetInPile>().PlayerIDAssocie == FindLocalPlayer().GetComponent<Player>().PlayerID &&
+                    !CheckIfThisEffetInPile(conditions) &&
+                    allEffetsInPile[i].GetComponent<EffetInPile>().IDObjectCardGame == this.IDCardGame) {
                     // On a trouvé dans la pile un effet du joueur qui est une attaque. 
                     return true; 
                 }
             }
         }
         return false; 
+    }
+
+    // On regarde qu'il n'y ait pas déjà le même effet dans la pile pour ne pas l'appeler récursivement
+    private bool CheckIfThisEffetInPile(List<Condition> conditions) {
+        foreach (Transform effet in GameObject.FindGameObjectWithTag("Pile").transform) {
+            if (effet.gameObject.GetComponent<EffetInPile>().IDObjectCardGame == this.IDCardGame) {
+                // On vérfie que les conditions soient les mêmes
+                // on part du principe que si même ID + même condition alors même effet. 
+                if (effet.gameObject.GetComponent<EffetInPile>().effetJoue.AllConditionsEffet.Count != conditions.Count) {
+                    continue; 
+                }
+                bool result = true; 
+                for (int i = 0; i < conditions.Count; i++) { 
+                    if (!conditions[i].Equals(effet.gameObject.GetComponent<EffetInPile>().effetJoue.AllConditionsEffet[i])) {
+                        result = false;  
+                    }
+                }
+                if (result) {
+                    return true;
+                }
+            }
+        }
+        Debug.Log("On ne trouve pas l'effet dans la pile"); 
+        return false;
     }
 
     /// <summary>

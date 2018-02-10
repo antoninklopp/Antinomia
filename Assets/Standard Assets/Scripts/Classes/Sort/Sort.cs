@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using System; 
+using System;
+using AntinomiaException; 
 
 /// <summary>
 /// Classe pour modéliser un sort. 
@@ -331,22 +332,35 @@ public class Sort : Carte, ICarte {
         // Si on a drag la carte
         else {
             if (coutCarte <= getGameManager().GetComponent<GameManager>().getAKAGlobalTour() || true) {
-                if (!ApplyEffectOnAll()) { // Si l'effet s'applique sur tous il est joué dans la fonction
-                    GameObject Proche = CarteProche(gameObject);
-                    Debug.Log(Proche.GetComponent<Carte>().Name); 
-                    if (Proche != null) {
-                        RecupererCarteJouerSort(Proche); 
+                if (!ApplyEffectOnAll()) {
+                    // Si l'effet s'applique sur tous il est joué dans la fonction
+                    // ATTENTION : pour l'instant on part du principe que la carte n'a qu'un seul effet 
+                    int CartesNecessaires = AllEffets[0].CartesNecessairesSort();
+                    Debug.Log("Cartes nécessaires"); 
+                    if (CartesNecessaires < 1) {
+                        throw new UnusualBehaviourException("un sort qui n'est pas global doit target plusieurs entités");
+                    } else if (CartesNecessaires == 1) {
+                        GameObject Proche = CarteProche(gameObject);
+                        if (Proche != null) {
+                            RecupererCarteJouerSort(Proche);
+                        }
+                        else {
+                            clicked = 0;
+                            dragging = false;
+                            // on remet l'image de la carte. 
+                            StartCoroutine(setImageCarte());
+                            Main.SendMessage("ReordonnerCarte");
+                        }
                     } else {
-                        DisplayMessage("Vous n'avez pas assez d'AKA pour jouer ce sort");
-                        clicked = 0;
-                        dragging = false;
-                        Main.SendMessage("ReordonnerCarte");
+                        // grace à ça on saura quelles cartes il faut jouer. 
+                        GererEffets(AllEffets, debut: true); 
                     }
                 }
             } else {
                 DisplayMessage("Vous n'avez pas assez d'AKA pour jouer ce sort");
                 clicked = 0;
                 dragging = false;
+                StartCoroutine(setImageCarte());
                 Main.SendMessage("ReordonnerCarte"); 
             }
         }

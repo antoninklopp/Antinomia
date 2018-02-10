@@ -166,44 +166,55 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         AntinomiaLog(PlayerID);
         AntinomiaLog(FindLocalPlayer().GetComponent<Player>().PlayerID);
 
-        // On regarde les effets des cartes. 
-        switch (numeroEffet) {
-            case -2:
-            case -3:
-                ////////////// GESTION DES EFFETS PONCTUELS ////////////////
-                GameObject thisCarte = NouveauEffetInPile.GetComponent<EffetInPile>().ObjetEffet;
-
-                List<GameObject> allCardsPlayer = getAllCardsFromPlayerBoardSanctuaire(thisCarte);
-
-                int deposeCarte = 0;
-                switch (numeroEffet) {
-                    case -2:
-                        // On dépose une carte sur le board
-                        Debug.Log("Depose carte sur le board."); 
-                        deposeCarte = 2;
-                        break;
-                    case -3:
-                        // On dépose une carte sur le sanctuaire
-                        Debug.Log("<color=red>Depose Carte 1</color>");
-                        deposeCarte = 1;
-                        break;
-                    default:
-                        // Si l'effet n'est d'aucun de ces deux types, 
-                        // c'est qu'il n'y a aucun effet à jouer lors d'une dépose de carte
-                        return;
-                }
-
-                for (int i = 0; i < allCardsPlayer.Count; i++) {
-                    Debug.Log("On gere les effets ponctuels de la pile");
-                    NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(allCardsPlayer[i], deposeCarte);
-                }
-                break;
-        }
+        Debug.Log("On va regarder les effets"); 
 
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On propose à tous les joueurs de répondre/ajouter des effets à la pile
             InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
             AntinomiaLog("L'effet devrait être display"); 
+        }
+        // On ne regarde les effets que si on est chez le joueur qui a créé l'effet. 
+        else {
+            GameObject thisCarte = NouveauEffetInPile.GetComponent<EffetInPile>().ObjetEffet;
+
+            List<GameObject> allCardsPlayer = getAllCardsFromPlayerBoardSanctuaire(thisCarte);
+
+            int deposeCarte = 0;
+            // On regarde les effets des cartes. 
+            switch (numeroEffet) {
+                case -2:
+                case -3:
+                    ////////////// GESTION DES EFFETS PONCTUELS ////////////////
+                    switch (numeroEffet) {
+                        case -2:
+                            // On dépose une carte sur le board
+                            Debug.Log("Depose carte sur le board.");
+                            deposeCarte = 2;
+                            break;
+                        case -3:
+                            // On dépose une carte sur le sanctuaire
+                            Debug.Log("<color=red>Depose Carte 1</color>");
+                            deposeCarte = 1;
+                            break;
+                        default:
+                            // Si l'effet n'est d'aucun de ces deux types, 
+                            // c'est qu'il n'y a aucun effet à jouer lors d'une dépose de carte
+                            // Mais il peut quand même y avoir d'autres effets.
+                            break;
+                    }
+                    break; 
+            }
+
+
+            for (int i = 0; i < allCardsPlayer.Count; i++) {
+                Debug.Log("On gere les effets ponctuels de la pile");
+                NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(allCardsPlayer[i], deposeCarte);
+            }
+            if (deposeCarte == 0) {
+                if (thisCarte != null) {
+                    NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(thisCarte, deposeCarte);
+                }
+            }
         }
     }
 
