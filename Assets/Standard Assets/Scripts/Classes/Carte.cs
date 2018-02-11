@@ -676,8 +676,11 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Action.ActionEnum.PLACER_SANCTUAIRE:
                     break;
                 case Action.ActionEnum.ATTAQUE_DIRECTE:
+                    attaqueDirecte = false; 
                     break;
                 case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
+                    // Avant il lui était impossible d'attaquer, maintenant on lui permet
+                    GetComponent<Entite>().hasAttacked = 0; 
                     break;
                 case Action.ActionEnum.REVELER_CARTE:
                     break;
@@ -1209,14 +1212,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     }
                     break;
                 case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
-                    //if (jouerEffet) {
-                    if (GetComponent<Entite>().hasAttacked != 1) {
-                        GetComponent<Entite>().hasAttacked = -1;
-                        DisplayMessage("Cette entité ne peut pas attaquer");
-                    }
-                    //} else {
-                    //    StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
-                    //}
+                    GetComponent<Entite>().hasAttacked = -1;
+                    DisplayMessage("Cette entité ne peut pas attaquer");
                     break;
                 case Action.ActionEnum.DEFAUSSER:
                     // On propose de défausser. 

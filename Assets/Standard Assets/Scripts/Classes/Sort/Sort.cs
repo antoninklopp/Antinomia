@@ -336,7 +336,8 @@ public class Sort : Carte, ICarte {
                     // Si l'effet s'applique sur tous il est joué dans la fonction
                     // ATTENTION : pour l'instant on part du principe que la carte n'a qu'un seul effet 
                     int CartesNecessaires = AllEffets[0].CartesNecessairesSort();
-                    Debug.Log("Cartes nécessaires"); 
+                    Debug.Log("Cartes nécessaires");
+                    Debug.Log(CartesNecessaires);
                     if (CartesNecessaires < 1) {
                         throw new UnusualBehaviourException("un sort qui n'est pas global doit target plusieurs entités");
                     } else if (CartesNecessaires == 1) {

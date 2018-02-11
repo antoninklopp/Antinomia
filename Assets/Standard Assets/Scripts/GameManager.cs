@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI; 
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement; 
-using System; 
+using System;
+using AntinomiaException; 
 #if UNITY_EDITOR
 using UnityEditor; 
 using UnityEditor.Callbacks;
@@ -1392,6 +1393,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <returns></returns>
     public IEnumerator MontrerCartesAChoisirDebut(int nombreCartes=6) {
         yield return new WaitForSeconds(0.5f);
+
         if (nombreCartes == 6) {
             yield return FindLocalPlayer().GetComponent<Player>().CreateDeck();
         } else {
@@ -1417,6 +1419,9 @@ public class GameManager : NetworkBehaviourAntinomia {
         for (int i = 0; i < nombreCartes; ++i) {
             GameObject newCarte = Instantiate(CarteDebutPrefab);
             newCarte.transform.SetParent(ParentCartesDebut, false);
+            if (_cartesDebut[i].GetComponent<Carte>().shortCode.Length < 3) {
+                throw new UnusualBehaviourException("Cette carte n'a pas de shortCode, ce n'est pas normal. "); 
+            }
             // Si ça ne marche pas, il FAUT différencier, sort, entité, et assistance. 
             newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Carte>().shortCode,
                     _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
@@ -1456,6 +1461,12 @@ public class GameManager : NetworkBehaviourAntinomia {
             FindLocalPlayer().GetComponent<Player>().CmdChoixCartesFini(); 
             if (ChoixCartesAdversaire != null) {
                 ChoixCartesAdversaire.SetActive(true);
+            }
+
+            // il faut regarder qu'il n'y ait plus d'object Info dans la scène. 
+            // Si il en reste quelque chose s'est mal passé. 
+            if (GameObject.FindGameObjectsWithTag("ObjectInfo").Length != 0) {
+                throw new UnusualBehaviourException("Il reste un object Info des cartes ont mal dû s'instancier.");
             }
         }
     }

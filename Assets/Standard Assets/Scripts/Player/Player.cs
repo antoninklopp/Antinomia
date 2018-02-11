@@ -207,6 +207,10 @@ public class Player : NetworkBehaviourAntinomia	 {
 		StartCoroutine (PiocherCarteRoutine ()); 
 	}
 
+    /// <summary>
+    /// Coroutine pour piocher les cartes.
+    /// </summary>
+    /// <returns></returns>
 	public IEnumerator PiocherCarteRoutine(){
         // Comme on ne peut instancier que des objets de type prefab référencié (ici c'est l'objet public carte prefab). 
         // Normalement, comme on a créé le deck à partir du prefab, ça devrait fonctionner. 
@@ -233,6 +237,10 @@ public class Player : NetworkBehaviourAntinomia	 {
         CmdTestIfObjectInfoDestroyed(30); 
 	}
 
+    /// <summary>
+    /// Regarder sur le seveur si l'objet a été détruit. 
+    /// </summary>
+    /// <param name="nombreEssais"></param>
     [Command(channel=0)]
     void CmdTestIfObjectInfoDestroyed(int nombreEssais) {
         if(ObjectInfo != null) {
@@ -244,17 +252,31 @@ public class Player : NetworkBehaviourAntinomia	 {
         }
     }
 
+    /// <summary>
+    /// Regarder chez le client si l'objet a été détruit. 
+    /// </summary>
+    /// <param name="destroyed"></param>
+    /// <param name="nombreEssais"></param>
     [ClientRpc(channel=0)]
     void RpcTestIfObjectInfoDestroyed(bool destroyed, int nombreEssais) {
         if (!isLocalPlayer) {
             return;
         } 
         if (destroyed) {
-            AntinomiaLog("La carte a bien été créée"); 
+            AntinomiaLog("La carte a bien été créée");
+            // Ici l'object Info a bien été détruit, mais il faut vérifier que la carte a bien été créée. 
+            VerifierCreationCarte(); 
         } else {
             StartCoroutine(RepiocherCarte(--nombreEssais));
             AntinomiaLog("On retente de piocher"); 
         }
+    }
+
+    /// <summary>
+    /// On vérifie que la carte ait bien été créée
+    /// </summary>
+    public void VerifierCreationCarte() {
+
     }
 
     /// <summary>
@@ -299,19 +321,20 @@ public class Player : NetworkBehaviourAntinomia	 {
 		MelangerDeck ();
 	}
 
+    /// <summary>
+    /// Melanger les cartes dans le deck pour les mettre dans le désordre. 
+    /// </summary>
 	public void MelangerDeck(){
-		/*
-		 * Melange des cartes dans le deck. 
-		 */ 
-		Deck DeckRandom = new Deck (); 
-		DeckRandom.Number = CardDeck.Number; 
+        Deck DeckRandom = new Deck {
+            Number = CardDeck.Number
+        };
 
-		int random; 
+        int random; 
 		int index = 0;
 		// Maintenant on met les cartes dans le désordre. 
 		while (CardDeck.Cartes.Count > 0) {
 			random = UnityEngine.Random.Range (0, CardDeck.Cartes.Count); 
-			Debug.Log ("RANDOM : ------------------------------------------ " + random.ToString ()); 
+			// Debug.Log ("RANDOM : ------------------------------------------ " + random.ToString ()); 
 			DeckRandom.Cartes.Add(CardDeck.Cartes [random]); 
 			CardDeck.Cartes.Remove (CardDeck.Cartes [random]); 
 			index++; 
@@ -336,11 +359,13 @@ public class Player : NetworkBehaviourAntinomia	 {
 	void CmdPiocherNouvelleCarte1(string oID){
 		ObjectInfo = new GameObject();
 		GetPlayerInfoGameSparks playerInfo = ObjectInfo.AddComponent<GetPlayerInfoGameSparks> ();
+        ObjectInfo.tag = "ObjectInfo"; 
 		playerInfo.StartCardByoID(oID, CartePrefab); 
 	}
 
     /// <summary>
-    /// 
+    /// Piocher une carte ou la repiocher. 
+    /// Instantiation de la carte dans le main des deux joueurs. 
     /// </summary>
     /// <param name="oID">ID de la carte dans la metaCollection</param>
 	[Command(channel=0)]
@@ -376,7 +401,7 @@ public class Player : NetworkBehaviourAntinomia	 {
             Debug.LogWarning(e);
             Debug.Log("La carte n'a pas pu être instanciée");
         } catch (NullReferenceException e) {
-
+            Debug.Log(e); 
         }
         Destroy(CardToInstantiate); 
 	}
