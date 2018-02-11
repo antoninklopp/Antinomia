@@ -449,7 +449,6 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
         }
         finish = false;
 		cardoIDOk = true;
-        Debug.Log("<color=green> LA CARTE EST RECUPEREE ICI </color>");
 
 #if UNITY_EDITOR
         WriteOutputFile write = new WriteOutputFile();

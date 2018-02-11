@@ -379,9 +379,8 @@ public class Player : NetworkBehaviourAntinomia	 {
             Debug.LogWarning("Warning, la carte n'existe plus ici");
             return; 
         }
-        Debug.Log("Carte instanciee" + CardToInstantiate);
 
-        Debug.Log("<color=green> ON PIOCHE LA CARTE ICI </color>");
+
         GameObject NouvelleCarte = null; 
         try {
             NouvelleCarte = Instantiate(CardToInstantiate) as GameObject;
@@ -406,6 +405,8 @@ public class Player : NetworkBehaviourAntinomia	 {
             Debug.Log(e); 
         } catch (MissingReferenceException e) {
             // Dans le cas où l'objet n'existe plus. 
+            Debug.Log(e); 
+            Debug.Log("<color=orange>On essaie de repiocher la carte ici</color>"); 
             if (NouvelleCarte != null) {
                 Destroy(NouvelleCarte);
             } 

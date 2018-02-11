@@ -410,7 +410,17 @@ public class Sort : Carte, ICarte {
             Debug.Log("La carte est une entité temporaire"); 
             CarteCiblee = CarteCiblee.GetComponent<EntiteTemporaire>().getVraieEntite(); 
         }
-        GererEffets(AllEffets, Cible:CarteCiblee, debut:true); 
+
+        // Si les conditions ne sont pas vérifiées, on remet la carte dans la main du joueur. 
+        if (!GererEffets(AllEffets, Cible:CarteCiblee, debut: true)) {
+            clicked = 0;
+            dragging = false;
+            // on remet l'image de la carte. 
+            StartCoroutine(setImageCarte());
+            Main.SendMessage("ReordonnerCarte");
+            DisplayMessage("Les conditions ne sont pas réunies."); 
+        } 
+        // Sinon, le sort a été joué.
 
         // Le sort a été joué. 
         clicked = 0;
@@ -432,7 +442,7 @@ public class Sort : Carte, ICarte {
          */
         // Gestion de l'effet1
         Debug.Log(AllEffets[0].AllConditionsEffet[0].ConditionCondition);
-         if (!hasEffetGlobal(0)) {
+         if (!HasEffetGlobal(0)) {
             // Pas d'effet global. 
             return false; 
         } else {
@@ -446,7 +456,7 @@ public class Sort : Carte, ICarte {
 
     }
 
-    bool hasEffetGlobal(int numeroEffet) {
+    bool HasEffetGlobal(int numeroEffet) {
         foreach (Condition cond in AllEffets[numeroEffet].AllConditionsEffet) {
             if (cond.ConditionCondition == Condition.ConditionEnum.EFFET_GLOBAL) {
                 return true; 

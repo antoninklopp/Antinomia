@@ -574,11 +574,12 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="debut">true, si on la carte vient d'être posée</param>
     /// <param name="Cible">Si c'est un sort qui appelle la méthode, il peut déjà avoir une cible</param>
     /// <param name="nouveauTour">true si on vient de passer à un nouveau tour</param>
-    public void GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false, 
+    /// <returns>True si l'effet a pu être joué, false sinon. </returns>
+    public bool GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false, 
         bool nouveauTour=false, GameObject Cible=null, int numeroListEffet=0, int deposeCarte=0, bool changementDomination=false) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
-            return; 
+            return false; 
         }
         for (int i = 0; i < _allEffets.Count; ++i) {
             // On regarde les effets un par un. 
@@ -601,11 +602,13 @@ public class Carte : NetworkBehaviourAntinomia {
                 // Dans le cas où toutes les conditions sont réunies. 
                 GererActions(_allEffets[i].AllActionsEffet, CibleDejaChoisie:!(Cible==null), numeroEffet:i, 
                     effetListNumber:numeroListEffet);
-            }
+            } 
             else {
                 Debug.Log("<color=orange>L'effet n'a pas pu être joué, pour diverses raisons. </color>" + Name);
+                return false; 
             }
         }
+        return true; 
     }
 
     /// <summary>
