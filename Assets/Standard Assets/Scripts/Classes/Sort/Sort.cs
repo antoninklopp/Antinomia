@@ -228,6 +228,8 @@ public class Sort : Carte, ICarte {
             return;
         }
 
+        dragging = true; 
+
         Vector3 MousePosition = Input.mousePosition;
         MousePosition.z = 15;
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
@@ -301,6 +303,7 @@ public class Sort : Carte, ICarte {
          */
         // Si on a fait un clic sur la carte
         if (!dragging) {
+            Debug.Log("On passe ici");
             if (coutCarte <= FindLocalPlayer().GetComponent<Player>().PlayerAKA && clicked == 1) {
                 // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
                 Destroy(GetComponent<BoxCollider2D>());
@@ -330,7 +333,9 @@ public class Sort : Carte, ICarte {
             }
         }
         // Si on a drag la carte
+        // A priori on ne passe jamais ici.
         else {
+            Debug.Log("On passe là"); 
             if (coutCarte <= getGameManager().GetComponent<GameManager>().getAKAGlobalTour() || true) {
                 if (!ApplyEffectOnAll()) {
                     // Si l'effet s'applique sur tous il est joué dans la fonction

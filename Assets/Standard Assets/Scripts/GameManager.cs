@@ -1420,7 +1420,14 @@ public class GameManager : NetworkBehaviourAntinomia {
             GameObject newCarte = Instantiate(CarteDebutPrefab);
             newCarte.transform.SetParent(ParentCartesDebut, false);
             if (_cartesDebut[i].GetComponent<Carte>().shortCode.Length < 3) {
-                throw new UnusualBehaviourException("Cette carte n'a pas de shortCode, ce n'est pas normal. "); 
+                Debug.Log(_cartesDebut[i].GetComponent<Carte>().oID);
+                Debug.Log(_cartesDebut[i].GetComponent<Carte>().shortCode);
+                Debug.Log(_cartesDebut[i].GetComponent<Carte>().IDCardGame); 
+                throw new UnusualBehaviourException("Cette carte n'a pas de shortCode, ce n'est pas normal." +
+                    _cartesDebut[i].GetComponent<Carte>().oID +  " "  +
+                    _cartesDebut[i].GetComponent<Carte>().shortCode+ " " +
+                    _cartesDebut[i].GetComponent<Carte>().IDCardGame
+                ); 
             }
             // Si ça ne marche pas, il FAUT différencier, sort, entité, et assistance. 
             newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Carte>().shortCode,
