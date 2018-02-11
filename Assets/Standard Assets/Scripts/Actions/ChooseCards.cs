@@ -207,8 +207,7 @@ public class ChooseCards : NetworkBehaviour {
                 (AllCardsToReturnID.Count - nombreDeCartesAChoisir).ToString() + "cartes en trop. Supprimez en."; 
             return;
         }
-
-		Debug.Log (AllCardsToReturn [0]); 
+ 
 		FiniButton.SetActive (false);
         TextChooseCards.SetActive(false); 
 		newList = new string[AllCardsToShowOther.Count];  
@@ -219,15 +218,15 @@ public class ChooseCards : NetworkBehaviour {
         if (ObjectAsking == null){
             FindLocalPlayer().GetComponent<Player>().CmdSendCards (newList, "Cartes choisies");
         } else {
-            // Debug.Log("Object Asking" + ObjectAsking.GetComponent<Entite>().Name); 
+            Debug.Log("On envoie à l'objet qui demande " + AllCardsToReturnID.Count); 
             ObjectAsking.SendMessage("CartesChoisies", AllCardsToReturnID); 
         }
         StartCoroutine(FinShowCards(0f, AllCardsToShow)); 
 		AllCardsToShowOther = new List<string> ();
-
         ObjectAsking = null;
+        effetEnCours = false;
 
-        effetEnCours = false; 
+        Debug.Log("Cartes envoyées");
 	}
 
     /// <summary>

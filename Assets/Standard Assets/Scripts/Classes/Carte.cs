@@ -1552,7 +1552,7 @@ public class Carte : NetworkBehaviourAntinomia {
             gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Choisissez " + nombreCartes.ToString() + 
             " cartes", deactivateAfter:false);
-        ShowCardsMustBeActivated = true; 
+        ShowCardsMustBeActivated = false; 
     }
 
     /// <summary>
@@ -1569,9 +1569,7 @@ public class Carte : NetworkBehaviourAntinomia {
 
         foreach (Transform t in FindLocalPlayer().transform.Find("ChampBatailleJoueur").
             Find("CartesChampBatailleJoueur")) {
-            Debug.Log("On regarde cette carte ");
             if (!(exceptThisCard && gameObject == t.gameObject)) {
-                Debug.Log("On l'ajoute"); 
                 AllCardsToChoose.Add(t.gameObject);
             }
         }
@@ -1579,7 +1577,7 @@ public class Carte : NetworkBehaviourAntinomia {
             gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, deactivateAfter:false, stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", 
             _nombreDeCartesAChoisir:nombreCartes);
-        ShowCardsMustBeActivated = true; 
+        ShowCardsMustBeActivated = false; 
     }
 
     /// <summary>
@@ -1598,7 +1596,7 @@ public class Carte : NetworkBehaviourAntinomia {
             GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, 
             stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", deactivateAfter:false);
-        ShowCardsMustBeActivated = true; 
+        ShowCardsMustBeActivated = false; 
     }
 
     /// <summary>
@@ -1969,6 +1967,8 @@ public class Carte : NetworkBehaviourAntinomia {
             // Si les cibles n'ont pas déjà été choisies
             yield return WaitForCardsChosen();
         }
+
+        Debug.Log("Nombre de cartes choisies pour l'effet : " + CartesChoisiesPourEffets.Count); 
 
         for (int i = 0; i < CartesChoisiesPourEffets.Count; ++i) {
             // On détruit toutes les cartes une par une. 

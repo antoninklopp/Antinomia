@@ -315,8 +315,6 @@ public class Sort : Carte, ICarte {
         if (!dragging) {
             Debug.Log("On passe ici");
             if (coutCarte <= FindLocalPlayer().GetComponent<Player>().PlayerAKA && clicked == 1) {
-                // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
-                Destroy(GetComponent<BoxCollider2D>());
                 // Target du sort. 
                 if (!ApplyEffectOnAll()) {
                     int CartesNecessaires = AllEffets[0].CartesNecessairesSort();
@@ -326,6 +324,10 @@ public class Sort : Carte, ICarte {
                         throw new UnusualBehaviourException("un sort qui n'est pas global doit target plusieurs entités");
                     }
                     else if (CartesNecessaires == 1) {
+                        // on ne doit destroy le box collider que si c'est pour une carte. 
+                        // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
+                        Destroy(GetComponent<BoxCollider2D>());
+
                         GetComponent<SpriteRenderer>().sprite = Cible;
                         // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
                         GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = gameObject;

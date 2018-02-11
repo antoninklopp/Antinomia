@@ -1422,12 +1422,13 @@ public class GameManager : NetworkBehaviourAntinomia {
             if (_cartesDebut[i].GetComponent<Carte>().shortCode.Length < 3) {
                 Debug.Log(_cartesDebut[i].GetComponent<Carte>().oID);
                 Debug.Log(_cartesDebut[i].GetComponent<Carte>().shortCode);
-                Debug.Log(_cartesDebut[i].GetComponent<Carte>().IDCardGame); 
-                throw new UnusualBehaviourException("Cette carte n'a pas de shortCode, ce n'est pas normal." +
-                    _cartesDebut[i].GetComponent<Carte>().oID +  " "  +
-                    _cartesDebut[i].GetComponent<Carte>().shortCode+ " " +
-                    _cartesDebut[i].GetComponent<Carte>().IDCardGame
-                ); 
+                Debug.Log(_cartesDebut[i].GetComponent<Carte>().IDCardGame);
+                // throw new UnusualBehaviourException("Cette carte n'a pas de shortCode, ce n'est pas normal." +
+                //    _cartesDebut[i].GetComponent<Carte>().oID +  " "  +
+                //    _cartesDebut[i].GetComponent<Carte>().shortCode+ " " +
+                //    _cartesDebut[i].GetComponent<Carte>().IDCardGame
+                //);
+                Debug.Log("<color=red> Un probleme ici</color>"); 
             }
             // Si ça ne marche pas, il FAUT différencier, sort, entité, et assistance. 
             newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Carte>().shortCode,
