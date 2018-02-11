@@ -373,6 +373,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         GameObject CardToInstantiate; 
         try {
             CardToInstantiate = ObjectInfo.GetComponent<GetPlayerInfoGameSparks>().GetCardoID();
+            Debug.Log("On recupere l'oID de la carte"); 
         } catch (MissingReferenceException e) {
             Debug.LogWarning(e);
             Debug.LogWarning("Warning, la carte n'existe plus ici");
@@ -380,9 +381,10 @@ public class Player : NetworkBehaviourAntinomia	 {
         }
         Debug.Log("Carte instanciee" + CardToInstantiate);
 
-        Debug.Log("<color=green> ON PIOCHE LA CARTE ICI </color>"); 
+        Debug.Log("<color=green> ON PIOCHE LA CARTE ICI </color>");
+        GameObject NouvelleCarte = null; 
         try {
-            GameObject NouvelleCarte = Instantiate(CardToInstantiate) as GameObject;
+            NouvelleCarte = Instantiate(CardToInstantiate) as GameObject;
             // On enlève la carte du deck. 
             // On passe la carte du deck à la main 
             if (NouvelleCarte.GetComponent<Entite>() != null) {
@@ -402,21 +404,51 @@ public class Player : NetworkBehaviourAntinomia	 {
             Debug.Log("La carte n'a pas pu être instanciée");
         } catch (NullReferenceException e) {
             Debug.Log(e); 
+        } catch (MissingReferenceException e) {
+            // Dans le cas où l'objet n'existe plus. 
+            if (NouvelleCarte != null) {
+                Destroy(NouvelleCarte);
+            } 
+            if (ObjectInfo != null) {
+                Destroy(ObjectInfo);
+                ObjectInfo = null; 
+            }
+            RpcRepiocherCarteApresProb(oID); 
         }
         Destroy(CardToInstantiate); 
 	}
 
+    [ClientRpc(channel=0)]
+    void RpcRepiocherCarteApresProb(string oID) {
+        if (!isLocalPlayer) {
+            return; 
+        }
+        StartCoroutine(RePiocherCarteRoutine(oID)); 
+    }
+
+
+    /// <summary>
+    /// Repiocher une carte après une erreur. 
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator RePiocherCarteRoutine(string oID) {
+
+        int nombreDeCartesMain = transform.Find("MainJoueur").Find("CartesMainJoueur").childCount;
+        CmdPiocherNouvelleCarte1(oID);
+        yield return new WaitForSeconds(0.2f);
+        CmdPiocherNouvelleCarte2(oID);
+
+        // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
+        yield return new WaitForSeconds(0.1f);
+        // L'objet a été détruit donc c'est bon.
+        CmdTestIfObjectInfoDestroyed(30);
+    }
 
     /// <summary>
     /// Changer la phase sur l'UI. 
     /// </summary>
     /// <param name="newPhase"></param>
 	void ChangeUIPhase(Phases newPhase){
-		/*
-		 * Changer la variable synchronisée de la phase, côté client et serveur. 
-         * 
-		 */  
-
 		if (!isLocalPlayer) {
 			return; 
 		}
