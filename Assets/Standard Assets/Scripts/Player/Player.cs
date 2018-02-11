@@ -387,7 +387,20 @@ public class Player : NetworkBehaviourAntinomia	 {
             // On enlève la carte du deck. 
             // On passe la carte du deck à la main 
             if (NouvelleCarte.GetComponent<Entite>() != null) {
+                NouvelleCarte.GetComponent<Entite>().enabled = true; 
                 NouvelleCarte.GetComponent<Entite>().setState("MAIN");
+            } else if (NouvelleCarte.GetComponent<Sort>() != null) {
+                NouvelleCarte.GetComponent<Sort>().enabled = true;
+            } else if (NouvelleCarte.GetComponent<Assistance>() != null) {
+                NouvelleCarte.GetComponent<Assistance>().enabled = true; 
+            }
+            try {
+                NouvelleCarte.GetComponent<CarteType>().enabled = true;
+                NouvelleCarte.GetComponent<BoxCollider2D>().enabled = true;
+            } catch (NullReferenceException e) {
+                Debug.Log("Probleme ici"); 
+            } catch (MissingComponentException e) {
+                Debug.Log("Le composant n'existe pas"); 
             }
 		    NouvelleCarte.transform.SetParent (transform.Find("MainJoueur").Find("CartesMainJoueur")); 
 		    // On crée la nouvelle carte sur le serveur. 

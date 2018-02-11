@@ -805,12 +805,15 @@ public class Carte : NetworkBehaviourAntinomia {
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
                         // Si on ne veut pas jouer la condition directement, il faut s'arrêter et ne pas proposer
                         // à l'utilisateur de choisir une carte
+                        Debug.Log("On est ici");
                         if (!jouerDirect) {
                             break;
                         }
                         if (checkCibleNull(Cible)) {
+                            Debug.Log("On est ici"); 
                             ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
                         }
+                        Debug.Log("On est là"); 
                         break;
                     case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
                         if (!jouerDirect) {
@@ -1558,22 +1561,23 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     void ShowCardsForChoiceChampBatailleDeuxJoueurs(int nombreCartes, string stringPlus="", bool exceptThisCard=true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
-        for (int k = 0; k < FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").
-            Find("CartesChampBatailleJoueur").childCount; ++k) {
-            AllCardsToChoose.Add(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").
-                Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
+
+        foreach (Transform t in FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").
+            Find("CartesChampBatailleJoueur")) {
+            AllCardsToChoose.Add(t.gameObject);
         }
-        for (int k = 0; k < FindLocalPlayer().transform.Find("ChampBatailleJoueur").
-            Find("CartesChampBatailleJoueur").childCount; ++k) {
-            if (!(exceptThisCard && gameObject == FindLocalPlayer().transform.Find("ChampBatailleJoueur").
-                Find("CartesChampBatailleJoueur").GetChild(k).gameObject)) {
-                AllCardsToChoose.Add(FindLocalPlayer().transform.Find("ChampBatailleJoueur").
-                Find("CartesChampBatailleJoueur").GetChild(k).gameObject);
+
+        foreach (Transform t in FindLocalPlayer().transform.Find("ChampBatailleJoueur").
+            Find("CartesChampBatailleJoueur")) {
+            Debug.Log("On regarde cette carte ");
+            if (!(exceptThisCard && gameObject == t.gameObject)) {
+                Debug.Log("On l'ajoute"); 
+                AllCardsToChoose.Add(t.gameObject);
             }
         }
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
             gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject, deactivateAfter:true, stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", 
+            AllCardsToChoose, gameObject, deactivateAfter:false, stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", 
             _nombreDeCartesAChoisir:nombreCartes);
         ShowCardsMustBeActivated = true; 
     }
@@ -1593,7 +1597,7 @@ public class Carte : NetworkBehaviourAntinomia {
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.
             GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, 
-            stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", deactivateAfter:true);
+            stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", deactivateAfter:false);
         ShowCardsMustBeActivated = true; 
     }
 
@@ -1763,7 +1767,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Cette coroutine permet d'attendre des cartes choisies pour qu'on éxécute un effet.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator WaitForCardsChosen() {
+    protected IEnumerator WaitForCardsChosen() {
         CartesChoisiesPourEffets = null; 
         while (CartesChoisiesPourEffets == null) {
             yield return new WaitForSeconds(0.2f); 
@@ -2128,8 +2132,9 @@ public class Carte : NetworkBehaviourAntinomia {
         if (Cible == null) {
             return true; 
         } else {
-            CartesChoisiesPourEffets = new List<GameObject>();
-            CartesChoisiesPourEffets.Add(Cible);
+            CartesChoisiesPourEffets = new List<GameObject> {
+                Cible
+            };
             return false; 
         }
     }

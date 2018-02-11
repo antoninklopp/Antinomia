@@ -51,7 +51,9 @@ public class Effet {
     /// </summary>
     public int CartesNecessairesSort() {
         foreach (Condition c in AllConditionsEffet) {
-            if (Array.IndexOf(new int[]{0, 1, 2, 3, 7, 8, 9}, c.ConditionCondition) != -1) {
+            Debug.Log(c.ConditionCondition);
+            Debug.Log((int)c.ConditionCondition); 
+            if (Array.IndexOf(new int[]{0, 1, 2, 3, 7, 8, 9}, (int)c.ConditionCondition) != -1) {
                 return c.properIntCondition; 
             }
         }

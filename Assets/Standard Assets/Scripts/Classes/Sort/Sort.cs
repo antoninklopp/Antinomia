@@ -253,15 +253,27 @@ public class Sort : Carte, ICarte {
             return;
         }
 
+        // Sinon on n'appelle pas la fonction
+        dragging = false;
+
         Vector3 MousePosition = Input.mousePosition;
         MousePosition.z = 15;
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
+
+        // Dans le cas où l'on veut reposer le sort dans la main.
+        if (Math.Abs(transform.position.y - positionBeforeDragging.y) < 1f) {
+            DisplayMessage("Sort reposé dans la main"); 
+            Main.GetComponent<MainJoueur>().ReordonnerCarte();
+            return; 
+        }
+
 
         Debug.Log(Vector3.Distance(positionBeforeDragging, transform.position));
         if (Vector2.Distance(positionBeforeDragging, mouseWorldPoint) > 0.5f) {
             CliqueSimpleCarte(true);
             positionBeforeDragging = transform.position;
         }
+
         else {
 #if (UNITY_ANDROID || UNITY_IOS)
             InformationsSurLaCarte();
@@ -269,8 +281,6 @@ public class Sort : Carte, ICarte {
             Main.SendMessage("ReordonnerCarte");
 #endif
         }
-        // Sinon on n'appelle pas la fonction
-        dragging = false;
     }
     /// <summary>
     /// Changer la position du sort, 
@@ -309,11 +319,34 @@ public class Sort : Carte, ICarte {
                 Destroy(GetComponent<BoxCollider2D>());
                 // Target du sort. 
                 if (!ApplyEffectOnAll()) {
-                    GetComponent<SpriteRenderer>().sprite = Cible;
-                    // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
-                    GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = gameObject;
-                    // Debug.Log("On a mis sort en cours à gameObject"); 
-                    clicked = 2;
+                    int CartesNecessaires = AllEffets[0].CartesNecessairesSort();
+                    Debug.Log("Cartes nécessaires");
+                    Debug.Log(CartesNecessaires);
+                    if (CartesNecessaires < 1) {
+                        throw new UnusualBehaviourException("un sort qui n'est pas global doit target plusieurs entités");
+                    }
+                    else if (CartesNecessaires == 1) {
+                        GetComponent<SpriteRenderer>().sprite = Cible;
+                        // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
+                        GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = gameObject;
+                        // Debug.Log("On a mis sort en cours à gameObject"); 
+                        clicked = 2;
+                    } else {
+                        if (!GererConditions(AllEffets[0].AllConditionsEffet, debut: true, jouerDirect: true)) {
+                            clicked = 0;
+                            // on remet l'image de la carte. 
+                            StartCoroutine(setImageCarte());
+                            Main.SendMessage("ReordonnerCarte");
+                            DisplayMessage("Les conditions ne sont pas réunies.");
+                        }
+                        else {
+                            // Le sort a été joué. 
+                            clicked = 0;
+                            transform.position = new Vector2(-10, -10);
+                            Destroy(GetComponent<SpriteRenderer>());
+                            StartCoroutine(JouerSortPlusieursCartes(0));
+                        }
+                    }
                 }
             }
             else if (clicked == 2) {
@@ -359,7 +392,22 @@ public class Sort : Carte, ICarte {
                         }
                     } else {
                         // grace à ça on saura quelles cartes il faut jouer. 
-                        GererEffets(AllEffets, debut: true); 
+                        dragging = false;
+                        Debug.Log("On gere les effets"); 
+                        if (!GererConditions(AllEffets[0].AllConditionsEffet, debut: true, jouerDirect:true)) {
+                            clicked = 0;
+                            dragging = false;
+                            // on remet l'image de la carte. 
+                            StartCoroutine(setImageCarte());
+                            Main.SendMessage("ReordonnerCarte");
+                            DisplayMessage("Les conditions ne sont pas réunies.");
+                        } else {
+                            // Le sort a été joué. 
+                            clicked = 0;
+                            transform.position = new Vector2(-10, -10);
+                            Destroy(GetComponent<SpriteRenderer>());
+                            StartCoroutine(JouerSortPlusieursCartes(0)); 
+                        }
                     }
                 }
             } else {
@@ -426,6 +474,16 @@ public class Sort : Carte, ICarte {
         clicked = 0;
         transform.position = new Vector2(-10, -10);
         Destroy(GetComponent<SpriteRenderer>()); 
+    }
+
+    /// <summary>
+    /// Jouer un sort sur plusieurs cartes. 
+    /// </summary>
+    /// <param name="numeroEffet">Numero de l"effet à jouer.</param>
+    /// <returns></returns>
+    private IEnumerator JouerSortPlusieursCartes(int numeroEffet) {
+        yield return WaitForCardsChosen();
+        GererActions(AllEffets[numeroEffet].AllActionsEffet, CibleDejaChoisie:true); 
     }
 
     /// <summary>
