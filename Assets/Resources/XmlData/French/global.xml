@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fichier Global en Français. -->
+<transforms>
+  <CreateAccount>Créez votre compte Antinomia!</CreateAccount>
+  <Name>Nom</Name>
+  <Password>Mot de passe</Password>
+  <ConfirmPassword>Confirmez le mot de passe</ConfirmPassword>
+  <ErrorPassword>Les mots de passe sont différents</ErrorPassword>
+  <ErrorName>Ce nom existe déjà.</ErrorName>
+  <ErrorPasswordSecurity>Votre mot de passe est trop court (moins de 5 caractères)</ErrorPasswordSecurity>
+  <Register>Inscription</Register>
+  <RegistrationOK>Compte créé avec succès</RegistrationOK>
+  <NoAccount>Pas encore inscrit? Créez un compte!</NoAccount>
+</transforms>

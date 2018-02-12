@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fichier comment en anglais -->
+<transforms>
+  <commentNotSent>The comment has not been sent</commentNotSent>
+  <commentSent>The comment has been sent with success</commentSent>
+  <comment>Comment</comment>
+  <submit>Submit</submit>
+</transforms>
