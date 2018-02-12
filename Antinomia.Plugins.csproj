@@ -390,8 +390,6 @@
     <Compile Include="Assets\Standard Assets\Scripts\Exception\CardNotFoundException.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Exception\UnknownCardException.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Exception\UnusualBehaviourException.cs" />
-    <Compile Include="Assets\Standard Assets\Scripts\GameManager.cs" />
-    <Compile Include="Assets\Standard Assets\Scripts\GameManagerIA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GameSparksManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GetGlobalInfoGameSparks.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\GameSparkScripts\GetPlayerInfoGameSparks.cs" />
@@ -423,6 +421,10 @@
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\RemoveCardFromDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\SupprimerDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\TriFiltreEditor.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\GameManager.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\GameManagerIA.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\InformationManager.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\TutorialManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\AttackMyPlayer.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\IA\IA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\IA\LogActionIA.cs" />
@@ -464,8 +466,10 @@
     <None Include="Assets\Resources\WaitForCardoID.txt" />
     <None Include="Assets\Resources\XmlData\English\comment.xml" />
     <None Include="Assets\Resources\XmlData\English\global.xml" />
+    <None Include="Assets\Resources\XmlData\English\tutorial.xml" />
     <None Include="Assets\Resources\XmlData\French\comment.xml" />
     <None Include="Assets\Resources\XmlData\French\global.xml" />
+    <None Include="Assets\Resources\XmlData\French\tutorial.xml" />
     <None Include="Assets\Resources\informations.xml" />
     <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
     <None Include="Assets\Standard Assets\Fonts\OpenSans\License!.txt" />

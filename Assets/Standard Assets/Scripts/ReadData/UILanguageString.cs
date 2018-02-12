@@ -5,14 +5,20 @@ using UnityEngine.UI;
 
 namespace LanguageModule {
     /// <summary>
-    /// Juste un string UI qui change de texte en fonction de la langue? 
+    /// A simple string to put on GameObject. It changes automatically by language. 
     /// </summary>
     public class UILanguageString : MonoBehaviour {
 
+        /// <summary>
+        /// ShortCode of the string <see cref="LanguageData"/>
+        /// </summary>
         public string stringToDisplay;
+
+        /// <summary>
+        /// FileName of the file where the string is.
+        /// </summary>
         public string stringFileName = "global";
 
-        // Use this for initialization
         void Start() {
             if (stringToDisplay == null || stringToDisplay == "") {
                 Debug.LogWarning("L'objet " + name + " n'a pas de string associé"); 
