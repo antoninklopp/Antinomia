@@ -24,7 +24,7 @@ public class TutorialManager : MonoBehaviour {
             PlayerPrefs.SetInt("TutorialActivated", 1); 
         }
         // Dans le cas où le joueur ne souhaite voir aucun tutoriel on détruit le composant
-        else if (PlayerPrefs.GetInt("TutorialActivated") == 1) {
+        else if (PlayerPrefs.GetInt("TutorialActivated") == 0) {
             Destroy(this); 
         }
 	}
@@ -38,7 +38,7 @@ public class TutorialManager : MonoBehaviour {
         // Normalement, rien à faire il devrait tout faire seul. 
         // On le détruit après sa durée
         GameObject PartInstantiated = Instantiate(ParticleSystemTutorial);
-        float particleDuration = PartInstantiated.GetComponent<ParticleSystem>().main.duration; 
+        float particleDuration = 5f; 
         Destroy(PartInstantiated, particleDuration);
         StartCoroutine(DisableTextDisplay(particleDuration)); 
     }
@@ -49,7 +49,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     public void SetTutorialInformation(Player.Phases phase) {
-        string message = LanguageData.GetString(phase.ToString(), PlayerPrefs.GetString("Language"), "tutorial");
+        string message = LanguageData.GetString(phase.ToString() + "TUTORIAL", PlayerPrefs.GetString("Language"), "tutorial");
         SetTutorialInformation(message);
     }
 }

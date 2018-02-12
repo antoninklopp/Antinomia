@@ -53,7 +53,7 @@ namespace LanguageModule {
         /// <returns></returns>
         public static string GetString(string stringShortCode, string fileName) {
             string language = PlayerPrefs.GetString("Language");
-            return GetString(stringShortCode, fileName); 
+            return GetString(stringShortCode, language, fileName); 
         }
 
         /// <summary>

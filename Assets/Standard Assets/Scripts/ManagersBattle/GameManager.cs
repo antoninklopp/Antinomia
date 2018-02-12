@@ -237,7 +237,12 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Informations sur un effet de l'adversaire
     /// </summary>
-    private GameObject InfoEffetTransmis; 
+    private GameObject InfoEffetTransmis;
+
+    /// <summary>
+    /// L'autre GameManager qui permet de transmettre des informations à l'autre joueur. 
+    /// </summary>
+    private GameObject GameManagerInformation; 
 
 	/// <summary>
     /// Initialisation du GameManager
@@ -288,13 +293,13 @@ public class GameManager : NetworkBehaviourAntinomia {
         EndGame = GameObject.Find("EndGame");
         EndGame.SetActive(false);
         InfoEffetTransmis = GameObject.Find("InfoEffetTransmis");
-        InfoEffetTransmis.SetActive(false); 
+        InfoEffetTransmis.SetActive(false);
+        GameManagerInformation = GameObject.Find("InformationManager"); 
 	}
 
 	IEnumerator CoroutineDebugPhase(){
 		syncPhase = false; 
 		yield return new WaitForSeconds (0.5f); 
-		//setNamePhaseUI (Phase); 
 		print (Phase);
 		syncPhase = true; 
 	}
@@ -304,9 +309,6 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="defairePile">true si on défait la pile, false sinon. </param>
 	public void GoToNextPhase(bool defairePile=false){
-        /*
-		 * Lors d'un appui sur le bouton continuer, on passe à la phase suivante. 
-		 */
 
         // On ne peut pas changer de phase quand ce n'est pas son tour. 
         if (Tour != FindLocalPlayerID()) {
@@ -436,7 +438,11 @@ public class GameManager : NetworkBehaviourAntinomia {
 		Phase = newPhase; 
 		string PhaseToString = " ";
 
-        SendNextPhaseAllCards(newPhase); 
+        SendNextPhaseAllCards(newPhase);
+
+        // Pour certaines phases Preparation, principales, combat, on affiche au centre de l'écran avec 
+        // tutoriels peut etre. 
+        bool informationCentreEcran = false; 
 
 		switch (Phase) {
 		    case Player.Phases.INITIATION:
@@ -456,20 +462,32 @@ public class GameManager : NetworkBehaviourAntinomia {
 			    break;
 		    case Player.Phases.PREPARATION:
 			    PhaseToString ="Preparation";
+                informationCentreEcran = true; 
                 break; 
 		    case Player.Phases.PRINCIPALE1:
 			    PhaseToString ="Principale1";
+                informationCentreEcran = true;
                 break; 
 		    case Player.Phases.PRINCIPALE2:
 			    PhaseToString ="Principale2";
+                informationCentreEcran = true;
                 break; 
 		    case Player.Phases.COMBAT:
 			    PhaseToString ="Combat";
+                informationCentreEcran = true;
                 break; 
 		    case Player.Phases.FINALE:
 			    PhaseToString ="Finale";
                 break; 
 		}
+
+
+        if (informationCentreEcran) {
+            if (GameManagerInformation != null) {
+                GameManagerInformation.GetComponent<InformationManager>().SetInformation(Phase);
+            }
+        }
+
 		CurrentPhase.GetComponent<Text> ().text = PhaseToString;
         // On ne peut pas réagir à la FIN de la phase d'initiation <=> au début de la phase de pioche. 
         if ((Tour != FindLocalPlayerID()) && (Phase != Player.Phases.PIOCHE)) {
@@ -521,6 +539,15 @@ public class GameManager : NetworkBehaviourAntinomia {
 		Tour = newTour; 
 		CurrentTour.GetComponent<Text> ().text = Tour.ToString();
 
+        if (GameManagerInformation != null) {
+            // Inforlation visuelle pour le joueur. 
+            if (newTour == FindLocalPlayerID()) {
+                GameManagerInformation.GetComponent<InformationManager>().SetInformation(InformationManager.TourJoueur.JOUEUR_LOCAL);
+            }
+            else {
+                GameManagerInformation.GetComponent<InformationManager>().SetInformation(InformationManager.TourJoueur.JOUEUR_ADVERSE);
+            }
+        }
 	}
 
     /// <summary>
