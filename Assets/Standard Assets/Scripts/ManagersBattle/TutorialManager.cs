@@ -21,7 +21,7 @@ public class TutorialManager : MonoBehaviour {
             throw new UnusualBehaviourException("Il manque un compsant de particle system ici. ");
         }
         if (!PlayerPrefs.HasKey("TutorialActivated")) {
-            PlayerPrefs.SetInt("TutorialActivated", 1); 
+            PlayerPrefs.SetInt("TutorialActivated", 0); 
         }
         // Dans le cas où le joueur ne souhaite voir aucun tutoriel on détruit le composant
         else if (PlayerPrefs.GetInt("TutorialActivated") == 0) {
