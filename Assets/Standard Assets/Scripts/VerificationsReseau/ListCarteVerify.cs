@@ -22,7 +22,11 @@ public class ListCarteVerify {
     /// Met que la carte a bien été piochée
     /// </summary>
     public void CartePiocheOK(string oID) {
+        Debug.Log(liste.Count);
         for (int i = 0; i < liste.Count; i++) {
+            if (liste[i].oID.Equals(oID)) {
+                Debug.Log("Carte déjà piochée " + liste[i].pioche); 
+            }
             if (liste[i].oID.Equals(oID) && !liste[i].pioche) {
                 liste[i].pioche = true;
                 return;

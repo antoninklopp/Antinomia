@@ -676,9 +676,10 @@ public class Sort : Carte, ICarte {
 
         if (IDCardGame == 0) {
             Destroy(gameObject);
+            yield break; 
         }
 
-        if (isFromLocalPlayer) {
+        if (isFromLocalPlayer && sortState == State.MAIN) {
             // On informe que la carte a bien été piochée.
             FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID);
         }

@@ -1089,7 +1089,7 @@ public class Entite : Carte, ICarte {
             yield break; 
         }
 
-        if (isFromLocalPlayer) {
+        if (isFromLocalPlayer && entiteState == State.MAIN) {
             // On informe que la carte a bien été piochée.
             FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID); 
         }

@@ -228,6 +228,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         int nombreDeCartesMain = transform.Find("MainJoueur").Find("CartesMainJoueur").childCount; 
         if (CardDeck.Cartes.Count != 0) {
             oID = CardDeck.Cartes[0].GetComponent<Carte>().oID;
+            CartesPiochees.Add(new VerifyCartePioche(oID));
             // TestConnection(); 
             Debug.Log("On pioche une carte"); 
             CmdPiocherNouvelleCarte1(oID);
@@ -239,7 +240,6 @@ public class Player : NetworkBehaviourAntinomia	 {
 		CmdPiocherNouvelleCarte2 (oID); 
 		cartesPiochees.Add (CardDeck.Cartes [0]); 
 		CardDeck.Cartes.Remove (CardDeck.Cartes [0]);
-        CartesPiochees.Add(new VerifyCartePioche(oID)); 
 
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
         yield return new WaitForSeconds(0.1f);
@@ -254,6 +254,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     IEnumerator PiocherCarteRoutineoID(string oID) {
         if (CardDeck.Cartes.Count != 0) {
             oID = CardDeck.Cartes[0].GetComponent<Carte>().oID;
+            yield return new WaitForSeconds(0.2f);
             // TestConnection(); 
             Debug.Log("On pioche une carte");
             CmdPiocherNouvelleCarte1(oID);
@@ -262,7 +263,6 @@ public class Player : NetworkBehaviourAntinomia	 {
             Debug.Log(CardDeck.Cartes.Count);
             throw new Exception("Impossible d'instancier la carte, il n'y a plus de cartes dans le deck");
         }
-        yield return new WaitForSeconds(0.2f);
         CartesPiochees.Add(new VerifyCartePioche(oID));
 
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
@@ -1275,7 +1275,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         }
         List<string> oIDCartesNonPiochees = CartesPiochees.oIDNonPiochees(); 
         foreach (string s in oIDCartesNonPiochees) {
-            yield return PiocherCarteRoutine(); 
+            yield return PiocherCarteRoutineoID(oID:s); 
         }
         // Et on verifie si on doit repiocher. 
         yield return Repioche(); 
