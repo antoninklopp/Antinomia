@@ -267,7 +267,7 @@ public class AntinomiaConsole : MonoBehaviourAntinomia {
             // On vérifie que l'argument est bien un entier.
             int.Parse(parameter);
         }
-        catch (FormatException e) {
+        catch (FormatException) {
             AddStringToConsole("Format : Fonction parametre");
             return false;
         }

@@ -313,6 +313,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 			.Send ((response) => {
 
 				if (!response.HasErrors) {
+                    finish = false; 
 					Debug.Log ("Received Player Decks From GameSparks... "); 
 					// On récupère une liste des cartes du joueur
 					List<GSData> dataList = response.ScriptData.GetGSDataList ("decks"); 
@@ -342,9 +343,9 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 						allDecks.Add(thisDeck); 
 					}
 					finish = true; 	
-					} else {
+				} else {
                     Debug.Log(response.Errors.JSON); 
-					Debug.Log ("Not Received"); 
+				    Debug.Log ("Not Received"); 
 				}
 			}); 
 	}
@@ -362,6 +363,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
 		while (!finish) {
 			yield return new WaitForSeconds (0.05f); 
 		}
+        Debug.Log("On a fini de recuperer"); 
 		finish = false; 
 	}
 

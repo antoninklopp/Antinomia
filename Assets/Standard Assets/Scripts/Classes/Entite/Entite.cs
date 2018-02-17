@@ -1083,7 +1083,15 @@ public class Entite : Carte, ICarte {
         Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
         if (IDCardGame == 0) {
-            Destroy(gameObject); 
+            Debug.Log("On detruit un objet dont l'ID est 0");
+            Debug.Log(oID); 
+            Destroy(gameObject);
+            yield break; 
+        }
+
+        if (isFromLocalPlayer) {
+            // On informe que la carte a bien été piochée.
+            FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID); 
         }
     }
 
@@ -1117,7 +1125,6 @@ public class Entite : Carte, ICarte {
                                     Entite.Nature nature) {
 
         // On peut peut-être tout faire passer par les arguments. 
-        // IDCardGame = _ID;
         oID = _oID;
         Debug.Log(_oID);
         Name = _Name;

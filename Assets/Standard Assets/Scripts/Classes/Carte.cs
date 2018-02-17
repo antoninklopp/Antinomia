@@ -974,7 +974,6 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Condition.ConditionEnum.CHOIX_ELEMENT:
                     // Permettre au joueur de choisir un élément.
                     return true; 
-                    break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
                     if (checkCibleNull(Cible)) {
                         ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
@@ -1005,7 +1004,6 @@ public class Carte : NetworkBehaviourAntinomia {
                     ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
                         _conditions[j].properIntCondition);
                     return true; 
-                    break;
             }
         }
         // Dans les autres cas, pas besoin d'attendre

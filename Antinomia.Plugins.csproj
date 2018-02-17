@@ -441,6 +441,8 @@
     <Compile Include="Assets\Standard Assets\Scripts\Tests\TestCartes\TestCartes.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\TestShaders.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\WriteOutputFile.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\VerificationsReseau\ListCarteVerify.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\VerificationsReseau\VerifyCartePioche.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Art\Shader\ShaderBlackWhite.shader" />

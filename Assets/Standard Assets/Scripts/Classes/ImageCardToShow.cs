@@ -44,9 +44,6 @@ public class ImageCardToShow : MonoBehaviour {
     /// </summary>
     /// <param name="name">shortCode de la carte</param>
 	public void setImage(string name){
-		/*
-		 * Changer l'image
-		 */ 
 		AllImages = Resources.LoadAll<Sprite> ("Cartes"); 
 		for (int i = 0; i < AllImages.Length; ++i) {
 			if (name == AllImages [i].name) {
@@ -104,7 +101,9 @@ public class ImageCardToShow : MonoBehaviour {
     /// Clic sur la carte
     /// </summary>
 	public void OnMouseDown(){
-		// Clic sur la carte. 
+        // Clic sur la carte. 
+        // On selectionne ou on deselectionne la carte. 
+        isTargeted = !isTargeted; 
 		CreateTarget();
 		SendCarteToManager (); 
 	}

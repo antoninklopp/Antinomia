@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking; 
 using UnityEngine.UI; 
-using System; 
+using System;
+using AntinomiaException; 
 using UnityEngine.SceneManagement;
 
 /// <summary>
@@ -91,6 +92,13 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// </summary>
     public GameObject PilePrefab;
 
+    /// <summary>
+    /// A cause de tous les problemes de réseau, 
+    /// cette liste permet de vérifier que toutes les cartes qui doivent être piochées
+    /// ont bien été piochées. 
+    /// </summary>
+    public ListCarteVerify CartesPiochees; 
+
     // Use this for initialization
     public override void Start() {
         base.Start(); 
@@ -119,7 +127,8 @@ public class Player : NetworkBehaviourAntinomia	 {
         playerInfo = GetComponent<GetPlayerInfoGameSparks>();
         print("playerID");
 
-        StartCoroutine(SetNames ()); 
+        StartCoroutine(SetNames ());
+        CartesPiochees = new ListCarteVerify(); 
         // setPlayerPV (PlayerPV); 
     }
 
@@ -230,25 +239,50 @@ public class Player : NetworkBehaviourAntinomia	 {
 		CmdPiocherNouvelleCarte2 (oID); 
 		cartesPiochees.Add (CardDeck.Cartes [0]); 
 		CardDeck.Cartes.Remove (CardDeck.Cartes [0]);
+        CartesPiochees.Add(new VerifyCartePioche(oID)); 
 
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
         yield return new WaitForSeconds(0.1f);
         // L'objet a été détruit donc c'est bon.
-        CmdTestIfObjectInfoDestroyed(30); 
+        CmdTestIfObjectInfoDestroyed(30, oID); 
 	}
+
+    /// <summary>
+    /// Piocher la carte une fois que l'oID est recuperé
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator PiocherCarteRoutineoID(string oID) {
+        if (CardDeck.Cartes.Count != 0) {
+            oID = CardDeck.Cartes[0].GetComponent<Carte>().oID;
+            // TestConnection(); 
+            Debug.Log("On pioche une carte");
+            CmdPiocherNouvelleCarte1(oID);
+        }
+        else {
+            Debug.Log(CardDeck.Cartes.Count);
+            throw new Exception("Impossible d'instancier la carte, il n'y a plus de cartes dans le deck");
+        }
+        yield return new WaitForSeconds(0.2f);
+        CartesPiochees.Add(new VerifyCartePioche(oID));
+
+        // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
+        yield return new WaitForSeconds(0.1f);
+        // L'objet a été détruit donc c'est bon.
+        CmdTestIfObjectInfoDestroyed(30, oID);
+    }
 
     /// <summary>
     /// Regarder sur le seveur si l'objet a été détruit. 
     /// </summary>
     /// <param name="nombreEssais"></param>
     [Command(channel=0)]
-    void CmdTestIfObjectInfoDestroyed(int nombreEssais) {
+    void CmdTestIfObjectInfoDestroyed(int nombreEssais, string oID) {
         if(ObjectInfo != null) {
             Debug.Log("<color=red>L'Object Info n'a pas été détruit</color>");
-            RpcTestIfObjectInfoDestroyed(false, nombreEssais); 
+            RpcTestIfObjectInfoDestroyed(false, nombreEssais, oID); 
         } else {
             Debug.Log("<color=red>L'Object Info a été détruit</color>");
-            RpcTestIfObjectInfoDestroyed(true, nombreEssais); 
+            RpcTestIfObjectInfoDestroyed(true, nombreEssais, oID); 
         }
     }
 
@@ -258,7 +292,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="destroyed"></param>
     /// <param name="nombreEssais"></param>
     [ClientRpc(channel=0)]
-    void RpcTestIfObjectInfoDestroyed(bool destroyed, int nombreEssais) {
+    void RpcTestIfObjectInfoDestroyed(bool destroyed, int nombreEssais, string oID) {
         if (!isLocalPlayer) {
             return;
         } 
@@ -267,7 +301,7 @@ public class Player : NetworkBehaviourAntinomia	 {
             // Ici l'object Info a bien été détruit, mais il faut vérifier que la carte a bien été créée. 
             VerifierCreationCarte(); 
         } else {
-            StartCoroutine(RepiocherCarte(--nombreEssais));
+            StartCoroutine(RepiocherCarte(--nombreEssais, oID));
             AntinomiaLog("On retente de piocher"); 
         }
     }
@@ -284,14 +318,16 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// </summary>
     /// <param name="nombreTests"></param>
     /// <returns></returns>
-    IEnumerator RepiocherCarte(int nombreTests) {
+    IEnumerator RepiocherCarte(int nombreTests, string oID) {
         Debug.Log("On tente de repiocher la carte"); 
-        CmdPiocherNouvelleCarte2("fbhkbh");
+        CmdPiocherNouvelleCarte2(oID);
         yield return new WaitForSeconds(0.1f); 
         if (nombreTests > 0) {
-            CmdTestIfObjectInfoDestroyed(nombreTests);
+            CmdTestIfObjectInfoDestroyed(nombreTests, oID);
         } else {
             AntinomiaLog("En attendant encore la carte n'a quand même pas pu être récupérée. "); 
+            // Dans ce cas la carte n'a pas pu être récupérée. 
+
         }
     }
 
@@ -375,6 +411,7 @@ public class Player : NetworkBehaviourAntinomia	 {
             CardToInstantiate = ObjectInfo.GetComponent<GetPlayerInfoGameSparks>().GetCardoID();
             Debug.Log("On recupere l'oID de la carte"); 
         } catch (MissingReferenceException e) {
+            Debug.Log(oID); 
             Debug.LogWarning(e);
             Debug.LogWarning("Warning, la carte n'existe plus ici");
             return; 
@@ -398,8 +435,10 @@ public class Player : NetworkBehaviourAntinomia	 {
                 NouvelleCarte.GetComponent<CarteType>().enabled = true;
                 NouvelleCarte.GetComponent<BoxCollider2D>().enabled = true;
             } catch (NullReferenceException e) {
+                Debug.Log(e); 
                 Debug.Log("Probleme ici"); 
             } catch (MissingComponentException e) {
+                Debug.Log(e); 
                 Debug.Log("Le composant n'existe pas"); 
             }
 		    NouvelleCarte.transform.SetParent (transform.Find("MainJoueur").Find("CartesMainJoueur")); 
@@ -418,9 +457,11 @@ public class Player : NetworkBehaviourAntinomia	 {
             Debug.Log(e); 
         } catch (MissingReferenceException e) {
             // Dans le cas où l'objet n'existe plus. 
+            return; 
             Debug.Log(e); 
             Debug.Log("<color=orange>On essaie de repiocher la carte ici</color>"); 
             if (NouvelleCarte != null) {
+                RpcInfoDestroyCarte(); 
                 Destroy(NouvelleCarte);
             } 
             if (ObjectInfo != null) {
@@ -431,6 +472,11 @@ public class Player : NetworkBehaviourAntinomia	 {
         }
         Destroy(CardToInstantiate); 
 	}
+
+    [ClientRpc(channel=0)]
+    public void RpcInfoDestroyCarte() {
+        Debug.LogWarning("A la pioche, on a detruit la carte faute de mieux"); 
+    }
 
     [ClientRpc(channel=0)]
     void RpcRepiocherCarteApresProb(string oID) {
@@ -455,7 +501,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
         yield return new WaitForSeconds(0.1f);
         // L'objet a été détruit donc c'est bon.
-        CmdTestIfObjectInfoDestroyed(30);
+        CmdTestIfObjectInfoDestroyed(30, oID);
     }
 
     /// <summary>
@@ -1213,5 +1259,25 @@ public class Player : NetworkBehaviourAntinomia	 {
             return; 
         }
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().AfficherInfoEffetTransmis(message); 
+    }
+
+    /// <summary>
+    /// Met que la carte a bien été piochée
+    /// </summary>
+    public void CartePiocheOK(string oID) {
+        CartesPiochees.CartePiocheOK(oID); 
+    }
+
+    public IEnumerator Repioche() {
+        if (CartesPiochees.PiocheOK()) {
+            // Si la pioche est bonne on sort de la boucle
+            yield break; 
+        }
+        List<string> oIDCartesNonPiochees = CartesPiochees.oIDNonPiochees(); 
+        foreach (string s in oIDCartesNonPiochees) {
+            yield return PiocherCarteRoutine(); 
+        }
+        // Et on verifie si on doit repiocher. 
+        yield return Repioche(); 
     }
 }

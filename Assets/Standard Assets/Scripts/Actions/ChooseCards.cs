@@ -157,11 +157,11 @@ public class ChooseCards : NetworkBehaviour {
     /// </summary>
     /// <param name="number">Numéro de la carte</param>
 	void AddNewCardToReturn(int number){
-		/*
+        /*
 		 * Envoi d'une information de l'image cliquée. 
 		 * Le joueur choisit cette carte. 
-		 * 
-		 */ 
+		 */
+        Debug.Log(number + " " + AllCardsGiven.Count); 
 		AllCardsToReturn.Add (AllCardsGiven [number]); 
 		AllCardsToShowOther.Add (AllCardsGiven[number].GetComponent<Carte>().shortCode);
         AllCardsToReturnID.Add(AllCardsGiven[number].GetComponent<Carte>().IDCardGame);
@@ -181,9 +181,8 @@ public class ChooseCards : NetworkBehaviour {
 			AllCardsGiven.Remove(CardToRemove); 
 			AllCardsToShowOther.Remove(CardToRemove.GetComponent<Carte>().shortCode);
             AllCardsToReturnID.Remove(CardToRemove.GetComponent<Carte>().IDCardGame); 
-#pragma warning disable CS0168 // La variable 'e' est déclarée, mais jamais utilisée
 		} catch (NullReferenceException e){
-#pragma warning restore CS0168 // La variable 'e' est déclarée, mais jamais utilisée
+            Debug.Log(e); 
 			throw new Exception ("La carte n'a pas pu être enlevée"); 
 		}
 	}
@@ -198,11 +197,11 @@ public class ChooseCards : NetworkBehaviour {
 		 * On envoie toutes les cartes!
 		 */ 
 
-        if (nombreDeCartesAChoisir < AllCardsToReturnID.Count) {
+        if (nombreDeCartesAChoisir > AllCardsToReturnID.Count) {
             TextChooseCards.GetComponent<Text>().text = "Vous devez encore choisir " +
                 (AllCardsToReturnID.Count - nombreDeCartesAChoisir).ToString() + "cartes";
             return; 
-        } else if (nombreDeCartesAChoisir > AllCardsToReturnID.Count) {
+        } else if (nombreDeCartesAChoisir < AllCardsToReturnID.Count) {
             TextChooseCards.GetComponent<Text>().text = "Vous avez choisi" +
                 (AllCardsToReturnID.Count - nombreDeCartesAChoisir).ToString() + "cartes en trop. Supprimez en."; 
             return;

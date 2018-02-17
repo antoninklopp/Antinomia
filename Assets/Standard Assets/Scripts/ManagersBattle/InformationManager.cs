@@ -68,8 +68,8 @@ public class InformationManager : MonoBehaviour {
         }
         GameObject partInstantiated = Instantiate(ParticleSystemNewTurn);
         float duration = partInstantiated.GetComponent<ParticleSystem>().main.duration;
-        SetInformation(message, duration);
-        Destroy(partInstantiated, duration);
+        SetInformation(message, 3f);
+        Destroy(partInstantiated, 3f);
     }
 
     /// <summary>

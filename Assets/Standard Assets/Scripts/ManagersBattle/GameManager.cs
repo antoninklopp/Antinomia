@@ -523,7 +523,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                     AllAssistances[i].SendMessage("UpdateNewPhase", currentPhase);
                 }
             } catch (NullReferenceException e) {
-                // Debug.Log(e); 
+                Debug.Log(e); 
             }
         }
     }
@@ -626,8 +626,13 @@ public class GameManager : NetworkBehaviourAntinomia {
             Debug.Log("On a override tout ça."); 
         }
 
-		Entite.Ascendance AscendanceMyEntity = MyPlayerEntity.GetComponent<Entite> ().EntiteAscendance; 
-		Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().EntiteElement; 
+        try {
+            Entite.Ascendance AscendanceMyEntity = MyPlayerEntity.GetComponent<Entite>().EntiteAscendance;
+            Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().EntiteElement;
+        } catch (NullReferenceException e) {
+            Debug.Log(e);
+            Debug.Log("Appui accidentel"); 
+        }
 		int multiplicateurDegatsMy = 1;
 
 		// Debug.Log (OtherPlayerEntity.tag);
@@ -1498,12 +1503,20 @@ public class GameManager : NetworkBehaviourAntinomia {
                 ChoixCartesAdversaire.SetActive(true);
             }
 
-            // il faut regarder qu'il n'y ait plus d'object Info dans la scène. 
-            // Si il en reste quelque chose s'est mal passé. 
-            if (GameObject.FindGameObjectsWithTag("ObjectInfo").Length != 0) {
-                throw new UnusualBehaviourException("Il reste un object Info des cartes ont mal dû s'instancier.");
-            }
+            yield return CheckCartePiocheesOK();
         }
+    }
+
+    /// <summary>
+    /// Coroutine pour verifier que toutes les cartes ont bien été piochées. 
+    /// Sinon on les reinstancient. 
+    /// AUTANT DE FOIS QU'IL LE FAUDRA!
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator CheckCartePiocheesOK() {
+        // il faut regarder qu'il n'y ait plus d'object Info dans la scène. 
+        // Si il en reste quelque chose s'est mal passé. 
+        yield return FindLocalPlayer().GetComponent<Player>().Repioche(); 
     }
 
     /// <summary>

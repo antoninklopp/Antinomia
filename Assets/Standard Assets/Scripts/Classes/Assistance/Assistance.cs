@@ -612,6 +612,11 @@ public class Assistance : Carte, ICarte {
         if (IDCardGame == 0) {
             Destroy(gameObject);
         }
+
+        if (isFromLocalPlayer) {
+            // On informe que la carte a bien été piochée.
+            FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID);
+        }
     }
 
     /// <summary>
