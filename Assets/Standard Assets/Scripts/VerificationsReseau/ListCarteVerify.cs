@@ -23,7 +23,9 @@ public class ListCarteVerify {
     /// </summary>
     public void CartePiocheOK(string oID) {
         Debug.Log(liste.Count);
+        Debug.Log("Recherchee " + oID); 
         for (int i = 0; i < liste.Count; i++) {
+            Debug.Log(liste[i].oID); 
             if (liste[i].oID.Equals(oID)) {
                 Debug.Log("Carte déjà piochée " + liste[i].pioche); 
             }
@@ -55,9 +57,13 @@ public class ListCarteVerify {
     /// </summary>
     /// <returns></returns>
     public bool PiocheOK() {
+        Debug.Log("On verifie toutes les cartes"); 
         foreach (VerifyCartePioche v in liste) {
             if (!v.pioche) {
+                Debug.Log(v.oID + "not sOK");
                 return false; 
+            } else {
+                Debug.Log(v.oID + "OK"); 
             }
         }
         return true; 

@@ -327,7 +327,6 @@ public class Player : NetworkBehaviourAntinomia	 {
         } else {
             AntinomiaLog("En attendant encore la carte n'a quand même pas pu être récupérée. "); 
             // Dans ce cas la carte n'a pas pu être récupérée. 
-
         }
     }
 
@@ -1271,8 +1270,10 @@ public class Player : NetworkBehaviourAntinomia	 {
     public IEnumerator Repioche() {
         if (CartesPiochees.PiocheOK()) {
             // Si la pioche est bonne on sort de la boucle
+            Debug.Log("<color=red>On sort</color>"); 
             yield break; 
         }
+        Debug.Log("<color=yellow>On continue</color>");
         List<string> oIDCartesNonPiochees = CartesPiochees.oIDNonPiochees(); 
         foreach (string s in oIDCartesNonPiochees) {
             yield return PiocherCarteRoutineoID(oID:s); 

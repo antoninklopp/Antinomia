@@ -207,6 +207,12 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
                 _sort.IDAllCards = data.GetInt("card_ID").Value;
                 _sort.oID = data.GetString("oID");
             }
+            if (ID != "") {
+                // L'oID de la carte peut être utile dans le cas où on aurait changé des élements sur la carte 
+                // et qu'on voudrait récupérer les infos de base. 
+                //Debug.Log("On set l'OID de la carte" + ID);
+                _sort.oID = ID;
+            }
             newCarte.tag = "Sort"; 
         } else if (data.GetString("type") == "assistance") {
             Assistance _assistance = newCarte.AddComponent<Assistance>();
@@ -219,6 +225,12 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             if (data.GetString("oID") != null) {
                 _assistance.IDAllCards = data.GetInt("card_ID").Value;
                 _assistance.oID = data.GetString("oID");
+            }
+            if (ID != "") {
+                // L'oID de la carte peut être utile dans le cas où on aurait changé des élements sur la carte 
+                // et qu'on voudrait récupérer les infos de base. 
+                //Debug.Log("On set l'OID de la carte" + ID);
+                _assistance.oID = ID;
             }
             newCarte.tag = "Assistance";
         }

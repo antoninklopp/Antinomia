@@ -679,8 +679,10 @@ public class Sort : Carte, ICarte {
             yield break; 
         }
 
-        if (isFromLocalPlayer && sortState == State.MAIN) {
+        if (isFromLocalPlayer && sortState == State.MAIN && oID != "") {
             // On informe que la carte a bien été piochée.
+            Debug.Log("oID de cette carte " + oID);
+            Debug.Log("Nom " + Name); 
             FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID);
         }
     }

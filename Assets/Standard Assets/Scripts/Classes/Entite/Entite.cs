@@ -1091,6 +1091,7 @@ public class Entite : Carte, ICarte {
 
         if (isFromLocalPlayer && entiteState == State.MAIN) {
             // On informe que la carte a bien été piochée.
+            Debug.Log("oID de cette carte " + oID); 
             FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID); 
         }
     }
