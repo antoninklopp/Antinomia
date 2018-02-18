@@ -1862,6 +1862,7 @@ public class Carte : NetworkBehaviourAntinomia {
         reponseDemandeEffet = -1; 
 
         if (ShowCardsMustBeActivated) {
+            Debug.Log("On reactive chosseCards ici"); 
             ShowCardsMustBeActivated = false;
             getGameManager().GetComponent<GameManager>().ActivateChooseCards(); 
         }

@@ -916,36 +916,6 @@ public class Entite : Carte, ICarte {
 		 * Solution moyenne, temporaire
 		 */
 
-        //ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
-        //Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
-        //Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-        //Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
-
-        //carteState = newCarteState;
-        //Debug.Log(carteState);
-        //// il faut maintenant mettre à jour les position. 
-        //switch (carteState) {
-        //    case State.CHAMPBATAILLE:
-        //        // Delete Card de la main ne sert à rien. 
-        //        Main.SendMessage("DeleteCard", gameObject);
-        //        ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
-        //        Main.SendMessage("ReordonnerCarte");
-        //        gameObject.tag = "BoardSanctuaire";
-        //        break;
-        //    case State.SANCTUAIRE:
-        //        Main.SendMessage("DeleteCard", gameObject);
-        //        Sanctuaire.SendMessage("CmdCarteDeposee", gameObject);
-        //        Sanctuaire.SendMessage("ReordonnerCarte");
-        //        gameObject.tag = "BoardSanctuaire";
-        //        break;
-        //    case State.CIMETIERE:
-        //        Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
-        //        Sanctuaire.SendMessage("ReordonnerCarte");
-        //        ChampBataille.SendMessage("CmdReordonnerCarte");
-        //        gameObject.tag = "Cimetiere";
-        //        break;
-        //}
-
         RpcChangePosition(newCarteState); 
 
     }
@@ -972,6 +942,9 @@ public class Entite : Carte, ICarte {
         // il faut maintenant mettre à jour les position. 
         switch (EntiteState) {
             case State.MAIN:
+                // On rechange l'image de la carte , car dans le cas d'un effet
+                // il faut que la carte puisse reprendre son dos de carte. 
+                setImageCarte(); 
                 Main.SendMessage("AjouterCarteMain", gameObject);
                 ChampBataille.SendMessage("CmdReordonnerCarte");
                 Sanctuaire.SendMessage("ReordonnerCarte");
@@ -1746,6 +1719,12 @@ public class Entite : Carte, ICarte {
     /// <param name="_ascendance">la nouvelle ascendance du terrain. </param>
     public void UpdateChangementAscendanceTerrain(GameManager.AscendanceTerrain _ascendance, 
                               GameManager.AscendanceTerrain _previousAscendance=GameManager.AscendanceTerrain.NONE) {
+
+        // On ne veut changer que les cartes du joueur local. 
+        if (!isFromLocalPlayer) {
+            return; 
+        }
+
         Debug.Log(_ascendance);
         Debug.Log(_previousAscendance);
         switch (_ascendance) {
@@ -2109,8 +2088,17 @@ public class Entite : Carte, ICarte {
     /// <summary>
     /// Renvoyer une carte dans la main de son propriétaire. 
     /// </summary>
-    public void RenvoyerCarteMain() {
-        CmdChangePosition(State.MAIN); 
+    /// <param name="parametreNull">Paramètre inutile, seulement pour l'envoi de la methode à un autre joueur. 
+    /// A changer</param>
+    public void RenvoyerCarteMain(int parametreNull=0) {
+        if (hasAuthority) {
+            // Si c'est notre carte on peut le faire directement
+            CmdChangePosition(State.MAIN);
+        } else {
+            // Sinon il faut appeler une methode du local Player
+            FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame,
+                    "RenvoyerCarteMain", 0, FindLocalPlayer().GetComponent<Player>().PlayerID); 
+        }
     }
 
 }

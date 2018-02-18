@@ -252,18 +252,10 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// </summary>
     /// <returns></returns>
     IEnumerator PiocherCarteRoutineoID(string oID) {
-        if (CardDeck.Cartes.Count != 0) {
-            oID = CardDeck.Cartes[0].GetComponent<Carte>().oID;
-            yield return new WaitForSeconds(0.2f);
-            // TestConnection(); 
-            Debug.Log("On pioche une carte");
-            CmdPiocherNouvelleCarte1(oID);
-        }
-        else {
-            Debug.Log(CardDeck.Cartes.Count);
-            throw new Exception("Impossible d'instancier la carte, il n'y a plus de cartes dans le deck");
-        }
+
         CartesPiochees.Add(new VerifyCartePioche(oID));
+        Debug.Log("On pioche une carte");
+        CmdPiocherNouvelleCarte1(oID);
 
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
         yield return new WaitForSeconds(0.1f);
@@ -456,8 +448,8 @@ public class Player : NetworkBehaviourAntinomia	 {
             Debug.Log(e); 
         } catch (MissingReferenceException e) {
             // Dans le cas où l'objet n'existe plus. 
+            Debug.Log(e);
             return; 
-            Debug.Log(e); 
             Debug.Log("<color=orange>On essaie de repiocher la carte ici</color>"); 
             if (NouvelleCarte != null) {
                 RpcInfoDestroyCarte(); 
@@ -581,14 +573,12 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Afficher le nom des deux joueurs. 
     /// </summary>
     /// <returns></returns>
-	IEnumerator SetNames(){
+	private IEnumerator SetNames(){
 		/*
 		 * Mettre les noms des joueurs
          * On attend un peu, pour être sur que les deux jours sont sur le serveur. 
 		 */ 
-		yield return new WaitForSeconds(0.2f);
-        //NomJoueur1 = GameObject.FindGameObjectWithTag("GameManager").transform.Find ("NomJoueur1").gameObject; 
-        //NomJoueur2 = GameObject.FindGameObjectWithTag("GameManager").transform.Find ("NomJoueur2").gameObject; 
+		yield return new WaitForSeconds(0.4f);
 
 #if UNITY_EDITOR
         CmdSetName("device");
@@ -604,7 +594,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 	}
 
 
-    void OnName(string newName) {
+    private void OnName(string newName) {
         /*
          * Appelé par la syncVar du nom. 
          */
@@ -623,8 +613,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         if (isLocalPlayer) {
             // Joueur local
             NomJoueur1.GetComponent<Text>().text = newName;
-        }
-        else {
+        } else {
             NomJoueur2.GetComponent<Text>().text = newName;
         }
 
@@ -1278,6 +1267,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         foreach (string s in oIDCartesNonPiochees) {
             yield return PiocherCarteRoutineoID(oID:s); 
         }
+        yield return new WaitForSeconds(0.5f); 
         // Et on verifie si on doit repiocher. 
         yield return Repioche(); 
     }

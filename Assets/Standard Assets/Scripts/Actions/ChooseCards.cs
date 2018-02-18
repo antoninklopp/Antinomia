@@ -129,7 +129,6 @@ public class ChooseCards : NetworkBehaviour {
         // 75 est la taille d'une cellule. 
         gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2((_AllCardsGiven.Count + 1) * 75f, 100f);
 
-        Debug.Log("On ne desactive pas après. ");
         if (deactivateAfter) {
             EmpecherInteraction(); 
         }
@@ -172,10 +171,11 @@ public class ChooseCards : NetworkBehaviour {
     /// </summary>
     /// <param name="number">Numéro de la carte</param>
 	void RemoveCardToReturn(int number){
-		/*
+        /*
 		 * Envoi d'une information de l'image cliquée
 		 * Le joueur ne choisit plus cette carte. 
-		 */ 
+		 */
+        Debug.Log("On remove ici"); 
 		GameObject CardToRemove = AllCardsGiven[number]; 
 		try{
 			AllCardsGiven.Remove(CardToRemove); 

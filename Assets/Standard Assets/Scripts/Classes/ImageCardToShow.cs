@@ -102,9 +102,9 @@ public class ImageCardToShow : MonoBehaviour {
     /// </summary>
 	public void OnMouseDown(){
         // Clic sur la carte. 
-        // On selectionne ou on deselectionne la carte. 
-        isTargeted = !isTargeted; 
 		CreateTarget();
-		SendCarteToManager (); 
-	}
+		SendCarteToManager ();
+        // On selectionne ou on deselectionne la carte. 
+        isTargeted = !isTargeted;
+    }
 }
