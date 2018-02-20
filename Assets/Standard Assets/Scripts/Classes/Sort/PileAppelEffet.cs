@@ -68,6 +68,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             // On crée une liste qui regroupe les IDCardGame des cibles. 
             ListeIDCardGameCible = new int[ObjetCible.Count];
             for (int i = 0; i < ObjetCible.Count; ++i) {
+                Debug.Log("Cible ici"); 
                 ListeIDCardGameCible[i] = GetObjetIDCardGame(ObjetCible[i]);
             }
         }
@@ -81,8 +82,6 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             FindLocalPlayer().GetComponent<Player>().CmdAjouterEffetALaPile(IDObjetEffet, 
                                         ListeIDCardGameCible, numeroEffet, numeroListeEffet, playerID);
         }
-
-        // CmdEffetRecu(FindLocalPlayer().GetComponent<Player>().PlayerID); 
     }
 
     /// <summary>
@@ -154,6 +153,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         // On crée une liste d'entier au lieu d'un tableau. 
         List<int> ListeObjetsCibleInt = new List<int>(); 
         for (int i = 0; i < ListeObjetsCible.Length; ++i) {
+            Debug.Log("Cible la"); 
             ListeObjetsCibleInt.Add(ListeObjetsCible[i]); 
         }
 

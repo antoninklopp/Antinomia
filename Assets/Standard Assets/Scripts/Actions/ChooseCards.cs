@@ -120,7 +120,8 @@ public class ChooseCards : NetworkBehaviour {
 			AllCardsToShow.Add (newCarte); 
 		}
 		for (int i = 0; i < AllCardsToShow.Count; ++i) {
-			// On met l'image sur toutes les cartes. 
+            // On met l'image sur toutes les cartes. 
+            AllCardsToShow[i].SetActive(true); 
 			AllCardsToShow[i].SendMessage("setImage", AllShortCodes[i]); 
 			AllCardsToShow [i].SendMessage ("setOnIntListener", i);
 		}

@@ -169,11 +169,11 @@ public class Carte : NetworkBehaviourAntinomia {
 		 * TODO: Attention, il faudrait vérifier l'état du réseau avant d'instancier la carte sur le serveur. 
 		 */
         yield return new WaitForSeconds(0.05f);
+        Debug.Log("On change l'image de la carte"); 
         if (hasAuthority) {
             // Si ça vient du joueur local, on affiche la carte
             GetComponent<ImageCardBattle>().setImage(shortCode);
-        }
-        else {
+        } else {
             // Sinon on affiche le dos de la carte. 
             GetComponent<ImageCardBattle>().setDosCarte();
         }
@@ -779,7 +779,7 @@ public class Carte : NetworkBehaviourAntinomia {
             } else if ((!changementDomination && !debut) && _conditions[j].intCondition < 100) {
                 // Si le numero de l'effet est inférieur à 100, on est sur un effet unique. 
                 // Il ne peut donc être target que par un changement de domination ou le debut d'une carte. 
-                Debug.Log("On est ici"); 
+                Debug.Log("On est ici, changement domination"); 
                 return false; 
             } else {
                 Debug.Log("<color=green>Verification de conditions </color>");

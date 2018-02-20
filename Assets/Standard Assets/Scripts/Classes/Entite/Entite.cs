@@ -944,7 +944,7 @@ public class Entite : Carte, ICarte {
             case State.MAIN:
                 // On rechange l'image de la carte , car dans le cas d'un effet
                 // il faut que la carte puisse reprendre son dos de carte. 
-                setImageCarte(); 
+                StartCoroutine(setImageCarte()); 
                 Main.SendMessage("AjouterCarteMain", gameObject);
                 ChampBataille.SendMessage("CmdReordonnerCarte");
                 Sanctuaire.SendMessage("ReordonnerCarte");
@@ -1064,8 +1064,11 @@ public class Entite : Carte, ICarte {
 
         if (isFromLocalPlayer && entiteState == State.MAIN) {
             // On informe que la carte a bien été piochée.
-            Debug.Log("oID de cette carte " + oID); 
-            FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID); 
+            Debug.Log("oID de cette carte " + oID);
+            if (!FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID)) {
+                Debug.LogError("carte detruite");
+                Destroy(gameObject);
+            }
         }
     }
 

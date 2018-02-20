@@ -21,7 +21,7 @@ public class ListCarteVerify {
     /// <summary>
     /// Met que la carte a bien été piochée
     /// </summary>
-    public void CartePiocheOK(string oID) {
+    public bool CartePiocheOK(string oID) {
         Debug.Log(liste.Count);
         Debug.Log("Recherchee " + oID); 
         for (int i = 0; i < liste.Count; i++) {
@@ -31,9 +31,12 @@ public class ListCarteVerify {
             }
             if (liste[i].oID.Equals(oID) && !liste[i].pioche) {
                 liste[i].pioche = true;
-                return;
+                return true;
             }
         }
+
+        Debug.LogError("Carte introuvable"); 
+        return false; 
         throw new UnusualBehaviourException("Carte introuvable");
     }
 

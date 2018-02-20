@@ -207,16 +207,6 @@ public class Sort : Carte, ICarte {
 		 * 
 		 */
         base.OnMouseExit(); 
-        //if (sortState == State.MAIN) {
-        //    GetComponent<SpriteRenderer>().enabled = true;
-        //    Destroy(BigCard);
-        //    // On lance la petite animation de fin. 
-        //    // StartCoroutine(AnimationFinBigCard());
-        //    // On réactive les objets enfants lors de la destruction de la grosse carte. 
-        //    for (int i = 0; i < transform.childCount; ++i) {
-        //        transform.GetChild(i).gameObject.SetActive(true);
-        //    }
-        //}
     }
 
     /// <summary>
@@ -326,7 +316,7 @@ public class Sort : Carte, ICarte {
                     else if (CartesNecessaires == 1) {
                         // on ne doit destroy le box collider que si c'est pour une carte. 
                         // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
-                        Destroy(GetComponent<BoxCollider2D>());
+                        GetComponent<BoxCollider2D>().enabled = false; 
 
                         GetComponent<SpriteRenderer>().sprite = Cible;
                         // On informe le gameManager qu'un sort est en cours, lors d'un clic prochain sur une carte. 
@@ -337,6 +327,7 @@ public class Sort : Carte, ICarte {
                         if (!GererConditions(AllEffets[0].AllConditionsEffet, debut: true, jouerDirect: true)) {
                             clicked = 0;
                             // on remet l'image de la carte. 
+                            GetComponent<BoxCollider2D>().enabled = true;
                             StartCoroutine(setImageCarte());
                             Main.SendMessage("ReordonnerCarte");
                             DisplayMessage("Les conditions ne sont pas réunies.");
@@ -363,6 +354,7 @@ public class Sort : Carte, ICarte {
                 // Display un message disant que le joueur n'a pas assez d'AKA pour jouer
                 clicked = 0;
                 Main.SendMessage("ReordonnerCarte");
+                GetComponent<BoxCollider2D>().enabled = true;
                 GameObject.Find("GameManager").GetComponent<GameManager>().DisplayMessage("Le sort n'a pas été lancé");
                 return;
             }
@@ -683,7 +675,10 @@ public class Sort : Carte, ICarte {
             // On informe que la carte a bien été piochée.
             Debug.Log("oID de cette carte " + oID);
             Debug.Log("Nom " + Name); 
-            FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID);
+            if (!FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID)) {
+                Debug.LogError("carte detruite"); 
+                Destroy(gameObject); 
+            }
         }
     }
 

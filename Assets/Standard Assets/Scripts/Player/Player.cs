@@ -1252,8 +1252,8 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <summary>
     /// Met que la carte a bien été piochée
     /// </summary>
-    public void CartePiocheOK(string oID) {
-        CartesPiochees.CartePiocheOK(oID); 
+    public bool CartePiocheOK(string oID) {
+        return CartesPiochees.CartePiocheOK(oID); 
     }
 
     public IEnumerator Repioche() {

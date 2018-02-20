@@ -107,7 +107,8 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                                     int numeroListEffet, int playerID) {
         effetJoue = effet;
         IDObjectCardGame = _IDCardGame;
-        IDCardGameCibleEffet = _IDCardGameCibleEffet; 
+        IDCardGameCibleEffet = _IDCardGameCibleEffet;
+        Debug.Log(IDCardGameCibleEffet.Count); 
         GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
         transform.SetParent(Pile.transform, false);
         EffetListNumber = numeroListEffet;
@@ -199,12 +200,11 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                 Debug.Log("Depuis cette carte");
 
                 // On recrée la liste des cibles
-                for (int i = 0; i < IDCardGameCibleEffet.Count; ++i) {
+                for (int i = 0; i < IDCardGameCibleEffet.Count; i++) {
                     Debug.Log(i);
                     if (IDCardGameCibleEffet[i] != -1) {
                         // -1 est l'identifiant du joueur adverse. 
                         CibleEffet.Add(FindCardWithID(IDCardGameCibleEffet[i]));
-                        break;
                     }
                     else {
                         CibleEffet.Add(FindNotLocalPlayer());
@@ -303,14 +303,15 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     public void GererEffetsPonctuelPile(GameObject _carte, int deposeCarte=0) {
         Debug.Log(_carte.GetComponent<CarteType>().thisCarteType); 
         switch (_carte.GetComponent<CarteType>().thisCarteType) {
+            // Debut true? 
             case CarteType.Type.ENTITE:
-                _carte.GetComponent<Entite>().GererEffetsPonctuel(debut: true, deposeCarte: deposeCarte);
+                _carte.GetComponent<Entite>().GererEffetsPonctuel(debut: false, deposeCarte: deposeCarte);
                 break;
             case CarteType.Type.ASSISTANCE:
-                _carte.GetComponent<Assistance>().GererEffetsPonctuel(debut: true);
+                _carte.GetComponent<Assistance>().GererEffetsPonctuel(debut: false);
                 break;
             case CarteType.Type.SORT:
-                _carte.GetComponent<Sort>().GererEffetsPonctuel(debut: true);
+                _carte.GetComponent<Sort>().GererEffetsPonctuel(debut: false);
                 break;
             default:
                 throw new Exception("Ce type d'exception n'est pas encore géré");

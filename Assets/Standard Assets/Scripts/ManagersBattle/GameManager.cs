@@ -631,7 +631,8 @@ public class GameManager : NetworkBehaviourAntinomia {
             Entite.Element ElementMy = MyPlayerEntity.GetComponent<Entite>().EntiteElement;
         } catch (NullReferenceException e) {
             Debug.Log(e);
-            Debug.Log("Appui accidentel"); 
+            Debug.Log("Appui accidentel");
+            return; 
         }
 		int multiplicateurDegatsMy = 1;
 
@@ -1066,7 +1067,8 @@ public class GameManager : NetworkBehaviourAntinomia {
             // On instancie une nouvelle carte pour chaque carte du cimetière.
             GameObject NouvelleCarte = Instantiate(CarteBaseCimetiere);
             // NouvelleCarte.AddComponent<Carte>(); 
-            NouvelleCarte.SendMessage("setImage", allCartesCimetiere[i].GetComponent<Entite>().shortCode);
+            NouvelleCarte.GetComponent<ImageCarteCimetiere>().setImage(allCartesCimetiere[i].GetComponent<Entite>().shortCode);
+            NouvelleCarte.GetComponent<ImageCarteCimetiere>().Info = allCartesCimetiere[i].GetComponent<Entite>().GetInfoCarte(); 
             Debug.Log("1 carte instanciée dans le cimetière");
             NouvelleCarte.transform.SetParent(Content.transform, false);
             NouvelleCarte.SetActive(true); 
