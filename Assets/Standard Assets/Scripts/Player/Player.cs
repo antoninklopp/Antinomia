@@ -99,6 +99,10 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// </summary>
     public ListCarteVerify CartesPiochees;
 
+    /// <summary>
+    /// Variable qui permet de voir si la carte a été bien piochée.
+    /// True lorsqu'elle vient d'etre piochée. 
+    /// </summary>
     private bool CartePiocheeOK = false; 
 
     // Use this for initialization
@@ -325,8 +329,9 @@ public class Player : NetworkBehaviourAntinomia	 {
         if (nombreTests > 0) {
             CmdTestIfObjectInfoDestroyed(nombreTests, oID);
         } else {
-            AntinomiaLog("En attendant encore la carte n'a quand même pas pu être récupérée. "); 
+            AntinomiaLog("En attendant encore la carte n'a quand même pas pu être récupérée. ");
             // Dans ce cas la carte n'a pas pu être récupérée. 
+            CartePiocheeOK = true; 
         }
     }
 

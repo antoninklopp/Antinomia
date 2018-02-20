@@ -136,6 +136,10 @@ public class Sort : Carte, ICarte {
         // TODO : Empecher les interactions quand elles doivent être empechees. 
         base.OnMouseDown();
 
+        if (!isFromLocalPlayer) {
+            return; 
+        }
+
         if (!isFromLocalPlayer && sortState == State.MAIN) {
             return;
         }

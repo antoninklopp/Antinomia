@@ -243,8 +243,20 @@ public class Condition {
     /// True si la condition dépend de la phase. 
     /// </summary>
     public bool dependsOnPhase = false;
+
+    /// <summary>
+    /// Phase de la condition
+    /// </summary>
     public Player.Phases PhaseCondition;
+
+    /// <summary>
+    /// Condition d'une réaction. 
+    /// </summary>
     public Reaction ReactionCondition = Reaction.NONE;
+
+    /// <summary>
+    /// Tour de la condition
+    /// </summary>
     public Tour TourCondition = Tour.NONE;
 
     

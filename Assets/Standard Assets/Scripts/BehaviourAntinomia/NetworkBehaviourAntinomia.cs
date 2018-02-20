@@ -51,6 +51,9 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
 
         for (int i = 0; i < AllCartes.Count; ++i) {
             // On cherche la carte avec le bon ID
+            if (AllCartes[i].GetComponent<Carte>() == null) {
+                continue; 
+            }
             if (AllCartes[i].GetComponent<Carte>().IDCardGame == _ID_) {
                 return AllCartes[i];
             }

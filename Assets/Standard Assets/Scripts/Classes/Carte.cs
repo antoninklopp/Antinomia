@@ -90,6 +90,9 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     public string AllEffetsStringToDisplay = "";
 
+    /// <summary>
+    /// Toutes les cartes choisies pour être les cibles d'un effet. 
+    /// </summary>
     private List<GameObject> CartesChoisiesPourEffets = new List<GameObject>();
 
     /// <summary>
@@ -729,11 +732,15 @@ public class Carte : NetworkBehaviourAntinomia {
                                     bool estMort = false, bool debut = false, bool nouveauTour = false, GameObject Cible=null, 
                                     int deposeCarte=0, bool choixJoueur=false, bool changementDomination=false, bool jouerDirect=true) {
         bool effetOK = true;
+        // On recupère la phase directement.
+        _currentPhase = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Phase; 
         for (int j = 0; j < _conditions.Count; ++j) {
             Debug.Log("Int COndition" + _conditions[j].intCondition.ToString());
             if (_conditions[j].dependsOnPhase &&
                 _currentPhase != _conditions[j].PhaseCondition) {
                 // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
+                Debug.Log(_currentPhase);
+                Debug.Log(_conditions[j].PhaseCondition); 
                 Debug.Log("Condition de phase non remplie");
                 return false;
             }
@@ -747,7 +754,7 @@ public class Carte : NetworkBehaviourAntinomia {
                 Debug.Log("Pas le bon tour");
                 return false;
             }
-            else if (debut && (_conditions[j].intCondition >= 100)) {
+            else if (debut && (Math.Abs(_conditions[j].intCondition) >= 100)) {
                 // L'effet dépend donc d'une phase. 
                 Debug.Log("Cette effet dépend d'une phase particulière.");
                 return false;
@@ -776,7 +783,7 @@ public class Carte : NetworkBehaviourAntinomia {
                 // Il faut TOUJOURS mettre la condition de changement de domination en premier. 
                 Debug.Log("Changement de domination"); 
                 return false;
-            } else if ((!changementDomination && !debut) && _conditions[j].intCondition < 100) {
+            } else if ((!changementDomination && !debut) && Math.Abs(_conditions[j].intCondition) < 100) {
                 // Si le numero de l'effet est inférieur à 100, on est sur un effet unique. 
                 // Il ne peut donc être target que par un changement de domination ou le debut d'une carte. 
                 Debug.Log("On est ici, changement domination"); 
