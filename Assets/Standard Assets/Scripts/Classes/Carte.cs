@@ -2333,5 +2333,10 @@ public class Carte : NetworkBehaviourAntinomia {
 
         return true; 
     }
+    
+    [Command(channel = 0)]
+    public void CmdDestroyDirect() {
+        Destroy(gameObject);
+    }
 
 }

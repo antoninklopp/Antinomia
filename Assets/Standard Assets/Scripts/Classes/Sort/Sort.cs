@@ -677,10 +677,11 @@ public class Sort : Carte, ICarte {
             Debug.Log("Nom " + Name); 
             if (!FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID)) {
                 Debug.LogError("carte detruite"); 
-                Destroy(gameObject); 
+                CmdDestroyDirect(); 
             }
         }
     }
+
 
     /// <summary>
     /// Transmission d'informations sur les principales informations du sort.

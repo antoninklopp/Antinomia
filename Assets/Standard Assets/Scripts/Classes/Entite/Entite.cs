@@ -1067,7 +1067,7 @@ public class Entite : Carte, ICarte {
             Debug.Log("oID de cette carte " + oID);
             if (!FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID)) {
                 Debug.LogError("carte detruite");
-                Destroy(gameObject);
+                CmdDestroyDirect(); 
             }
         }
     }

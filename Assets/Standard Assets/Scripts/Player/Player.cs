@@ -97,7 +97,9 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// cette liste permet de vérifier que toutes les cartes qui doivent être piochées
     /// ont bien été piochées. 
     /// </summary>
-    public ListCarteVerify CartesPiochees; 
+    public ListCarteVerify CartesPiochees;
+
+    private bool CartePiocheeOK = false; 
 
     // Use this for initialization
     public override void Start() {
@@ -223,6 +225,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 	public IEnumerator PiocherCarteRoutine(){
         // Comme on ne peut instancier que des objets de type prefab référencié (ici c'est l'objet public carte prefab). 
         // Normalement, comme on a créé le deck à partir du prefab, ça devrait fonctionner. 
+        CartePiocheeOK = false; 
         string oID = " ";
 
         int nombreDeCartesMain = transform.Find("MainJoueur").Find("CartesMainJoueur").childCount; 
@@ -244,7 +247,11 @@ public class Player : NetworkBehaviourAntinomia	 {
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
         yield return new WaitForSeconds(0.1f);
         // L'objet a été détruit donc c'est bon.
-        CmdTestIfObjectInfoDestroyed(30, oID); 
+        CmdTestIfObjectInfoDestroyed(30, oID);
+
+        while (!CartePiocheeOK) {
+            yield return new WaitForSeconds(0.05f); 
+        }
 	}
 
     /// <summary>
@@ -291,7 +298,8 @@ public class Player : NetworkBehaviourAntinomia	 {
         if (destroyed) {
             AntinomiaLog("La carte a bien été créée");
             // Ici l'object Info a bien été détruit, mais il faut vérifier que la carte a bien été créée. 
-            VerifierCreationCarte(); 
+            VerifierCreationCarte();
+            CartePiocheeOK = true; 
         } else {
             StartCoroutine(RepiocherCarte(--nombreEssais, oID));
             AntinomiaLog("On retente de piocher"); 
