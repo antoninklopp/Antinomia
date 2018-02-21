@@ -3,25 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; 
 
-public class ShowCards : MonoBehaviour {
+public class ShowCards : MonoBehaviourAntinomia {
 
     private GameObject TextShowCards;
 
-    public GameObject CartePrefab; 
+    public GameObject CartePrefab;
+
+    private GameObject FinManuelle; 
 
 	// Use this for initialization
-	void Start () {
+	public override void Start () {
         TextShowCards = GameObject.Find("TextShowCards");
-        TextShowCards.SetActive(false); 
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+        TextShowCards.SetActive(false);
+        FinManuelle = GameObject.Find("ArretManuelShowCards");
+        FinManuelle.SetActive(false); 
 	}
 
-    public void ShowCardsToPlayer(string[] Cards) {
-        ShowCardsToPlayer(Cards.Length.ToString() + " de votre adversaire", Cards); 
+    /// <summary>
+    /// Montrer les cartes à l'autre joueur, sans personnalisation du message
+    /// </summary>
+    /// <param name="Cards"></param>
+    /// <param name="fermetureManuelle"></param>
+    /// <param name="playerEnvoi"></param>
+    public void ShowCardsToPlayer(string[] Cards, bool fermetureManuelle=false, int playerEnvoi=1) {
+        if (playerEnvoi == GameManager.FindLocalPlayerID()) {
+            ShowCardsToPlayer(Cards.Length.ToString() + " de vos cartes", Cards, fermetureManuelle);
+        } else {
+            ShowCardsToPlayer(Cards.Length.ToString() + " cartes de votre adversaire", Cards, fermetureManuelle);
+        }
     }
 
     /// <summary>
@@ -29,7 +38,7 @@ public class ShowCards : MonoBehaviour {
     /// </summary>
     /// <param name="message"></param>
     /// <param name="Cards"></param>
-    public void ShowCardsToPlayer(string message, string[] _AllCardsGiven) {
+    public void ShowCardsToPlayer(string message, string[] _AllCardsGiven, bool fermetureManuelle=true) {
         TextShowCards.SetActive(true);
         TextShowCards.GetComponent<Text>().text = message;
 
@@ -53,7 +62,11 @@ public class ShowCards : MonoBehaviour {
             }
         }
 
-        StartCoroutine(FinShowCards()); 
+        if (FinManuelle) {
+            FinManuelle.SetActive(true); 
+        } else {
+            StartCoroutine(FinShowCards());
+        }
 
     }
 
@@ -62,14 +75,22 @@ public class ShowCards : MonoBehaviour {
     /// </summary>
     /// <returns></returns>
     private IEnumerator FinShowCards() {
-        yield return new WaitForSeconds(3f); 
-        foreach(Transform t in transform) {
+        yield return new WaitForSeconds(3f);
+        DesactivateShowCards(); 
+    }
+
+    /// <summary>
+    /// Tout desactiver
+    /// </summary>
+    public void DesactivateShowCards() {
+        foreach (Transform t in transform) {
             if (t.gameObject.activeSelf) {
-                Destroy(t.gameObject); 
+                Destroy(t.gameObject);
             }
         }
 
         TextShowCards.SetActive(false);
-        gameObject.SetActive(false); 
+        gameObject.SetActive(false);
+        FinManuelle.SetActive(false); 
     }
 }

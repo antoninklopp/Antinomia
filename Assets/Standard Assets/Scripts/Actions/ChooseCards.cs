@@ -216,7 +216,7 @@ public class ChooseCards : NetworkBehaviour {
 		}
 		
         if (ObjectAsking == null){
-            FindLocalPlayer().GetComponent<Player>().CmdSendCards (newList, "Cartes choisies");
+            FindLocalPlayer().GetComponent<Player>().CmdSendCards (newList, "Cartes choisies", GameManager.FindLocalPlayerID());
         } else {
             Debug.Log("On envoie à l'objet qui demande " + AllCardsToReturnID.Count); 
             ObjectAsking.SendMessage("CartesChoisies", AllCardsToReturnID); 

@@ -256,5 +256,4 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
     public static Vector3 Copy(Vector3 vecteur) {
         return new Vector3(vecteur.x, vecteur.y, vecteur.z); 
     }
-
 }

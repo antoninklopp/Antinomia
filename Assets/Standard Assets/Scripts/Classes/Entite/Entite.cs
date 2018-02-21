@@ -789,7 +789,7 @@ public class Entite : Carte, ICarte {
                                 else {
                                     gameObject.tag = "BoardSanctuaire";
                                     // Montrer x cartes à l'adversaire. 
-                                    GameObject.Find("GameManager").SendMessage("InvocationElementaireAir", 2*x);
+                                    GameObject.Find("GameManager").SendMessage("InvocationElementaireAir", x);
                                 }
                                 break;
                             case Element.TERRE:
@@ -1611,7 +1611,7 @@ public class Entite : Carte, ICarte {
             stringToReturn += "Ascendance : " + EntiteAscendance + "\n"; 
         } else {
             stringToReturn += "Ascendance : ELEMENTAIRE" + "\n" +
-                "Element : " + EntiteElement + "\n"; 
+                "Element : " + EntiteElement + "\n" + "Cout elementaire : " + coutElementaire.ToString() + "\n"; 
         }
 
         List<string> noneStrings = new List<string>(){"None", " ", ""};
@@ -1635,7 +1635,13 @@ public class Entite : Carte, ICarte {
     /// Cette fonction est appelée après un effet qui permet à un joueur de changer la position d'une carte. 
     /// </summary>
     public void ChangerPosition() {
-        clicked = true; 
+        if (entiteState == State.CHAMPBATAILLE) {
+            CmdChangePosition(State.SANCTUAIRE); 
+        } else if (entiteState == State.SANCTUAIRE) {
+            CmdChangePosition(State.CHAMPBATAILLE); 
+        } else {
+            throw new UnusualBehaviourException("Cette carte devrait être dans le sanctuaire ou sur le champ de bataille"); 
+        }
     }
 
     /// <summary>
@@ -2102,6 +2108,14 @@ public class Entite : Carte, ICarte {
             FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame,
                     "RenvoyerCarteMain", 0, FindLocalPlayer().GetComponent<Player>().PlayerID); 
         }
+    }
+
+    protected override void InformationsSurLaCarte() {
+        isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
+        if (!isFromLocalPlayer && entiteState == State.MAIN) {
+            return; 
+        }
+        base.InformationsSurLaCarte();
     }
 
 }

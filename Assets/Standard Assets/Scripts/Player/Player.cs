@@ -918,20 +918,23 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Execute sur le serveur. 
     /// </summary>
     /// <param name="allCards">La liste des shortCodes des cartes à montrer. </param>
-    [Command(channel=0)]
-	public void CmdSendCards(string[] allCards, string message){
-		RpcShowCardsToOtherPlayer (allCards, message); 
-	}
+    /// <param name="playerEnvoi">ID du player qui a envoyé les cartes</param>
+    [Command(channel = 0)]
+    public void CmdSendCards(string[] allCards, string message, int playerEnvoi) {
+        RpcShowCardsToOtherPlayer(allCards, message, playerEnvoi);
+    }
 
     /// <summary>
     /// Montrer des cartes (souvent choisies lors d'un effet à un l'autre joueur)
     /// Execute sur les clients
     /// </summary>
     /// <param name="allCards">La liste des shortCodes des cartes à montrer. </param>
-	[ClientRpc(channel=0)]
-	public void RpcShowCardsToOtherPlayer (string[] allCards, string message){
+
+    [ClientRpc(channel = 0)]
+    public void RpcShowCardsToOtherPlayer(string[] allCards, string message, int playerEnvoi) {
         AntinomiaLog("On montre les cartes choisies");
-        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCardsToPlayer(message, allCards); 
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowCardsToPlayer(message, allCards,
+            true, playerEnvoi);
     }
 
     /// <summary>

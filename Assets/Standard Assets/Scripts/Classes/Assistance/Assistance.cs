@@ -739,4 +739,13 @@ public class Assistance : Carte, ICarte {
         return assistanceState; 
     }
 
+    protected override void InformationsSurLaCarte() {
+
+        isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
+        if (!isFromLocalPlayer && assistanceState == State.MAIN) {
+            return; 
+        }
+        base.InformationsSurLaCarte();
+    }
+
 }

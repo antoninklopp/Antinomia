@@ -204,14 +204,10 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// Afficher les informations sur la carte.
     /// </summary>
-    protected void InformationsSurLaCarte() {
+    protected virtual void InformationsSurLaCarte() {
         isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
 
         checkIfLocalPlayerOnMousEnter();
-
-        if (!isFromLocalPlayer) {
-            return;
-        }
 
         // Si un sort est en train d'être joué, on ne veut pas grossir la carte. 
         if (GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours != null) {
@@ -219,13 +215,6 @@ public class Carte : NetworkBehaviourAntinomia {
         }
 
         if (canGoBig) {
-            //CreateBigCard();
-            //GetComponent<SpriteRenderer>().enabled = false;
-            //// On désactive les objets enfants lors de la création de la grosse carte. 
-            //for (int i = 0; i < transform.childCount; ++i) {
-            //    transform.GetChild(i).gameObject.SetActive(false);
-            //}
-
             DisplayInfoCarteGameManager();
         }
     }
@@ -2052,7 +2041,8 @@ public class Carte : NetworkBehaviourAntinomia {
             string stringCartei = CartesChoisiesPourEffets[i].GetComponent<Carte>().shortCode; 
             AllCartesChoisiesString[i] = stringCartei;
         }
-        FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString, "Cartes de votre adversaire"); 
+        FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString, "Cartes montrées", 
+            GameManager.FindLocalPlayerID()); 
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2322,6 +2312,13 @@ public class Carte : NetworkBehaviourAntinomia {
         // c'est à notre tour de repondre à un effet
         if (getGameManager().GetComponent<GameManager>().getTour() != FindLocalPlayer().GetComponent<Player>().PlayerID &&
             GameObject.FindGameObjectWithTag("Pile") == null) {
+            return false; 
+        }
+
+        // On ne peut pas interagir avec les cartes si on 
+        // est en pahse principale. 
+        if (getGameManager().GetComponent<GameManager>().getPhase() != Player.Phases.PRINCIPALE1 && 
+            getGameManager().GetComponent<GameManager>().getPhase() != Player.Phases.PRINCIPALE2 && stateMain) {
             return false; 
         }
 

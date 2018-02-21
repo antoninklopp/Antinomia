@@ -554,7 +554,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Trouver l'ID du joueur qui n'est pas local. 
     /// </summary>
     /// <returns>Nn entier contenant 1 ou 2. </returns>
-	private static int FindLocalPlayerID(){
+	public static int FindLocalPlayerID(){
 		/*
 		 * Mettre le résultat de cette fonction dans une variable?? 
 		 * 
@@ -1001,9 +1001,6 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="cout"></param>
 	void InvocationElementaireAir(int cout){
-		/*
-		 * Les cartes à montrer sont choisies au hasard. 
-		 */ 
 
 		// on trouve maintenant les cartes de la main du joueur. 
 		GameObject[] AllCardsHandAndDeck = GameObject.FindGameObjectsWithTag("Carte"); 
@@ -1025,7 +1022,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 		}
 		Debug.Log (AllCardsGiven.Count); 
 		// ShowCards.SendMessage ("ShowCardsToChoose", AllCardsGiven); 
-		FindLocalPlayer().GetComponent<Player>().CmdSendCards (AllCardsRandom, "Cartes de votre adversaire");
+		FindLocalPlayer().GetComponent<Player>().CmdSendCards (AllCardsRandom, "Cartes de votre adversaire", FindLocalPlayerID());
 	}
 
     /// <summary>
@@ -1726,14 +1723,27 @@ public class GameManager : NetworkBehaviourAntinomia {
         ChooseCardsObject.SetActive(false);
     }
 
-    public void ShowCardsToPlayer(string message, string[] CardsGiven) {
+    /// <summary>
+    /// Montrer des cartes à l'autre joueur
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="CardsGiven"></param>
+    /// <param name="fermetureManuelle"></param>
+    /// <param name="playerEnvoi"></param>
+    public void ShowCardsToPlayer(string message, string[] CardsGiven, bool fermetureManuelle=false, int playerEnvoi=1) {
         ShowCardsObject.SetActive(true);
-        ShowCardsObject.GetComponent<ShowCards>().ShowCardsToPlayer(message, CardsGiven); 
+        ShowCardsObject.GetComponent<ShowCards>().ShowCardsToPlayer(message, CardsGiven, fermetureManuelle); 
     }
 
-    public void ShowCardsToPlayer(string[] CardsGiven) {
+    /// <summary>
+    /// Montrer des cartes à l'autre joueur.
+    /// </summary>
+    /// <param name="CardsGiven"></param>
+    /// <param name="fermetureManuelle"></param>
+    /// <param name="playerEnvoi"></param>
+    public void ShowCardsToPlayer(string[] CardsGiven, bool fermetureManuelle = false, int playerEnvoi = 1) {
         ShowCardsObject.SetActive(true);
-        ShowCardsObject.GetComponent<ShowCards>().ShowCardsToPlayer(CardsGiven);
+        ShowCardsObject.GetComponent<ShowCards>().ShowCardsToPlayer(CardsGiven, fermetureManuelle, playerEnvoi);
     }
 
     /// <summary>

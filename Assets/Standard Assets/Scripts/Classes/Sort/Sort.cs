@@ -850,4 +850,12 @@ public class Sort : Carte, ICarte {
         return sortState;
     }
 
+    protected override void InformationsSurLaCarte() {
+        isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
+        if (!isFromLocalPlayer && sortState == State.MAIN) {
+            return; 
+        }
+            base.InformationsSurLaCarte();
+    }
+
 }
