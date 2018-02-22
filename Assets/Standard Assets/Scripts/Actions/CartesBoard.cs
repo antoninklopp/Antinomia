@@ -99,7 +99,10 @@ public class CartesBoard : NetworkBehaviourAntinomia {
 		 */ 
 		AllCreaturesChampBataille = new List<GameObject> (); 
 		foreach (Transform child in transform) {
-			AllCreaturesChampBataille.Add (child.gameObject); 
+            // On ne regarde que les cartes
+            if (child.gameObject.GetComponent<Carte>() != null) {
+                AllCreaturesChampBataille.Add(child.gameObject);
+            }
 		}
 
         if (AllCreaturesChampBataille.Count > 5) {

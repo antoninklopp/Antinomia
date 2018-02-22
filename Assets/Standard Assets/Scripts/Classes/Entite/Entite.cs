@@ -959,6 +959,10 @@ public class Entite : Carte, ICarte {
                 // StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposeToPauseGame()); 
                 break;
             case State.SANCTUAIRE:
+                if (entiteAscendance == Ascendance.ASTRALE || entiteAscendance == Ascendance.MALEFIQUE) {
+                    DetruireCarte();
+                    return; 
+                }
                 Main.SendMessage("DeleteCard", gameObject);
                 Sanctuaire.SendMessage("CmdCarteDeposee", gameObject);
                 Sanctuaire.SendMessage("ReordonnerCarte");
