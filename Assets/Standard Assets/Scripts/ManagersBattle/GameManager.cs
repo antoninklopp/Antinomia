@@ -242,7 +242,9 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// L'autre GameManager qui permet de transmettre des informations à l'autre joueur. 
     /// </summary>
-    private GameObject GameManagerInformation; 
+    private GameObject GameManagerInformation;
+
+    private GameObject eventManager; 
 
 	/// <summary>
     /// Initialisation du GameManager
