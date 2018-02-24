@@ -115,9 +115,11 @@ public class ChooseCards : NetworkBehaviour {
 			GameObject newCarte = Instantiate(CartePrefab);
             newCarte.SetActive(true); 
 			// Ensuite on met leur position avec une demi carte entre chaque carte. 
-			newCarte.transform.SetParent(transform); 
-			// newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
-			AllCardsToShow.Add (newCarte); 
+			newCarte.transform.SetParent(transform);
+            newCarte.GetComponent<CarteChooseShow>().shortCode = AllShortCodes[i];
+            newCarte.GetComponent<CarteChooseShow>().StringToDisplay = AllCardsGiven[i].GetComponent<Carte>().GetInfoCarte(); 
+            // newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
+            AllCardsToShow.Add (newCarte); 
 		}
 		for (int i = 0; i < AllCardsToShow.Count; ++i) {
             // On met l'image sur toutes les cartes. 
@@ -256,7 +258,8 @@ public class ChooseCards : NetworkBehaviour {
 			// On crée d'abord toutes les cartes
 			GameObject newCarte = Instantiate(CartePrefab); 
 			// Ensuite on met leur position avec une demi carte entre chaque carte. 
-			newCarte.transform.SetParent(transform); 
+			newCarte.transform.SetParent(transform);
+            newCarte.GetComponent<CarteChooseShow>().shortCode = AllShortCodes[i]; 
 			// newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
 			AllCardsToShow.Add (newCarte); 
 			Debug.Log ("J'ai instancié la carte"); 

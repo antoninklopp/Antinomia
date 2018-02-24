@@ -73,7 +73,7 @@ public class EventManager : MonoBehaviourAntinomia {
             GameObject.Find("GameManager").GetComponent<GameManager>().DisplayMessage("Vous n'avez pas tout choisi"); 
         }
         ButtonFin.SetActive(false);
-        JouerEffets(); 
+        StartCoroutine(JouerEffets()); 
     }
 
     /// <summary>

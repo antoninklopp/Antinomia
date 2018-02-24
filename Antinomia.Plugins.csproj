@@ -359,6 +359,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Assistance\EntiteAssocieeAssistance.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Capacite.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Carte.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\CarteChooseShow.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\CarteDebut.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\CarteDefinition.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\CarteType.cs" />

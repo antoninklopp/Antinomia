@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; 
+using UnityEngine.UI;
+using AntinomiaException; 
 
 public class ShowCards : MonoBehaviourAntinomia {
 
@@ -51,6 +52,8 @@ public class ShowCards : MonoBehaviourAntinomia {
             newCarte.SetActive(true); 
             // Ensuite on met leur position avec une demi carte entre chaque carte. 
             newCarte.transform.SetParent(transform);
+            newCarte.GetComponent<CarteChooseShow>().shortCode = _AllCardsGiven[i];
+            newCarte.GetComponent<CarteChooseShow>().StringToDisplay = GetInfoCarte(_AllCardsGiven[i]); 
             // newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
             AllCardsToShow.Add(newCarte);
         }
@@ -68,6 +71,22 @@ public class ShowCards : MonoBehaviourAntinomia {
             StartCoroutine(FinShowCards());
         }
 
+    }
+
+    /// <summary>
+    /// Retourne l'info d'une carte en fonction de son shortCode
+    /// </summary>
+    /// <param name="shortCode"></param>
+    /// <returns></returns>
+    public string GetInfoCarte(string shortCode) {
+        Carte[] AllCartesType = FindObjectsOfType(typeof(Carte)) as Carte[];
+        foreach (Carte c in AllCartesType) {
+            if (c.shortCode.Equals(shortCode)) {
+                return c.GetInfoCarte(); 
+            }
+        }
+
+        throw new UnusualBehaviourException("Cette carte devrait être trouvée"); 
     }
 
     /// <summary>
