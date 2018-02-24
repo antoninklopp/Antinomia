@@ -46,7 +46,7 @@ public class EventManager : MonoBehaviourAntinomia {
 	}
 
     public void AjouterEffet(EventEffet ef) {
-        listeEvents.Add(ef); 
+        listeEvents.Add(ef);
     }
 
     public void EnleverEffet(EventEffet ef) {
@@ -72,21 +72,28 @@ public class EventManager : MonoBehaviourAntinomia {
         if(EventCourant != EventTotal) {
             GameObject.Find("GameManager").GetComponent<GameManager>().DisplayMessage("Vous n'avez pas tout choisi"); 
         }
-        ButtonFin.SetActive(false); 
+        ButtonFin.SetActive(false);
+        JouerEffets(); 
     }
 
     /// <summary>
     /// Créer un nouvel ensemble d'events
     /// </summary>
-    public void CreerNouvellePileEvent(List<EventEffet> allEvent) {
+    public void CreerNouvellePileEvent() {
         // S'il n'y a qu'un seul évênement, on ne propose pas de choisir
-        if (allEvent.Count == 1) {
-            allEvent[0].Jouer();
+        if (listeEvents.Count == 0) {
             return; 
         }
-        EventTotal = allEvent.Count;
+
+        if (listeEvents.Count == 1) {
+            listeEvents[0].Jouer();
+            return; 
+        }
+
+        ButtonFin.SetActive(true);
+        ResetOrdreButton.SetActive(true);
+        EventTotal = listeEvents.Count;
         SetUpButtons();
-        ButtonFin.SetActive(true); 
     }
 
 
@@ -94,13 +101,16 @@ public class EventManager : MonoBehaviourAntinomia {
     /// Créer tous les boutons de choix des events
     /// </summary>
     public void SetUpButtons() {
+        listeButtons = new List<GameObject>(); 
         for (int i = 0; i < EventTotal; i++) {
             GameObject newButton = Instantiate(EventButtonPrefab);
             newButton.transform.SetParent(transform, false);
             int number = i;
             // Changement de deck. 
+            Debug.Log(1); 
             newButton.GetComponent<Button>().onClick.AddListener(delegate { CliqueEffet(number); });
-
+            newButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = listeEvents[i].effet.EffetString;
+            Debug.Log(2); 
             listeButtons.Add(newButton);
         }
     }
@@ -116,6 +126,16 @@ public class EventManager : MonoBehaviourAntinomia {
     /// A la fin on reset l'eventManager
     /// </summary>
     public IEnumerator JouerEffets() {
+        // On détruit tous les boutons pour qu'ils ne soient plus visibles. 
+        Debug.Log("On joue les effets"); 
+        foreach (GameObject o in listeButtons) {
+            Destroy(o); 
+        }
+        listeButtons = new List<GameObject>();
+
+        ButtonFin.SetActive(false); 
+        ResetOrdreButton.SetActive(false); 
+
         // On joue les effets dans l'ordre de tri
         for (int i = 0; i < EventTotal; i++) {
             // On attend la fin de l'effet avant de passer au suivant.

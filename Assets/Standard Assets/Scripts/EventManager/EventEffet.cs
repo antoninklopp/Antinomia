@@ -19,7 +19,7 @@ public class EventEffet {
         }
     }
 
-    private Effet effet;
+    public Effet effet;
 
     /// <summary>
     /// Passe à true quand l'event est fini. 

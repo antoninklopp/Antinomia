@@ -1893,7 +1893,13 @@ public class GameManager : NetworkBehaviourAntinomia {
     }
 
     public void JouerEventManager() {
-        eventManager.GetComponent<EventManager>().JouerEffets(); 
+        try {
+            Debug.Log(eventManager);
+            Debug.Log(eventManager.GetComponent<EventManager>());
+            eventManager.GetComponent<EventManager>().CreerNouvellePileEvent();
+        } catch (NullReferenceException) {
+            Debug.Log("Impossible de jouer les effets pour le moment");
+        }
     }
 
     /// <summary>

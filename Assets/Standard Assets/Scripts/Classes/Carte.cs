@@ -600,6 +600,7 @@ public class Carte : NetworkBehaviourAntinomia {
             }
             // Si on ne joue pas l'effet directement, on l'ajoute à l'eventManager
             else if (effetOK && !jouerDirect) {
+                Debug.Log("On ne joue pas l'effet directement"); 
                 getGameManager().GetComponent<GameManager>().AjouterEffetEventManager(new EventEffet(_allEffets[i], gameObject)); 
             }
             else {
