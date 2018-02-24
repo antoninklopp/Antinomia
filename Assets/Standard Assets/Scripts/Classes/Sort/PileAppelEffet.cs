@@ -205,7 +205,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                     break; 
             }
 
-
+            getGameManager().GetComponent<GameManager>().ResetEventManager(); 
             for (int i = 0; i < allCardsPlayer.Count; i++) {
                 Debug.Log("On gere les effets ponctuels de la pile");
                 NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(allCardsPlayer[i], deposeCarte);
@@ -215,6 +215,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                     NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(thisCarte, deposeCarte);
                 }
             }
+            getGameManager().GetComponent<GameManager>().JouerEventManager();
         }
     }
 

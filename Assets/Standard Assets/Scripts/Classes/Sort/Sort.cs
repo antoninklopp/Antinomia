@@ -458,7 +458,7 @@ public class Sort : Carte, ICarte {
         }
 
         // Si les conditions ne sont pas vérifiées, on remet la carte dans la main du joueur. 
-        if (!GererEffets(AllEffets, Cible:CarteCiblee, debut: true)) {
+        if (!GererEffets(AllEffets, Cible:CarteCiblee, debut: true, jouerDirect:true)) {
             clicked = 0;
             dragging = false;
             // on remet l'image de la carte. 
@@ -503,7 +503,7 @@ public class Sort : Carte, ICarte {
             return false; 
         } else {
             // Effet global 
-            GererEffets(AllEffets, debut: true);
+            GererEffets(AllEffets, debut: true, jouerDirect:true);
             Debug.Log("Cette carte a un effet sur plusieurs cartes. "); 
             DetruireCarte();
             GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().sortLance += 1;

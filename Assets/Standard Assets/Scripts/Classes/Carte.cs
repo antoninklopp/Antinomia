@@ -566,9 +566,11 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="debut">true, si on la carte vient d'être posée</param>
     /// <param name="Cible">Si c'est un sort qui appelle la méthode, il peut déjà avoir une cible</param>
     /// <param name="nouveauTour">true si on vient de passer à un nouveau tour</param>
+    /// <param name="jouerDirect">True si l'effet est à jouer directement, après être passé par l'eventManager.</param>
     /// <returns>True si l'effet a pu être joué, false sinon. </returns>
     public bool GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false, 
-        bool nouveauTour=false, GameObject Cible=null, int numeroListEffet=0, int deposeCarte=0, bool changementDomination=false) {
+        bool nouveauTour=false, GameObject Cible=null, int numeroListEffet=0, int deposeCarte=0, bool changementDomination=false, 
+        bool jouerDirect=false) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
             return false; 
@@ -580,21 +582,26 @@ public class Carte : NetworkBehaviourAntinomia {
             // Il faut gérer indépendamment le cas où le joueur doit faire un choix à la depose de la carte.
             // TODO : A mieux gérer? 
             if (debut && _allEffets[i].AllConditionsEffet[0].ConditionCondition == Condition.ConditionEnum.CHOIX_DEPOSE) {
-                List<EffetPlusInfo> effets = new List<EffetPlusInfo>();
-                effets.Add(new EffetPlusInfo(_allEffets[i], i, numeroListEffet));
+                List<EffetPlusInfo> effets = new List<EffetPlusInfo> {
+                    new EffetPlusInfo(_allEffets[i], i, numeroListEffet)
+                };
                 Debug.Log("<color=red>On propose l'effet</color>"); 
                 ProposerEffets(effets);
                 continue;
             }
 
             bool effetOK = GererConditions(_allEffets[i].AllConditionsEffet, _currentPhase, debut:debut, nouveauTour:nouveauTour,
-                                               Cible:Cible, deposeCarte:deposeCarte, changementDomination:changementDomination);
+                                               Cible:Cible, deposeCarte:deposeCarte, changementDomination:changementDomination, jouerDirect:jouerDirect);
             Debug.Log("<color=orange>" + effetOK.ToString() + "</Color>"); 
-            if (effetOK) {
+            if (effetOK && jouerDirect) {
                 // Dans le cas où toutes les conditions sont réunies. 
                 GererActions(_allEffets[i].AllActionsEffet, CibleDejaChoisie:!(Cible==null), numeroEffet:i, 
                     effetListNumber:numeroListEffet);
-            } 
+            }
+            // Si on ne joue pas l'effet directement, on l'ajoute à l'eventManager
+            else if (effetOK && !jouerDirect) {
+                getGameManager().GetComponent<GameManager>().AjouterEffetEventManager(new EventEffet(_allEffets[i], gameObject)); 
+            }
             else {
                 Debug.Log("<color=orange>L'effet n'a pas pu être joué, pour diverses raisons. </color>" + Name);
                 return false; 
@@ -725,233 +732,233 @@ public class Carte : NetworkBehaviourAntinomia {
         _currentPhase = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Phase; 
         for (int j = 0; j < _conditions.Count; ++j) {
             Debug.Log("Int COndition" + _conditions[j].intCondition.ToString());
-            if (_conditions[j].dependsOnPhase &&
-                _currentPhase != _conditions[j].PhaseCondition) {
-                // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
-                Debug.Log(_currentPhase);
-                Debug.Log(_conditions[j].PhaseCondition); 
-                Debug.Log("Condition de phase non remplie");
-                return false;
-            }
-            else if (((_conditions[j].TourCondition == Condition.Tour.TOUR_LOCAL) && (
-                  GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour !=
-                  FindLocalPlayer().GetComponent<Player>().PlayerID)) ||
-                  (_conditions[j].TourCondition == Condition.Tour.TOUR_NOT_LOCAL)
-                  && (FindLocalPlayer().GetComponent<Player>().PlayerID ==
-                  GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour)) {
-                // La condition de tour n'est pas remplie, on passe donc à l'effet suivant. 
-                Debug.Log("Pas le bon tour");
-                return false;
-            }
-            else if (debut && (Math.Abs(_conditions[j].intCondition) >= 100)) {
-                // L'effet dépend donc d'une phase. 
-                Debug.Log("Cette effet dépend d'une phase particulière.");
-                return false;
-            }
-            else if (nouveauTour && !_conditions[j].dependsOnPhase) {
-                // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
-                Debug.Log("Le tour n'est pas bon.");
-                return false;
-            } else if (!_conditions[0].ActionObligatoire && !choixJoueur && j == 0) {
-                // Si on est pas sur une obligatoire et que le joueur n'a pas choisi de la jouer, on sort de là. 
-                // L'action obligatoire ne sera marquée que sur la première carte
-                Debug.Log("L'action n'est pas obligatoire" + Name);
-                Debug.Log(_conditions[j].intCondition);
-                return false;
-            }
-            else if (_conditions[j].utilisePourCeTour) {
-                // DisplayMessage("Cet effet a déjà été utilisé pour ce tour. ");
-                Debug.Log("Cet effet a déjà été utilisé pour ce tour.");
-                return false;
-            } else if (estMort && (_conditions[j].ConditionCondition != Condition.ConditionEnum.MORT)) {
-                // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditions lors de
-                // la mort d'une carte. 
-                Debug.Log("La carte n'a pas d'effets de mort");
-                return false;
-            } else if (changementDomination && (_conditions[0].ConditionCondition != Condition.ConditionEnum.CHANGEMENT_DOMINATION)) {
-                // Il faut TOUJOURS mettre la condition de changement de domination en premier. 
-                Debug.Log("Changement de domination"); 
-                return false;
-            } else if ((!changementDomination && !debut) && Math.Abs(_conditions[j].intCondition) < 100) {
-                // Si le numero de l'effet est inférieur à 100, on est sur un effet unique. 
-                // Il ne peut donc être target que par un changement de domination ou le debut d'une carte. 
-                Debug.Log("On est ici, changement domination"); 
-                return false; 
-            } else {
-                Debug.Log("<color=green>Verification de conditions </color>");
-                // if (_conditions[j].ActionObligatoire) {
-                // Dans le cas d'une action obligatoire. 
-                switch (_conditions[j].ConditionCondition) {
-                    case Condition.ConditionEnum.NONE:
-                        // Dans le cas où il n'y a aucune condition. 
-                        return true;
-                    case Condition.ConditionEnum.CHOIX_DEPOSE:
-                        // Cette condition aura été catch plus haut.
-                        return false; 
-                    case Condition.ConditionEnum.CARTES_CIMETIERE:
-                        if (FindLocalPlayer().transform.Find("Cimetiere").
-                            Find("CartesCimetiere").gameObject.GetComponent<Cimetiere>().NombreDeCartesDansCimetiere() <
-                            _conditions[j].properIntCondition) {
-                            return false;
-                        }
-                        break;
-                    case Condition.ConditionEnum.CHOIX_ELEMENT:
-                        // Permettre au joueur de choisir un élément.
-                        break;
-                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
-                        // Si on ne veut pas jouer la condition directement, il faut s'arrêter et ne pas proposer
-                        // à l'utilisateur de choisir une carte
-                        Debug.Log("On est ici");
-                        if (!jouerDirect) {
-                            break;
-                        }
-                        if (checkCibleNull(Cible)) {
-                            Debug.Log("On est ici"); 
-                            ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
-                        }
-                        Debug.Log("On est là"); 
-                        break;
-                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
-                        if (!jouerDirect) {
-                            break;
-                        }
-                        if (checkCibleNull(Cible)) {
-                            ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
-                                _conditions[j].properIntCondition);
-                        }
-                        break;
-                    case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
-                        if (!jouerDirect) {
-                            break;
-                        }
-                        if (checkCibleNull(Cible)) {
-                            ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
-                                _conditions[j].properIntCondition);
-                        }
-                        break;
-                    case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
-                        if (!jouerDirect) {
-                            break;
-                        }
-                        if (checkCibleNull(Cible)) {
-                            ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition);
-                        }
-                        break;
-                    case Condition.ConditionEnum.DEFAUSSER:
-                        if (!jouerDirect) {
-                            break;
-                        }
-                        ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
-                            _conditions[j].properIntCondition);
-                        break;
-                    case Condition.ConditionEnum.DELTA:
-                        // La condition delta est par rapport à TOUTES les cartes du terrain. 
-                        if (_conditions[j].properIntCondition + FindAllCartesLocal().Count >
-                            FindAllNotLocalCartes().Count) {
-                            return false;
-                        }
-                        break;
-                    case Condition.ConditionEnum.MORT:
-                        if (!estMort) {
-                            return false;
-                        }
-                        break;
-                    case Condition.ConditionEnum.PAYER_COUT_ELEMENTAIRE:
-                        // Dans le cas où l'on ne dépose pas une carte sur le sanctuaire
-                        // Le cout élémentaire ne peut être payé que lorsqu'on dépose une carte dans le sanctuaire. 
-                        Debug.Log("Payer cout elementaire" + deposeCarte.ToString());
-                        if (deposeCarte != 1) {
-                            return false;
-                        }
-                        else {
-                            // Sinon il faut regarder dans la pile s'il n'y a pas une carte qui veut se déplacer dans le sanctuaire
-                            if (!CheckIfCartePayeCoutElementaire(_conditions[j].properIntCondition)) {
-                                return false;
-                            }
-                        }
-                        break;
-                    case Condition.ConditionEnum.SACRIFIER_CARTE:
-                        // Lorsque la condition est le sacrifice d'une carte. 
-                        // Dans le cas du sacrifice d'une carte, il faut rajouter dans les effets le sacrifice de la carte. 
-                        Debug.Log("Une carte est sacrifiée, condition");
-                        // il faudra vérifier si la carte peut être sacrifiée. 
-                        break;
-                    case Condition.ConditionEnum.CARTE_SUR_CHAMP_BATAILLE:
-                        // Si la carte n'est pas sur le champ de bataille on s'arrête. 
-                        if (GetComponent<Entite>().EntiteState != Entite.State.CHAMPBATAILLE) {
-                            return false;
-                        }
-                        break;
-                    case Condition.ConditionEnum.CHOIX_ENTITE_NEUTRE_ADVERSAIRE:
-                        break;
-                    case Condition.ConditionEnum.CHOIX_ENTITE_NEUTRE_JOUEUR:
-                        break;
-                    case Condition.ConditionEnum.PAYER_AKA:
-                        // On vérifie que le joueur a assez d'AKA 
-                        if (_conditions[j].properIntCondition > FindLocalPlayer().GetComponent<Player>().getAKA()) {
-                            DisplayMessage("Vous n'avez pas assez d'AKA");
-                            Debug.Log("Impossible de payer l'AKA"); 
-                            return false; 
-                        } 
-                        break;
-                    case Condition.ConditionEnum.CARTE_DANS_SANCTUAIRE:
-                        if (GetComponent<CarteType>().thisCarteType != CarteType.Type.ENTITE) {
-                            return false; 
-                        } else if (GetComponent<Entite>().EntiteState != Entite.State.SANCTUAIRE) {
-                            return false; 
-                        }
-                        break;
-                    case Condition.ConditionEnum.OBLIGATOIRE:
-                        break;
-                    case Condition.ConditionEnum.DEFAUSSER_TYPE:
-                        ShowCardsForChoiceType(_conditions[j].properIntCondition); 
-                        break;
-                    case Condition.ConditionEnum.DOMINATION:
-                        // On vérifie que l'ascendance correspond. 
-                        if ((_conditions[j].properIntCondition == 1 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
-                            GameManager.AscendanceTerrain.NONE) ||
-                            (_conditions[j].properIntCondition == 2 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
-                            GameManager.AscendanceTerrain.ASTRALE) ||
-                            (_conditions[j].properIntCondition == 3 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
-                            GameManager.AscendanceTerrain.MALEFIQUE)) {
-                            Debug.Log("Mauvaise condition de domination");
-                            Debug.Log(_conditions[j].properIntCondition);
-                            Debug.Log(getGameManager().GetComponent<GameManager>().ascendanceTerrain); 
-                            return false; 
-                        }
-                        break;
-                    case Condition.ConditionEnum.CHANGEMENT_DOMINATION:
-                        // S'il n'y a pas de changement de domination ou si le changement ne correspondau type maléfique/astral 
-                        // demandé
-                        Debug.Log("Proper int condition : " + _conditions[j].properIntCondition); 
-                        if (!changementDomination ||  
-                            (_conditions[j].properIntCondition == 1 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
-                            GameManager.AscendanceTerrain.NONE) ||
-                            (_conditions[j].properIntCondition == 2 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
-                            GameManager.AscendanceTerrain.ASTRALE) ||
-                            (_conditions[j].properIntCondition == 3 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
-                            GameManager.AscendanceTerrain.MALEFIQUE)) {
-                            return false;
-                        }
-                        break;
-                    case Condition.ConditionEnum.DECLARE_ATTAQUE:
-                        Debug.Log("La carte ne déclare pas d'attaque"); 
-                        if (!CheckIfCarteDeclareAttaque(_conditions)) {
-                            return false; 
-                        } 
-                        break;
-                    default:
-                        Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
-                        break;
-                        //}
+            // On ne vérifie les conditions que si on ne joue pas directement l'effet. 
+            if (!jouerDirect) {
+                if (_conditions[j].dependsOnPhase &&
+                    _currentPhase != _conditions[j].PhaseCondition) {
+                    // La condition de phase n'est pas remplie, donc on passe à l'effet suivant 
+                    Debug.Log(_currentPhase);
+                    Debug.Log(_conditions[j].PhaseCondition);
+                    Debug.Log("Condition de phase non remplie");
+                    return false;
                 }
-                //else {
-                // Si l'action n'est pas obligatoire, on n'oblige pas le joueur à jouer cet effet à ce moment précis. 
-                // On fait donc un break et passe à l'effet suivant. 
-                //   break;
-                //}
-                Debug.Log("<color=green>effet est OK</color>");
+                else if (((_conditions[j].TourCondition == Condition.Tour.TOUR_LOCAL) && (
+                      GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour !=
+                      FindLocalPlayer().GetComponent<Player>().PlayerID)) ||
+                      (_conditions[j].TourCondition == Condition.Tour.TOUR_NOT_LOCAL)
+                      && (FindLocalPlayer().GetComponent<Player>().PlayerID ==
+                      GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour)) {
+                    // La condition de tour n'est pas remplie, on passe donc à l'effet suivant. 
+                    Debug.Log("Pas le bon tour");
+                    return false;
+                }
+                else if (debut && (Math.Abs(_conditions[j].intCondition) >= 100)) {
+                    // L'effet dépend donc d'une phase. 
+                    Debug.Log("Cette effet dépend d'une phase particulière.");
+                    return false;
+                }
+                else if (nouveauTour && !_conditions[j].dependsOnPhase) {
+                    // une carte dont l'effet ne dépend pas de la phase ne peut pas jouer son effet lors d'un nouveau tour.
+                    Debug.Log("Le tour n'est pas bon.");
+                    return false;
+                }
+                else if (!_conditions[0].ActionObligatoire && !choixJoueur && j == 0) {
+                    // Si on est pas sur une obligatoire et que le joueur n'a pas choisi de la jouer, on sort de là. 
+                    // L'action obligatoire ne sera marquée que sur la première carte
+                    Debug.Log("L'action n'est pas obligatoire" + Name);
+                    Debug.Log(_conditions[j].intCondition);
+                    return false;
+                }
+                else if (_conditions[j].utilisePourCeTour) {
+                    // DisplayMessage("Cet effet a déjà été utilisé pour ce tour. ");
+                    Debug.Log("Cet effet a déjà été utilisé pour ce tour.");
+                    return false;
+                }
+                else if (estMort && (_conditions[j].ConditionCondition != Condition.ConditionEnum.MORT)) {
+                    // Il faudra TOUJOURS mettre la condition de mort en premier dans la liste de conditions lors de
+                    // la mort d'une carte. 
+                    Debug.Log("La carte n'a pas d'effets de mort");
+                    return false;
+                }
+                else if (changementDomination && (_conditions[0].ConditionCondition != Condition.ConditionEnum.CHANGEMENT_DOMINATION)) {
+                    // Il faut TOUJOURS mettre la condition de changement de domination en premier. 
+                    Debug.Log("Changement de domination");
+                    return false;
+                }
+                else if ((!changementDomination && !debut) && Math.Abs(_conditions[j].intCondition) < 100) {
+                    // Si le numero de l'effet est inférieur à 100, on est sur un effet unique. 
+                    // Il ne peut donc être target que par un changement de domination ou le debut d'une carte. 
+                    Debug.Log("On est ici, changement domination");
+                    return false;
+                }
             }
+            Debug.Log("<color=green>Verification de conditions </color>");
+            // if (_conditions[j].ActionObligatoire) {
+            // Dans le cas d'une action obligatoire. 
+            switch (_conditions[j].ConditionCondition) {
+                case Condition.ConditionEnum.NONE:
+                    // Dans le cas où il n'y a aucune condition. 
+                    return true;
+                case Condition.ConditionEnum.CHOIX_DEPOSE:
+                    // Cette condition aura été catch plus haut.
+                    return false; 
+                case Condition.ConditionEnum.CARTES_CIMETIERE:
+                    if (FindLocalPlayer().transform.Find("Cimetiere").
+                        Find("CartesCimetiere").gameObject.GetComponent<Cimetiere>().NombreDeCartesDansCimetiere() <
+                        _conditions[j].properIntCondition) {
+                        return false;
+                    }
+                    break;
+                case Condition.ConditionEnum.CHOIX_ELEMENT:
+                    // Permettre au joueur de choisir un élément.
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
+                    // Si on ne veut pas jouer la condition directement, il faut s'arrêter et ne pas proposer
+                    // à l'utilisateur de choisir une carte
+                    Debug.Log("On est ici");
+                    if (!jouerDirect) {
+                        break;
+                    }
+                    if (checkCibleNull(Cible)) {
+                        Debug.Log("On est ici"); 
+                        ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
+                    }
+                    Debug.Log("On est là"); 
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
+                    if (!jouerDirect) {
+                        break;
+                    }
+                    if (checkCibleNull(Cible)) {
+                        ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                            _conditions[j].properIntCondition);
+                    }
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
+                    if (!jouerDirect) {
+                        break;
+                    }
+                    if (checkCibleNull(Cible)) {
+                        ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                            _conditions[j].properIntCondition);
+                    }
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
+                    if (!jouerDirect) {
+                        break;
+                    }
+                    if (checkCibleNull(Cible)) {
+                        ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition);
+                    }
+                    break;
+                case Condition.ConditionEnum.DEFAUSSER:
+                    if (!jouerDirect) {
+                        break;
+                    }
+                    ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
+                        _conditions[j].properIntCondition);
+                    break;
+                case Condition.ConditionEnum.DELTA:
+                    // La condition delta est par rapport à TOUTES les cartes du terrain. 
+                    if (_conditions[j].properIntCondition + FindAllCartesLocal().Count >
+                        FindAllNotLocalCartes().Count) {
+                        return false;
+                    }
+                    break;
+                case Condition.ConditionEnum.MORT:
+                    if (!estMort) {
+                        return false;
+                    }
+                    break;
+                case Condition.ConditionEnum.PAYER_COUT_ELEMENTAIRE:
+                    // Dans le cas où l'on ne dépose pas une carte sur le sanctuaire
+                    // Le cout élémentaire ne peut être payé que lorsqu'on dépose une carte dans le sanctuaire. 
+                    Debug.Log("Payer cout elementaire" + deposeCarte.ToString());
+                    if (deposeCarte != 1) {
+                        return false;
+                    }
+                    else {
+                        // Sinon il faut regarder dans la pile s'il n'y a pas une carte qui veut se déplacer dans le sanctuaire
+                        if (!CheckIfCartePayeCoutElementaire(_conditions[j].properIntCondition)) {
+                            return false;
+                        }
+                    }
+                    break;
+                case Condition.ConditionEnum.SACRIFIER_CARTE:
+                    // Lorsque la condition est le sacrifice d'une carte. 
+                    // Dans le cas du sacrifice d'une carte, il faut rajouter dans les effets le sacrifice de la carte. 
+                    Debug.Log("Une carte est sacrifiée, condition");
+                    // il faudra vérifier si la carte peut être sacrifiée. 
+                    break;
+                case Condition.ConditionEnum.CARTE_SUR_CHAMP_BATAILLE:
+                    // Si la carte n'est pas sur le champ de bataille on s'arrête. 
+                    if (GetComponent<Entite>().EntiteState != Entite.State.CHAMPBATAILLE) {
+                        return false;
+                    }
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_NEUTRE_ADVERSAIRE:
+                    break;
+                case Condition.ConditionEnum.CHOIX_ENTITE_NEUTRE_JOUEUR:
+                    break;
+                case Condition.ConditionEnum.PAYER_AKA:
+                    // On vérifie que le joueur a assez d'AKA 
+                    if (_conditions[j].properIntCondition > FindLocalPlayer().GetComponent<Player>().getAKA()) {
+                        DisplayMessage("Vous n'avez pas assez d'AKA");
+                        Debug.Log("Impossible de payer l'AKA"); 
+                        return false; 
+                    } 
+                    break;
+                case Condition.ConditionEnum.CARTE_DANS_SANCTUAIRE:
+                    if (GetComponent<CarteType>().thisCarteType != CarteType.Type.ENTITE) {
+                        return false; 
+                    } else if (GetComponent<Entite>().EntiteState != Entite.State.SANCTUAIRE) {
+                        return false; 
+                    }
+                    break;
+                case Condition.ConditionEnum.OBLIGATOIRE:
+                    break;
+                case Condition.ConditionEnum.DEFAUSSER_TYPE:
+                    ShowCardsForChoiceType(_conditions[j].properIntCondition); 
+                    break;
+                case Condition.ConditionEnum.DOMINATION:
+                    // On vérifie que l'ascendance correspond. 
+                    if ((_conditions[j].properIntCondition == 1 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                        GameManager.AscendanceTerrain.NONE) ||
+                        (_conditions[j].properIntCondition == 2 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                        GameManager.AscendanceTerrain.ASTRALE) ||
+                        (_conditions[j].properIntCondition == 3 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                        GameManager.AscendanceTerrain.MALEFIQUE)) {
+                        Debug.Log("Mauvaise condition de domination");
+                        Debug.Log(_conditions[j].properIntCondition);
+                        Debug.Log(getGameManager().GetComponent<GameManager>().ascendanceTerrain); 
+                        return false; 
+                    }
+                    break;
+                case Condition.ConditionEnum.CHANGEMENT_DOMINATION:
+                    // S'il n'y a pas de changement de domination ou si le changement ne correspondau type maléfique/astral 
+                    // demandé
+                    Debug.Log("Proper int condition : " + _conditions[j].properIntCondition); 
+                    if (!changementDomination ||  
+                        (_conditions[j].properIntCondition == 1 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                        GameManager.AscendanceTerrain.NONE) ||
+                        (_conditions[j].properIntCondition == 2 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                        GameManager.AscendanceTerrain.ASTRALE) ||
+                        (_conditions[j].properIntCondition == 3 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
+                        GameManager.AscendanceTerrain.MALEFIQUE)) {
+                        return false;
+                    }
+                    break;
+                case Condition.ConditionEnum.DECLARE_ATTAQUE:
+                    Debug.Log("La carte ne déclare pas d'attaque"); 
+                    if (!CheckIfCarteDeclareAttaque(_conditions)) {
+                        return false; 
+                    } 
+                    break;
+                default:
+                    Debug.LogWarning("<color=rouge>Cette capacité n'est pas encore gérée par le code</color>");
+                    break;
+            }
+            Debug.Log("<color=green>effet est OK</color>");
         }
         Debug.Log(effetOK);
         return effetOK;
@@ -1164,6 +1171,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
                         DisplayMessage("Ajout de " + _actions[j].intAction.ToString() + "AKA à ce tour");
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
@@ -1173,6 +1181,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction));
                         DisplayMessage("Pioche " + _actions[j].properIntAction.ToString() + " carte");
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                         Debug.Log("<color=purple> Piocher une carte </color>");
                     } else if (j == 0) {
                         MettreEffetDansLaPile(null, numeroEffet, effetListNumber);
@@ -1182,6 +1191,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     // Sacrifier cette carte. 
                     DisplayMessage("<color=orange>Sacrifice de cette carte</color>");
                     if (jouerEffet) {
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                         SacrifierCarteEntite();
                     }
                     else if (j == 0){
@@ -1192,6 +1202,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         DisplayMessage("On place cette carte dans le sanctuaire");
                         PlacerSanctuaire();
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
@@ -1210,10 +1221,12 @@ public class Carte : NetworkBehaviourAntinomia {
                             }
                         }
                     }
+                    getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
                     GetComponent<Entite>().hasAttacked = -1;
                     DisplayMessage("Cette entité ne peut pas attaquer");
+                    getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.DEFAUSSER:
                     // On propose de défausser. 
@@ -1237,18 +1250,22 @@ public class Carte : NetworkBehaviourAntinomia {
                     Debug.Log("<color=purple>Reveler carte adversaire</color>");
                     FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame,
                         "RevelerCarteEffet", _actions[j].properIntAction, FindLocalPlayer().GetComponent<Player>().PlayerID);
+                    getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.ATTAQUE_DIRECTE:
                     attaqueDirecte = true;
+                    getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.FORTE_ENTITE:
                     // si une entité est forte face à l'entité d'un autre joueur
                     CarteForteFaceA(_actions[j].properIntAction);
+                    getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.PROCURE_AKA_SUPPLEMENTAIRE:
                     // Une carte peut procurer de l'AKA supplémentaire.
                     Debug.Log("Cette carte procure un AKA supplémentaire");
                     FindLocalPlayer().GetComponent<Player>().addAKA(_actions[j].properIntAction);
+                    getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case (Action.ActionEnum.NATURE_AIR):
                     if (jouerEffet) {
@@ -1339,6 +1356,7 @@ public class Carte : NetworkBehaviourAntinomia {
                                 g.GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, g.GetComponent<Carte>().IDCardGame);
                             }
                         }
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
@@ -1352,6 +1370,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     // On change l'ascendance du terrain en astral. 
                     if (jouerEffet) {
                         getGameManager().GetComponent<GameManager>().SetAscendanceTerrain(GameManager.AscendanceTerrain.ASTRALE);
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
@@ -1361,6 +1380,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     // On change l'ascendance du terrain en maléfique. 
                     if (jouerEffet) {
                         getGameManager().GetComponent<GameManager>().SetAscendanceTerrain(GameManager.AscendanceTerrain.MALEFIQUE);
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
@@ -1371,6 +1391,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log("<color=green>CA PART222</color>");
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
                         _actions[j].properIntAction);
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         Debug.Log("<color=green>CA PART</color>");
@@ -1408,6 +1429,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         // Comme c'est un cout à payer, on le paye directement, pas besoin de payer deux fois. 
                         FindLocalPlayer().GetComponent<Player>().subtractAKA(_actions[j].properIntAction);
+                        getGameManager().GetComponent<GameManager>().SetEffetFini();
                     } else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
@@ -1896,6 +1918,7 @@ public class Carte : NetworkBehaviourAntinomia {
             CartesChoisiesPourEffets[0].GetComponent<Entite>().ChangerPosition();
             Debug.Log("L'effet changement de position a été autorisé");
         }
+        getGameManager().GetComponent<GameManager>().SetEffetFini(); 
         CartesChoisiesPourEffets = null; 
     }
 
@@ -1920,7 +1943,7 @@ public class Carte : NetworkBehaviourAntinomia {
             Debug.Log("L'effet changement de position a été autorisé");
         }
 
-
+        getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
     }
 
@@ -1945,6 +1968,7 @@ public class Carte : NetworkBehaviourAntinomia {
             CartesChoisiesPourEffets[0].GetComponent<Entite>().CmdChangeElement(newElement, true);
             Debug.Log("L'effet changement de position a été autorisé");
         }
+        getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
 
     }
@@ -1971,7 +1995,7 @@ public class Carte : NetworkBehaviourAntinomia {
             Debug.Log(CartesChoisiesPourEffets[i].GetComponent<Entite>().Name); 
             CartesChoisiesPourEffets[i].SendMessage("DetruireCarte");
         }
-
+        getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2012,6 +2036,7 @@ public class Carte : NetworkBehaviourAntinomia {
             // On détruit les cartes choisies 
             CartesChoisiesPourEffets[i].SendMessage("DetruireCarte"); 
         }
+        getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2042,7 +2067,8 @@ public class Carte : NetworkBehaviourAntinomia {
             AllCartesChoisiesString[i] = stringCartei;
         }
         FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString, "Cartes montrées", 
-            GameManager.FindLocalPlayerID()); 
+            GameManager.FindLocalPlayerID());
+        getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2141,7 +2167,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="_currentPhase">Phase en train d'être jouée</param>
     public virtual void CartePeutJouer(Player.Phases _currentPhase) {
         if (CarteJouerReponseEffet(_currentPhase)) {
-            setColor(Color.blue); 
+            // setColor(Color.blue); 
         }
     }
 
@@ -2238,6 +2264,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     "CmdAddStat", _intToAdd, FindLocalPlayer().GetComponent<Player>().PlayerID);
             }
         }
+        getGameManager().GetComponent<GameManager>().SetEffetFini();
     }
 
     /// <summary>

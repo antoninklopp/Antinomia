@@ -296,7 +296,8 @@ public class GameManager : NetworkBehaviourAntinomia {
         EndGame.SetActive(false);
         InfoEffetTransmis = GameObject.Find("InfoEffetTransmis");
         InfoEffetTransmis.SetActive(false);
-        GameManagerInformation = GameObject.Find("InformationManager"); 
+        GameManagerInformation = GameObject.Find("InformationManager");
+        eventManager = GameObject.Find("EventManager");
 	}
 
 	IEnumerator CoroutineDebugPhase(){
@@ -528,6 +529,9 @@ public class GameManager : NetworkBehaviourAntinomia {
                 Debug.Log(e); 
             }
         }
+
+        // Une fois qu'on a cherché tous les effets, on les joue depuis l'eventManager
+        JouerEventManager(); 
     }
 
     /// <summary>
@@ -1147,6 +1151,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         for (int i = 0; i < AllCartes.Length; ++i) {
             AllCartes[i].GetComponent<Entite>().UpdateChangementAscendanceTerrain(ascendanceTerrain, previousAscendance); 
         }
+        JouerEventManager(); 
     }
 
     /// <summary>
@@ -1674,6 +1679,11 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     public void CheckAllEffetsCartes(bool changementDomination = false) {
         GameObject[] AllEntites = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
+
+        // On reset d'abord l'eventManager
+
+        ResetEventManager(); 
+
         for (int i = 0; i < AllEntites.Length; ++i) {
             try {
                 if (AllEntites[i].GetComponent<Entite>().isFromLocalPlayer) {
@@ -1697,6 +1707,9 @@ public class GameManager : NetworkBehaviourAntinomia {
                 Debug.Log(e);
             }
         }
+
+        // Une fois qu'on a tout check, on joue tous les effets. 
+        JouerEventManager(); 
     }
 
     /// <summary>
@@ -1869,6 +1882,25 @@ public class GameManager : NetworkBehaviourAntinomia {
         InfoEffetTransmis.GetComponent<Text>().text = message;
         yield return new WaitForSeconds(2f);
         InfoEffetTransmis.SetActive(false); 
+    }
+
+    public void AjouterEffetEventManager(EventEffet ef) {
+        eventManager.GetComponent<EventManager>().AjouterEffet(ef); 
+    }
+
+    public void ResetEventManager() {
+        eventManager.GetComponent<EventManager>().Reset(); 
+    }
+
+    public void JouerEventManager() {
+        eventManager.GetComponent<EventManager>().JouerEffets(); 
+    }
+
+    /// <summary>
+    /// A appeler à chaque fin d'un effet
+    /// </summary>
+    public void SetEffetFini() {
+        eventManager.GetComponent<EventManager>().EffetFiniOK(); 
     }
 
 }

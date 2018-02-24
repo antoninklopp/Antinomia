@@ -9,7 +9,7 @@ using System;
 /// Gestion des evenements s'il y a plusieurs effets à faire en même temps. 
 /// Script attaché à un objet qui représente cet event manager. 
 /// </summary>
-public class EventManager : MonoBehaviour {
+public class EventManager : MonoBehaviourAntinomia {
 
     private List<GameObject> listeButtons;
 
@@ -25,16 +25,24 @@ public class EventManager : MonoBehaviour {
     /// <summary>
     /// Nombre total d'event. 
     /// </summary>
-    public int EventTotal; 
+    public int EventTotal;
+
+    private bool EffetFini = false;
+
+    private GameObject ButtonFin;
+
+    /// <summary>
+    /// Bouton qui permet de remettre l'ordre des effets à 0
+    /// Dans le cas où le joueur s'est trompé et veut changer l'ordre des effets. 
+    /// </summary>
+    private GameObject ResetOrdreButton; 
 
 	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+	public override void Start () {
+        ButtonFin = GameObject.Find("FinEventManager");
+        ButtonFin.SetActive(false);
+        ResetOrdreButton = GameObject.Find("ResetOrdre");
+        ResetOrdreButton.SetActive(false); 
 	}
 
     public void AjouterEffet(EventEffet ef) {
@@ -51,7 +59,20 @@ public class EventManager : MonoBehaviour {
     /// </summary>
     public void CliqueEffet(int nombre) {
         listeEvents[nombre].EventInt = EventCourant;
-        EventCourant++; 
+        EventCourant++;
+
+        listeButtons[nombre].transform.Find("Number").gameObject.GetComponent<Text>().text = EventCourant.ToString(); 
+    }
+
+    /// <summary>
+    /// Appui sur le bouton de fin de choix
+    /// Il faut vérifier que tous les effets aient bien été choisis. 
+    /// </summary>
+    public void ChoixFini() {
+        if(EventCourant != EventTotal) {
+            GameObject.Find("GameManager").GetComponent<GameManager>().DisplayMessage("Vous n'avez pas tout choisi"); 
+        }
+        ButtonFin.SetActive(false); 
     }
 
     /// <summary>
@@ -64,7 +85,8 @@ public class EventManager : MonoBehaviour {
             return; 
         }
         EventTotal = allEvent.Count;
-        SetUpButtons(); 
+        SetUpButtons();
+        ButtonFin.SetActive(true); 
     }
 
 
@@ -80,6 +102,60 @@ public class EventManager : MonoBehaviour {
             newButton.GetComponent<Button>().onClick.AddListener(delegate { CliqueEffet(number); });
 
             listeButtons.Add(newButton);
+        }
+    }
+
+    public void Reset() {
+        listeEvents = new List<EventEffet>();
+        EventCourant = 0;
+        EventTotal = 0; 
+    }
+
+    /// <summary>
+    /// Jouer tous les effets dans l'eventManager. 
+    /// A la fin on reset l'eventManager
+    /// </summary>
+    public IEnumerator JouerEffets() {
+        // On joue les effets dans l'ordre de tri
+        for (int i = 0; i < EventTotal; i++) {
+            // On attend la fin de l'effet avant de passer au suivant.
+            FindEffet(i).Jouer();
+            while (!EffetFini) {
+                yield return new WaitForSeconds(0.2f); 
+            }
+            EffetFini = false; 
+        }
+        Reset(); 
+    }
+
+    /// <summary>
+    /// Trouve l'effet dans la liste correspondant au nombre recherché. 
+    /// </summary>
+    /// <param name="number"></param>
+    /// <returns></returns>
+    private EventEffet FindEffet(int number) {
+        foreach (EventEffet ef in listeEvents) {
+            if (ef.EventInt == number) {
+                return ef; 
+            }
+        }
+        throw new UnusualBehaviourException("L'effet n'a pas été trouvé");
+    }
+
+    /// <summary>
+    /// Passe EffetFini à true lorsqu'on trouve la fin d'un effet. 
+    /// </summary>
+    public void EffetFiniOK() {
+        EffetFini = true; 
+    }
+
+    /// <summary>
+    /// Remettre l'ordre des event à 0. 
+    /// </summary>
+    public void ResetOrdre() {
+        EventCourant = 0;
+        foreach (GameObject o in listeButtons) {
+            o.transform.Find("Number").gameObject.GetComponent<Text>().text = ""; 
         }
     }
 
