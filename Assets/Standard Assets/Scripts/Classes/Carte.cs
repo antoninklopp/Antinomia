@@ -579,6 +579,11 @@ public class Carte : NetworkBehaviourAntinomia {
             // On regarde les effets un par un. 
             // Si à la fin des conditions effetOk == true, alors on pourra réaliser l'effet.
 
+            // On pourrait avoir des effets null dans la liste, on les passe
+            if (_allEffets[i] == null) {
+                continue; 
+            }
+
             // Il faut gérer indépendamment le cas où le joueur doit faire un choix à la depose de la carte.
             // TODO : A mieux gérer? 
             if (debut && _allEffets[i].AllConditionsEffet[0].ConditionCondition == Condition.ConditionEnum.CHOIX_DEPOSE) {
@@ -601,7 +606,11 @@ public class Carte : NetworkBehaviourAntinomia {
             // Si on ne joue pas l'effet directement, on l'ajoute à l'eventManager
             else if (effetOK && !jouerDirect) {
                 Debug.Log("On ne joue pas l'effet directement"); 
-                getGameManager().GetComponent<GameManager>().AjouterEffetEventManager(new EventEffet(_allEffets[i], gameObject)); 
+                getGameManager().GetComponent<GameManager>().AjouterEffetEventManager(
+                    new EventEffet(
+                        new EffetPlusInfo(_allEffets[i], i, numeroListEffet)
+                        , gameObject)
+                    ); 
             }
             else {
                 Debug.Log("<color=orange>L'effet n'a pas pu être joué, pour diverses raisons. </color>" + Name);
@@ -2009,7 +2018,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">numéro de l'effet dans la liste des effets</param>
     /// <param name="numeroListEffet">numero de la liste des effets (facultatif)</param>
     /// <returns></returns>
-    private IEnumerator MettreEffetDansLaPileFromActions(int numeroEffet, bool CibleDejaChoisie = false, int numeroListEffet = 0) {
+    public IEnumerator MettreEffetDansLaPileFromActions(int numeroEffet, bool CibleDejaChoisie = false, int numeroListEffet = 0) {
         Debug.Log(CibleDejaChoisie);
         if (!CibleDejaChoisie) {
             yield return WaitForCardsChosen(); 

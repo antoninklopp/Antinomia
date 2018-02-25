@@ -1383,6 +1383,25 @@ public class GameManager : NetworkBehaviourAntinomia {
     }
 
     /// <summary>
+    /// Informer l'autre joueur d'un effet sans lui proposer de mettre le jeu en pause ! 
+    /// Peut arriver lorsque plusieurs effets sont joués à la suite chez un joueur. 
+    /// </summary>
+    /// <param name="playerID"></param>
+    /// <param name="message"></param>
+    public void InformerEffet(int playerID = 0, string message="") {
+        if ((FindLocalPlayerID() != playerID) || (playerID == 0)) {
+            // Si on a reçu un effet, c'est que l'adversaire a réagi, le jeu n'est plus en pause. 
+            FindLocalPlayer().GetComponent<Player>().CmdOnlySetPause(false);
+            PauseButton.SetActive(true);
+            StartCoroutine(ShowTimeSpendPause(1f));
+            if (message != "") {
+                // Si un message est fourni lors de l'appel, on l'affiche
+                DisplayInfoToPlayer(message);
+            }
+        }
+    }
+
+    /// <summary>
     /// Montrer au joueur pendant combien de temps il peut encore faire pause.
     /// ANIMATION
     /// </summary>
@@ -1907,6 +1926,10 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     public void SetEffetFini() {
         eventManager.GetComponent<EventManager>().EffetFiniOK(); 
+    }
+
+    public bool IsAllEffetsFinis() {
+        return eventManager.GetComponent<EventManager>().IsAllEffetsFini(); 
     }
 
 }

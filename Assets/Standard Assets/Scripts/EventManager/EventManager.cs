@@ -32,6 +32,11 @@ public class EventManager : MonoBehaviourAntinomia {
     private GameObject ButtonFin;
 
     /// <summary>
+    /// Passe à true quand TOUS les effets qui doivent être joués sont finis.
+    /// </summary>
+    private bool TousEffetsFini = true; 
+
+    /// <summary>
     /// Bouton qui permet de remettre l'ordre des effets à 0
     /// Dans le cas où le joueur s'est trompé et veut changer l'ordre des effets. 
     /// </summary>
@@ -85,8 +90,8 @@ public class EventManager : MonoBehaviourAntinomia {
             return; 
         }
 
-        if (listeEvents.Count == 1) {
-            listeEvents[0].Jouer();
+        if (EffetsDemandeInteraction() < 1) {
+            JouerUnEffet(listeEvents[0]); 
             return; 
         }
 
@@ -127,6 +132,7 @@ public class EventManager : MonoBehaviourAntinomia {
     /// </summary>
     public IEnumerator JouerEffets() {
         // On détruit tous les boutons pour qu'ils ne soient plus visibles. 
+        TousEffetsFini = false; 
         Debug.Log("On joue les effets"); 
         foreach (GameObject o in listeButtons) {
             Destroy(o); 
@@ -138,14 +144,19 @@ public class EventManager : MonoBehaviourAntinomia {
 
         // On joue les effets dans l'ordre de tri
         for (int i = 0; i < EventTotal; i++) {
+            // On met TousEffetsFini à true avant de jouer le dernier effet pour que le joueur adverse puisse répondre.
+            if (i == EventTotal - 1) {
+                TousEffetsFini = true; 
+            }
             // On attend la fin de l'effet avant de passer au suivant.
-            FindEffet(i).Jouer();
+            JouerUnEffet(FindEffet(i)); 
             while (!EffetFini) {
                 yield return new WaitForSeconds(0.2f); 
             }
+            Debug.Log("<color=purple> Un effet est fini</color>"); 
             EffetFini = false; 
         }
-        Reset(); 
+        Reset();
     }
 
     /// <summary>
@@ -179,5 +190,30 @@ public class EventManager : MonoBehaviourAntinomia {
         }
     }
 
+    /// <summary>
+    /// Renvoie le nombre d'effets qui demandent un
+    /// </summary>
+    /// <returns></returns>
+    private int EffetsDemandeInteraction() {
+        int somme = 0; 
+        foreach (EventEffet ef in listeEvents) {
+            if (ef.demandeInteraction) {
+                somme++; 
+            }
+        }
+        return somme; 
+    }
 
+    public bool IsAllEffetsFini() {
+        return TousEffetsFini; 
+    }
+
+    private void JouerUnEffet(EventEffet ef) {
+        // il faut recréer une liste d'effets avec effet dans la bonne position, pour qu'il n'y ait pas de problèems
+        // lors de la transmission des infos..
+        // On mettra donc des elements à null pour compléter
+        StartCoroutine(ef.CarteAssociee.GetComponent<Carte>().MettreEffetDansLaPileFromActions(
+            ef.effet.numeroEffet, numeroListEffet: ef.effet.numeroListEffet
+        ));
+    }
 }

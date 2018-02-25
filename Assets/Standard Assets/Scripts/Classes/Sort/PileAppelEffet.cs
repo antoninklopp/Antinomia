@@ -132,9 +132,11 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
             // On vérifie que ce n'est pas un effet "spécial" tel qu'une attaque ou un déplacement.
             // Attaque
             case -1:
-                effetJoue = new Effet();
-                effetJoue.AllActionsEffet = new List<Action>();
-                effetJoue.AllActionsEffet.Add(new Action(Action.ActionEnum.ATTAQUE, 0));
+                effetJoue = new Effet {
+                    AllActionsEffet = new List<Action> {
+                        new Action(Action.ActionEnum.ATTAQUE, 0)
+                    }
+                };
                 break;
             // Changement de phase
             case -4:
@@ -170,7 +172,11 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On propose à tous les joueurs de répondre/ajouter des effets à la pile
-            InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
+            if (getGameManager().GetComponent<GameManager>().IsAllEffetsFinis()) {
+                InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
+            } else {
+                InformerSansPause(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet()); 
+            }
             AntinomiaLog("L'effet devrait être display"); 
         }
         // On ne regarde les effets que si on est chez le joueur qui a créé l'effet. 
@@ -224,6 +230,10 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// </summary>
     void InformerAjoutEffetPile(string Phrase) {
         StartCoroutine(getGameManager().GetComponent<GameManager>().ProposeToPauseGame(message:Phrase)); 
+    }
+
+    void InformerSansPause(string Phrase) {
+        getGameManager().GetComponent<GameManager>().InformerEffet(message: Phrase);
     }
 
     /// <summary>

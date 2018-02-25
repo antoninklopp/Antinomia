@@ -16,9 +16,16 @@ public class Sort : Carte, ICarte {
      /// Pour pouvoir être joué, un sort doit avoir un niveau inférieur ou égal à l'AKA rémanent calculé au début du tour.
      /// </summary>
     public int Niveau;
+
+    /// <summary>
+    /// Condition du sort
+    /// </summary>
     public string ConditionSort;
     public int CoutAKA;
 
+    /// <summary>
+    /// True si la carte est en train d'etre déplacé en drag
+    /// </summary>
     private bool dragging;
 
     private Vector3 positionBeforeDragging;
@@ -258,6 +265,7 @@ public class Sort : Carte, ICarte {
         if (Math.Abs(transform.position.y - positionBeforeDragging.y) < 1f) {
             DisplayMessage("Sort reposé dans la main"); 
             Main.GetComponent<MainJoueur>().ReordonnerCarte();
+            clicked = 0; 
             return; 
         }
 

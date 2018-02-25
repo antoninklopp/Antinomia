@@ -19,7 +19,7 @@ public class EventEffet {
         }
     }
 
-    public Effet effet;
+    public EffetPlusInfo effet;
 
     /// <summary>
     /// Passe à true quand l'event est fini. 
@@ -31,7 +31,7 @@ public class EventEffet {
     /// </summary>
     public bool demandeInteraction = false; 
 
-    private GameObject CarteAssociee; 
+    public GameObject CarteAssociee;
 
     // Use this for initialization
     void Start () {
@@ -43,18 +43,11 @@ public class EventEffet {
 		
 	}
 
-    /// <summary>
-    /// Jouer l'evenement. 
-    /// </summary>
-    public void Jouer() {
-        CarteAssociee.GetComponent<Carte>().GererEffets(new List<Effet>() { effet }, jouerDirect:true); 
-    }
-
     public EventEffet() {
 
     }
 
-    public EventEffet(Effet ef, GameObject CarteAssociee) : this() {
+    public EventEffet(EffetPlusInfo ef, GameObject CarteAssociee) : this() {
         this.effet = ef;
         this.CarteAssociee = CarteAssociee; 
     }
