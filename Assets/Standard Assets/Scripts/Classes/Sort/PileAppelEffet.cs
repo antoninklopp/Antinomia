@@ -172,7 +172,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On propose à tous les joueurs de répondre/ajouter des effets à la pile
-            if (getGameManager().GetComponent<GameManager>().IsAllEffetsFinis()) {
+            if (getGameManager().GetComponent<GameManager>().IsAllEffetsFinis() && FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0) {
                 InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
             } else {
                 InformerSansPause(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet()); 

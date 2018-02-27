@@ -428,6 +428,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\GameManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\GameManagerIA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\InformationManager.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\InformerAdversaireChoixEffet.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\TutorialManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\AttackMyPlayer.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\IA\IA.cs" />

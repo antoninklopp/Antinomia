@@ -114,12 +114,17 @@ public class EventManager : MonoBehaviourAntinomia {
             // Changement de deck. 
             Debug.Log(1); 
             newButton.GetComponent<Button>().onClick.AddListener(delegate { CliqueEffet(number); });
-            newButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = listeEvents[i].effet.EffetString;
+            // On informe le joueur de l'effet qui peut être joué ainsi que de la carte qui peut le jouer. 
+            newButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = listeEvents[i].effet.EffetString + "\n" + 
+                "<color=purple>" + listeEvents[i].CarteAssociee.GetComponent<Carte>().Name + "</color>";
             Debug.Log(2); 
             listeButtons.Add(newButton);
         }
     }
 
+    /// <summary>
+    /// Reset tous les evenements. 
+    /// </summary>
     public void Reset() {
         listeEvents = new List<EventEffet>();
         EventCourant = 0;
@@ -146,6 +151,8 @@ public class EventManager : MonoBehaviourAntinomia {
         for (int i = 0; i < EventTotal; i++) {
             // On met TousEffetsFini à true avant de jouer le dernier effet pour que le joueur adverse puisse répondre.
             if (i == EventTotal - 1) {
+                // On a besoin d'avoir changer l'entier d'effet fini pour une vérification dans la pile. 
+                yield return ChangerEffetFiniJoueur(); 
                 TousEffetsFini = true; 
             }
             // On attend la fin de l'effet avant de passer au suivant.
@@ -157,6 +164,31 @@ public class EventManager : MonoBehaviourAntinomia {
             EffetFini = false; 
         }
         Reset();
+    }
+
+    private IEnumerator ChangerEffetFiniJoueur() {
+        int entierAttendu = 0; 
+        // Et on passe l'entier au bon nombre (dans le Player). 
+        if (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0) {
+            // Dans le cas où c'était à nous de jouer en premier.
+            entierAttendu = FindLocalPlayer().GetComponent<Player>().PlayerID;
+        }
+        FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(entierAttendu);
+
+        // On vérifie que l'information est bien arrivée à l'autre joueur. 
+
+        int decompte = 0; 
+        while (FindNotLocalPlayer().GetComponent<Player>().EffetPlayer != entierAttendu && decompte < 10) {
+            yield return new WaitForSeconds(0.1f);
+            decompte++; 
+        }
+
+        // Dans ce cas l'information n'est pas arrivée. 
+        if (decompte == 10) {
+            // On rappelle la meme methode. 
+            Debug.LogError("Probleme lors de l'envoi des informations");
+            StartCoroutine(ChangerEffetFiniJoueur()); 
+        }
     }
 
     /// <summary>

@@ -81,4 +81,20 @@ public class MonoBehaviourAntinomia : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Recupérer le GameObject du joueur qui n'est pas le joueur local.
+    /// </summary>
+    /// <returns>L'objet Player qui n'est pas celui du joueur local</returns>
+    protected GameObject FindNotLocalPlayer() {
+        /*
+		 * Trouver le joueur qui n'est pas local, pour lui faire envoyer les fonctions [Command(channel=0)]
+		 */
+        GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
+        if (!Players[0].GetComponent<Player>().isLocalPlayer) {
+            return Players[0];
+        }
+        else {
+            return Players[1];
+        }
+    }
 }

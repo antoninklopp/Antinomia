@@ -103,7 +103,17 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Variable qui permet de voir si la carte a été bien piochée.
     /// True lorsqu'elle vient d'etre piochée. 
     /// </summary>
-    private bool CartePiocheeOK = false; 
+    private bool CartePiocheeOK = false;
+
+    /// <summary>
+    /// Entier qui permet de vérifier que les effets sont bien joués dans le bon ordre : 
+    /// 1 - Par la joueur dont c'est le tour
+    /// 2 - Par le joueur dont ce n'est pas le tour.
+    /// Cette variable devra repasser à zéro chaque fois que tous les effets ont été vérifiés. 
+    /// Sinon, il sera mis au PlayerID dont c'est le tour. 
+    /// </summary>
+    public int EffetPlayer;
+
 
     // Use this for initialization
     public override void Start() {
@@ -1272,6 +1282,10 @@ public class Player : NetworkBehaviourAntinomia	 {
         return CartesPiochees.CartePiocheOK(oID); 
     }
 
+    /// <summary>
+    /// Repiocher des cartes 
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator Repioche() {
         if (CartesPiochees.PiocheOK()) {
             // Si la pioche est bonne on sort de la boucle
@@ -1286,5 +1300,20 @@ public class Player : NetworkBehaviourAntinomia	 {
         yield return new WaitForSeconds(0.5f); 
         // Et on verifie si on doit repiocher. 
         yield return Repioche(); 
+    }
+
+    /// <summary>
+    /// Hook de la variable EffetPlayer. 
+    /// </summary>
+    /// <param name="_EffetPlayer"></param>
+    [Command(channel=0)]
+    public void CmdOnEffetPlayer(int _EffetPlayer) {
+        RpcOnEffetPlayer(_EffetPlayer); 
+    }
+
+    [ClientRpc(channel=0)]
+    public void RpcOnEffetPlayer(int _EffetPlayer) {
+        FindLocalPlayer().GetComponent<Player>().EffetPlayer = _EffetPlayer;
+        FindNotLocalPlayer().GetComponent<Player>().EffetPlayer = _EffetPlayer;
     }
 }

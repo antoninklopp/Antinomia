@@ -244,7 +244,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     private GameObject GameManagerInformation;
 
-    private GameObject eventManager; 
+    private GameObject eventManager;
 
 	/// <summary>
     /// Initialisation du GameManager
@@ -1147,11 +1147,48 @@ public class GameManager : NetworkBehaviourAntinomia {
             EffetParticuleTerrain.SetActive(false); 
         }
 
-        GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
-        for (int i = 0; i < AllCartes.Length; ++i) {
-            AllCartes[i].GetComponent<Entite>().UpdateChangementAscendanceTerrain(ascendanceTerrain, previousAscendance); 
+        StartCoroutine(AttendreGererEffetsToutesCartesChangementTerrain(previousAscendance)); 
+    }
+
+    /// <summary>
+    /// Gerer les effets de toutes les cartes lors d'un changement de terrain. 
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator AttendreGererEffetsToutesCartesChangementTerrain(AscendanceTerrain previousAscendance) {
+
+        // Si ce n'est pas le tour de ce joueur
+        if (FindLocalPlayerID() != Tour) {
+            // Tant que l'entier reste à 0, on attend
+            while (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0) {
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            // Dans le cas où l'entier test n'est pas celui de notre joueur, on attend encore
+            // Et on instantie l'objet d'information. 
+            if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
+                GetComponent<InformerAdversaireChoixEffet>().AdversaireChoisitEffet(); 
+                while (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
+                    yield return new WaitForSeconds(0.1f);
+                }
+                // Une fois que c'est notre tour, on detruit l'objet d'information. 
+                GetComponent<InformerAdversaireChoixEffet>().DetruireAdversaireChoisitEffet(); 
+            }
+
+            if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
+                throw new UnusualBehaviourException("L'entier devrait être celui du joueur"); 
+            }
+
+            GererEffetsToutesCartesChangementTerrain(previousAscendance); 
         }
-        JouerEventManager(); 
+
+    }
+
+    private void GererEffetsToutesCartesChangementTerrain(AscendanceTerrain previousAscendance) {
+        GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
+        for (int i = 0; i < AllCartes.Length; ++i) {
+            AllCartes[i].GetComponent<Entite>().UpdateChangementAscendanceTerrain(ascendanceTerrain, previousAscendance);
+        }
+        JouerEventManager();
     }
 
     /// <summary>
