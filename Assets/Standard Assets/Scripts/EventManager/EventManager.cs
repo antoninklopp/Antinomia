@@ -166,6 +166,10 @@ public class EventManager : MonoBehaviourAntinomia {
         Reset();
     }
 
+    /// <summary>
+    /// Une fois que tous les effets ont été vérifiés chez un joueur, on vérifie tous les effets chez l'autre
+    /// </summary>
+    /// <returns>None</returns>
     private IEnumerator ChangerEffetFiniJoueur() {
         int entierAttendu = 0; 
         // Et on passe l'entier au bon nombre (dans le Player). 

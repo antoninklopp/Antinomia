@@ -503,10 +503,32 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// afin qu'on puisse détecter s'il certaines cartes peuvent jouer des effets lors de cette nouvelle phase notamment. 
     /// </summary>
     /// <param name="currentPhase">La nouvelle phase de jeu.</param>
-    void SendNextPhaseAllCards(Player.Phases currentPhase) {
+    public void SendNextPhaseAllCards(Player.Phases currentPhase) {
         /*
          * Envoyer à toutes les cartes qu'on change de phase. 
          */
+
+        StartCoroutine(SendNextPhaseAllCardsRoutine(currentPhase)); 
+    }
+
+    /// <summary>
+    /// Routine associée à <see cref="SendNextPhaseAllCards(Player.Phases)"/>
+    /// qui permet d'attendre que les effets joueurs aient été mis à jour. 
+    /// </summary>
+    /// <param name="currentPhase"></param>
+    /// <returns></returns>
+    private IEnumerator SendNextPhaseAllCardsRoutine(Player.Phases currentPhase) {
+        yield return AttendreEffetsJoueur(); 
+        UpdatePhaseAllCards(currentPhase);
+    }
+
+    /// <summary>
+    /// Update la phhase et les effets sur toutes les cartes. 
+    /// Peut être delayed par SendNextPhaseAllCardsRoutine (dans le cas où ce n'est pas le tour
+    /// du joueur chez lequel on vérifie tous les effets). 
+    /// </summary>
+    /// <param name="currentPhase"></param>
+    private void UpdatePhaseAllCards(Player.Phases currentPhase) { 
         GameObject[] AllEntites = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
         for (int i = 0; i < AllEntites.Length; ++i) {
             try {
@@ -1151,11 +1173,10 @@ public class GameManager : NetworkBehaviourAntinomia {
     }
 
     /// <summary>
-    /// Gerer les effets de toutes les cartes lors d'un changement de terrain. 
+    /// Attendre avant de jouer les effets de joueurs. 
     /// </summary>
     /// <returns></returns>
-    IEnumerator AttendreGererEffetsToutesCartesChangementTerrain(AscendanceTerrain previousAscendance) {
-
+    public IEnumerator AttendreEffetsJoueur() {
         // Si ce n'est pas le tour de ce joueur
         if (FindLocalPlayerID() != Tour) {
             // Tant que l'entier reste à 0, on attend
@@ -1166,23 +1187,42 @@ public class GameManager : NetworkBehaviourAntinomia {
             // Dans le cas où l'entier test n'est pas celui de notre joueur, on attend encore
             // Et on instantie l'objet d'information. 
             if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
-                GetComponent<InformerAdversaireChoixEffet>().AdversaireChoisitEffet(); 
+                GetComponent<InformerAdversaireChoixEffet>().AdversaireChoisitEffet();
                 while (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
                     yield return new WaitForSeconds(0.1f);
                 }
                 // Une fois que c'est notre tour, on detruit l'objet d'information. 
-                GetComponent<InformerAdversaireChoixEffet>().DetruireAdversaireChoisitEffet(); 
+                GetComponent<InformerAdversaireChoixEffet>().DetruireAdversaireChoisitEffet();
             }
 
             if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
-                throw new UnusualBehaviourException("L'entier devrait être celui du joueur"); 
+                throw new UnusualBehaviourException("L'entier devrait être celui du joueur");
             }
-
-            GererEffetsToutesCartesChangementTerrain(previousAscendance); 
         }
+        // Si c'est le tour du joueur
+        else {
+            // On vérifie que la variable globale soit bien à 0. 
+            if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != 0) {
+                throw new UnusualBehaviourException("L'entier EffetPlayer devrait être à 0");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gerer les effets de toutes les cartes lors d'un changement de terrain. 
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator AttendreGererEffetsToutesCartesChangementTerrain(AscendanceTerrain previousAscendance) {
+
+        yield return AttendreEffetsJoueur(); 
+        GererEffetsToutesCartesChangementTerrain(previousAscendance); 
 
     }
 
+    /// <summary>
+    /// Gerer les effets de toutes les cartes au changement de terrain. 
+    /// </summary>
+    /// <param name="previousAscendance"></param>
     private void GererEffetsToutesCartesChangementTerrain(AscendanceTerrain previousAscendance) {
         GameObject[] AllCartes = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
         for (int i = 0; i < AllCartes.Length; ++i) {
@@ -1734,6 +1774,15 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Regarder si certaines cartes peuvent jouer un ou plusieurs effet(s).
     /// </summary>
     public void CheckAllEffetsCartes(bool changementDomination = false) {
+        StartCoroutine(CheckAllEffetsCartesRoutine(changementDomination)); 
+    } 
+
+    private IEnumerator CheckAllEffetsCartesRoutine(bool changementDomination = false) {
+        yield return AttendreEffetsJoueur(); 
+        CheckAllEffetsCartes2(changementDomination); 
+    }
+
+    private void CheckAllEffetsCartes2(bool changementDomination = false) { 
         GameObject[] AllEntites = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
 
         // On reset d'abord l'eventManager
