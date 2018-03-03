@@ -37,6 +37,11 @@ public class AddImageToDeck : MonoBehaviour, IDropHandler {
 		AllCards.Add (eventData.pointerDrag.gameObject);
 		eventData.pointerDrag.transform.SetParent (transform); 
 
+        if (eventData.pointerDrag.GetComponent<DragImage>() == null) {
+            Debug.Log("Erreur de touche");
+            return; 
+        }
+
 		if (eventData.pointerDrag.GetComponent<DragImage> ().inDeck == false) {
 			AjoutCarte (eventData.pointerDrag); 
 		}

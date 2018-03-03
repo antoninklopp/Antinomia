@@ -347,6 +347,7 @@
     <Compile Include="Assets\GameSparks\Editor\GameSparksUnityInspector.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Art\Shader\DisolveCard.shader" />
     <None Include="Assets\Art\Shader\ShaderBlackWhite.shader" />
     <None Include="Assets\GameSparks\Plugins\GameSparks.Api.XML" />
     <None Include="Assets\GameSparks\Plugins\GameSparks.XML" />

@@ -344,9 +344,6 @@ public class GameManagerManageCards : MonoBehaviour {
             // On met dans les cartes globales le nombre de cartes globales du joueur moins
             // le nombre de cartes dans le deck courant.
             updateNombreCartes(Carte.Value[0], Carte.Value.Count - getNombreOfCartesInDeck(Carte.Value[0], currentDeckNumber));
-            //Debug.Log("Il y a " +
-            //    getNombreOfCartesInDeck(Carte.Value[0], currentDeckNumber).ToString() + " de " +
-            //    Carte.Value[0].GetComponent<Carte>().Name); 
         }
 
         if (initialize) {
