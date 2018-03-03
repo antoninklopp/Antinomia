@@ -62,10 +62,12 @@ public class CardCardManager : MonoBehaviour {
         }
 	}
 
+    /// <summary>
+    /// Indiquer au joueur qu'il n'a plus de cartes disponibles, à l'aide d'un shader blanc et noir. 
+    /// </summary>
     public void MakeBlackAndWhite() {
         baseShader = GetComponent<Image>().material.shader;
-        GetComponent<Image>().material = Instantiate(Resources.Load("Material/NormalMaterial") as Material); 
-        GetComponent<Image>().material.shader = blackAndWhite;
+        GetComponent<Image>().material = Instantiate(Resources.Load("Material/BlackWhite") as Material); 
         // Si on a pas assez de cartes, on la rend "intouchable"
         // Pour ne pas s'embeteer à faire des vérifications tout le temps de si la carte est dispo
         GetComponent<Button>().interactable = false;
@@ -73,6 +75,9 @@ public class CardCardManager : MonoBehaviour {
         GetComponent<Image>().raycastTarget = false;
     }
 
+    /// <summary>
+    /// Indiquer au joueur qu'il lui reste des cartes disponible, en la mettant colorée. 
+    /// </summary>
     public void MakeColored() {
         // S'il y a assez de cartes, on la rend "touchable"
         GetComponent<Image>().material = Instantiate(Resources.Load("Material/NormalMaterial") as Material);

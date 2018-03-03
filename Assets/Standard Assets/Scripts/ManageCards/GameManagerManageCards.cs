@@ -12,8 +12,6 @@ using System;
 /// </summary>
 public class GameManagerManageCards : MonoBehaviour {
 
-    public Shader blackAndWhite;
-
     /// <summary>
     /// Dictionnaire des cartes uniques
     /// </summary>
