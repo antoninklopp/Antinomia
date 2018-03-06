@@ -1181,7 +1181,8 @@ public class GameManager : NetworkBehaviourAntinomia {
         if (FindLocalPlayerID() != Tour) {
             // Tant que l'entier reste à 0, on attend
             while (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0) {
-                yield return new WaitForSeconds(0.1f);
+                Debug.Log("On attend"); 
+                yield return new WaitForSeconds(0.3f);
             }
 
             // Dans le cas où l'entier test n'est pas celui de notre joueur, on attend encore
@@ -1213,7 +1214,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <returns></returns>
     IEnumerator AttendreGererEffetsToutesCartesChangementTerrain(AscendanceTerrain previousAscendance) {
-
+        Debug.Log("On attend les effets des autres joueurs"); 
         yield return AttendreEffetsJoueur(); 
         GererEffetsToutesCartesChangementTerrain(previousAscendance); 
 
@@ -1525,19 +1526,32 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Permettre au joueur de choisir s'il veut garder sa première pioche, sa deuxième, sa troisième...
     /// </summary>
     /// <returns></returns>
-    public IEnumerator MontrerCartesAChoisirDebut(int nombreCartes=6) {
+    public IEnumerator MontrerCartesAChoisirDebut(int nombreCartes = 6) {
         yield return new WaitForSeconds(0.5f);
 
         if (nombreCartes == 6) {
             yield return FindLocalPlayer().GetComponent<Player>().CreateDeck();
         } else {
-            FindLocalPlayer().GetComponent<Player>().MelangerDeck(); 
+            FindLocalPlayer().GetComponent<Player>().MelangerDeck();
         }
 
         ChoixCartesDebut.SetActive(true);
-        CarteDebutPrefab.SetActive(true); 
+        CarteDebutPrefab.SetActive(true);
         // On récupère les cartes du dessus du deck. 
         List<GameObject> _cartesDebut = FindLocalPlayer().GetComponent<Player>().RecupererCartesDessusDeck(6);
+
+        StartCoroutine(MontrerCartesAChoisirDebut2(_cartesDebut, nombreCartes, 0)); 
+
+    }
+
+    /// <summary>
+    /// Coroutine permettant de réafficher les cartes s'il y a un probleme réseau de récupération. 
+    /// </summary>
+    /// <param name="_cartesDebut"></param>
+    /// <param name="nombreCartes"></param>
+    /// <param name="nombreEssais"></param>
+    /// <returns></returns>
+    public IEnumerator MontrerCartesAChoisirDebut2(List<GameObject> _cartesDebut, int nombreCartes, int nombreEssais) { 
 
         Transform ParentCartesDebut = ChoixCartesDebut.transform.Find("ChoixCartesDebutFond");
 
@@ -1550,6 +1564,8 @@ public class GameManager : NetworkBehaviourAntinomia {
             }
         }
 
+        // Passe à true s'il y a eu un Probleme
+        bool probleme = false; 
         for (int i = 0; i < nombreCartes; ++i) {
             GameObject newCarte = Instantiate(CarteDebutPrefab);
             newCarte.transform.SetParent(ParentCartesDebut, false);
@@ -1557,16 +1573,25 @@ public class GameManager : NetworkBehaviourAntinomia {
                 Debug.Log(_cartesDebut[i].GetComponent<Carte>().oID);
                 Debug.Log(_cartesDebut[i].GetComponent<Carte>().shortCode);
                 Debug.Log(_cartesDebut[i].GetComponent<Carte>().IDCardGame);
-                // throw new UnusualBehaviourException("Cette carte n'a pas de shortCode, ce n'est pas normal." +
-                //    _cartesDebut[i].GetComponent<Carte>().oID +  " "  +
-                //    _cartesDebut[i].GetComponent<Carte>().shortCode+ " " +
-                //    _cartesDebut[i].GetComponent<Carte>().IDCardGame
-                //);
-                Debug.Log("<color=red> Un probleme ici</color>"); 
+                probleme = true; 
+                if (nombreEssais > 5) {
+                    Debug.LogError("Un probleme ici. On aurait du avoir les cartes");
+                    // throw new UnusualBehaviourException("Cette carte n'a pas de shortCode, ce n'est pas normal." +
+                    //    _cartesDebut[i].GetComponent<Carte>().oID +  " "  +
+                    //    _cartesDebut[i].GetComponent<Carte>().shortCode+ " " +
+                    //    _cartesDebut[i].GetComponent<Carte>().IDCardGame
+                    //);
+                }  else {
+                    yield return new WaitForSeconds(0.5f);
+                    yield return MontrerCartesAChoisirDebut2(_cartesDebut, nombreCartes, nombreEssais + 1);
+                    Debug.LogError("<color=red> Un probleme ici</color>");
+                }
             }
-            // Si ça ne marche pas, il FAUT différencier, sort, entité, et assistance. 
-            newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Carte>().shortCode,
-                    _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
+            if (!probleme) {
+                // Si ça ne marche pas, il FAUT différencier, sort, entité, et assistance. 
+                newCarte.GetComponent<CarteDebut>().InfoDebut(_cartesDebut[i].GetComponent<Carte>().shortCode,
+                        _cartesDebut[i].GetComponent<Carte>().GetInfoCarte());
+            }
         }
 
         CarteDebutPrefab.SetActive(false);
@@ -1777,11 +1802,21 @@ public class GameManager : NetworkBehaviourAntinomia {
         StartCoroutine(CheckAllEffetsCartesRoutine(changementDomination)); 
     } 
 
+    /// <summary>
+    /// Coroutine verifiant tous les effets 
+    /// <see cref="CheckAllEffetsCartes(bool)"/>
+    /// </summary>
+    /// <param name="changementDomination"></param>
+    /// <returns></returns>
     private IEnumerator CheckAllEffetsCartesRoutine(bool changementDomination = false) {
         yield return AttendreEffetsJoueur(); 
         CheckAllEffetsCartes2(changementDomination); 
     }
 
+    /// <summary>
+    /// Appelée après <see cref="CheckAllEffetsCartes(bool)"/> vérifie les effets de toutes les cartes. 
+    /// </summary>
+    /// <param name="changementDomination"></param>
     private void CheckAllEffetsCartes2(bool changementDomination = false) { 
         GameObject[] AllEntites = GameObject.FindGameObjectsWithTag("BoardSanctuaire");
 
@@ -1830,9 +1865,13 @@ public class GameManager : NetworkBehaviourAntinomia {
             deactivateAfter : true); 
     }
 
+    /// <summary>
+    /// Permet l'interaction de choix des cartes
+    /// </summary>
+    /// <param name="activate"></param>
     public void ActivateChooseCards(bool activate=true) {
         ChooseCardsObject.SetActive(true);
-        Debug.Log("ShowCards is active"); 
+        Debug.Log("ChooseCards is active"); 
         // On permet au joueur d'interagir. 
         if (activate) {
             ChooseCardsObject.GetComponent<ChooseCards>().PermettreInteraction();
@@ -1989,14 +2028,24 @@ public class GameManager : NetworkBehaviourAntinomia {
         InfoEffetTransmis.SetActive(false); 
     }
 
+    /// <summary>
+    /// Ajouter un effet à l'eventManager
+    /// </summary>
+    /// <param name="ef"></param>
     public void AjouterEffetEventManager(EventEffet ef) {
         eventManager.GetComponent<EventManager>().AjouterEffet(ef); 
     }
 
+    /// <summary>
+    /// Reset l'eventManager et en enlever tous les effets. 
+    /// </summary>
     public void ResetEventManager() {
         eventManager.GetComponent<EventManager>().Reset(); 
     }
 
+    /// <summary>
+    /// Jouer les effets de l'eventManager
+    /// </summary>
     public void JouerEventManager() {
         try {
             Debug.Log(eventManager);

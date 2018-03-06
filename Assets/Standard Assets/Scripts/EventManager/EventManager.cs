@@ -87,10 +87,12 @@ public class EventManager : MonoBehaviourAntinomia {
     public void CreerNouvellePileEvent() {
         // S'il n'y a qu'un seul évênement, on ne propose pas de choisir
         if (listeEvents.Count == 0) {
+            Debug.Log("Il n'y a pas d'effets dans l'eventManager"); 
             return; 
         }
 
         if (EffetsDemandeInteraction() < 1) {
+            Debug.Log("Il n'y a qu'un seul effet dans l'eventManager"); 
             JouerUnEffet(listeEvents[0]); 
             return; 
         }
@@ -106,6 +108,7 @@ public class EventManager : MonoBehaviourAntinomia {
     /// Créer tous les boutons de choix des events
     /// </summary>
     public void SetUpButtons() {
+        Debug.Log("On crée les bouttons"); 
         listeButtons = new List<GameObject>(); 
         for (int i = 0; i < EventTotal; i++) {
             GameObject newButton = Instantiate(EventButtonPrefab);
@@ -233,6 +236,7 @@ public class EventManager : MonoBehaviourAntinomia {
     private int EffetsDemandeInteraction() {
         int somme = 0; 
         foreach (EventEffet ef in listeEvents) {
+            Debug.Log("Il y a un effet ici"); 
             if (ef.demandeInteraction) {
                 somme++; 
             }
@@ -240,6 +244,10 @@ public class EventManager : MonoBehaviourAntinomia {
         return somme; 
     }
 
+    /// <summary>
+    /// Renvoi true si tous les effets sont finis. 
+    /// </summary>
+    /// <returns></returns>
     public bool IsAllEffetsFini() {
         return TousEffetsFini; 
     }

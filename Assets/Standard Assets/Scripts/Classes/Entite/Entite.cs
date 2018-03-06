@@ -1504,10 +1504,10 @@ public class Entite : Carte, ICarte {
             case GameManager.AscendanceTerrain.NONE:
                 return;
             case GameManager.AscendanceTerrain.MALEFIQUE:
-                GererEffets(AllEffetsMalefique, _currentPhase, numeroListEffet:2); 
+                GererEffets(AllEffetsMalefique, _currentPhase, numeroListEffet:2, jouerDirect:true); 
                 break;
             case GameManager.AscendanceTerrain.ASTRALE:
-                GererEffets(AllEffetsAstral, _currentPhase, numeroListEffet:1);
+                GererEffets(AllEffetsAstral, _currentPhase, numeroListEffet:1, jouerDirect:true);
                 break; 
         }
     }
