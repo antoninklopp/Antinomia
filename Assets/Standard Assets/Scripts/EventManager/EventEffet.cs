@@ -27,7 +27,7 @@ public class EventEffet {
     public bool fini = false;
 
     /// <summary>
-    /// True si l'effet demande une ingteraction .
+    /// True si l'effet demande une interaction.
     /// </summary>
     public bool demandeInteraction = false; 
 
@@ -37,11 +37,6 @@ public class EventEffet {
     void Start () {
 		
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
     public EventEffet() {
 
@@ -49,6 +44,8 @@ public class EventEffet {
 
     public EventEffet(EffetPlusInfo ef, GameObject CarteAssociee) : this() {
         this.effet = ef;
-        this.CarteAssociee = CarteAssociee; 
+        this.CarteAssociee = CarteAssociee;
+        // Si carte nécessaire sort alors on a besoin d'une interaction.
+        demandeInteraction = (ef.CartesNecessairesSort() != 0);
     }
 }

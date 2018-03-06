@@ -91,7 +91,7 @@ public class EventManager : MonoBehaviourAntinomia {
             return; 
         }
 
-        if (EffetsDemandeInteraction() < 1) {
+        if (EffetsDemandeInteraction() <= 1) {
             Debug.Log("Il n'y a qu'un seul effet dans l'eventManager"); 
             JouerUnEffet(listeEvents[0]); 
             return; 
@@ -238,7 +238,10 @@ public class EventManager : MonoBehaviourAntinomia {
         foreach (EventEffet ef in listeEvents) {
             Debug.Log("Il y a un effet ici"); 
             if (ef.demandeInteraction) {
+                Debug.Log("Celui ci demande une interaction");
                 somme++; 
+            } else {
+                Debug.Log("Celui ci non"); 
             }
         }
         return somme; 
@@ -256,8 +259,8 @@ public class EventManager : MonoBehaviourAntinomia {
         // il faut recréer une liste d'effets avec effet dans la bonne position, pour qu'il n'y ait pas de problèems
         // lors de la transmission des infos..
         // On mettra donc des elements à null pour compléter
-        StartCoroutine(ef.CarteAssociee.GetComponent<Carte>().MettreEffetDansLaPileFromActions(
-            ef.effet.numeroEffet, numeroListEffet: ef.effet.numeroListEffet
-        ));
+        if (!ef.CarteAssociee.GetComponent<Carte>().GererEffets(numeroListEffet:ef.effet.numeroListEffet, jouerDirect: true)) {
+            throw new UnusualBehaviourException("Cet effet aurait du etre joué"); 
+        }
     }
 }

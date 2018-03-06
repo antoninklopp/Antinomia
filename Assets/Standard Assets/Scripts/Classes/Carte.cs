@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using System; 
+using System;
+using AntinomiaException; 
 
 /// <summary>
 /// Classe de base dont héritent toutes les cartes qui en sont dérivées. 
@@ -559,6 +560,29 @@ public class Carte : NetworkBehaviourAntinomia {
     }
 
     /// <summary>
+    /// Meme methode que <see cref="GererEffets(List{Effet}, Player.Phases, bool, bool, GameObject, int, int, bool, bool)"/> sauf 
+    /// qu'ici on détermine la liste des effets à partir de numeroListEffet
+    /// </summary>
+    /// <param name="_currentPhase"></param>
+    /// <param name="debut"></param>
+    /// <param name="nouveauTour"></param>
+    /// <param name="Cible"></param>
+    /// <param name="numeroListEffet"></param>
+    /// <param name="deposeCarte"></param>
+    /// <param name="changementDomination"></param>
+    /// <param name="jouerDirect"></param>
+    /// <returns></returns>
+    public virtual bool GererEffets(Player.Phases _currentPhase = Player.Phases.INITIATION, bool debut = false,
+        bool nouveauTour = false, GameObject Cible = null, int numeroListEffet = 0, int deposeCarte = 0, bool changementDomination = false,
+        bool jouerDirect = false) {
+        if (numeroListEffet == 0) {
+            return GererEffets(AllEffets, _currentPhase, debut, nouveauTour, Cible, numeroListEffet, deposeCarte, changementDomination, jouerDirect);
+        } else { 
+            throw new UnusualBehaviourException("Le numero de liste doit etre 0, 1 ou 2");
+        }
+    }
+
+    /// <summary>
     /// Gerer les effets d'une carte
     /// </summary>
     /// <param name="_allEffets">Liste des effets à effectier</param>
@@ -831,7 +855,10 @@ public class Carte : NetworkBehaviourAntinomia {
                     }
                     if (checkCibleNull(Cible)) {
                         Debug.Log("On est ici"); 
-                        ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
+                        // Cette fonction retourne faux, s'il n'y a pas assez de cartes à choisir
+                        if (!ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition)){
+                            return false; 
+                        }
                     }
                     Debug.Log("On est là"); 
                     break;
@@ -840,8 +867,11 @@ public class Carte : NetworkBehaviourAntinomia {
                         break;
                     }
                     if (checkCibleNull(Cible)) {
-                        ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
-                            _conditions[j].properIntCondition);
+                        // Cette fonction retourne faux, s'il n'y a pas assez de cartes à choisir
+                        if (!ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                            _conditions[j].properIntCondition)) {
+                            return false; 
+                        }
                     }
                     break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
@@ -849,8 +879,10 @@ public class Carte : NetworkBehaviourAntinomia {
                         break;
                     }
                     if (checkCibleNull(Cible)) {
-                        ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
-                            _conditions[j].properIntCondition);
+                        if (!ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                            _conditions[j].properIntCondition)) {
+                            return false; 
+                        }
                     }
                     break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
@@ -858,15 +890,19 @@ public class Carte : NetworkBehaviourAntinomia {
                         break;
                     }
                     if (checkCibleNull(Cible)) {
-                        ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition);
+                        if (!ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition)) {
+                            return false; 
+                        }
                     }
                     break;
                 case Condition.ConditionEnum.DEFAUSSER:
                     if (!jouerDirect) {
                         break;
                     }
-                    ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
-                        _conditions[j].properIntCondition);
+                    if (!ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
+                        _conditions[j].properIntCondition)) {
+                        return false; 
+                    }
                     break;
                 case Condition.ConditionEnum.DELTA:
                     // La condition delta est par rapport à TOUTES les cartes du terrain. 
@@ -1566,26 +1602,35 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Montrer au joueur les cartes qu'il peut choisir à partir d'un objet parent (Transform). 
     /// <paramref name="exceptThisCard"/>Si on ne veut pas que la carte courante soit prise en compte</param>
     /// </summary>
-    void ShowCardsForChoice(Transform _parent, int nombreCartes, bool exceptThisCard = true) {
+    private bool ShowCardsForChoice(Transform _parent, int nombreCartes, bool exceptThisCard = true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         for (int k = 0; k < _parent.childCount; ++k) {
             if (!(exceptThisCard && gameObject == _parent.GetChild(k).gameObject)) {
                 AllCardsToChoose.Add(_parent.GetChild(k).gameObject);
             }
         }
+
+        // Si le nombre de cartes à choisir est supérieur au nombre de cartes sur possibles, l'effet
+        // ne peut pas etre joué
+        if (nombreCartes > AllCardsToChoose.Count) {
+            return false;
+        }
+
         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ActivateChooseCards(true); 
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
             gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Choisissez " + nombreCartes.ToString() + 
             " cartes", deactivateAfter:false);
-        ShowCardsMustBeActivated = false; 
+        ShowCardsMustBeActivated = false;
+
+        return true; 
     }
 
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir sur les champs de bataille des deux joueurs. 
     /// <paramref name="stringPlus"/> String à rajouter potentiellement après choisissez n cartes</param>
     /// </summary>
-    void ShowCardsForChoiceChampBatailleDeuxJoueurs(int nombreCartes, string stringPlus="", bool exceptThisCard=true) {
+    private bool ShowCardsForChoiceChampBatailleDeuxJoueurs(int nombreCartes, string stringPlus="", bool exceptThisCard=true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
 
         foreach (Transform t in FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").
@@ -1599,18 +1644,27 @@ public class Carte : NetworkBehaviourAntinomia {
                 AllCardsToChoose.Add(t.gameObject);
             }
         }
+
+        // Si le nombre de cartes à choisir est supérieur au nombre de cartes sur possibles, l'effet
+        // ne peut pas etre joué
+        if (nombreCartes > AllCardsToChoose.Count) {
+            return false; 
+        }
+
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
             gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, deactivateAfter:false, stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", 
             _nombreDeCartesAChoisir:nombreCartes);
-        ShowCardsMustBeActivated = false; 
+        ShowCardsMustBeActivated = false;
+
+        return true; 
     }
 
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir parmi toutes les cartes (sur le champ de bataille
     /// ou sur la sanctuaire) des deux joueurs. 
     /// </summary>
-    void ShowCardsForChoiceAllCartesDeuxJoueurs(int nombreCartes, bool exceptThisCard = true) {
+    private bool ShowCardsForChoiceAllCartesDeuxJoueurs(int nombreCartes, bool exceptThisCard = true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         GameObject[] AllCardsBoardSanctuaire = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
         for (int i = 0; i < AllCardsBoardSanctuaire.Length; ++i) {
@@ -1618,11 +1672,20 @@ public class Carte : NetworkBehaviourAntinomia {
                 AllCardsToChoose.Add(AllCardsBoardSanctuaire[i]);
             }
         }
+
+        // Si le nombre de cartes à choisir est supérieur au nombre de cartes sur possibles, l'effet
+        // ne peut pas etre joué
+        if (nombreCartes > AllCardsToChoose.Count) {
+            return false;
+        }
+
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.
             GetComponent<ChooseCards>().ShowCardsToChoose(
             AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, 
             stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", deactivateAfter:false);
-        ShowCardsMustBeActivated = false; 
+        ShowCardsMustBeActivated = false;
+
+        return true; 
     }
 
     /// <summary>
@@ -1639,7 +1702,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// 7 - MALEFIQUE   -- TODO : A implémenter avec les nouvelles règles. 
     /// </param>
     /// <param name="StateCarte">State de la carte : MAIN, SANCTUAIRE ou BOARD. </param>
-    void ShowCardsForChoiceType(int properIntCondition, Entite.State StateCarte=Entite.State.MAIN) {
+    private bool ShowCardsForChoiceType(int properIntCondition, Entite.State StateCarte=Entite.State.MAIN) {
         List<GameObject> allCardsToChoose = new List<GameObject>();
         GameObject[] AllCartesType = GameObject.FindGameObjectsWithTag("Main");
         switch (StateCarte) {
@@ -1693,10 +1756,18 @@ public class Carte : NetworkBehaviourAntinomia {
             }
         }
 
+        // Si le nombre de cartes à choisir est supérieur au nombre de cartes sur possibles, l'effet
+        // ne peut pas etre joué
+        if (properIntCondition > allCardsToChoose.Count) {
+            return false;
+        }
+
         GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
             allCardsToChoose, gameObject, _nombreDeCartesAChoisir: properIntCondition%10, stringToDisplay: "Choisissez " + 
             (properIntCondition % 10).ToString() + " cartes", deactivateAfter: true);
         ShowCardsMustBeActivated = true;
+
+        return true; 
     }
     
 

@@ -2122,4 +2122,22 @@ public class Entite : Carte, ICarte {
         base.InformationsSurLaCarte();
     }
 
+    public override bool GererEffets(Player.Phases _currentPhase = Player.Phases.INITIATION, bool debut = false,
+    bool nouveauTour = false, GameObject Cible = null, int numeroListEffet = 0, int deposeCarte = 0, bool changementDomination = false,
+    bool jouerDirect = false) {
+        switch (numeroListEffet) {
+            // Effets normaux
+            case 0:
+                return GererEffets(AllEffets, _currentPhase, debut, nouveauTour, Cible, numeroListEffet, deposeCarte, changementDomination, jouerDirect);
+            // Effets astraux
+            case 1:
+                return GererEffets(AllEffetsAstral, _currentPhase, debut, nouveauTour, Cible, numeroListEffet, deposeCarte, changementDomination, jouerDirect);
+            // Effets maléfiques
+            case 2:
+                return GererEffets(AllEffetsMalefique, _currentPhase, debut, nouveauTour, Cible, numeroListEffet, deposeCarte, changementDomination, jouerDirect);
+            default:
+                throw new UnusualBehaviourException("Le numero de liste doit etre 0, 1 ou 2");
+        }
+    }
+
 }
