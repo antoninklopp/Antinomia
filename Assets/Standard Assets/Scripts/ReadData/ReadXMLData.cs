@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿
+// Copyright (c) 2017-2018 Antonin KLOPP-TOSSER
+ 
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;

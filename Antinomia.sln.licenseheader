@@ -1,0 +1,5 @@
+extensions: .cs .cpp .h
+
+// Copyright (c) 2017-2018 Antonin KLOPP-TOSSER
+ 
+extensions: .aspx .ascx

@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿
+// Copyright (c) 2017-2018 Antonin KLOPP-TOSSER
+ 
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -16,7 +19,7 @@ using AntinomiaException;
 /// </summary>
 public class Carte : NetworkBehaviourAntinomia {
     /*
-     * Parent des cartes de base : entite, sort, assistance.  
+     * Parent des cartes de base : entite, sort, assistance.  ss
      */
 
     /// <summary>
