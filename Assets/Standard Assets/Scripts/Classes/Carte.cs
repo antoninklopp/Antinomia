@@ -851,6 +851,9 @@ public class Carte : NetworkBehaviourAntinomia {
                     // à l'utilisateur de choisir une carte
                     Debug.Log("On est ici");
                     if (!jouerDirect) {
+                        if (!ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition, jouerDirect:false)) {
+                            return false;
+                        }
                         break;
                     }
                     if (checkCibleNull(Cible)) {
@@ -864,6 +867,10 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
                     if (!jouerDirect) {
+                        if (!ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                            _conditions[j].properIntCondition, jouerDirect:false)) {
+                            return false;
+                        }
                         break;
                     }
                     if (checkCibleNull(Cible)) {
@@ -876,6 +883,10 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
                     if (!jouerDirect) {
+                        if (!ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
+                            _conditions[j].properIntCondition, jouerDirect:false)) {
+                            return false;
+                        }
                         break;
                     }
                     if (checkCibleNull(Cible)) {
@@ -887,6 +898,9 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
                     if (!jouerDirect) {
+                        if (!ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition, jouerDirect:false)) {
+                            return false;
+                        }
                         break;
                     }
                     if (checkCibleNull(Cible)) {
@@ -897,6 +911,10 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Condition.ConditionEnum.DEFAUSSER:
                     if (!jouerDirect) {
+                        if (!ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
+                            _conditions[j].properIntCondition, jouerDirect:false)) {
+                            return false;
+                        }
                         break;
                     }
                     if (!ShowCardsForChoice(FindLocalPlayer().transform.Find("MainJoueur").Find("CartesMainJoueur"),
@@ -1394,7 +1412,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     // La puissance de cette carte augmente (uniquement cette carte). 
                     if (jouerEffet) {
                         // Si il n'y a pas de cible c'est sa propre puissance qui augmente
-                        if (CartesChoisiesPourEffets.Count == 0) {
+                        if (CartesChoisiesPourEffets == null || CartesChoisiesPourEffets.Count == 0) {
                             GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, IDCardGame);
                         } else {
                             // Sinon c'est celle des autres. 
@@ -1601,8 +1619,10 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir à partir d'un objet parent (Transform). 
     /// <paramref name="exceptThisCard"/>Si on ne veut pas que la carte courante soit prise en compte</param>
+    /// <param name="jouerDirect">Si true alors on propose directement au joueur de jouer des cartes, sinon on ne fait que 
+    /// vérifier qu'il y a assez de cartes à choisir</param>
     /// </summary>
-    private bool ShowCardsForChoice(Transform _parent, int nombreCartes, bool exceptThisCard = true) {
+    private bool ShowCardsForChoice(Transform _parent, int nombreCartes, bool exceptThisCard = true, bool jouerDirect=true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         for (int k = 0; k < _parent.childCount; ++k) {
             if (!(exceptThisCard && gameObject == _parent.GetChild(k).gameObject)) {
@@ -1616,12 +1636,14 @@ public class Carte : NetworkBehaviourAntinomia {
             return false;
         }
 
-        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ActivateChooseCards(true); 
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
-            gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, stringToDisplay:"Choisissez " + nombreCartes.ToString() + 
-            " cartes", deactivateAfter:false);
-        ShowCardsMustBeActivated = false;
+        if (jouerDirect) {
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ActivateChooseCards(true);
+            GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
+                gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
+                AllCardsToChoose, gameObject, _nombreDeCartesAChoisir: nombreCartes, stringToDisplay: "Choisissez " + nombreCartes.ToString() +
+                " cartes", deactivateAfter: false);
+            ShowCardsMustBeActivated = false;
+        }
 
         return true; 
     }
@@ -1629,8 +1651,10 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir sur les champs de bataille des deux joueurs. 
     /// <paramref name="stringPlus"/> String à rajouter potentiellement après choisissez n cartes</param>
+    /// <param name="jouerDirect">Si true alors on propose directement au joueur de jouer des cartes, sinon on ne fait que 
+    /// vérifier qu'il y a assez de cartes à choisir</param>
     /// </summary>
-    private bool ShowCardsForChoiceChampBatailleDeuxJoueurs(int nombreCartes, string stringPlus="", bool exceptThisCard=true) {
+    private bool ShowCardsForChoiceChampBatailleDeuxJoueurs(int nombreCartes, string stringPlus="", bool exceptThisCard=true, bool jouerDirect=true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
 
         foreach (Transform t in FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").
@@ -1651,11 +1675,13 @@ public class Carte : NetworkBehaviourAntinomia {
             return false; 
         }
 
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
-            gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject, deactivateAfter:false, stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", 
-            _nombreDeCartesAChoisir:nombreCartes);
-        ShowCardsMustBeActivated = false;
+        if (jouerDirect) {
+            GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").
+                gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
+                AllCardsToChoose, gameObject, deactivateAfter: false, stringToDisplay: "Choisissez " + nombreCartes.ToString() + " cartes",
+                _nombreDeCartesAChoisir: nombreCartes);
+            ShowCardsMustBeActivated = false;
+        }
 
         return true; 
     }
@@ -1663,8 +1689,10 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <summary>
     /// Montrer au joueur les cartes qu'il peut choisir parmi toutes les cartes (sur le champ de bataille
     /// ou sur la sanctuaire) des deux joueurs. 
+    /// <param name="jouerDirect">Si true alors on propose directement au joueur de jouer des cartes, sinon on ne fait que 
+    /// vérifier qu'il y a assez de cartes à choisir</param>
     /// </summary>
-    private bool ShowCardsForChoiceAllCartesDeuxJoueurs(int nombreCartes, bool exceptThisCard = true) {
+    private bool ShowCardsForChoiceAllCartesDeuxJoueurs(int nombreCartes, bool exceptThisCard = true, bool jouerDirect=true) {
         List<GameObject> AllCardsToChoose = new List<GameObject>();
         GameObject[] AllCardsBoardSanctuaire = GameObject.FindGameObjectsWithTag("BoardSanctuaire"); 
         for (int i = 0; i < AllCardsBoardSanctuaire.Length; ++i) {
@@ -1679,11 +1707,13 @@ public class Carte : NetworkBehaviourAntinomia {
             return false;
         }
 
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.
-            GetComponent<ChooseCards>().ShowCardsToChoose(
-            AllCardsToChoose, gameObject, _nombreDeCartesAChoisir:nombreCartes, 
-            stringToDisplay:"Choisissez " + nombreCartes.ToString() + " cartes", deactivateAfter:false);
-        ShowCardsMustBeActivated = false;
+        if (jouerDirect) {
+            GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.
+                GetComponent<ChooseCards>().ShowCardsToChoose(
+                AllCardsToChoose, gameObject, _nombreDeCartesAChoisir: nombreCartes,
+                stringToDisplay: "Choisissez " + nombreCartes.ToString() + " cartes", deactivateAfter: false);
+            ShowCardsMustBeActivated = false;
+        }
 
         return true; 
     }
@@ -1702,7 +1732,9 @@ public class Carte : NetworkBehaviourAntinomia {
     /// 7 - MALEFIQUE   -- TODO : A implémenter avec les nouvelles règles. 
     /// </param>
     /// <param name="StateCarte">State de la carte : MAIN, SANCTUAIRE ou BOARD. </param>
-    private bool ShowCardsForChoiceType(int properIntCondition, Entite.State StateCarte=Entite.State.MAIN) {
+    /// <param name="jouerDirect">Si true alors on propose directement au joueur de jouer des cartes, sinon on ne fait que 
+    /// vérifier qu'il y a assez de cartes à choisir</param>
+    private bool ShowCardsForChoiceType(int properIntCondition, Entite.State StateCarte=Entite.State.MAIN, bool jouerDirect=true) {
         List<GameObject> allCardsToChoose = new List<GameObject>();
         GameObject[] AllCartesType = GameObject.FindGameObjectsWithTag("Main");
         switch (StateCarte) {
@@ -1762,10 +1794,12 @@ public class Carte : NetworkBehaviourAntinomia {
             return false;
         }
 
-        GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
-            allCardsToChoose, gameObject, _nombreDeCartesAChoisir: properIntCondition%10, stringToDisplay: "Choisissez " + 
-            (properIntCondition % 10).ToString() + " cartes", deactivateAfter: true);
-        ShowCardsMustBeActivated = true;
+        if (jouerDirect) {
+            GameObject.FindGameObjectWithTag("GameManager").transform.Find("ChooseCards").gameObject.GetComponent<ChooseCards>().ShowCardsToChoose(
+                allCardsToChoose, gameObject, _nombreDeCartesAChoisir: properIntCondition % 10, stringToDisplay: "Choisissez " +
+                (properIntCondition % 10).ToString() + " cartes", deactivateAfter: true);
+            ShowCardsMustBeActivated = true;
+        }
 
         return true; 
     }
