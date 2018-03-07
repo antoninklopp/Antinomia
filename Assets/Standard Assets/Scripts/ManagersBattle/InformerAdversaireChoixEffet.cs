@@ -21,7 +21,8 @@ public class InformerAdversaireChoixEffet : MonoBehaviour {
     /// </summary>
     public void AdversaireChoisitEffet() {
         if (CurrentChoixAdversaire == null) {
-            CurrentChoixAdversaire = Instantiate(InformerAdversaireChoisitEffet); 
+            CurrentChoixAdversaire = Instantiate(InformerAdversaireChoisitEffet);
+            CurrentChoixAdversaire.SetActive(true); 
         }
     }
 

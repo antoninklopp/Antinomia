@@ -90,15 +90,23 @@ public class EventManager : MonoBehaviourAntinomia {
     public void CreerNouvellePileEvent() {
         // S'il n'y a qu'un seul évênement, on ne propose pas de choisir
         if (listeEvents.Count == 0) {
-            Debug.Log("Il n'y a pas d'effets dans l'eventManager"); 
+            Debug.Log("Il n'y a pas d'effets dans l'eventManager");
+            // On indique que c'est à l'autre joueur de jouer. 
+            StartCoroutine(ChangerEffetFiniJoueur());
+            TousEffetsFini = true; 
             return; 
         }
 
-        if (EffetsDemandeInteraction() <= 1) {
+        if (listeEvents.Count == 1) {
             Debug.Log("Il n'y a qu'un seul effet dans l'eventManager"); 
-            JouerUnEffet(listeEvents[0]); 
+            JouerUnEffet(listeEvents[0]);
+            StartCoroutine(ChangerEffetFiniJoueur());
+            TousEffetsFini = true; 
             return; 
         }
+
+        // On indique à l'autre joueur qu'on est en train de choisir des effets. 
+        FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(FindLocalPlayer().GetComponent<Player>().PlayerID);
 
         ButtonFin.SetActive(true);
         ResetOrdreButton.SetActive(true);
@@ -118,12 +126,10 @@ public class EventManager : MonoBehaviourAntinomia {
             newButton.transform.SetParent(transform, false);
             int number = i;
             // Changement de deck. 
-            Debug.Log(1); 
             newButton.GetComponent<Button>().onClick.AddListener(delegate { CliqueEffet(number); });
             // On informe le joueur de l'effet qui peut être joué ainsi que de la carte qui peut le jouer. 
             newButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = listeEvents[i].effet.EffetString + "\n" + 
                 "<color=purple>" + listeEvents[i].CarteAssociee.GetComponent<Carte>().Name + "</color>";
-            Debug.Log(2); 
             listeButtons.Add(newButton);
         }
     }
@@ -132,9 +138,12 @@ public class EventManager : MonoBehaviourAntinomia {
     /// Reset tous les evenements. 
     /// </summary>
     public void Reset() {
+        Debug.Log("Reset"); 
         listeEvents = new List<EventEffet>();
         EventCourant = 0;
-        EventTotal = 0; 
+        EventTotal = 0;
+        //On remet les effets à 0
+        FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(0);
     }
 
     /// <summary>
@@ -151,10 +160,12 @@ public class EventManager : MonoBehaviourAntinomia {
         listeButtons = new List<GameObject>();
 
         ButtonFin.SetActive(false); 
-        ResetOrdreButton.SetActive(false); 
+        ResetOrdreButton.SetActive(false);
 
         // On joue les effets dans l'ordre de tri
+        Debug.Log("Il y a " + EventTotal + " à jouer"); 
         for (int i = 0; i < EventTotal; i++) {
+            Debug.Log("On joue l'effet " + i); 
             // On met TousEffetsFini à true avant de jouer le dernier effet pour que le joueur adverse puisse répondre.
             if (i == EventTotal - 1) {
                 // On a besoin d'avoir changer l'entier d'effet fini pour une vérification dans la pile. 
@@ -162,7 +173,8 @@ public class EventManager : MonoBehaviourAntinomia {
                 TousEffetsFini = true; 
             }
             // On attend la fin de l'effet avant de passer au suivant.
-            JouerUnEffet(FindEffet(i)); 
+            JouerUnEffet(FindEffet(i));
+            Debug.Log("On a fini l'effet"); 
             while (!EffetFini) {
                 yield return new WaitForSeconds(0.2f); 
             }
@@ -177,11 +189,13 @@ public class EventManager : MonoBehaviourAntinomia {
     /// </summary>
     /// <returns>None</returns>
     private IEnumerator ChangerEffetFiniJoueur() {
-        int entierAttendu = 0; 
+        // On indique à l'autre joueur que c'est à lui de joueur.
+        int entierAttendu = 0;
+        Debug.Log("EffetPlayer" + FindLocalPlayer().GetComponent<Player>().EffetPlayer); 
         // Et on passe l'entier au bon nombre (dans le Player). 
         if (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0) {
             // Dans le cas où c'était à nous de jouer en premier.
-            entierAttendu = FindLocalPlayer().GetComponent<Player>().PlayerID;
+            entierAttendu = FindNotLocalPlayer().GetComponent<Player>().PlayerID;
         }
         FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(entierAttendu);
 

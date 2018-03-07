@@ -859,7 +859,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         }
                         break;
                     }
-                    if (checkCibleNull(Cible)) {
+                    if (CheckCibleNull(Cible)) {
                         Debug.Log("On est ici"); 
                         // Cette fonction retourne faux, s'il n'y a pas assez de cartes à choisir
                         if (!ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition)){
@@ -876,7 +876,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         }
                         break;
                     }
-                    if (checkCibleNull(Cible)) {
+                    if (CheckCibleNull(Cible)) {
                         // Cette fonction retourne faux, s'il n'y a pas assez de cartes à choisir
                         if (!ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
                             _conditions[j].properIntCondition)) {
@@ -892,7 +892,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         }
                         break;
                     }
-                    if (checkCibleNull(Cible)) {
+                    if (CheckCibleNull(Cible)) {
                         if (!ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
                             _conditions[j].properIntCondition)) {
                             return false; 
@@ -906,7 +906,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         }
                         break;
                     }
-                    if (checkCibleNull(Cible)) {
+                    if (CheckCibleNull(Cible)) {
                         if (!ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition)) {
                             return false; 
                         }
@@ -1045,27 +1045,27 @@ public class Carte : NetworkBehaviourAntinomia {
                     // Permettre au joueur de choisir un élément.
                     return true; 
                 case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE:
-                    if (checkCibleNull(Cible)) {
+                    if (CheckCibleNull(Cible)) {
                         ShowCardsForChoiceChampBatailleDeuxJoueurs(_conditions[j].properIntCondition);
                         return true; 
                     }
                     break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_ADVERSAIRE:
-                    if (checkCibleNull(Cible)) {
+                    if (CheckCibleNull(Cible)) {
                         ShowCardsForChoice(FindNotLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
                             _conditions[j].properIntCondition);
                         return true;
                     }
                     break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_CHAMP_BATAILLE_JOUEUR:
-                    if (checkCibleNull(Cible)) {
+                    if (CheckCibleNull(Cible)) {
                         ShowCardsForChoice(FindLocalPlayer().transform.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur"),
                             _conditions[j].properIntCondition);
                         return true; 
                     }
                     break;
                 case Condition.ConditionEnum.CHOIX_ENTITE_TERRAIN:
-                    if (checkCibleNull(Cible)) {
+                    if (CheckCibleNull(Cible)) {
                         ShowCardsForChoiceAllCartesDeuxJoueurs(_conditions[j].properIntCondition);
                         return true;
                     }
@@ -1483,6 +1483,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         // On ne met l'effet dans la pile que si le 1er de la liste parce que dans tous les cas les autres seront joués
                         // Comme ça, on ne met pas plusieurs effets dans la pile. 
                         // sinon. 
+                        Debug.Log("La cible null? " + CibleDejaChoisie); 
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
                     break;
@@ -2268,7 +2269,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Dans le cas où la cible n'est pas nulle, on l'ajoute dans les cartes choisies. 
     /// </summary>
     /// <returns>true si la Cible est null, false sinon</returns>
-    private bool checkCibleNull(GameObject Cible) {
+    private bool CheckCibleNull(GameObject Cible) {
         if (Cible == null) {
             return true; 
         } else {

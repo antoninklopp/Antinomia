@@ -546,7 +546,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         GameObject[] AllAssistances = GameObject.FindGameObjectsWithTag("Assistance");
         for (int i = 0; i < AllAssistances.Length; ++i) {
             try {
-                if (AllAssistances[i].GetComponent<Assistance>().isFromLocalPlayer &&
+                if (AllAssistances[i].GetComponent<Assistance>() != null && AllAssistances[i].GetComponent<Assistance>().isFromLocalPlayer &&
                     AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.JOUEE) {
                     AllAssistances[i].SendMessage("UpdateNewPhase", currentPhase);
                 }
@@ -1180,17 +1180,30 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <returns></returns>
     public IEnumerator AttendreEffetsJoueur() {
+
+        // On s'assure qu'on a bien remis l'entier à 0. 
+        if (FindLocalPlayerID() == Tour) {
+            FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(0);
+        }
+
+        while (FindLocalPlayer().GetComponent<Player>().EffetPlayer != 0) {
+            // Debug.Log("On attend"); 
+            yield return new WaitForSeconds(0.3f);
+        }
+
         // Si ce n'est pas le tour de ce joueur
         if (FindLocalPlayerID() != Tour) {
             // Tant que l'entier reste à 0, on attend
             while (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0) {
-                Debug.Log("On attend"); 
+                // Debug.Log("On attend"); 
                 yield return new WaitForSeconds(0.3f);
             }
 
             // Dans le cas où l'entier test n'est pas celui de notre joueur, on attend encore
             // Et on instantie l'objet d'information. 
+            Debug.LogError(FindLocalPlayer().GetComponent<Player>().EffetPlayer + " " + FindLocalPlayerID()); 
             if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
+                Debug.LogError("On devrait créer un message"); 
                 GetComponent<InformerAdversaireChoixEffet>().AdversaireChoisitEffet();
                 while (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
                     yield return new WaitForSeconds(0.1f);
@@ -1205,9 +1218,13 @@ public class GameManager : NetworkBehaviourAntinomia {
         }
         // Si c'est le tour du joueur
         else {
+            Debug.Log("C'est mon tour"); 
             // On vérifie que la variable globale soit bien à 0. 
             if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != 0) {
-                throw new UnusualBehaviourException("L'entier EffetPlayer devrait être à 0");
+                Debug.LogError("L'entier EffetPlayer devrait être à 0. Sa valeur est " +
+                    FindLocalPlayer().GetComponent<Player>().EffetPlayer);
+                // throw new UnusualBehaviourException("L'entier EffetPlayer devrait être à 0. Sa valeur est " + 
+                //    FindLocalPlayer().GetComponent<Player>().EffetPlayer);
             }
         }
     }
@@ -1472,8 +1489,6 @@ public class GameManager : NetworkBehaviourAntinomia {
     public void InformerEffet(int playerID = 0, string message="") {
         if ((FindLocalPlayerID() != playerID) || (playerID == 0)) {
             // Si on a reçu un effet, c'est que l'adversaire a réagi, le jeu n'est plus en pause. 
-            FindLocalPlayer().GetComponent<Player>().CmdOnlySetPause(false);
-            PauseButton.SetActive(true);
             StartCoroutine(ShowTimeSpendPause(1f));
             if (message != "") {
                 // Si un message est fourni lors de l'appel, on l'affiche

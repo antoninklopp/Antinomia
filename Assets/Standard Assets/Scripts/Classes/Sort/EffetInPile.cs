@@ -265,12 +265,10 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                     // Passage à une nouvelle phase
                     case -4:
                         // Si le jeu a été mis en pause, on ne change pas de phase. 
+                        Debug.Log(jeuEnPause); 
                         if (!jeuEnPause) {
                             GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().GoToNextPhase(defairePile: true);
                             AntinomiaLog("Appel à GoToNextPhase");
-                            // Debug.Log(FindLocalPlayer().GetComponent<Player>().PlayerID);
-                            // Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Tour);
-                            // Debug.Log("On va à la prochaine phase");
                         } else {
                             // Sinon , il faut quand même réactiver la pile
                             getGameManager().GetComponent<GameManager>().ReactivateButtonPhase();
@@ -278,6 +276,7 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                         yield return new WaitForSeconds(0.2f);
                         GameObject.FindGameObjectWithTag("Pile").SendMessage("EffetTermine");
                         effetTermine = true;
+                        Debug.Log("On passe à la phase suivante"); 
                         yield break;
                 }
 

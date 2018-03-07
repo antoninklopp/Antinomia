@@ -104,7 +104,12 @@ public class ChooseCards : NetworkBehaviour {
 		AllCardsToShow = new List<GameObject> (); 
 		float widthPrefab = CartePrefab.GetComponent<RectTransform> ().sizeDelta.x;
         TextChooseCards.SetActive(true);
-        TextChooseCards.GetComponent<Text>().text = stringToDisplay;
+
+        if (_AllCardsGiven.Count < _nombreDeCartesAChoisir) {
+            TextChooseCards.GetComponent<Text>().text = "Impossible de jouer, pas assez de carte";
+        } else {
+            TextChooseCards.GetComponent<Text>().text = stringToDisplay;
+        }
 
 		List<string> AllShortCodes = new List<string> ();
         List<int> AllIDCards = new List<int>(); 
@@ -198,10 +203,18 @@ public class ChooseCards : NetworkBehaviour {
     /// pour un effet. 
     /// </summary>
 	public void SendAllCardsChoosen(){
-		/*
-		 * Lors du clique de fin. 
-		 * On envoie toutes les cartes!
-		 */ 
+
+        // S'il n'y avait pas assez de cartes à choisir. 
+        if (nombreDeCartesAChoisir < AllCardsGiven.Count) {
+            StartCoroutine(FinShowCards(0f, AllCardsToShow));
+            AllCardsToShowOther = new List<string>();
+            ObjectAsking = null;
+            effetEnCours = false;
+
+            Debug.Log("Cartes pas envoyées, pas assez de cartes à choisir.");
+
+            return; 
+        }
 
         if (nombreDeCartesAChoisir > AllCardsToReturnID.Count) {
             TextChooseCards.GetComponent<Text>().text = "Vous devez encore choisir " +

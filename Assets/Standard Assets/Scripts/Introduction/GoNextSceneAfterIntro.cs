@@ -17,7 +17,7 @@ public class GoNextSceneAfterIntro : MonoBehaviour {
         AsyncOperation SceneLoad = SceneManager.LoadSceneAsync("LoginDataBase");
         Debug.Log("OK"); 
         SceneLoad.allowSceneActivation = false;
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1f);
         SceneLoad.allowSceneActivation = true;
         Debug.Log("OK");
         while (!SceneLoad.isDone) {

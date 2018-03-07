@@ -165,6 +165,9 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
 		 * Trouver le joueur qui n'est pas local, pour lui faire envoyer les fonctions [Command(channel=0)]
 		 */
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
+        if (Players.Length != 2) {
+            throw new UnusualBehaviourException("Il devrait y avoir deux joueurs. Seulement " + Players.Length + " détectés."); 
+        }
         if (!Players[0].GetComponent<Player>().isLocalPlayer) {
             return Players[0];
         }

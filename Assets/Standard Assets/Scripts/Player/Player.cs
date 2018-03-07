@@ -110,12 +110,13 @@ public class Player : NetworkBehaviourAntinomia	 {
 
     /// <summary>
     /// Entier qui permet de vérifier que les effets sont bien joués dans le bon ordre : 
-    /// 1 - Par la joueur dont c'est le tour
-    /// 2 - Par le joueur dont ce n'est pas le tour.
+    /// 0 si aucun effet n'a encore été checké
+    /// PlayerID du joueur dont c'est le tour SEULEMENT SI il a des effets à jouer
+    /// PlayerID dont le joueur dont ce n'est pas le tour.
     /// Cette variable devra repasser à zéro chaque fois que tous les effets ont été vérifiés. 
     /// Sinon, il sera mis au PlayerID dont c'est le tour. 
     /// </summary>
-    public int EffetPlayer;
+    public int EffetPlayer = 0;
 
 
     // Use this for initialization
@@ -1316,6 +1317,7 @@ public class Player : NetworkBehaviourAntinomia	 {
 
     [ClientRpc(channel=0)]
     public void RpcOnEffetPlayer(int _EffetPlayer) {
+        Debug.Log("On change les infos de l'effet Player " + _EffetPlayer);
         FindLocalPlayer().GetComponent<Player>().EffetPlayer = _EffetPlayer;
         FindNotLocalPlayer().GetComponent<Player>().EffetPlayer = _EffetPlayer;
     }

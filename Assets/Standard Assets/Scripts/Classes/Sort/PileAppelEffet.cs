@@ -175,9 +175,11 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On propose à tous les joueurs de répondre/ajouter des effets à la pile
-            if (getGameManager().GetComponent<GameManager>().IsAllEffetsFinis() && FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0) {
+            if (getGameManager().GetComponent<GameManager>().IsAllEffetsFinis()) {
+                AntinomiaLog("On propose"); 
                 InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
             } else {
+                AntinomiaLog("On ne propose pas"); 
                 InformerSansPause(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet()); 
             }
             AntinomiaLog("L'effet devrait être display"); 
@@ -214,18 +216,39 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
                     break; 
             }
 
-            getGameManager().GetComponent<GameManager>().ResetEventManager(); 
-            for (int i = 0; i < allCardsPlayer.Count; i++) {
-                Debug.Log("On gere les effets ponctuels de la pile");
-                NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(allCardsPlayer[i], deposeCarte);
-            }
-            if (deposeCarte == 0) {
-                if (thisCarte != null) {
-                    NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(thisCarte, deposeCarte);
-                }
-            }
-            getGameManager().GetComponent<GameManager>().JouerEventManager();
+            StartCoroutine(CheckEffetCartesApresAjout(thisCarte, deposeCarte, allCardsPlayer, NouveauEffetInPile)); 
         }
+
+    }
+
+    /// <summary>
+    /// On a besoin d'attendre que tous les effets soient finis avant de pouvoir jouer ces effets là. 
+    /// </summary>
+    /// <param name="thisCarte"></param>
+    /// <param name="deposeCarte"></param>
+    /// <param name="allCardsPlayer"></param>
+    /// <param name="NouveauEffetInPile"></param>
+    /// <returns></returns>
+    private IEnumerator CheckEffetCartesApresAjout(GameObject thisCarte, int deposeCarte, 
+        List<GameObject> allCardsPlayer, GameObject NouveauEffetInPile) {
+
+        while (!getGameManager().GetComponent<GameManager>().IsAllEffetsFinis()) {
+            yield return new WaitForSeconds(0.3f); 
+        }
+
+        getGameManager().GetComponent<GameManager>().ResetEventManager();
+        for (int i = 0; i < allCardsPlayer.Count; i++) {
+            Debug.Log("On gere les effets ponctuels de la pile");
+            NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(allCardsPlayer[i], deposeCarte);
+        }
+        if (deposeCarte == 0) {
+            if (thisCarte != null) {
+                NouveauEffetInPile.GetComponent<EffetInPile>().GererEffetsPonctuelPile(thisCarte, deposeCarte);
+            }
+        }
+        getGameManager().GetComponent<GameManager>().JouerEventManager();
+
+        yield break; 
     }
 
     /// <summary>
@@ -235,6 +258,10 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         StartCoroutine(getGameManager().GetComponent<GameManager>().ProposeToPauseGame(message:Phrase)); 
     }
 
+    /// <summary>
+    /// Informer le joueur adverse d'un ajout d'effet dans la pile sans lui permettre de faire Pause. 
+    /// </summary>
+    /// <param name="Phrase"></param>
     void InformerSansPause(string Phrase) {
         getGameManager().GetComponent<GameManager>().InformerEffet(message: Phrase);
     }
