@@ -61,7 +61,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">Le numero de l'effet dans la liste des effets</param>
     /// <param name="numeroListeEffet">0 si liste normale, 1 si astral, 2 si maléfique</param>
     public void AjouterEffetALaPile(GameObject ObjetEffet, List<GameObject> ObjetCible, 
-                                        int numeroEffet, int numeroListeEffet=0) {
+                                        int numeroEffet, int numeroListeEffet=0, bool ProposerDefairePile=true) {
 
         AntinomiaLog("On ajoute un effet à la pile dans effetInPile");
         AntinomiaLog(ObjetEffet); 
@@ -80,10 +80,10 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         int playerID = FindLocalPlayer().GetComponent<Player>().PlayerID;
 
         if (hasAuthority) {
-            CmdAjouterEffetALaPile(IDObjetEffet, ListeIDCardGameCible, numeroEffet, numeroListeEffet, playerID);
+            CmdAjouterEffetALaPile(IDObjetEffet, ListeIDCardGameCible, numeroEffet, numeroListeEffet, playerID, ProposerDefairePile);
         } else {
             FindLocalPlayer().GetComponent<Player>().CmdAjouterEffetALaPile(IDObjetEffet, 
-                                        ListeIDCardGameCible, numeroEffet, numeroListeEffet, playerID);
+                                        ListeIDCardGameCible, numeroEffet, numeroListeEffet, playerID, ProposerDefairePile);
         }
     }
 
@@ -97,8 +97,8 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
     [Command(channel=0)]
     void CmdAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
-                                      int numeroListeEffet, int PlayerID) {
-        RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
+                                      int numeroListeEffet, int PlayerID, bool ProposerDefairePile) {
+        RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID, ProposerDefairePile); 
     }
 
 
@@ -113,8 +113,8 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
     [ClientRpc(channel = 0)]
     public void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
-                                      int numeroListeEffet, int PlayerID) {
-        AjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
+                                      int numeroListeEffet, int PlayerID, bool ProposerDefairePile) {
+        AjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID, ProposerDefairePile); 
     }
 
     /// <summary>
@@ -126,8 +126,9 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">Le numero de l'effet dans la liste</param>
     /// <param name="numeroListeEffet">Le numero de la liste d'effets</param>
     /// <param name="PlayerID">L'ID du joueur qui joue l'effet</param>
+    /// <param name="ProposeDefairePile">Si True alors cet effet est le dernier joué, il doit proposer de défaire la pile</param>
     public void AjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
-                                      int numeroListeEffet, int PlayerID) {
+                                      int numeroListeEffet, int PlayerID, bool ProposeDefairePile) {
 
         GameObject NouveauEffetInPile = Instantiate(EffetInPilePrefab);
         Effet effetJoue = new Effet(); 
@@ -175,7 +176,7 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On propose à tous les joueurs de répondre/ajouter des effets à la pile
-            if (getGameManager().GetComponent<GameManager>().IsAllEffetsFinis()) {
+            if (ProposeDefairePile) {
                 AntinomiaLog("On propose"); 
                 InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
             } else {

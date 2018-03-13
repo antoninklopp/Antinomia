@@ -97,21 +97,37 @@ public class EventManager : MonoBehaviourAntinomia {
             return; 
         }
 
-        if (listeEvents.Count == 1) {
-            Debug.Log("Il n'y a qu'un seul effet dans l'eventManager"); 
-            JouerUnEffet(listeEvents[0]);
-            StartCoroutine(ChangerEffetFiniJoueur());
-            TousEffetsFini = true; 
-            return; 
+        // Ici il n'y aucun effet à rajouter à la pile. 
+        // On peut donc demander à ce joueur s'il veut défaire la pile ou ajouter un effet.
+        if (NombreEffetsDemandeInteraction() < 0) {
+            // On propose de défaire la pile.
+            GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(message: "Voulez vous defaire la Pile?");
         }
+        // Sinon c'est ce joueur CI qui demandera à defaire la pile. 
+        else {
+            if (NombreEffetsDemandeInteraction() < 1) {
+                Debug.Log("Il n'y a qu'un seul effet dans l'eventManager");
+                // Si le joueur est le deuxieme joueur, il propose de défaire la pile
+                if (FindLocalPlayer().GetComponent<Player>().PlayerID != GameObject.Find("GameManager").GetComponent<GameManager>().Tour) {
+                    JouerUnEffet(listeEvents[0], true);
+                } else {
+                    JouerUnEffet(listeEvents[0], false);
+                }
+                StartCoroutine(ChangerEffetFiniJoueur());
+                FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(FindLocalPlayer().GetComponent<Player>().PlayerID);
+                TousEffetsFini = true;
+                return;
+            }
 
-        // On indique à l'autre joueur qu'on est en train de choisir des effets. 
-        FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(FindLocalPlayer().GetComponent<Player>().PlayerID);
+            // On indique à l'autre joueur qu'on est en train de choisir des effets. 
+            Debug.Log("Je suis ici");
+            FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(FindLocalPlayer().GetComponent<Player>().PlayerID);
 
-        ButtonFin.SetActive(true);
-        ResetOrdreButton.SetActive(true);
-        EventTotal = listeEvents.Count;
-        SetUpButtons();
+            ButtonFin.SetActive(true);
+            ResetOrdreButton.SetActive(true);
+            EventTotal = listeEvents.Count;
+            SetUpButtons();
+        }
     }
 
 
@@ -165,21 +181,35 @@ public class EventManager : MonoBehaviourAntinomia {
         // On joue les effets dans l'ordre de tri
         Debug.Log("Il y a " + EventTotal + " à jouer"); 
         for (int i = 0; i < EventTotal; i++) {
-            Debug.Log("On joue l'effet " + i); 
+            Debug.Log("On joue l'effet " + i);
             // On met TousEffetsFini à true avant de jouer le dernier effet pour que le joueur adverse puisse répondre.
-            if (i == EventTotal - 1) {
-                // On a besoin d'avoir changer l'entier d'effet fini pour une vérification dans la pile. 
-                yield return ChangerEffetFiniJoueur(); 
-                TousEffetsFini = true; 
-            }
             // On attend la fin de l'effet avant de passer au suivant.
-            JouerUnEffet(FindEffet(i));
+
+
+            // Le seul moyen pour un joueur de proposer à son adversaire de jouer est que chacun ait fait ses effets. 
+            // Il ne peut pas y avoir d'interaction entre les effets du joueur 1 et du joueur 2
+            // car tout est dans le même flux! 
+            // On checkera au début du joueur 2 si celui ci a un effet à proposer ou pas, il creera à ce moment lui 
+            // même la possibilité de créer un effet
+            if ((i == EventTotal - 1) 
+                && (FindLocalPlayer().GetComponent<Player>().PlayerID != GameObject.Find("GameManager").GetComponent<GameManager>().Tour)) {
+                // Si on est au dernier effet on proposera au joueur de defaire la pile. 
+                JouerUnEffet(FindEffet(i), true); 
+            } else {
+                // Sinon on propose au joueur. 
+                JouerUnEffet(FindEffet(i), false);
+            }
             Debug.Log("On a fini l'effet"); 
             while (!EffetFini) {
                 yield return new WaitForSeconds(0.2f); 
             }
             Debug.Log("<color=purple> Un effet est fini</color>"); 
-            EffetFini = false; 
+            EffetFini = false;
+            if (i == EventTotal - 1) {
+                // On a besoin d'avoir changer l'entier d'effet fini pour une vérification dans la pile. 
+                yield return ChangerEffetFiniJoueur();
+                TousEffetsFini = true;
+            }
         }
         Reset();
     }
@@ -250,15 +280,12 @@ public class EventManager : MonoBehaviourAntinomia {
     /// Renvoie le nombre d'effets qui demandent un
     /// </summary>
     /// <returns></returns>
-    private int EffetsDemandeInteraction() {
+    private int NombreEffetsDemandeInteraction() {
         int somme = 0; 
         foreach (EventEffet ef in listeEvents) {
-            Debug.Log("Il y a un effet ici"); 
             if (ef.demandeInteraction) {
-                Debug.Log("Celui ci demande une interaction");
                 somme++; 
             } else {
-                Debug.Log("Celui ci non"); 
             }
         }
         return somme; 
@@ -272,12 +299,40 @@ public class EventManager : MonoBehaviourAntinomia {
         return TousEffetsFini; 
     }
 
-    private void JouerUnEffet(EventEffet ef) {
+    /// <summary>
+    /// Jouer un effet. 
+    /// </summary>
+    /// <param name="ef"></param>
+    /// <param name="ProposerDefairePile">True si c'est le dernier effet du dernier joueur et qu'il propose de défaire la pile. </param>
+    private void JouerUnEffet(EventEffet ef, bool ProposerDefairePile) {
         // il faut recréer une liste d'effets avec effet dans la bonne position, pour qu'il n'y ait pas de problèems
         // lors de la transmission des infos..
         // On mettra donc des elements à null pour compléter
-        if (!ef.CarteAssociee.GetComponent<Carte>().GererEffets(numeroListEffet:ef.effet.numeroListEffet, jouerDirect: true)) {
+        if (!ef.CarteAssociee.GetComponent<Carte>().GererEffets(numeroListEffet:ef.effet.numeroListEffet, jouerDirect: true, 
+                ProposerDefairePile:ProposerDefairePile)) {
             throw new UnusualBehaviourException("Cet effet aurait du etre joué"); 
         }
     }
+
+    /// <summary>
+    /// On joue tous les effets sans interaction, ceux qui ne rentrent pas dans le flux en premier, 
+    /// pour s'en débarassern puis on jouera les suivants. 
+    /// </summary>
+    private void JouerEffetSansInteraction() {
+        foreach (EventEffet ef in listeEvents) {
+            if (!ef.demandeInteraction) {
+                JouerUnEffet(ef, false); 
+            }
+        }
+    }
+
+    private List<EventEffet> EffetsDemandeInteraction() {
+        List<EventEffet> interaction = new List<EventEffet>();
+        foreach (EventEffet ef in listeEvents) {
+            if (ef.demandeInteraction) {
+                interaction.Add(ef); 
+            }
+        }
+        return interaction; 
+    } 
 }

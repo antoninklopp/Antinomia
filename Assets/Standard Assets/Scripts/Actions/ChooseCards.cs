@@ -204,8 +204,8 @@ public class ChooseCards : NetworkBehaviour {
     /// </summary>
 	public void SendAllCardsChoosen(){
 
-        // S'il n'y avait pas assez de cartes à choisir. 
-        if (nombreDeCartesAChoisir < AllCardsGiven.Count) {
+        // S'il y avait trop de cartes à choisir. 
+        if (nombreDeCartesAChoisir > AllCardsGiven.Count) {
             StartCoroutine(FinShowCards(0f, AllCardsToShow));
             AllCardsToShowOther = new List<string>();
             ObjectAsking = null;

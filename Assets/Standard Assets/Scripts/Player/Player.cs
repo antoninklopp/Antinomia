@@ -1043,8 +1043,8 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="PlayerID"></param>
     [Command(channel=0)]
     public void CmdAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
-                                      int numeroListeEffet, int PlayerID) {
-        RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID); 
+                                      int numeroListeEffet, int PlayerID, bool ProposerDefairePile) {
+        RpcAjouterEffetALaPile(IDObjetEffet, ListeObjetsCible, numeroEffet, numeroListeEffet, PlayerID, ProposerDefairePile); 
     }
 
     /// <summary>
@@ -1057,9 +1057,9 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <param name="PlayerID"></param>
     [ClientRpc(channel=0)]
     public void RpcAjouterEffetALaPile(int IDObjetEffet, int[] ListeObjetsCible, int numeroEffet,
-                                      int numeroListeEffet, int PlayerID) {
+                                      int numeroListeEffet, int PlayerID, bool ProposerDefairePile) {
         GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().AjouterEffetALaPile(IDObjetEffet, ListeObjetsCible,
-                                                                    numeroEffet, numeroListeEffet, PlayerID); 
+                                                                    numeroEffet, numeroListeEffet, PlayerID, ProposerDefairePile); 
     }
 
     /// <summary>

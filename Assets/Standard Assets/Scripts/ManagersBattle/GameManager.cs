@@ -1195,17 +1195,16 @@ public class GameManager : NetworkBehaviourAntinomia {
         if (FindLocalPlayerID() != Tour) {
             // Tant que l'entier reste à 0, on attend
             while (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0) {
-                // Debug.Log("On attend"); 
+                Debug.Log("On attend"); 
                 yield return new WaitForSeconds(0.3f);
             }
 
             // Dans le cas où l'entier test n'est pas celui de notre joueur, on attend encore
             // Et on instantie l'objet d'information. 
-            Debug.LogError(FindLocalPlayer().GetComponent<Player>().EffetPlayer + " " + FindLocalPlayerID()); 
             if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
-                Debug.LogError("On devrait créer un message"); 
                 GetComponent<InformerAdversaireChoixEffet>().AdversaireChoisitEffet();
                 while (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
+                    Debug.Log("Le joueur choisi des effets");
                     yield return new WaitForSeconds(0.1f);
                 }
                 // Une fois que c'est notre tour, on detruit l'objet d'information. 

@@ -22,6 +22,8 @@ public class InformerAdversaireChoixEffet : MonoBehaviour {
     public void AdversaireChoisitEffet() {
         if (CurrentChoixAdversaire == null) {
             CurrentChoixAdversaire = Instantiate(InformerAdversaireChoisitEffet);
+            // L'objet est un objet d'UI.
+            CurrentChoixAdversaire.transform.SetParent(GameObject.Find("GameManager").transform, false); 
             CurrentChoixAdversaire.SetActive(true); 
         }
     }

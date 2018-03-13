@@ -577,9 +577,10 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <returns></returns>
     public virtual bool GererEffets(Player.Phases _currentPhase = Player.Phases.INITIATION, bool debut = false,
         bool nouveauTour = false, GameObject Cible = null, int numeroListEffet = 0, int deposeCarte = 0, bool changementDomination = false,
-        bool jouerDirect = false) {
+        bool jouerDirect = false, bool ProposerDefairePile=true) {
         if (numeroListEffet == 0) {
-            return GererEffets(AllEffets, _currentPhase, debut, nouveauTour, Cible, numeroListEffet, deposeCarte, changementDomination, jouerDirect);
+            return GererEffets(AllEffets, _currentPhase, debut, nouveauTour, Cible, numeroListEffet, 
+                deposeCarte, changementDomination, jouerDirect, ProposerDefairePile);
         } else { 
             throw new UnusualBehaviourException("Le numero de liste doit etre 0, 1 ou 2");
         }
@@ -597,7 +598,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <returns>True si l'effet a pu être joué, false sinon. </returns>
     public bool GererEffets(List<Effet> _allEffets, Player.Phases _currentPhase=Player.Phases.INITIATION, bool debut=false, 
         bool nouveauTour=false, GameObject Cible=null, int numeroListEffet=0, int deposeCarte=0, bool changementDomination=false, 
-        bool jouerDirect=false) {
+        bool jouerDirect=false, bool ProposerDefairePile=true) {
         if (_allEffets.Count == 0) {
             // La carte n'a aucune capacité/effet lors de tours. 
             return false; 
@@ -628,7 +629,7 @@ public class Carte : NetworkBehaviourAntinomia {
             if (effetOK && jouerDirect) {
                 // Dans le cas où toutes les conditions sont réunies. 
                 GererActions(_allEffets[i].AllActionsEffet, CibleDejaChoisie:!(Cible==null), numeroEffet:i, 
-                    effetListNumber:numeroListEffet);
+                    effetListNumber:numeroListEffet, ProposerDefairePile:ProposerDefairePile);
             }
             // Si on ne joue pas l'effet directement, on l'ajoute à l'eventManager
             else if (effetOK && !jouerDirect) {
@@ -1202,7 +1203,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Sinon on les ajoute juste à la pile. </param>
     /// <param name="CibleDejaChoisie">true si les paramètres ont été choisis en amont, par exemple pour un sort</param>
     public void GererActions(List<Action> _actions, int numeroEffet=0, int effetListNumber=0, bool jouerEffet=false, 
-                                bool CibleDejaChoisie=false) {
+                                bool CibleDejaChoisie=false, bool ProposerDefairePile=true) {
         // On doit maintenant gérer les effets.
         for (int j = 0; j < _actions.Count; ++j) {
             // On est obliger de regarder la condition jouerEffet à l'intérieur du switch parce que 
@@ -1223,7 +1224,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     else if (j == 0) {
                         // On ne met l'effet dans la pile que si le 1er de la liste parce que dans tous les cas les autres seront joués
                         // sinon. 
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.DETRUIRE:
@@ -1231,7 +1232,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         StartCoroutine(DetruireEffet(CibleDejaChoisie));
                     } else if (j == 0) {
                         Debug.Log("On met l'effet dans la pile"); 
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.GAIN_AKA_UN_TOUR:
@@ -1241,7 +1242,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.PIOCHER_CARTE:
@@ -1251,7 +1252,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         getGameManager().GetComponent<GameManager>().SetEffetFini();
                         Debug.Log("<color=purple> Piocher une carte </color>");
                     } else if (j == 0) {
-                        MettreEffetDansLaPile(null, numeroEffet, effetListNumber);
+                        MettreEffetDansLaPile(null, numeroEffet, effetListNumber, ProposerDefairePile);
                     }
                     break;
                 case Action.ActionEnum.SACRIFIER_CARTE:
@@ -1272,7 +1273,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_MULTIPLIE:
@@ -1305,7 +1306,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log("Defausser"); 
                         StartCoroutine(DefausserEffet(action:true, nombreCartes:_actions[j].properIntAction));
                     } else if (j == 0){
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.REVELER_CARTE:
@@ -1339,7 +1340,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.AIR, CibleDejaChoisie));
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     Debug.Log("Element de la carte changé en AIR");
                     break;
@@ -1348,7 +1349,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.EAU, CibleDejaChoisie));
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     Debug.Log("Element de la carte changé en EAU");
                     break;
@@ -1358,7 +1359,7 @@ public class Carte : NetworkBehaviourAntinomia {
 
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     Debug.Log("Element de la carte changé en FEU");
                     break;
@@ -1367,7 +1368,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         StartCoroutine(ChangerNatureEffet(Entite.Element.TERRE, CibleDejaChoisie));
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     Debug.Log("Element de la carte changé en TERRE");
                     break;
@@ -1378,7 +1379,8 @@ public class Carte : NetworkBehaviourAntinomia {
                         ChangeEffetPuissance(Entite.Element.AIR, _actions[j].properIntAction);
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber, 
+                            ProposerDefairePile: ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_TERRE_AUGMENTE:
@@ -1388,7 +1390,8 @@ public class Carte : NetworkBehaviourAntinomia {
                         ChangeEffetPuissance(Entite.Element.TERRE, _actions[j].properIntAction);
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber, 
+                            ProposerDefairePile:ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_EAU_AUGMENTE:
@@ -1398,7 +1401,8 @@ public class Carte : NetworkBehaviourAntinomia {
                         ChangeEffetPuissance(Entite.Element.EAU, _actions[j].properIntAction);
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber, 
+                            ProposerDefairePile: ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_FEU_AUGMENTE:
@@ -1408,7 +1412,8 @@ public class Carte : NetworkBehaviourAntinomia {
                         ChangeEffetPuissance(Entite.Element.FEU, _actions[j].properIntAction);
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber,
+                             ProposerDefairePile: ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_AUGMENTE:
@@ -1426,7 +1431,8 @@ public class Carte : NetworkBehaviourAntinomia {
                         getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber,
+                             ProposerDefairePile: ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.PUISSANCE_AUGMENTE_DIRECT:
@@ -1440,7 +1446,8 @@ public class Carte : NetworkBehaviourAntinomia {
                         getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber,
+                             ProposerDefairePile: ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.TERRAIN_MALEFIQUE:
@@ -1450,7 +1457,8 @@ public class Carte : NetworkBehaviourAntinomia {
                         getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber,
+                             ProposerDefairePile: ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.ATTAQUE_JOUEUR_ADVERSE:
@@ -1462,7 +1470,8 @@ public class Carte : NetworkBehaviourAntinomia {
                     }
                     else if (j == 0) {
                         Debug.Log("<color=green>CA PART</color>");
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber,
+                             ProposerDefairePile: ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.NATURE:
@@ -2127,13 +2136,14 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">numéro de l'effet dans la liste des effets</param>
     /// <param name="numeroListEffet">numero de la liste des effets (facultatif)</param>
     /// <returns></returns>
-    public IEnumerator MettreEffetDansLaPileFromActions(int numeroEffet, bool CibleDejaChoisie = false, int numeroListEffet = 0) {
+    public IEnumerator MettreEffetDansLaPileFromActions(int numeroEffet, bool CibleDejaChoisie = false, int numeroListEffet = 0,
+        bool ProposerDefairePile=true) {
         Debug.Log(CibleDejaChoisie);
         if (!CibleDejaChoisie) {
             yield return WaitForCardsChosen(); 
         }
         Debug.Log("Nombre de cartes choisies : " + CartesChoisiesPourEffets.Count.ToString());
-        MettreEffetDansLaPile(CartesChoisiesPourEffets, numeroEffet, numeroListEffet); 
+        MettreEffetDansLaPile(CartesChoisiesPourEffets, numeroEffet, numeroListEffet, ProposerDefairePile); 
     }
 
     /// <summary>
@@ -2224,7 +2234,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="Cibles">Les Cibles de l'effet</param>
     /// <param name="numeroEffet">La position de l'effet dans la liste d'effets</param>
     /// <param name="numeroListEffet">Le numero de la liste d'effets</param>
-    protected void MettreEffetDansLaPile(List<GameObject> Cibles, int numeroEffet, int numeroListEffet=0) {
+    protected void MettreEffetDansLaPile(List<GameObject> Cibles, int numeroEffet, int numeroListEffet=0, bool ProposerDefairePile = true) {
         Debug.Log("Effet dans la pile"); 
         GameObject Pile = GameObject.FindGameObjectWithTag("Pile"); 
         if (Pile == null) {
@@ -2233,7 +2243,7 @@ public class Carte : NetworkBehaviourAntinomia {
             StartCoroutine(MettreEffetDansLaPileRoutine(Cibles, numeroEffet, numeroListEffet));
         } else {
             // La pile existe déjà, on peut rajouter à la pile. 
-            Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(gameObject, Cibles, numeroEffet, numeroListEffet);
+            Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(gameObject, Cibles, numeroEffet, numeroListEffet, ProposerDefairePile);
             Debug.Log("Un effet a été ajouté à la pile"); 
         }
 
@@ -2246,7 +2256,8 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <param name="Cibles">Les Cibles de l'effet</param>
     /// <param name="numeroEffet">La position de l'effet dans la liste d'effets</param>
     /// <param name="numeroListEffet">Le numero de la liste d'effets</param>
-    protected IEnumerator MettreEffetDansLaPileRoutine(List<GameObject> Cibles, int numeroEffet, int numeroListEffet = 0) {
+    protected IEnumerator MettreEffetDansLaPileRoutine(List<GameObject> Cibles, int numeroEffet, 
+            int numeroListEffet = 0, bool ProposerDefairePile=true) {
         Debug.Log("Effet dans la pile"); 
         GameObject Pile = null; 
         for (int i = 0; i < 5 && Pile == null; ++i) {
@@ -2259,7 +2270,7 @@ public class Carte : NetworkBehaviourAntinomia {
             throw new Exception("La pile ne s'est pas créée"); 
         }
 
-        Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(gameObject, Cibles, numeroEffet, numeroListEffet);
+        Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(gameObject, Cibles, numeroEffet, numeroListEffet, ProposerDefairePile);
         Debug.Log("Un effet a été ajouté à la pile"); 
     }
 
