@@ -100,4 +100,37 @@ public class MonoBehaviourAntinomia : MonoBehaviour {
             return Players[1];
         }
     }
+
+    private GameObject getGameManager() {
+        return GameObject.FindGameObjectWithTag("GameManager"); 
+    }
+
+    /// <summary>
+    /// Faire un log dans la console unity et dans la console Antinomia.
+    /// </summary>
+    /// <param name="message">Message du log (string)</param>
+    protected void AntinomiaLog(string message) {
+        getGameManager().GetComponent<GameManager>().Log(message);
+    }
+
+    /// <summary>
+    /// Faire un log dans la console unity et dans la console Antinomia. 
+    /// </summary>
+    /// <param name="message">Message du log (int)</param>
+    protected void AntinomiaLog(int message) {
+        getGameManager().GetComponent<GameManager>().Log(message.ToString());
+    }
+
+    /// <summary>
+    /// Faire un log dans la console unity et dans la console Antinomia. 
+    /// </summary>
+    /// <param name="message">Message du log (GameObject)</param>
+    protected void AntinomiaLog(GameObject message) {
+        try {
+            getGameManager().GetComponent<GameManager>().Log(message.ToString());
+        }
+        catch (NullReferenceException) {
+            Debug.Log("Impossoble de faire le log");
+        }
+    }
 }

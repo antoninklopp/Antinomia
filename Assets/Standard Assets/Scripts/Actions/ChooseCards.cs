@@ -93,6 +93,10 @@ public class ChooseCards : NetworkBehaviour {
 		 * On crée toutes les images à partir de la carte. 
 		 */
 
+        // On reset les listes. 
+        AllCardsToReturn = new List<GameObject>();
+        AllCardsToReturnID = new List<int>(); 
+
         DetruireCartesPrevious(); 
 
         nombreDeCartesAChoisir = _nombreDeCartesAChoisir; 
@@ -204,6 +208,8 @@ public class ChooseCards : NetworkBehaviour {
     /// </summary>
 	public void SendAllCardsChoosen(){
 
+        Debug.Log("On envoie les cartes"); 
+
         // S'il y avait trop de cartes à choisir. 
         if (nombreDeCartesAChoisir > AllCardsGiven.Count) {
             StartCoroutine(FinShowCards(0f, AllCardsToShow));
@@ -212,7 +218,6 @@ public class ChooseCards : NetworkBehaviour {
             effetEnCours = false;
 
             Debug.Log("Cartes pas envoyées, pas assez de cartes à choisir.");
-
             return; 
         }
 
@@ -225,6 +230,8 @@ public class ChooseCards : NetworkBehaviour {
                 (AllCardsToReturnID.Count - nombreDeCartesAChoisir).ToString() + "cartes en trop. Supprimez en."; 
             return;
         }
+
+        Debug.Log("On est passé"); 
  
 		FiniButton.SetActive (false);
         TextChooseCards.SetActive(false); 
@@ -234,17 +241,23 @@ public class ChooseCards : NetworkBehaviour {
 		}
 		
         if (ObjectAsking == null){
+            Debug.Log("Object asking null"); 
             FindLocalPlayer().GetComponent<Player>().CmdSendCards (newList, "Cartes choisies", GameManager.FindLocalPlayerID());
         } else {
             Debug.Log("On envoie à l'objet qui demande " + AllCardsToReturnID.Count); 
             ObjectAsking.SendMessage("CartesChoisies", AllCardsToReturnID); 
         }
+
+        // On a choisi des cartes donc un effet a du etre fini. 
+        GameObject.Find("GameManager").GetComponent<GameManager>().SetEffetFini();
+
         StartCoroutine(FinShowCards(0f, AllCardsToShow)); 
 		AllCardsToShowOther = new List<string> ();
         ObjectAsking = null;
         effetEnCours = false;
 
         Debug.Log("Cartes envoyées");
+
 	}
 
     /// <summary>

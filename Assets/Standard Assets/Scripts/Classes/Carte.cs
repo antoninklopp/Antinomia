@@ -1005,7 +1005,8 @@ public class Carte : NetworkBehaviourAntinomia {
                 case Condition.ConditionEnum.CHANGEMENT_DOMINATION:
                     // S'il n'y a pas de changement de domination ou si le changement ne correspondau type maléfique/astral 
                     // demandé
-                    Debug.Log("Proper int condition : " + _conditions[j].properIntCondition); 
+                    Debug.Log("Proper int condition : " + _conditions[j].properIntCondition);
+                    Debug.Log(getGameManager().GetComponent<GameManager>().ascendanceTerrain); 
                     if (!changementDomination ||  
                         (_conditions[j].properIntCondition == 1 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
                         GameManager.AscendanceTerrain.NONE) ||
@@ -1013,6 +1014,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         GameManager.AscendanceTerrain.ASTRALE) ||
                         (_conditions[j].properIntCondition == 3 && getGameManager().GetComponent<GameManager>().ascendanceTerrain !=
                         GameManager.AscendanceTerrain.MALEFIQUE)) {
+                        Debug.Log("Condition non respectée"); 
                         return false;
                     }
                     break;
@@ -1239,7 +1241,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         FindLocalPlayer().GetComponent<Player>().subtractAKA(-_actions[j].intAction);
                         DisplayMessage("Ajout de " + _actions[j].intAction.ToString() + "AKA à ce tour");
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
@@ -1249,7 +1251,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().PiocheMultiple(_actions[j].properIntAction));
                         DisplayMessage("Pioche " + _actions[j].properIntAction.ToString() + " carte");
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                         Debug.Log("<color=purple> Piocher une carte </color>");
                     } else if (j == 0) {
                         MettreEffetDansLaPile(null, numeroEffet, effetListNumber, ProposerDefairePile);
@@ -1259,7 +1261,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     // Sacrifier cette carte. 
                     DisplayMessage("<color=orange>Sacrifice de cette carte</color>");
                     if (jouerEffet) {
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                         SacrifierCarteEntite();
                     }
                     else if (j == 0){
@@ -1270,7 +1272,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         DisplayMessage("On place cette carte dans le sanctuaire");
                         PlacerSanctuaire();
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
@@ -1289,12 +1291,12 @@ public class Carte : NetworkBehaviourAntinomia {
                             }
                         }
                     }
-                    getGameManager().GetComponent<GameManager>().SetEffetFini();
+                    // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
                     GetComponent<Entite>().hasAttacked = -1;
                     DisplayMessage("Cette entité ne peut pas attaquer");
-                    getGameManager().GetComponent<GameManager>().SetEffetFini();
+                    // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.DEFAUSSER:
                     // On propose de défausser. 
@@ -1318,22 +1320,22 @@ public class Carte : NetworkBehaviourAntinomia {
                     Debug.Log("<color=purple>Reveler carte adversaire</color>");
                     FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame,
                         "RevelerCarteEffet", _actions[j].properIntAction, FindLocalPlayer().GetComponent<Player>().PlayerID);
-                    getGameManager().GetComponent<GameManager>().SetEffetFini();
+                    // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.ATTAQUE_DIRECTE:
                     attaqueDirecte = true;
-                    getGameManager().GetComponent<GameManager>().SetEffetFini();
+                    // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.FORTE_ENTITE:
                     // si une entité est forte face à l'entité d'un autre joueur
                     CarteForteFaceA(_actions[j].properIntAction);
-                    getGameManager().GetComponent<GameManager>().SetEffetFini();
+                    // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.PROCURE_AKA_SUPPLEMENTAIRE:
                     // Une carte peut procurer de l'AKA supplémentaire.
                     Debug.Log("Cette carte procure un AKA supplémentaire");
                     FindLocalPlayer().GetComponent<Player>().addAKA(_actions[j].properIntAction);
-                    getGameManager().GetComponent<GameManager>().SetEffetFini();
+                    // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case (Action.ActionEnum.NATURE_AIR):
                     if (jouerEffet) {
@@ -1428,7 +1430,7 @@ public class Carte : NetworkBehaviourAntinomia {
                                 g.GetComponent<Entite>().CmdAddStat(_actions[j].properIntAction, g.GetComponent<Carte>().IDCardGame);
                             }
                         }
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber,
@@ -1443,7 +1445,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     // On change l'ascendance du terrain en astral. 
                     if (jouerEffet) {
                         getGameManager().GetComponent<GameManager>().SetAscendanceTerrain(GameManager.AscendanceTerrain.ASTRALE);
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber,
@@ -1454,7 +1456,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     // On change l'ascendance du terrain en maléfique. 
                     if (jouerEffet) {
                         getGameManager().GetComponent<GameManager>().SetAscendanceTerrain(GameManager.AscendanceTerrain.MALEFIQUE);
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, true, numeroListEffet: effetListNumber,
@@ -1466,7 +1468,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         Debug.Log("<color=green>CA PART222</color>");
                         GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().Attack(true, gameObject, FindNotLocalPlayer(),
                         _actions[j].properIntAction);
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     }
                     else if (j == 0) {
                         Debug.Log("<color=green>CA PART</color>");
@@ -1506,7 +1508,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     if (jouerEffet) {
                         // Comme c'est un cout à payer, on le paye directement, pas besoin de payer deux fois. 
                         FindLocalPlayer().GetComponent<Player>().subtractAKA(_actions[j].properIntAction);
-                        getGameManager().GetComponent<GameManager>().SetEffetFini();
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     } else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
                     }
@@ -2046,7 +2048,7 @@ public class Carte : NetworkBehaviourAntinomia {
             CartesChoisiesPourEffets[0].GetComponent<Entite>().ChangerPosition();
             Debug.Log("L'effet changement de position a été autorisé");
         }
-        getGameManager().GetComponent<GameManager>().SetEffetFini(); 
+        // getGameManager().GetComponent<GameManager>().SetEffetFini(); 
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2071,7 +2073,7 @@ public class Carte : NetworkBehaviourAntinomia {
             Debug.Log("L'effet changement de position a été autorisé");
         }
 
-        getGameManager().GetComponent<GameManager>().SetEffetFini();
+        // getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2096,7 +2098,7 @@ public class Carte : NetworkBehaviourAntinomia {
             CartesChoisiesPourEffets[0].GetComponent<Entite>().CmdChangeElement(newElement, true);
             Debug.Log("L'effet changement de position a été autorisé");
         }
-        getGameManager().GetComponent<GameManager>().SetEffetFini();
+        // getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
 
     }
@@ -2123,7 +2125,7 @@ public class Carte : NetworkBehaviourAntinomia {
             Debug.Log(CartesChoisiesPourEffets[i].GetComponent<Entite>().Name); 
             CartesChoisiesPourEffets[i].SendMessage("DetruireCarte");
         }
-        getGameManager().GetComponent<GameManager>().SetEffetFini();
+        // getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2165,7 +2167,7 @@ public class Carte : NetworkBehaviourAntinomia {
             // On détruit les cartes choisies 
             CartesChoisiesPourEffets[i].SendMessage("DetruireCarte"); 
         }
-        getGameManager().GetComponent<GameManager>().SetEffetFini();
+        // // getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2197,7 +2199,7 @@ public class Carte : NetworkBehaviourAntinomia {
         }
         FindLocalPlayer().GetComponent<Player>().CmdSendCards(AllCartesChoisiesString, "Cartes montrées", 
             GameManager.FindLocalPlayerID());
-        getGameManager().GetComponent<GameManager>().SetEffetFini();
+        // getGameManager().GetComponent<GameManager>().SetEffetFini();
         CartesChoisiesPourEffets = null; 
     }
 
@@ -2394,7 +2396,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     "CmdAddStat", _intToAdd, FindLocalPlayer().GetComponent<Player>().PlayerID);
             }
         }
-        getGameManager().GetComponent<GameManager>().SetEffetFini();
+        // getGameManager().GetComponent<GameManager>().SetEffetFini();
     }
 
     /// <summary>

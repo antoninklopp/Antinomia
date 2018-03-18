@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
+# Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antinomia.Plugins", "Antinomia.Plugins.csproj", "{19CA5E02-E462-8B74-AAD2-C40A5A11303C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antinomia", "Antinomia.csproj", "{08C9D4D6-BB65-3019-F7E3-E93D10D4D833}"
