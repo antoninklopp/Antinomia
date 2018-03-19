@@ -35,6 +35,12 @@ public class LineRendererObject : MonoBehaviour {
         transform.position = mouseWorldPoint;
     }
 
+    /// <summary>
+    /// Trouver tous les colliders à une certaine distance de la LineRenderer. 
+    /// </summary>
+    /// <param name="distance">Distance maximale</param>
+    /// <param name="center">Centre de la recherche</param>
+    /// <returns></returns>
     public GameObject[] FindAllColliders(float distance, Vector2 center) {
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(center, distance);
         Debug.Log(transform.position); 

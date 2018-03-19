@@ -615,9 +615,18 @@ public class Player : NetworkBehaviourAntinomia	 {
 
     }
 
+    /// <summary>
+    /// Methode NON APPELEE
+    /// </summary>
+    /// <param name="name"></param>
     [ClientRpc(channel=0)]
 	public void RpcSetNameOpponent(string name){
-		NomJoueur2.GetComponent<Text> ().text = name; 
+        if (PlayerID != 0) {
+            NomJoueur2.GetComponent<Text>().text = name + "(Joueur " + PlayerID + ")";
+        } else {
+            NomJoueur2.GetComponent<Text>().text = name;
+            Debug.LogError("Probleme dans la transmission du nom"); 
+        }
 	}
 
 
@@ -630,6 +639,11 @@ public class Player : NetworkBehaviourAntinomia	 {
         StartCoroutine(RoutineSetName(newName));
     }
 
+    /// <summary>
+    /// Coroutine appelée par la syncVar
+    /// </summary>
+    /// <param name="newName"></param>
+    /// <returns></returns>
     IEnumerator RoutineSetName(string newName) {
         /*
          * On utilise une coroutine pour attendre que tous les objets soient "arrivés" dans la partie. 
@@ -637,13 +651,24 @@ public class Player : NetworkBehaviourAntinomia	 {
         yield return new WaitForSeconds(0.2f); 
         NomJoueur1 = GameObject.FindGameObjectWithTag("GameManager").transform.Find("NomJoueur1").gameObject;
         NomJoueur2 = GameObject.FindGameObjectWithTag("GameManager").transform.Find("NomJoueur2").gameObject;
+        
+        // On indique quel joueur est le numéro 1 et lequel est le numéro 2 aussi
         if (isLocalPlayer) {
             // Joueur local
-            NomJoueur1.GetComponent<Text>().text = newName;
+            if (PlayerID == 0) {
+                Debug.LogError("Probleme lors de la transmission des noms"); 
+                NomJoueur1.GetComponent<Text>().text = newName; 
+            } else {
+                NomJoueur1.GetComponent<Text>().text = newName + "(Joueur " + PlayerID + ")";
+            }
         } else {
-            NomJoueur2.GetComponent<Text>().text = newName;
+            if (PlayerID == 0) {
+                Debug.LogError("Probleme lors de la transmission des noms");
+                NomJoueur2.GetComponent<Text>().text = newName;
+            } else {
+                NomJoueur2.GetComponent<Text>().text = newName + "(Joueur " + PlayerID + ")";
+            }
         }
-
     }
 
 	[Command(channel=0)]

@@ -569,11 +569,9 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="newTour"></param>
 	protected void setTour(int newTour){
-		/*
-		 * Fonction appelée par le Player. 
-		 */ 
+
 		Tour = newTour; 
-		CurrentTour.GetComponent<Text> ().text = Tour.ToString();
+		CurrentTour.GetComponent<Text> ().text = "Tour " + Tour.ToString();
 
         if (GameManagerInformation != null) {
             // Inforlation visuelle pour le joueur. 
