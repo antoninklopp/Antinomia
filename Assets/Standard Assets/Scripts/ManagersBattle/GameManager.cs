@@ -67,7 +67,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// AKA sur le tour, c'est à dire à son niveau maximum au début du tour. 
     /// </summary>
 	private int AKATour = 0;
-#pragma warning restore CS0414 // Le champ 'GameManager.AKARemanent' est assigné, mais sa valeur n'est jamais utilisée
+
     // On ne peut lancer qu'un sort par tour. 
     public int sortLance = 0; 
 
@@ -249,10 +249,15 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     private GameObject eventManager;
 
-	/// <summary>
+    /// <summary>
+    /// AKA remanent, c'est à dire l'AKA maximum au début du tour. 
+    /// </summary>
+    public static int AKARemanent;
+
+    /// <summary>
     /// Initialisation du GameManager
     /// </summary>
-	public override void Start () {
+    public override void Start () {
         // On récupère tous les objets UI
         base.Start(); 
 
@@ -967,49 +972,59 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     /// <summary>
     /// Changer l'AKA sur l'UI visible. 
+    /// 
+    /// Mettre à joueur l'AKA du joueur sur l'écran. 
+    /// Si le joueur a l'ID 1 c'est qu'il est le serveur.
+    /// Sinon c'est le client. 
+    /// 
     /// </summary>
     /// <param name="IDJoueur"></param>
     /// <param name="AKA"></param>
 	public void setPlayerAKAUI(int IDJoueur, int AKA){
-		/*
-		 * Mettre à joueur l'AKA du joueur sur l'écran. 
-		 * 
-		 * Si le joueur a l'ID 1 c'est qu'il est le serveur. 
-		 * Sinon c'est le client. 
-		 */ 
+
 		if (FindLocalPlayer ().GetComponent<Player> ().isServer) {
 			// Si le joueur local est le server. 
 			if (IDJoueur == 1) {
-				NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString (); 
-			} else {
+				NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString ();
+                NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.
+                    GetComponent<Slider>().value = (float)AKA/AKARemanent;
+            } else {
 				NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString ();
-			}
+                NomJoueur2.transform.Find("AKAJoueur2").Find("AKASliderJoueur2").gameObject.
+                    GetComponent<Slider>().value = (float)AKA / AKARemanent;
+            }
 		} else {
 			if (IDJoueur == 2) {
-				NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString (); 
-			} else {
+				NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString ();
+                NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.
+                    GetComponent<Slider>().value = (float)AKA / AKARemanent;
+            } else {
 				NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString ();
-			}
+                NomJoueur2.transform.Find("AKAJoueur2").Find("AKASliderJoueur2").gameObject.
+                    GetComponent<Slider>().value = (float)AKA / AKARemanent;
+            }
 		}
-	}
+    }
 
-	void ChangeAKAJoueur(){
-		/*
-		 * 
-		 * Au début de chaque tour
-		 * 
-		 * l'ID du joueur est 1 si le joueur est le serveur
-		 * L'ID du joueur est 2 si le joueur n'est pas le serveur.
-		 * 
-		 * On met l'AKA des deux joueurs à jour. 
-		 * 
-		 */ 
+
+    /// <summary>
+    ///  Au début de chaque tour
+    /// l'ID du joueur est 1 si le joueur est le serveur
+    /// L'ID du joueur est 2 si le joueur n'est pas le serveur.
+    ///
+    /// On met l'AKA des deux joueurs à jour. 
+    /// </summary>
+    void ChangeAKAJoueur(){
 		int currentAKA = GameObject.FindGameObjectsWithTag ("BoardSanctuaire").Length;
-        // Debug.Log(currentAKA); 
-        AKATour = currentAKA; 
+        AKARemanent = currentAKA; 
 		NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
-		NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
-		FindLocalPlayer ().SendMessage ("setPlayerAKADebutTour", currentAKA); 
+		NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString();
+
+        // On change aussi les sliders d'AKA
+        NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.GetComponent<Slider>().value = 1;
+        NomJoueur2.transform.Find("AKAJoueur2").Find("AKASliderJoueur2").gameObject.GetComponent<Slider>().value = 1;
+
+        FindLocalPlayer ().SendMessage ("setPlayerAKADebutTour", currentAKA); 
 	}
 
 	public void DisplayMessage(string message){
@@ -2085,6 +2100,18 @@ public class GameManager : NetworkBehaviourAntinomia {
 
     public bool IsAllEffetsFinis() {
         return eventManager.GetComponent<EventManager>().IsAllEffetsFini(); 
+    }
+
+    /// <summary>
+    /// Changer l'AKA remanent du joueur. 
+    /// </summary>
+    /// <param name="NewAKARemanent"></param>
+    public void SetAKARemanent(int NewAKARemanent) {
+        AKARemanent = NewAKARemanent; 
+        // Si on appelle cette méthode c'est qu'on est au début du tour, 
+        // dans ce cas l'AKA courant est égal à l'AKA rémanent. 
+        setPlayerAKAUI(1, NewAKARemanent);
+        setPlayerAKAUI(2, NewAKARemanent);
     }
 
 }

@@ -830,7 +830,21 @@ public class Player : NetworkBehaviourAntinomia	 {
 #pragma warning restore CS0168 // La variable 'e' est déclarée, mais jamais utilisée
 			Debug.Log ("Normalement on doit être au premier tour"); 
 		}
+
+        // Si l'AKA est changé chez les deux joueurs c'est que c'est de l'AKA rémanent. 
+        // On change donc l'AKA rémanent. 
+        RpcAKARemanent(newAKA);
 	}
+
+
+    /// <summary>
+    /// Changer l'AKA Rémanent chez les deux joueurs
+    /// </summary>
+    /// <param name="NewAKARemanent">Nouvel AKA Remanent</param>
+    [ClientRpc]
+    private void RpcAKARemanent(int NewAKARemanent) {
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().SetAKARemanent(NewAKARemanent); 
+    }
 
     /// <summary>
     /// Changer l'AKA du joueur
