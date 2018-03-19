@@ -1,13 +1,15 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Unlit/DissolveEffectShader"
 {
 	Properties
 	{
 		_MainTex("Texture", 2D) = "white" {}
-	_NoiseTex("Texture", 2D) = "white" {}
-	[MaterialToggle] PixelSnap("Pixel snap", Float) = 0
+		_NoiseTex("Texture", 2D) = "white" {}
+		[MaterialToggle] PixelSnap("Pixel snap", Float) = 0
 		_EdgeColour1("Edge colour 1", Color) = (1.0, 1.0, 1.0, 1.0)
 		_EdgeColour2("Edge colour 2", Color) = (1.0, 1.0, 1.0, 1.0)
-		_Level("Dissolution level", Range(0.0, 1.0)) = 0.1
+		_Level("Dissolution", Range(0.0, 1.0)) = 0.1
 		_Edges("Edge width", Range(0.0, 1.0)) = 0.1
 	}
 		SubShader
@@ -54,7 +56,7 @@ Shader "Unlit/DissolveEffectShader"
 	v2f vert(appdata v)
 	{
 		v2f o;
-		o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+		o.vertex = UnityObjectToClipPos(v.vertex);
 		o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 
 #ifdef PIXELSNAP_ON

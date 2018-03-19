@@ -93,7 +93,8 @@ public class EventManager : MonoBehaviourAntinomia {
             Debug.Log("Il n'y a pas d'effets dans l'eventManager");
             // On indique que c'est à l'autre joueur de jouer. 
             StartCoroutine(ChangerEffetFiniJoueur());
-            TousEffetsFini = true; 
+            TousEffetsFini = true;
+            AutoPropose(); 
             return; 
         }
 
@@ -102,13 +103,10 @@ public class EventManager : MonoBehaviourAntinomia {
         // Si effet player != 0, alors le joueur est le deuxième à jouer.
         if (NombreEffetsDemandeInteraction() < 0) {
             // Il faut d'abord jouer les effets sans interaction ici. 
+            JouerEffetSansInteraction(); 
 
-
-            if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != 0) {
-                // On propose de défaire la pile.
-                AntinomiaLog("On s'auto propose");
-                GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(message: "Voulez vous defaire la Pile?");
-            }
+            // Puis on s'auto-propose de défaire la pile. 
+            AutoPropose(); 
         }
         // Sinon c'est ce joueur CI qui demandera à defaire la pile. 
         else {
@@ -134,6 +132,20 @@ public class EventManager : MonoBehaviourAntinomia {
             ResetOrdreButton.SetActive(true);
             EventTotal = listeEvents.Count;
             SetUpButtons();
+        }
+    }
+
+    /// <summary>
+    /// On regarde si le joueur doit s'auto proposer les effets. 
+    /// </summary>
+    private void AutoPropose() {
+        // S'il y a des effets à jouer. 
+        if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != 0 && GameObject.FindGameObjectWithTag("Pile") != null) {
+            // On propose de défaire la pile.
+            AntinomiaLog("On s'auto propose");
+            GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(message: "Voulez vous defaire la Pile?");
+            // Puis on remet l'effet à 0
+            FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(0);
         }
     }
 
@@ -165,8 +177,6 @@ public class EventManager : MonoBehaviourAntinomia {
         listeEvents = new List<EventEffet>();
         EventCourant = 0;
         EventTotal = 0;
-        //On remet les effets à 0
-        FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(0);
     }
 
     /// <summary>
@@ -237,8 +247,9 @@ public class EventManager : MonoBehaviourAntinomia {
 
         // Et on passe l'entier au bon nombre (dans le Player). 
         // Si on est le premier joueur 
-        if (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0 || FindLocalPlayer().GetComponent<Player>().EffetPlayer == 
-            FindLocalPlayer().GetComponent<Player>().PlayerID) {
+        if (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 0 || (FindLocalPlayer().GetComponent<Player>().EffetPlayer == 
+            FindLocalPlayer().GetComponent<Player>().PlayerID && FindLocalPlayer().GetComponent<Player>().PlayerID == 
+            GameObject.Find("GameManager").GetComponent<GameManager>().Tour)) {  // On change seulement si c'est le joueur dont c'est le tour. 
             // Dans le cas où c'était à nous de jouer en premier.
             entierAttendu = FindNotLocalPlayer().GetComponent<Player>().PlayerID;
         }

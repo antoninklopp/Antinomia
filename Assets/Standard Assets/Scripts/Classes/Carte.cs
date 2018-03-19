@@ -1495,7 +1495,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         // Comme ça, on ne met pas plusieurs effets dans la pile. 
                         // sinon. 
                         Debug.Log("La cible null? " + CibleDejaChoisie); 
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     break;
                 case Action.ActionEnum.CHANGER_POSITION_IMPOSSIBLE:
@@ -1510,7 +1510,7 @@ public class Carte : NetworkBehaviourAntinomia {
                         FindLocalPlayer().GetComponent<Player>().subtractAKA(_actions[j].properIntAction);
                         // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     } else if (j == 0) {
-                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber));
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
                     break; 
                 default:
@@ -2242,7 +2242,7 @@ public class Carte : NetworkBehaviourAntinomia {
         if (Pile == null) {
             // C'est le premier effet de la pile, il faut donc instancier la pile. 
             FindLocalPlayer().GetComponent<Player>().CmdCreerPile();
-            StartCoroutine(MettreEffetDansLaPileRoutine(Cibles, numeroEffet, numeroListEffet));
+            StartCoroutine(MettreEffetDansLaPileRoutine(Cibles, numeroEffet, numeroListEffet, ProposerDefairePile));
         } else {
             // La pile existe déjà, on peut rajouter à la pile. 
             Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(gameObject, Cibles, numeroEffet, numeroListEffet, ProposerDefairePile);

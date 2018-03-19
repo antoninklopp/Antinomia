@@ -981,6 +981,13 @@ public class Entite : Carte, ICarte {
                 gameObject.tag = "Cimetiere";
                 break;
         }
+
+        // On fait l'animation 
+        if (GetComponent<CarteAnimation>() != null) {
+            GetComponent<CarteAnimation>().AnimationDebut(); 
+        } else {
+            Debug.LogError("Le composant est absent"); 
+        }
     }
 
     void CheckCardOverlap() {

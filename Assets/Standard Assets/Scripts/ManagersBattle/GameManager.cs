@@ -813,10 +813,11 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     private void AjouterEffetAttaquePile() {
         // On prévient qu'on va jouer l'effet. 
-        List<GameObject> Cibles = new List<GameObject>();
-        // On ajoute le joueur adverse à la liste des cibles. 
-        // Il faudra bien faire un cas séparé lors de la recherche de l'ID lorsqu'on défait la pile.
-        Cibles.Add(OtherPlayerEntity);
+        List<GameObject> Cibles = new List<GameObject> {
+            // On ajoute le joueur adverse à la liste des cibles. 
+            // Il faudra bien faire un cas séparé lors de la recherche de l'ID lorsqu'on défait la pile.
+            OtherPlayerEntity
+        };
         // -1 est le nombre spécial pour une attaque.
         MettreEffetDansLaPile(MyPlayerEntity, Cibles, -1);
 
@@ -834,8 +835,9 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="CarteAttaque"></param>
     public void AjouterEffetAttaquePileJoueurAdverse(GameObject CarteAttaque) {
-        List<GameObject> Cibles = new List<GameObject>();
-        Cibles.Add(FindNotLocalPlayer());
+        List<GameObject> Cibles = new List<GameObject> {
+            FindNotLocalPlayer()
+        };
         MettreEffetDansLaPile(CarteAttaque, Cibles, -1); 
     }
 
@@ -1204,7 +1206,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
                 GetComponent<InformerAdversaireChoixEffet>().AdversaireChoisitEffet();
                 while (FindLocalPlayer().GetComponent<Player>().EffetPlayer != FindLocalPlayerID()) {
-                    Debug.Log("Le joueur choisi des effets");
+                    // Debug.Log("Le joueur choisit des effets");
                     yield return new WaitForSeconds(0.1f);
                 }
                 // Une fois que c'est notre tour, on detruit l'objet d'information. 
@@ -1716,17 +1718,18 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <param name="Cibles">Les Cibles de l'effet</param>
     /// <param name="numeroEffet">La position de l'effet dans la liste d'effets</param>
     /// <param name="numeroListEffet">Le numero de la liste d'effets</param>
-    protected void MettreEffetDansLaPile(GameObject ObjetEffet, List<GameObject> Cibles, int numeroEffet, int numeroListEffet = 0) {
+    protected void MettreEffetDansLaPile(GameObject ObjetEffet, List<GameObject> Cibles, int numeroEffet, int numeroListEffet = 0, 
+        bool ProposerDefairePile=true) {
         Debug.Log("Effet dans la pile");
         GameObject Pile = GameObject.FindGameObjectWithTag("Pile");
         if (Pile == null) {
             // C'est le premier effet de la pile, il faut donc instancier la pile. 
             FindLocalPlayer().GetComponent<Player>().CmdCreerPile();
-            StartCoroutine(MettreEffetDansLaPileRoutine(ObjetEffet, Cibles, numeroEffet, numeroListEffet));
+            StartCoroutine(MettreEffetDansLaPileRoutine(ObjetEffet, Cibles, numeroEffet, numeroListEffet, ProposerDefairePile));
         }
         else {
             // La pile existe déjà, on peut rajouter à la pile. 
-            Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(ObjetEffet, Cibles, numeroEffet, numeroListEffet);
+            Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(ObjetEffet, Cibles, numeroEffet, numeroListEffet, ProposerDefairePile);
             Debug.Log("Un effet a été ajouté à la pile");
         }
 
@@ -1741,7 +1744,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <param name="numeroEffet">La position de l'effet dans la liste d'effets</param>
     /// <param name="numeroListEffet">Le numero de la liste d'effets</param>
     protected IEnumerator MettreEffetDansLaPileRoutine(GameObject ObjetEffet, 
-                                        List<GameObject> Cibles, int numeroEffet, int numeroListEffet = 0) {
+                                        List<GameObject> Cibles, int numeroEffet, int numeroListEffet = 0, bool ProposerDefairePile=true) {
         Debug.Log("Effet dans la pile");
         GameObject Pile = null;
         for (int i = 0; i < 5 && Pile == null; ++i) {
@@ -1754,7 +1757,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             throw new Exception("La pile ne s'est pas créée");
         }
 
-        Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(ObjetEffet, Cibles, numeroEffet, numeroListEffet);
+        Pile.GetComponent<PileAppelEffet>().AjouterEffetALaPile(ObjetEffet, Cibles, numeroEffet, numeroListEffet, ProposerDefairePile);
         Debug.Log("Un effet a été ajouté à la pile");
     }
 

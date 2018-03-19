@@ -172,15 +172,21 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
         AntinomiaLog(PlayerID);
         AntinomiaLog(FindLocalPlayer().GetComponent<Player>().PlayerID);
 
-        Debug.Log("On va regarder les effets"); 
+        Debug.Log("On va regarder les effets");
+
+
+        Debug.Log("Defaire Pile " + ProposeDefairePile);
+        AntinomiaLog("Defaire Pile " + ProposeDefairePile);
 
         if (PlayerID != FindLocalPlayer().GetComponent<Player>().PlayerID) {
             // On propose à tous les joueurs de répondre/ajouter des effets à la pile
             if (ProposeDefairePile) {
                 AntinomiaLog("On propose"); 
+                Debug.Log("On propose"); 
                 InformerAjoutEffetPile(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet());
             } else {
-                AntinomiaLog("On ne propose pas"); 
+                Debug.Log("On ne propose pas");
+                AntinomiaLog("One ne propose pas"); 
                 InformerSansPause(NouveauEffetInPile.GetComponent<EffetInPile>().CreerPhraseDecritEffet()); 
             }
             AntinomiaLog("L'effet devrait être display"); 
