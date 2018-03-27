@@ -622,20 +622,19 @@ public class Player : NetworkBehaviourAntinomia	 {
     [ClientRpc(channel=0)]
 	public void RpcSetNameOpponent(string name){
         if (PlayerID != 0) {
-            NomJoueur2.GetComponent<Text>().text = name + "(Joueur " + PlayerID + ")";
+            NomJoueur2.GetComponent<Text>().text = name + "\n(Joueur " + PlayerID + ")";
         } else {
             NomJoueur2.GetComponent<Text>().text = name;
             Debug.LogError("Probleme dans la transmission du nom"); 
         }
 	}
 
-
+    /// <summary>
+    /// Callback appelée par la SyncVar lors d'un changement de nom. 
+    /// </summary>
+    /// <param name="newName"></param>
     private void OnName(string newName) {
-        /*
-         * Appelé par la syncVar du nom. 
-         */
         PlayerName = newName;
-
         StartCoroutine(RoutineSetName(newName));
     }
 
@@ -659,14 +658,14 @@ public class Player : NetworkBehaviourAntinomia	 {
                 Debug.LogError("Probleme lors de la transmission des noms"); 
                 NomJoueur1.GetComponent<Text>().text = newName; 
             } else {
-                NomJoueur1.GetComponent<Text>().text = newName + "(Joueur " + PlayerID + ")";
+                NomJoueur1.GetComponent<Text>().text = newName + "\n(Joueur " + PlayerID + ")";
             }
         } else {
             if (PlayerID == 0) {
                 Debug.LogError("Probleme lors de la transmission des noms");
                 NomJoueur2.GetComponent<Text>().text = newName;
             } else {
-                NomJoueur2.GetComponent<Text>().text = newName + "(Joueur " + PlayerID + ")";
+                NomJoueur2.GetComponent<Text>().text = newName + "\n(Joueur " + PlayerID + ")";
             }
         }
     }

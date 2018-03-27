@@ -30,8 +30,8 @@ public class TestMaterial : MonoBehaviour {
         GetComponent<SpriteRenderer>().material = NewMaterial;
 
         int i = 0; 
-        while (i < 20) {
-            NewMaterial.SetFloat("_Level", 1 - (float)i/20f);
+        while (i < 50) {
+            NewMaterial.SetFloat("_Level", 1 - (float)i/50f);
             yield return new WaitForSeconds(0.05f);
             i++; 
         }

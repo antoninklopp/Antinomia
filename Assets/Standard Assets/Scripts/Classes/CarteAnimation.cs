@@ -10,11 +10,11 @@ public class CarteAnimation : MonoBehaviour {
     /// <summary>
     /// Animation de l'apparition de la carte
     /// </summary>
-    public void AnimationDebut() {
-        StartCoroutine(AnimationEntreeRoutine(20)); 
+    public void AnimationDebut(float alpha=0.5f) {
+        StartCoroutine(AnimationEntreeRoutine(50, alpha));
     }
 
-	private IEnumerator AnimationEntreeRoutine(int time) {
+	private IEnumerator AnimationEntreeRoutine(int time, float alpha=0.5f) {
         Material NewMaterial = Instantiate(Resources.Load("Material/DisolveMaterial") as Material) as Material;
         Debug.Log(NewMaterial);
         GetComponent<SpriteRenderer>().material = NewMaterial;
@@ -31,11 +31,11 @@ public class CarteAnimation : MonoBehaviour {
     /// <summary>
     /// Animation de la disparition de la carte
     /// </summary>
-    public void AnimationFin() {
-        StartCoroutine(AnimationFinRoutine(20)); 
+    public void AnimationFin(float alpha=0.5f) {
+        StartCoroutine(AnimationFinRoutine(50, alpha)); 
     }
 
-    private IEnumerator AnimationFinRoutine(int time) {
+    private IEnumerator AnimationFinRoutine(int time, float alpha=0.5f) {
         GameObject Particle = Instantiate(Resources.Load("Particles/ParticleDeath") as GameObject);
         Particle.transform.position = transform.position;
 

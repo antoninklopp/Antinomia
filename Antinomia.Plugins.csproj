@@ -375,6 +375,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Classes\ImageCardBattle.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\ImageCardToShow.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\ImageCarteCimetiere.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\ITemporaire.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\PuissanceEntite.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Action.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Condition.cs" />

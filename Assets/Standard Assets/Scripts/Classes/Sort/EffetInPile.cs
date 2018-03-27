@@ -361,6 +361,9 @@ public class EffetInPile : NetworkBehaviourAntinomia {
                 Sanctuaire.gameObject.GetComponent<Sanctuaire>().ReordonnerCarte();
                 newCarte.GetComponent<EntiteTemporaire>().carteState = Entite.State.SANCTUAIRE;
             }
+
+            // Dans tous les cas on montre l'apparition de la carte. 
+            newCarte.GetComponent<CarteAnimation>().AnimationDebut(0.5f); 
         }
 
     }

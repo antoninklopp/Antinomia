@@ -92,9 +92,9 @@ public class EventManager : MonoBehaviourAntinomia {
         if (listeEvents.Count == 0) {
             Debug.Log("Il n'y a pas d'effets dans l'eventManager");
             // On indique que c'est à l'autre joueur de jouer. 
+            AutoPropose();
             StartCoroutine(ChangerEffetFiniJoueur());
             TousEffetsFini = true;
-            AutoPropose(); 
             return; 
         }
 
@@ -139,9 +139,12 @@ public class EventManager : MonoBehaviourAntinomia {
     /// On regarde si le joueur doit s'auto proposer les effets. 
     /// </summary>
     private void AutoPropose() {
+        Debug.Log(FindLocalPlayer().GetComponent<Player>().EffetPlayer);
+        Debug.Log(GameObject.FindGameObjectWithTag("Pile")); 
         // S'il y a des effets à jouer. 
         if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != 0 && GameObject.FindGameObjectWithTag("Pile") != null) {
             // On propose de défaire la pile.
+            Debug.Log("On s'auto propose"); 
             AntinomiaLog("On s'auto propose");
             GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(message: "Voulez vous defaire la Pile?");
             // Puis on remet l'effet à 0

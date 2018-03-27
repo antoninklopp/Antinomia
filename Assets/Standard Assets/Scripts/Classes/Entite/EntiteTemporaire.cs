@@ -59,5 +59,8 @@ public class EntiteTemporaire : Carte {
     public GameObject getVraieEntite() {
         return NetworkBehaviourAntinomia.FindCardWithID(IDCardGame); 
     }
-    
+
+    public override bool EstTemporaire() {
+        return true; 
+    }
 }

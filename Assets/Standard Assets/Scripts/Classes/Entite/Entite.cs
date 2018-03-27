@@ -984,7 +984,7 @@ public class Entite : Carte, ICarte {
 
         // On fait l'animation 
         if (GetComponent<CarteAnimation>() != null) {
-            GetComponent<CarteAnimation>().AnimationDebut(); 
+            GetComponent<CarteAnimation>().AnimationFin(1f); 
         } else {
             Debug.LogError("Le composant est absent"); 
         }

@@ -2502,4 +2502,8 @@ public class Carte : NetworkBehaviourAntinomia {
         Destroy(gameObject);
     }
 
+    public virtual bool EstTemporaire() {
+        return false; 
+    }
+
 }

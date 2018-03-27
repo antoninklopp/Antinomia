@@ -11,6 +11,7 @@ Shader "Unlit/DissolveEffectShader"
 		_EdgeColour2("Edge colour 2", Color) = (1.0, 1.0, 1.0, 1.0)
 		_Level("Dissolution", Range(0.0, 1.0)) = 0.1
 		_Edges("Edge width", Range(0.0, 1.0)) = 0.1
+		_Alpha("Alpha Carte", Range(0.0, 1.0)) = 0.5
 	}
 		SubShader
 	{
@@ -52,6 +53,7 @@ Shader "Unlit/DissolveEffectShader"
 	float _Level;
 	float _Edges;
 	float4 _MainTex_ST;
+	float _Alpha; 
 
 	v2f vert(appdata v)
 	{
@@ -70,15 +72,17 @@ Shader "Unlit/DissolveEffectShader"
 	{
 		// sample the texture
 		float cutout = tex2D(_NoiseTex, i.uv).r;
-	fixed4 col = tex2D(_MainTex, i.uv);
+		fixed4 col = tex2D(_MainTex, i.uv);
 
-	if (cutout < _Level)
-		discard;
+		if (cutout < _Level)
+			discard;
 
-	if (cutout < col.a && cutout < _Level + _Edges)
-		col = lerp(_EdgeColour1, _EdgeColour2, (cutout - _Level) / _Edges);
+		if (cutout < col.a && cutout < _Level + _Edges)
+			col = lerp(_EdgeColour1, _EdgeColour2, (cutout - _Level) / _Edges);
 
-	return col;
+		col.a = _Alpha; 
+
+		return col;
 	}
 		ENDCG
 	}
