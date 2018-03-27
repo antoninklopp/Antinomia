@@ -729,7 +729,7 @@ public class Entite : Carte, ICarte {
                 break;
         }
         
-        CmdChangePosition(EntiteState);
+        CmdChangePosition(EntiteState, false);
     }
 
     /// <summary>
@@ -828,8 +828,7 @@ public class Entite : Carte, ICarte {
             Main.SendMessage("DeleteCard", gameObject);
             Sanctuaire.SendMessage("CmdCarteDeposee", gameObject);
             gameObject.tag = "BoardSanctuaire";
-
-            CmdChangePosition(State.SANCTUAIRE);
+            CmdChangePosition(State.SANCTUAIRE, defairePile);
 
             // Il faut aussi vérifier si les autres cartes ont un effet à jouer
             // GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().CheckAllEffetsCartes(); 
@@ -900,7 +899,7 @@ public class Entite : Carte, ICarte {
                 Main.SendMessage("DeleteCard", gameObject);
                 ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
                 gameObject.tag = "BoardSanctuaire";
-                CmdChangePosition(State.CHAMPBATAILLE);
+                CmdChangePosition(State.CHAMPBATAILLE, defairePile);
             }
         } else {
             // TODO: Envoyer un message à l'utilisateur disant qu'il y a plus de 5 cartes sur le board. 
@@ -909,7 +908,7 @@ public class Entite : Carte, ICarte {
     }
 
     [Command(channel=0)]
-    void CmdChangePosition(State newCarteState) {
+    void CmdChangePosition(State newCarteState, bool defairePile) {
 
         /* 
 		 * TODO: NE pas faire ça!!
@@ -919,12 +918,12 @@ public class Entite : Carte, ICarte {
 		 * Solution moyenne, temporaire
 		 */
 
-        RpcChangePosition(newCarteState); 
+        RpcChangePosition(newCarteState, defairePile); 
 
     }
 
     [ClientRpc(channel=0)]
-    void RpcChangePosition(State newCarteState) {
+    void RpcChangePosition(State newCarteState, bool defairePile) {
 
         /* 
 		 * TODO: NE pas faire ça!!
@@ -982,11 +981,18 @@ public class Entite : Carte, ICarte {
                 break;
         }
 
+        if (GetComponent<CarteAnimation>() == null) {
+            Debug.LogError("Le composant est absent");
+            return; 
+        }
+
         // On fait l'animation 
-        if (GetComponent<CarteAnimation>() != null) {
-            GetComponent<CarteAnimation>().AnimationFin(1f); 
+        if (defairePile) {
+            // Si on defait la pile, on fait l'animation du debut
+            GetComponent<CarteAnimation>().AnimationDebut(1f);
         } else {
-            Debug.LogError("Le composant est absent"); 
+            // Sinon on fait l'animation inverse
+            GetComponent<CarteAnimation>().AnimationDeposeCarte(); 
         }
     }
 
@@ -1175,7 +1181,7 @@ public class Entite : Carte, ICarte {
             /*
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
 			 */
-            CmdChangePosition(EntiteState);
+            CmdChangePosition(EntiteState, false);
         } else {
             // Si on est pas sur le player local. 
             Debug.Log("N'est pas le local Player");
@@ -1497,7 +1503,7 @@ public class Entite : Carte, ICarte {
     /// </summary>
     public override void PlacerSanctuaire() {
         base.PlacerSanctuaire();
-        CmdChangePosition(State.SANCTUAIRE); 
+        CmdChangePosition(State.SANCTUAIRE, true); 
     }
 
     /// <summary>
@@ -1650,9 +1656,9 @@ public class Entite : Carte, ICarte {
     /// </summary>
     public void ChangerPosition() {
         if (entiteState == State.CHAMPBATAILLE) {
-            CmdChangePosition(State.SANCTUAIRE); 
+            CmdChangePosition(State.SANCTUAIRE, true); 
         } else if (entiteState == State.SANCTUAIRE) {
-            CmdChangePosition(State.CHAMPBATAILLE); 
+            CmdChangePosition(State.CHAMPBATAILLE, true); 
         } else {
             throw new UnusualBehaviourException("Cette carte devrait être dans le sanctuaire ou sur le champ de bataille"); 
         }
@@ -1817,7 +1823,7 @@ public class Entite : Carte, ICarte {
             // Si un joueur fait un clic droit alors qu'il tient la carte en main, on remet la carte d'où elle vient. 
             clicked = false;
             // on remet la carte à sa bonne place. 
-            RpcChangePosition(EntiteState);
+            RpcChangePosition(EntiteState, true);
             return;
         }
         base.RightClickOnCarte();
@@ -2116,7 +2122,7 @@ public class Entite : Carte, ICarte {
     public void RenvoyerCarteMain(int parametreNull=0) {
         if (hasAuthority) {
             // Si c'est notre carte on peut le faire directement
-            CmdChangePosition(State.MAIN);
+            CmdChangePosition(State.MAIN, false);
         } else {
             // Sinon il faut appeler une methode du local Player
             FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame,

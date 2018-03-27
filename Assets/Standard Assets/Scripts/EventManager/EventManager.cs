@@ -146,7 +146,7 @@ public class EventManager : MonoBehaviourAntinomia {
             // On propose de défaire la pile.
             Debug.Log("On s'auto propose"); 
             AntinomiaLog("On s'auto propose");
-            GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(message: "Voulez vous defaire la Pile?");
+            GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(message: "Voulez réagir aux effets?");
             // Puis on remet l'effet à 0
             FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(0);
         }

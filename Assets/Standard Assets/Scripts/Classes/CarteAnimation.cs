@@ -16,13 +16,30 @@ public class CarteAnimation : MonoBehaviour {
 
 	private IEnumerator AnimationEntreeRoutine(int time, float alpha=0.5f) {
         Material NewMaterial = Instantiate(Resources.Load("Material/DisolveMaterial") as Material) as Material;
-        Debug.Log(NewMaterial);
         GetComponent<SpriteRenderer>().material = NewMaterial;
 
         // Appear
         int i = 0;
         while (i < time) {
             NewMaterial.SetFloat("_Level", 1 - (float)i / time);
+            yield return new WaitForSeconds(0.05f);
+            i++;
+        }
+    }
+
+    public void AnimationDeposeCarte(float alpha = 1f) {
+        StartCoroutine(AnimationDeposeCarteRoutine(50, alpha)); 
+    }
+
+    private IEnumerator AnimationDeposeCarteRoutine(int time, float alpha=1f) {
+        // Disolve
+        Material NewMaterial = Instantiate(Resources.Load("Material/DisolveMaterial") as Material) as Material;
+        Debug.Log(NewMaterial);
+        GetComponent<SpriteRenderer>().material = NewMaterial;
+
+        int i = 0;
+        while (i < time) {
+            NewMaterial.SetFloat("_Level", (float)i / time);
             yield return new WaitForSeconds(0.05f);
             i++;
         }
