@@ -1470,6 +1470,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <returns>None</returns>
     public IEnumerator ProposeToPauseGame(int playerID=0, string message="") {
         if ((FindLocalPlayerID() != playerID) || (playerID == 0)) {
+            Debug.Log("<color=orange> Pauser le jeu? </color>"); 
             // Si on a reçu un effet, c'est que l'adversaire a réagi, le jeu n'est plus en pause. 
             FindLocalPlayer().GetComponent<Player>().CmdOnlySetPause(false); 
             PauseButton.SetActive(true);
@@ -1480,7 +1481,7 @@ public class GameManager : NetworkBehaviourAntinomia {
             }
             // Temps d'attente. 
             AntinomiaLog("Attente");
-            MontrerQuellesCartesPeuventJoueur(); 
+            // MontrerQuellesCartesPeuventJoueur();  // TODO : Cette méthode ne fonctionne pas pour l'instant. 
             yield return new WaitForSeconds(2f);
             if (!gameIsPaused) {
                 PauseButton.SetActive(false);

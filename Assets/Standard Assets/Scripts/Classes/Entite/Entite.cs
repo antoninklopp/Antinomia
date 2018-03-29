@@ -850,8 +850,10 @@ public class Entite : Carte, ICarte {
                 (defairePile && EntiteState == State.MAIN)) {
                 if (EntiteAscendance == Ascendance.MALEFIQUE && cardAstraleOnChampBatailleOrSanctuaire()) {
                     GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Il y a une carte astrale sur le board");
+                    return; 
                 } else if (EntiteAscendance == Ascendance.ASTRALE && cardMalefiqueOnChampBatailleOrSanctuaire()) {
                     GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Il y a une carte maléfique sur le board");
+                    return; 
                 } else if (FindLocalPlayer().GetComponent<Player>().PlayerAKA < CoutAKA) {
                     // Si le joueur n'a pas assez d'AKA pour mettre la carte sur le board
                     GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "AKA demandé: " + CoutAKA.ToString());
@@ -1215,12 +1217,49 @@ public class Entite : Carte, ICarte {
 
     // TOUT CE QUI CONCERNE LA GESTION DES CAPACITES : COMPLIQUE A DEPLACER DANS LA CLASSE CAPACITE (a cause des messages à envoyer aux objets). 
 
+    /// <summary>
+    /// Verrouiller ou déverrouiller une carte. 
+    /// </summary>
+    /// <param name="verrouiller"></param>
     public void VerrouillerCarte(bool verrouiller) {
-        /*
-		 * Verrouiller ou déverrouiller une carte. 
-		 */
         verrouillee = verrouiller;
+        // On met une indication visuelle au verouillage. 
+        CmdMontrerVerouillage(verrouillee);
     }
+
+    // On montre le verrouillage de la carte à tout le monde
+    /// <summary>
+    /// Montrer le verouillage de la carte à tout le monde
+    /// Fonction serveur
+    /// </summary>
+    /// <param name="montrer"></param>
+    void CmdMontrerVerouillage(bool montrer) {
+        RpcMontrerVerouillage(montrer); 
+    }
+
+    /// <summary>
+    /// Montrer le verouillage de la carte à tout le monde
+    /// Fonction client. 
+    /// </summary>
+    /// <param name="montrer"></param>
+    void RpcMontrerVerouillage(bool montrer) {
+        if (montrer) {
+            GameObject Chaines = Instantiate(Resources.Load("Prefabs/Chaines") as GameObject);
+            Chaines.transform.SetParent(transform, false);
+            // On centre les chaines sur cette carte 
+            Chaines.transform.localPosition = Vector2.zero;
+        }
+        else {
+            // On detruit les chaines
+            if (transform.Find("Chaines(Clone)") != null) {
+                Destroy(transform.Find("Chaines(Clone)").gameObject);
+            }
+            if (transform.Find("Chaines") != null) {
+                Destroy(transform.Find("Chaines").gameObject);
+            }
+        }
+    }
+
 
     IEnumerator CartesDegats(int nombreCartes, int nombreDeDegats) {
         /*

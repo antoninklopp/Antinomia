@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using AntinomiaException;
-using System; 
+using System;
+using UnityEngine.EventSystems;
+using UnityEngine.Events; 
 
 /// <summary>
 /// Gestion des evenements s'il y a plusieurs effets à faire en même temps. 
@@ -92,7 +94,7 @@ public class EventManager : MonoBehaviourAntinomia {
         if (listeEvents.Count == 0) {
             Debug.Log("Il n'y a pas d'effets dans l'eventManager");
             // On indique que c'est à l'autre joueur de jouer. 
-            AutoPropose();
+            StartCoroutine(AutoPropose());
             StartCoroutine(ChangerEffetFiniJoueur());
             TousEffetsFini = true;
             return; 
@@ -106,7 +108,7 @@ public class EventManager : MonoBehaviourAntinomia {
             JouerEffetSansInteraction(); 
 
             // Puis on s'auto-propose de défaire la pile. 
-            AutoPropose(); 
+            StartCoroutine(AutoPropose()); 
         }
         // Sinon c'est ce joueur CI qui demandera à defaire la pile. 
         else {
@@ -138,15 +140,16 @@ public class EventManager : MonoBehaviourAntinomia {
     /// <summary>
     /// On regarde si le joueur doit s'auto proposer les effets. 
     /// </summary>
-    private void AutoPropose() {
+    private IEnumerator AutoPropose() {
         Debug.Log(FindLocalPlayer().GetComponent<Player>().EffetPlayer);
         Debug.Log(GameObject.FindGameObjectWithTag("Pile")); 
         // S'il y a des effets à jouer. 
-        if (FindLocalPlayer().GetComponent<Player>().EffetPlayer != 0 && GameObject.FindGameObjectWithTag("Pile") != null) {
+        if (FindLocalPlayer().GetComponent<Player>().EffetPlayer == FindLocalPlayer().GetComponent<Player>().PlayerID
+                && GameObject.FindGameObjectWithTag("Pile") != null) {
             // On propose de défaire la pile.
             Debug.Log("On s'auto propose"); 
             AntinomiaLog("On s'auto propose");
-            GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(message: "Voulez réagir aux effets?");
+            yield return GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(0, message: "Voulez réagir aux effets?");
             // Puis on remet l'effet à 0
             FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(0);
         }
@@ -165,6 +168,8 @@ public class EventManager : MonoBehaviourAntinomia {
             int number = i;
             // Changement de deck. 
             newButton.GetComponent<Button>().onClick.AddListener(delegate { CliqueEffet(number); });
+            newButton.AddComponent<EventButton>();
+            newButton.GetComponent<EventButton>().IDCarte = listeEvents[i].CarteAssociee.GetComponent<Carte>().IDCardGame; 
             // On informe le joueur de l'effet qui peut être joué ainsi que de la carte qui peut le jouer. 
             newButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = listeEvents[i].effet.EffetString + "\n" + 
                 "<color=purple>" + listeEvents[i].CarteAssociee.GetComponent<Carte>().Name + "</color>";

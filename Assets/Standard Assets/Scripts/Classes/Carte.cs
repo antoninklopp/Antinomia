@@ -1294,9 +1294,13 @@ public class Carte : NetworkBehaviourAntinomia {
                     // getGameManager().GetComponent<GameManager>().SetEffetFini();
                     break;
                 case Action.ActionEnum.ATTAQUE_IMPOSSIBLE:
-                    GetComponent<Entite>().hasAttacked = -1;
-                    DisplayMessage("Cette entité ne peut pas attaquer");
-                    // getGameManager().GetComponent<GameManager>().SetEffetFini();
+                    if (jouerEffet) {
+                        GetComponent<Entite>().hasAttacked = -1;
+                        DisplayMessage("Cette entité ne peut pas attaquer");
+                        // getGameManager().GetComponent<GameManager>().SetEffetFini();
+                    } else if (j == 0) {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
+                    }
                     break;
                 case Action.ActionEnum.DEFAUSSER:
                     // On propose de défausser. 
@@ -1499,6 +1503,11 @@ public class Carte : NetworkBehaviourAntinomia {
                     }
                     break;
                 case Action.ActionEnum.CHANGER_POSITION_IMPOSSIBLE:
+                    if (jouerEffet) {
+                        GetComponent<Entite>().VerrouillerCarte(true); 
+                    } else if (j == 0) {
+                        StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
+                    }
                     break;
                 case Action.ActionEnum.CARTE_DOIT_ATTAQUER:
                     break;
@@ -2504,6 +2513,23 @@ public class Carte : NetworkBehaviourAntinomia {
 
     public virtual bool EstTemporaire() {
         return false; 
+    }
+
+    /// <summary>
+    /// Highlight la carte lors d'une selection. 
+    /// </summary>
+    public void HighlightSelectionEvent() {
+        GameObject Particles = Instantiate(Resources.Load("Particles/ParticleHighlight") as GameObject);
+        Particles.transform.SetParent(transform, false); 
+        Particles.name = "highlight";
+        Particles.transform.localPosition = Vector2.zero; 
+    }
+
+    /// <summary>
+    /// Arrete d'highlight la carte (sortie de la sélection). 
+    /// </summary>
+    public void StopHighlightSelectionEvent() {
+        Destroy(transform.Find("highlight").gameObject); 
     }
 
 }

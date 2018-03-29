@@ -17,6 +17,7 @@ public class CarteAnimation : MonoBehaviour {
 	private IEnumerator AnimationEntreeRoutine(int time, float alpha=0.5f) {
         Material NewMaterial = Instantiate(Resources.Load("Material/DisolveMaterial") as Material) as Material;
         GetComponent<SpriteRenderer>().material = NewMaterial;
+        NewMaterial.SetFloat("_Alpha", alpha); 
 
         // Appear
         int i = 0;
@@ -36,6 +37,7 @@ public class CarteAnimation : MonoBehaviour {
         Material NewMaterial = Instantiate(Resources.Load("Material/DisolveMaterial") as Material) as Material;
         Debug.Log(NewMaterial);
         GetComponent<SpriteRenderer>().material = NewMaterial;
+        NewMaterial.SetFloat("_Alpha", alpha);
 
         int i = 0;
         while (i < time) {
@@ -60,6 +62,7 @@ public class CarteAnimation : MonoBehaviour {
         Material NewMaterial = Instantiate(Resources.Load("Material/DisolveMaterial") as Material) as Material;
         Debug.Log(NewMaterial);
         GetComponent<SpriteRenderer>().material = NewMaterial;
+        NewMaterial.SetFloat("_Alpha", alpha);
 
         int i = 0;
         while (i < time) {

@@ -392,6 +392,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\DataBaseLogin.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\GameManagerLoginUser.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\LoginGUI.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\EventManager\EventButton.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\EventManager\EventEffet.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\EventManager\EventManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Exception\CardNotFoundException.cs" />

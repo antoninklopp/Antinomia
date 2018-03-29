@@ -313,9 +313,6 @@ public class ChooseCards : NetworkBehaviour {
     /// <param name="AllCardsToDestroy"></param>
     /// <returns></returns>
 	IEnumerator FinShowCards(float nbSeconds, List<GameObject> AllCardsToDestroy){
-		/*
-		 * Arrêter de montrer les cartes. 
-		 */ 
 		Debug.Log (AllCardsToDestroy.Count); 
 		yield return new WaitForSeconds (nbSeconds); 
 		for (int i = 0; i < transform.childCount; ++i) {
