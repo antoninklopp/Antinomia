@@ -429,6 +429,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\RemoveCardFromDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\SupprimerDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManageCards\TriFiltreEditor.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\ColorBlocksButtons.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\GameManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\GameManagerIA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\InformationManager.cs" />
@@ -450,6 +451,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Tests\TestCartes\TestCartes.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\TestMaterial.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\TestShaders.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Tests\TestUI.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Tests\WriteOutputFile.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\VerificationsReseau\ListCarteVerify.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\VerificationsReseau\VerifyCartePioche.cs" />

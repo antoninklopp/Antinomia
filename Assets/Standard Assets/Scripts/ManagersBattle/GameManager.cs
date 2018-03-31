@@ -311,7 +311,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         InfoEffetTransmis.SetActive(false);
         GameManagerInformation = GameObject.Find("InformationManager");
         eventManager = GameObject.Find("EventManager");
-        AllButtonsPhase = GameObject.Find("AllButtonsPhase");
+        AllButtonsPhase = GameObject.Find("AllButtonsPhases");
         StartCoroutine(SetUpPhaseButtons()); 
 	}
 
@@ -2187,19 +2187,13 @@ public class GameManager : NetworkBehaviourAntinomia {
         for (int i = 0; i < AllButtonsPhase.transform.childCount; i++) {
             GameObject button = AllButtonsPhase.transform.GetChild(i).gameObject;
             if (i == newPhase) {
-                button.GetComponent<SpriteRenderer>().color = Color.green;
+                button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorCurrentButton();
                 button.gameObject.GetComponent<Button>().interactable = false;
             } else if ((i + 1 + 7) % 7 == newPhase) {
-                button.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+                button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorNextButton(); 
                 button.gameObject.GetComponent<Button>().interactable = true;
             } else {
-                ColorBlock DisabledButton = new ColorBlock {
-                    normalColor = new Color(1, 1, 1, 0.5f),
-                    // On indique au joueur qu'il ne peut pas cliquer sur bouton en mettant une couleur 
-                    // de highlight rouge
-                    highlightedColor = new Color(1, 0, 0, 0.5f)
-                };
-                button.gameObject.GetComponent<Button>().colors = DisabledButton;
+                button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorDisabledButton();
                 button.gameObject.GetComponent<Button>().interactable = false;
             }
         }
@@ -2218,21 +2212,17 @@ public class GameManager : NetworkBehaviourAntinomia {
                 button.gameObject.GetComponent<Button>().interactable = false; 
             }
         } else {
-            foreach (Transform button in AllButtonsPhase.transform) {
+            Debug.Log(AllButtonsPhase);
+            Debug.Log(AllButtonsPhase.GetComponent<RectTransform>()); 
+            foreach (RectTransform button in AllButtonsPhase.GetComponent<RectTransform>()) {
                 if (button.name.Equals("Initiation")) {
-                    button.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorCurrentButton();
                     button.gameObject.GetComponent<Button>().interactable = false;
                 } else if (button.name.Equals("Pioche")) {
-                    button.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorNextButton();
                     button.gameObject.GetComponent<Button>().interactable = true;
                 } else {
-                    ColorBlock DisabledButton = new ColorBlock {
-                        normalColor = new Color(1, 1, 1, 0.5f),
-                        // On indique au joueur qu'il ne peut pas cliquer sur bouton en mettant une couleur 
-                        // de highlight rouge
-                        highlightedColor = new Color(1, 0, 0, 0.5f)
-                    };
-                    button.gameObject.GetComponent<Button>().colors = DisabledButton; 
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorDisabledButton(); 
                     button.gameObject.GetComponent<Button>().interactable = false;
                 }
             }
