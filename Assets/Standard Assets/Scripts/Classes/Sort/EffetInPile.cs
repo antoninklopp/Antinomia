@@ -146,7 +146,6 @@ public class EffetInPile : NetworkBehaviourAntinomia {
     /// </summary>
     public string CreerPhraseDecritEffet() {
         string phraseDecritEffet = "";
-        Debug.Log(ObjetEffet); 
 
         // Dans le cas des effets "spéciaux". 
         if (numeroEffet == -4) {

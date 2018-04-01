@@ -125,6 +125,11 @@ public class ChooseCards : NetworkBehaviour {
 		for (int i = 0; i < AllShortCodes.Count; ++i) {
 			// On crée d'abord toutes les cartes
 			GameObject newCarte = Instantiate(CartePrefab);
+
+            //On ajoute le script Eventbutton qui permet d'highlight la carte quand on passe dessus avec la souris ...
+            newCarte.AddComponent<CardInfoChooseCard>();
+            newCarte.GetComponent<CardInfoChooseCard>().IDCarte = AllCardsGiven[i].GetComponent<Carte>().IDCardGame;
+
             newCarte.SetActive(true); 
 			// Ensuite on met leur position avec une demi carte entre chaque carte. 
 			newCarte.transform.SetParent(transform);

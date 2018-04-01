@@ -55,4 +55,8 @@ public class EventEffet {
     public bool IsDeclarable() {
         return effet.IsDeclarable();
     }
+
+    public override string ToString() {
+        return effet.ToString(); 
+    }
 }

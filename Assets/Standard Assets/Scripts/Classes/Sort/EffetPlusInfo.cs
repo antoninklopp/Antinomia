@@ -35,6 +35,7 @@ public class EffetPlusInfo : Effet {
         numeroEffet = _numeroEffet;
         numeroListEffet = _numeroListEffet;
         EffetString = effet.EffetString;
+        EstDeclarable = effet.EstDeclarable; 
         Debug.Log(effet); 
     }
 
@@ -60,7 +61,12 @@ public class EffetPlusInfo : Effet {
 
     public EffetPlusInfo(Effet effet, int _numeroEffet, int _numeroListEffet, int _IDCardGame) : this (effet, _numeroEffet,
         _numeroListEffet) {
-        IDCardGame = _IDCardGame; 
+        IDCardGame = _IDCardGame;
+        EstDeclarable = effet.EstDeclarable;
+    }
+
+    public override string ToString() {
+        return " "; 
     }
 
 }

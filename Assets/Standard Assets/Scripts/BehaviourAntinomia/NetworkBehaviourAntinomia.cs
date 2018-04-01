@@ -36,8 +36,6 @@ public class NetworkBehaviourAntinomia : NetworkBehaviour {
 		 * Trouver la carte avec la bonne ID. 
          * Doit être la même méthode que dans player (à relier). 
 		 */
-
-        Debug.Log("Cherche Carte ID : " + _ID_.ToString()); 
         CarteType[] AllCartesType = FindObjectsOfType(typeof(CarteType)) as CarteType[];
         List<GameObject> AllCartes = new List<GameObject>();
         

@@ -100,6 +100,8 @@ public class EventManager : MonoBehaviourAntinomia {
             return; 
         }
 
+        Debug.Log("<color=purple>Nombre d'effet avec interaction " + NombreEffetsDemandeInteraction() + "</color>"); 
+
         // Ici il n'y aucun effet à rajouter à la pile. 
         // On peut donc demander à ce joueur s'il veut défaire la pile ou ajouter un effet.
         // Si effet player != 0, alors le joueur est le deuxième à jouer.
@@ -112,6 +114,8 @@ public class EventManager : MonoBehaviourAntinomia {
         }
         // Sinon c'est ce joueur ci qui demandera à defaire la pile. 
         else {
+            // On joue d'abord les effets qui ne demandent pas d'interaction. 
+            JouerEffetSansInteraction(); 
             if (NombreEffetsDemandeInteraction() <= 1) {
                 Debug.Log("Il n'y a qu'un seul effet dans l'eventManager");
                 // Si le joueur est le deuxieme joueur, il propose de défaire la pile
@@ -128,7 +132,6 @@ public class EventManager : MonoBehaviourAntinomia {
             }
             // S'il y a plus d'un effet qui demande une interaction. 
             else {
-
                 // On indique à l'autre joueur qu'on est en train de choisir des effets. 
                 Debug.Log("Je suis ici");
                 FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(FindLocalPlayer().GetComponent<Player>().PlayerID);
@@ -372,6 +375,7 @@ public class EventManager : MonoBehaviourAntinomia {
     private List<EventEffet> EffetsDemandeInteraction() {
         List<EventEffet> interaction = new List<EventEffet>();
         foreach (EventEffet ef in listeEvents) {
+            Debug.Log(ef); 
             if (ef.IsDeclarable()) {
                 interaction.Add(ef); 
             }

@@ -1217,14 +1217,33 @@ public class Entite : Carte, ICarte {
 
     // TOUT CE QUI CONCERNE LA GESTION DES CAPACITES : COMPLIQUE A DEPLACER DANS LA CLASSE CAPACITE (a cause des messages à envoyer aux objets). 
 
+
+    /// <summary>
+    /// Exactement la même méthode que <see cref="VerouillerCarte(bool)"/> mais avec un entier, 
+    /// pour permettre l'envoi lors du verouillage d'une autre carte. 
+    /// </summary>
+    /// <param name="verouiller"></param>
+    public void VerrouillerCarte(int verouiller) {
+        if (verouiller == 1) {
+            VerrouillerCarte(true); 
+        } else {
+            VerrouillerCarte(false); 
+        }
+    }
+
     /// <summary>
     /// Verrouiller ou déverrouiller une carte. 
     /// </summary>
     /// <param name="verrouiller"></param>
     public void VerrouillerCarte(bool verrouiller) {
         verrouillee = verrouiller;
-        // On met une indication visuelle au verouillage. 
-        CmdMontrerVerouillage(verrouillee);
+        // On met une indication visuelle au verouillage.
+        if (hasAuthority) {
+            CmdMontrerVerouillage(verrouillee);
+        } else {
+            FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame, "VerouillerCarte", 
+                verrouiller ? 1 : 0, FindLocalPlayer().GetComponent<Player>().PlayerID); 
+        }
     }
 
     // On montre le verrouillage de la carte à tout le monde
@@ -1233,6 +1252,7 @@ public class Entite : Carte, ICarte {
     /// Fonction serveur
     /// </summary>
     /// <param name="montrer"></param>
+    [Command]
     void CmdMontrerVerouillage(bool montrer) {
         RpcMontrerVerouillage(montrer); 
     }
@@ -1242,6 +1262,7 @@ public class Entite : Carte, ICarte {
     /// Fonction client. 
     /// </summary>
     /// <param name="montrer"></param>
+    [ClientRpc]
     void RpcMontrerVerouillage(bool montrer) {
         if (montrer) {
             GameObject Chaines = Instantiate(Resources.Load("Prefabs/Chaines") as GameObject);
@@ -1260,11 +1281,13 @@ public class Entite : Carte, ICarte {
         }
     }
 
-
+    /// <summary>
+    /// Infliger des dégâts à certaines cartes. 
+    /// </summary>
+    /// <param name="nombreCartes"></param>
+    /// <param name="nombreDeDegats"></param>
+    /// <returns></returns>
     IEnumerator CartesDegats(int nombreCartes, int nombreDeDegats) {
-        /*
-		 * infliger des degats à certaines cartes
-		 */
         // Attention il est possible que cette recherche ne fonctionne pas sur des objets spawn sur le réseau. 
         GameObject GameManagerObject = GameObject.Find("GameManager");
         GameManagerObject.GetComponent<GameManager>().DebutChoixCartes(nombreCartes);

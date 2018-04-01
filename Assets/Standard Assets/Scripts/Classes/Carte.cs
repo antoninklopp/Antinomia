@@ -381,6 +381,10 @@ public class Carte : NetworkBehaviourAntinomia {
 
         // On split la chaine de caractères reçue en entrée
 
+        if (allConditions.Substring(0, 3).Equals("(d)")) {
+            allConditions = allConditions.Substring(3, allConditions.Length - 3); 
+        }
+
         List<Condition> AllConditions = new List<Condition>();
         if (allConditions != "") {
             string[] AllConditionsStringList = allConditions.Split(';');
@@ -505,7 +509,8 @@ public class Carte : NetworkBehaviourAntinomia {
         if (_effetString.Substring(0, 3).Equals("(d)")) {
             newEffet.EstDeclarable = true;
             // On recrée le string sans le "(d)" au début. 
-            _effetString = _effetString.Substring(3, _effetString.Length - 3);
+
+            // _effetString = _effetString.Substring(3, _effetString.Length - 3);
         } else {
             newEffet.EstDeclarable = false; 
         }
