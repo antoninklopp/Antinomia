@@ -751,4 +751,8 @@ public class Assistance : Carte, ICarte {
         base.InformationsSurLaCarte();
     }
 
+    public override bool IsAssistance() {
+        return true; 
+    }
+
 }

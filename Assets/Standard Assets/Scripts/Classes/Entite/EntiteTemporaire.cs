@@ -63,4 +63,8 @@ public class EntiteTemporaire : Carte {
     public override bool EstTemporaire() {
         return true; 
     }
+
+    public override bool IsEntite() {
+        return true; 
+    }
 }

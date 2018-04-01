@@ -869,4 +869,8 @@ public class Sort : Carte, ICarte {
             base.InformationsSurLaCarte();
     }
 
+    public override bool IsSort() {
+        return true; 
+    }
+
 }

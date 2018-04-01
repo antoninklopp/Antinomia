@@ -52,4 +52,8 @@ public class AssistanceTemporaire : Carte {
         return NetworkBehaviourAntinomia.FindCardWithID(IDCardGame);
     }
 
+    public override bool IsAssistance() {
+        return true; 
+    }
+
 }

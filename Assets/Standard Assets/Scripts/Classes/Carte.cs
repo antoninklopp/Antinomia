@@ -2072,13 +2072,10 @@ public class Carte : NetworkBehaviourAntinomia {
             yield return WaitForCardsChosen();
         }
 
-        if (CartesChoisiesPourEffets.Count != 1) {
-            throw new Exception("Erreur dans la transmission des cartes. Cet effet ne permet pas encore" +
-                "de gérer plusieurs changements de position. ");
-        }
-        else {
+        // On renvoie toutes les cartes choisies dans la main de leur propriétaire. 
+        foreach (GameObject c in CartesChoisiesPourEffets) {
             // TODO :  A Verifier. 
-            CartesChoisiesPourEffets[0].GetComponent<Entite>().RenvoyerCarteMain();
+            c.GetComponent<Entite>().RenvoyerCarteMain();
             Debug.Log("L'effet changement de position a été autorisé");
         }
 
@@ -2530,6 +2527,18 @@ public class Carte : NetworkBehaviourAntinomia {
     /// </summary>
     public void StopHighlightSelectionEvent() {
         Destroy(transform.Find("highlight").gameObject); 
+    }
+
+    public virtual bool IsEntite() {
+        return false; 
+    }
+
+    public virtual bool IsSort() {
+        return false; 
+    }
+
+    public virtual bool IsAssistance() {
+        return false; 
     }
 
 }

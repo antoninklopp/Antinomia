@@ -385,6 +385,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\PileAppelEffet.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Sort.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\SortDefinition.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\VisuelCarte.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Console\AntinomiaConsole.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Console\ReportBug.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\DataBase\Controller.cs" />

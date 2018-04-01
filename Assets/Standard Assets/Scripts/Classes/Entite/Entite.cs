@@ -2161,7 +2161,8 @@ public class Entite : Carte, ICarte {
     public void RenvoyerCarteMain(int parametreNull=0) {
         if (hasAuthority) {
             // Si c'est notre carte on peut le faire directement
-            CmdChangePosition(State.MAIN, false);
+            // On veut que la carte fasses l'animation de début. 
+            CmdChangePosition(State.MAIN, true);
         } else {
             // Sinon il faut appeler une methode du local Player
             FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame,
@@ -2196,6 +2197,10 @@ public class Entite : Carte, ICarte {
             default:
                 throw new UnusualBehaviourException("Le numero de liste doit etre 0, 1 ou 2");
         }
+    }
+
+    public override bool IsEntite() {
+        return true; 
     }
 
 }
