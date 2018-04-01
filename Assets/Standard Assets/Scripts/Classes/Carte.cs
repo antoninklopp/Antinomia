@@ -498,6 +498,18 @@ public class Carte : NetworkBehaviourAntinomia {
     /// <returns>UN effet</returns>
     public Effet stringToEffet(string _effetString) {
         Effet newEffet = new Effet();
+
+        // On regarde si l'effet est déclarable ou pas. 
+
+        // Dans le cas où il est déclarable. 
+        if (_effetString.Substring(0, 3).Equals("(d)")) {
+            newEffet.EstDeclarable = true;
+            // On recrée le string sans le "(d)" au début. 
+            _effetString = _effetString.Substring(3, _effetString.Length - 3);
+        } else {
+            newEffet.EstDeclarable = false; 
+        }
+
         string ConditionList = _effetString.Split('!')[0];
         string ActionList = _effetString.Split('!')[1];
 

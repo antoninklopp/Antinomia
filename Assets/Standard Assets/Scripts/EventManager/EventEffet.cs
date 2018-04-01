@@ -51,4 +51,8 @@ public class EventEffet {
         // Si carte nécessaire sort alors on a besoin d'une interaction.
         demandeInteraction = (ef.CartesNecessairesSort() != 0);
     }
+
+    public bool IsDeclarable() {
+        return effet.IsDeclarable();
+    }
 }

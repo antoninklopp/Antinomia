@@ -265,7 +265,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
         yield return new WaitForSeconds(0.1f);
         // L'objet a été détruit donc c'est bon.
-        CmdTestIfObjectInfoDestroyed(30, oID);
+        CmdTestIfObjectInfoDestroyed(10, oID);
 
         while (!CartePiocheeOK) {
             yield return new WaitForSeconds(0.05f); 
@@ -519,7 +519,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         // On regarde si le nombre de cartes du joueur a augmenté (dans le cas où le il y aurait un probleme lors de la pioche). 
         yield return new WaitForSeconds(0.1f);
         // L'objet a été détruit donc c'est bon.
-        CmdTestIfObjectInfoDestroyed(30, oID);
+        CmdTestIfObjectInfoDestroyed(10, oID);
     }
 
     /// <summary>

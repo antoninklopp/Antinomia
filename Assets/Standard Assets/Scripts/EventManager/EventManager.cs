@@ -322,7 +322,7 @@ public class EventManager : MonoBehaviourAntinomia {
     private int NombreEffetsDemandeInteraction() {
         int somme = 0; 
         foreach (EventEffet ef in listeEvents) {
-            if (ef.demandeInteraction) {
+            if (ef.IsDeclarable()) {
                 somme++; 
             } else {
             }
@@ -359,7 +359,7 @@ public class EventManager : MonoBehaviourAntinomia {
     /// </summary>
     private void JouerEffetSansInteraction() {
         foreach (EventEffet ef in listeEvents) {
-            if (!ef.demandeInteraction) {
+            if (!ef.IsDeclarable()) {
                 JouerUnEffet(ef, false); 
             }
         }
@@ -372,7 +372,7 @@ public class EventManager : MonoBehaviourAntinomia {
     private List<EventEffet> EffetsDemandeInteraction() {
         List<EventEffet> interaction = new List<EventEffet>();
         foreach (EventEffet ef in listeEvents) {
-            if (ef.demandeInteraction) {
+            if (ef.IsDeclarable()) {
                 interaction.Add(ef); 
             }
         }

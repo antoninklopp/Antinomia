@@ -20,10 +20,26 @@ public class Effet {
      * 
      */
      
+    /// <summary>
+    /// Description de l'effet. 
+    /// </summary>
     protected string effetString; 
 
+    /// <summary>
+    /// Toutes les conditions de l'effet.
+    /// </summary>
     public List<Condition> AllConditionsEffet = new List<Condition>();
+
+    /// <summary>
+    /// Toutes les actions de l'effet. 
+    /// </summary>
     public List<Action> AllActionsEffet = new List<Action>();
+
+    /// <summary>
+    /// Si l'effet est déclarable, on le propose au joueur lorsque c'est le bon timing,
+    /// sinon on le joue automatiquement. 
+    /// </summary>
+    public bool EstDeclarable; 
 
     public string EffetString {
         get {
@@ -61,6 +77,14 @@ public class Effet {
             }
         }
         return 1; 
+    }
+
+    /// <summary>
+    /// Renvoie si l'effet est déclarable. 
+    /// </summary>
+    /// <returns></returns>
+    public bool IsDeclarable() {
+        return EstDeclarable; 
     }
 
 
