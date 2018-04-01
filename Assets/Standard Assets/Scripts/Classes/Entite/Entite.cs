@@ -2226,4 +2226,26 @@ public class Entite : Carte, ICarte {
         return true; 
     }
 
+    /// <summary>
+    /// <see cref="Carte.GetTextFromEffet(int, int)"/>
+    /// </summary>
+    /// <param name="numeroListEffet"></param>
+    /// <param name="numeroEffet"></param>
+    /// <returns></returns>
+    public override string GetTextFromEffet(int numeroListEffet, int numeroEffet) {
+        if (numeroListEffet == 0) {
+            return base.GetTextFromEffet(numeroListEffet, numeroEffet);
+        } else {
+            // Astral
+            if (numeroListEffet == 1) {
+                return AllEffetsAstral[numeroEffet].ToString(); 
+            } else if (numeroListEffet == 2) {
+                return AllEffetsMalefique[numeroEffet].ToString(); 
+            } else {
+                Debug.LogError("Probleme ici");
+                return " "; 
+            }
+        }
+    }
+
 }

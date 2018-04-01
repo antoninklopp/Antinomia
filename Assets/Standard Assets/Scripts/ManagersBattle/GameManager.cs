@@ -1943,9 +1943,9 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <param name="stringToDisplay"></param>
     /// <param name="_nombreDeCartesAChoisir"></param>
     public void ChooseCardsForEffect(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking = null, string stringToDisplay = "",
-                                    int _nombreDeCartesAChoisir = 1) {
+                                    int _nombreDeCartesAChoisir = 1, string EffetToDisplay="") {
         ChooseCardsObject.GetComponent<ChooseCards>().ShowCardsToChoose(_AllCardsGiven, _ObjectAsking, stringToDisplay, _nombreDeCartesAChoisir, 
-            deactivateAfter : true); 
+            deactivateAfter : true, effetToDisplay : EffetToDisplay); 
     }
 
     /// <summary>

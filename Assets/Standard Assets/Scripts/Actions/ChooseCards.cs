@@ -87,8 +87,9 @@ public class ChooseCards : NetworkBehaviour {
     /// <param name="stringToDisplay">Le string à montrer au joueur pour expliquer le choix qu'il doit faire. </param>
     /// <param name="deactivateAfter">Desactive l'objet directement après dans le cas où on veut d'abord proposer 
     /// au joueur de jouer un effet.</param>
+    /// <param name="effetToDisplay">S'il y a un effet à montrer, pour que ce soit plus clair pour le joueur. </param>
 	public void ShowCardsToChoose(List<GameObject> _AllCardsGiven, GameObject _ObjectAsking=null, string stringToDisplay="", 
-                                    int _nombreDeCartesAChoisir=1, bool deactivateAfter=false){
+                                    int _nombreDeCartesAChoisir=1, bool deactivateAfter=false, string effetToDisplay=""){
         /*
 		 * On crée toutes les images à partir de la carte. 
 		 */
@@ -112,7 +113,7 @@ public class ChooseCards : NetworkBehaviour {
         if (_AllCardsGiven.Count < _nombreDeCartesAChoisir) {
             TextChooseCards.GetComponent<Text>().text = "Impossible de jouer, pas assez de carte";
         } else {
-            TextChooseCards.GetComponent<Text>().text = stringToDisplay;
+            TextChooseCards.GetComponent<Text>().text = stringToDisplay + "\nEffet : " + effetToDisplay;
         }
 
 		List<string> AllShortCodes = new List<string> ();
