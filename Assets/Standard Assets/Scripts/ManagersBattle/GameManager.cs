@@ -362,7 +362,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         // Si d'autres effets sont en cours, on ne peut pas changer de phase. 
         if (GameObject.Find("Pile") != null) {
             DisplayMessage("Impossible de passer à une autre phase pour l'instant. ");
-            NextPhase.SetActive(true); 
+            // NextPhase.SetActive(true); 
             return;
         }
 
@@ -396,13 +396,7 @@ public class GameManager : NetworkBehaviourAntinomia {
                 PlayerObject.SendMessage("ChangeUIPhase", Phase);
                 StartNewPhase();
             }
-            NextPhase.SetActive(true); 
-        }
-
-        // Si on est sur windows, et qu'on defait la pile, 
-        // on update l'UI des boutons
-        if (defairePile && AllButtonsPhase.activeInHierarchy) {
-            UpdateButtonsNewPhase((int)Phase); 
+            // NextPhase.SetActive(true); 
         }
 	}
 
@@ -492,9 +486,15 @@ public class GameManager : NetworkBehaviourAntinomia {
 
         // Pour certaines phases Preparation, principales, combat, on affiche au centre de l'écran avec 
         // tutoriels peut etre. 
-        bool informationCentreEcran = false; 
+        bool informationCentreEcran = false;
 
-		switch (Phase) {
+        // Si on est sur windows, et qu'on defait la pile, 
+        // on update l'UI des boutons
+        if (AllButtonsPhase != null && AllButtonsPhase.activeInHierarchy) {
+            UpdateButtonsNewPhase((int)Phase);
+        }
+
+        switch (Phase) {
 		    case Player.Phases.INITIATION:
 			    PhaseToString = "Initiation"; 
 			    ChangeAKAJoueur ();
@@ -2168,6 +2168,11 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="newPhase"></param>
     public void ButtonPhaseCallback(int newPhase) {
+        // Au debut de la partie, il faut attendre que l'autre joueur ait choisi ses cartes. 
+        if (ChoixCartesAdversaire != null && ChoixCartesAdversaire.activeInHierarchy) {
+            return; 
+        }
+
         // On verifie que la phase correspond bien. 
         // +7 % 7 car il y a 7 phases.
         if ((newPhase - (int)Phase + 7) % 7 != 1) {
@@ -2183,18 +2188,37 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     /// <param name="newPhase"></param>
     private void UpdateButtonsNewPhase(int newPhase) {
-        // Sinon on met à jour les boutons. 
-        for (int i = 0; i < AllButtonsPhase.transform.childCount; i++) {
-            GameObject button = AllButtonsPhase.transform.GetChild(i).gameObject;
-            if (i == newPhase) {
-                button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorCurrentButton();
-                button.gameObject.GetComponent<Button>().interactable = false;
-            } else if ((i + 1 + 7) % 7 == newPhase) {
-                button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorNextButton(); 
-                button.gameObject.GetComponent<Button>().interactable = true;
-            } else {
-                button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorDisabledButton();
-                button.gameObject.GetComponent<Button>().interactable = false;
+        // Tour de notre joueur
+        if (Tour == FindLocalPlayerID()) {
+            // Sinon on met à jour les boutons. 
+            for (int i = 0; i < AllButtonsPhase.transform.childCount; i++) {
+                GameObject button = AllButtonsPhase.transform.GetChild(i).gameObject;
+                if (i == newPhase) {
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorCurrentButton();
+                    button.gameObject.GetComponent<Button>().interactable = false;
+                }
+                else if ((i - 1 + 7) % 7 == newPhase) {
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorNextButton();
+                    button.gameObject.GetComponent<Button>().interactable = true;
+                }
+                else {
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorDisabledButton();
+                    button.gameObject.GetComponent<Button>().interactable = false;
+                }
+            }
+        }
+        // Tour de l'autre joueur
+        else {
+            for (int i = 0; i < AllButtonsPhase.transform.childCount; i++) {
+                GameObject button = AllButtonsPhase.transform.GetChild(i).gameObject;
+                if (i == newPhase) {
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorNoTurnRightPhase();
+                    button.gameObject.GetComponent<Button>().interactable = false;
+                }
+                else {
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorNoTurnNoPhase();
+                    button.gameObject.GetComponent<Button>().interactable = false;
+                }
             }
         }
     }
@@ -2205,11 +2229,16 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <param name="tour"></param>
     private void ChangeButtonsNewTour(InformationManager.TourJoueur tour) {
         if (tour == InformationManager.TourJoueur.JOUEUR_ADVERSE) {
-            foreach (Transform button in AllButtonsPhase.transform) {
+            foreach (RectTransform button in AllButtonsPhase.GetComponent<RectTransform>()) {
                 // On désactive tous les boutons comme ce n'est pas le tour du joueur. 
                 // Et on met leur alpha à 0.5
-                button.gameObject.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
-                button.gameObject.GetComponent<Button>().interactable = false; 
+                if (button.name.Equals("Initiation")) {
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorNoTurnRightPhase(); 
+                    button.gameObject.GetComponent<Button>().interactable = false;
+                } else {
+                    button.gameObject.GetComponent<Button>().colors = ColorBlocksButtons.GetColorNoTurnNoPhase();
+                    button.gameObject.GetComponent<Button>().interactable = false;
+                }
             }
         } else {
             Debug.Log(AllButtonsPhase);

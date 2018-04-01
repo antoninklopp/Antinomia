@@ -103,21 +103,22 @@ public class EventManager : MonoBehaviourAntinomia {
         // Ici il n'y aucun effet à rajouter à la pile. 
         // On peut donc demander à ce joueur s'il veut défaire la pile ou ajouter un effet.
         // Si effet player != 0, alors le joueur est le deuxième à jouer.
-        if (NombreEffetsDemandeInteraction() < 0) {
+        if (NombreEffetsDemandeInteraction() <= 0) {
             // Il faut d'abord jouer les effets sans interaction ici. 
             JouerEffetSansInteraction(); 
 
             // Puis on s'auto-propose de défaire la pile. 
             StartCoroutine(AutoPropose()); 
         }
-        // Sinon c'est ce joueur CI qui demandera à defaire la pile. 
+        // Sinon c'est ce joueur ci qui demandera à defaire la pile. 
         else {
-            if (NombreEffetsDemandeInteraction() < 1) {
+            if (NombreEffetsDemandeInteraction() <= 1) {
                 Debug.Log("Il n'y a qu'un seul effet dans l'eventManager");
                 // Si le joueur est le deuxieme joueur, il propose de défaire la pile
                 if (FindLocalPlayer().GetComponent<Player>().PlayerID != GameObject.Find("GameManager").GetComponent<GameManager>().Tour) {
                     JouerUnEffet(listeEvents[0], true);
-                } else {
+                }
+                else {
                     JouerUnEffet(listeEvents[0], false);
                 }
                 StartCoroutine(ChangerEffetFiniJoueur());
@@ -125,15 +126,18 @@ public class EventManager : MonoBehaviourAntinomia {
                 TousEffetsFini = true;
                 return;
             }
+            // S'il y a plus d'un effet qui demande une interaction. 
+            else {
 
-            // On indique à l'autre joueur qu'on est en train de choisir des effets. 
-            Debug.Log("Je suis ici");
-            FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(FindLocalPlayer().GetComponent<Player>().PlayerID);
+                // On indique à l'autre joueur qu'on est en train de choisir des effets. 
+                Debug.Log("Je suis ici");
+                FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(FindLocalPlayer().GetComponent<Player>().PlayerID);
 
-            ButtonFin.SetActive(true);
-            ResetOrdreButton.SetActive(true);
-            EventTotal = listeEvents.Count;
-            SetUpButtons();
+                ButtonFin.SetActive(true);
+                ResetOrdreButton.SetActive(true);
+                EventTotal = listeEvents.Count;
+                SetUpButtons();
+            }
         }
     }
 

@@ -33,6 +33,10 @@ public class ColorBlocksButtons {
         };
     }
 
+    /// <summary>
+    /// Color Block d'un bouton qui est désactivé. 
+    /// </summary>
+    /// <returns></returns>
     public static ColorBlock GetColorDisabledButton() {
         return new ColorBlock {
             normalColor = new Color(1, 1, 1, 0.5f),
@@ -40,6 +44,38 @@ public class ColorBlocksButtons {
             // de highlight rouge
             highlightedColor = new Color(1, 0, 0, 0.5f),
             disabledColor = new Color(1, 1, 1, 0.5f),
+            colorMultiplier = 1
+        };
+    }
+
+    /// <summary>
+    /// ColorBlock du bouton quand ce n'est ni la bonne phase, 
+    /// ni le tour du joueur. 
+    /// </summary>
+    /// <returns></returns>
+    public static ColorBlock GetColorNoTurnNoPhase() {
+        return new ColorBlock {
+            normalColor = new Color(1, 1, 1, 0.2f),
+            // On indique au joueur qu'il ne peut pas cliquer sur bouton en mettant une couleur 
+            // de highlight rouge
+            highlightedColor = new Color(1, 0, 0, 0.5f),
+            disabledColor = new Color(1, 1, 1, 0.2f),
+            colorMultiplier = 1
+        };
+    }
+
+    /// <summary>
+    /// ColorBlock du bouton quand c'est la bonne phase mais 
+    /// pas le tour du joueur. 
+    /// </summary>
+    /// <returns></returns>
+    public static ColorBlock GetColorNoTurnRightPhase() {
+        return new ColorBlock {
+            normalColor = new Color(0, 1, 0, 0.2f),
+            // On indique au joueur qu'il ne peut pas cliquer sur bouton en mettant une couleur 
+            // de highlight rouge
+            highlightedColor = new Color(1, 0, 0, 0.5f),
+            disabledColor = new Color(0, 1, 0, 0.2f),
             colorMultiplier = 1
         };
     }
