@@ -221,7 +221,7 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
             Assistance _assistance = newCarte.AddComponent<Assistance>();
             _assistance.shortCode = data.GetString("shortCode");
             _assistance.Name = data.GetString("name");
-            _assistance.STAT = data.GetInt("STAT").Value;
+            _assistance.Puissance = data.GetInt("STAT").Value;
             _assistance.stringToEffetList(data.GetString("Effet"));
             _assistance.AllEffetsString = data.GetString("Effet");
             _assistance.stringToEffetString(data.GetString("EffetString"));

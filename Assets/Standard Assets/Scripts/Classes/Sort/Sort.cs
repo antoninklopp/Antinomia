@@ -33,6 +33,8 @@ public class Sort : Carte, ICarte {
 
     private Vector3 positionBeforeDragging;
 
+    public int Rang; 
+
     /// <summary>
     /// Constructeur de la classe 
     /// </summary>

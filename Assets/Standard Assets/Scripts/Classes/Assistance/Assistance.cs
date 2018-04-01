@@ -48,7 +48,7 @@ public class Assistance : Carte, ICarte {
     /// <summary>
     /// STAT de l'assistance
     /// </summary>
-    public int STAT;
+    public int Puissance;
 
     private int clicked = 0;
 
@@ -557,7 +557,7 @@ public class Assistance : Carte, ICarte {
         if (((Players[0].GetComponent<Player>().isLocalPlayer && Players[0].GetComponent<Player>().isServer) ||
             (Players[1].GetComponent<Player>().isLocalPlayer && Players[1].GetComponent<Player>().isServer)) && netId.Value != 0) {
             // Dans le cas d'une instantiation d'une carte sur le réseau.
-            RpcsetoID(IDCardGame, oID, Name, shortCode, STAT, AllEffetsString, AllEffetsStringToDisplay);
+            RpcsetoID(IDCardGame, oID, Name, shortCode, Puissance, AllEffetsString, AllEffetsStringToDisplay);
             // Inutile normalement.
             // RpcChangeParent (); 
         }
@@ -633,18 +633,18 @@ public class Assistance : Carte, ICarte {
     /// <param name="_oID">Attribut de la carte. Numero d'identification de la carte dans la META COLLECTION.</param>
     /// <param name="_Name">Attribut de la carte.</param>
     /// <param name="_shortCode">Attribut de la carte.</param>
-    /// <param name="_STAT">Attribut de la carte.</param>
+    /// <param name="_Puissance">Attribut de la carte.</param>
     /// <param name="_EffetString">Attribut de la carte. On parle ici des effets sous la forme à "décortiquer" et pas la forme 
     /// "compréhensible"</param>
     /// <param name="_EffetsToDisplay">Attribut de la carte. Forme compréhensible. </param>
     [ClientRpc(channel=0)]
     public void RpcsetoID(int _IDCardGame, string _oID, string _Name, string _shortCode,
-        int _STAT, string _EffetString, string _EffetsToDisplay) {
+        int _Puissance, string _EffetString, string _EffetsToDisplay) {
         IDCardGame = _IDCardGame;
         oID = _oID;
         Name = _Name;
         shortCode = _shortCode;
-        STAT = _STAT;
+        Puissance = _Puissance;
         AllEffetsString = _EffetString;
         assistanceState = State.MAIN;
         stringToEffetString(_EffetsToDisplay);
