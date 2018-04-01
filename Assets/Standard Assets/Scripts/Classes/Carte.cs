@@ -1521,7 +1521,7 @@ public class Carte : NetworkBehaviourAntinomia {
                     break;
                 case Action.ActionEnum.CHANGER_POSITION_IMPOSSIBLE:
                     if (jouerEffet) {
-                        GetComponent<Entite>().VerrouillerCarte(true); 
+                        VerrouillerCartes(); 
                     } else if (j == 0) {
                         StartCoroutine(MettreEffetDansLaPileFromActions(numeroEffet, CibleDejaChoisie, effetListNumber, ProposerDefairePile));
                     }
@@ -2556,6 +2556,16 @@ public class Carte : NetworkBehaviourAntinomia {
 
     public virtual bool IsAssistance() {
         return false; 
+    }
+
+    /// <summary>
+    /// Verouiller toutes les cartes choisies endantr l'effet. 
+    /// Ce qui rend leur changement de position impossible ! 
+    /// </summary>
+    private void VerrouillerCartes() {
+        foreach (GameObject g in CartesChoisiesPourEffets) {
+            g.GetComponent<Entite>().VerrouillerCarte(true);
+        }
     }
 
 }

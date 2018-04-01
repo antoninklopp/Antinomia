@@ -90,6 +90,10 @@ public class EventManager : MonoBehaviourAntinomia {
     /// Créer un nouvel ensemble d'events
     /// </summary>
     public void CreerNouvellePileEvent() {
+        // On reset les booleens à la création de la pile d'event. 
+        EffetFini = false;
+        TousEffetsFini = false; 
+
         // S'il n'y a qu'un seul évênement, on ne propose pas de choisir
         if (listeEvents.Count == 0) {
             Debug.Log("Il n'y a pas d'effets dans l'eventManager");
@@ -117,17 +121,14 @@ public class EventManager : MonoBehaviourAntinomia {
             // On joue d'abord les effets qui ne demandent pas d'interaction. 
             JouerEffetSansInteraction(); 
             if (NombreEffetsDemandeInteraction() <= 1) {
+                // Il y a un effet à jouer. 
+                EventTotal = 1; 
                 Debug.Log("Il n'y a qu'un seul effet dans l'eventManager");
+
                 // Si le joueur est le deuxieme joueur, il propose de défaire la pile
-                if (FindLocalPlayer().GetComponent<Player>().PlayerID != GameObject.Find("GameManager").GetComponent<GameManager>().Tour) {
-                    JouerUnEffet(listeEvents[0], true);
-                }
-                else {
-                    JouerUnEffet(listeEvents[0], false);
-                }
-                StartCoroutine(ChangerEffetFiniJoueur());
                 FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(FindLocalPlayer().GetComponent<Player>().PlayerID);
-                TousEffetsFini = true;
+
+                StartCoroutine(JouerEffets()); 
                 return;
             }
             // S'il y a plus d'un effet qui demande une interaction. 
@@ -201,11 +202,14 @@ public class EventManager : MonoBehaviourAntinomia {
     public IEnumerator JouerEffets() {
         // On détruit tous les boutons pour qu'ils ne soient plus visibles. 
         TousEffetsFini = false; 
-        Debug.Log("On joue les effets"); 
-        foreach (GameObject o in listeButtons) {
-            Destroy(o); 
+        Debug.Log("On joue les effets");
+
+        if (listeButtons != null) {
+            foreach (GameObject o in listeButtons) {
+                Destroy(o);
+            }
+            listeButtons = new List<GameObject>();
         }
-        listeButtons = new List<GameObject>();
 
         ButtonFin.SetActive(false); 
         ResetOrdreButton.SetActive(false);
@@ -213,6 +217,12 @@ public class EventManager : MonoBehaviourAntinomia {
         // On joue les effets dans l'ordre de tri
         Debug.Log("Il y a " + EventTotal + " à jouer"); 
         for (int i = 0; i < EventTotal; i++) {
+
+            // Si l'effet n'est pas déclarable, il a déjà été joué avant. 
+            if (!FindEffet(i).IsDeclarable()) {
+                continue;
+            }
+
             Debug.Log("On joue l'effet " + i);
             // On met TousEffetsFini à true avant de jouer le dernier effet pour que le joueur adverse puisse répondre.
             // On attend la fin de l'effet avant de passer au suivant.
