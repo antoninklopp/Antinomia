@@ -27,9 +27,8 @@ public class Assistance : Carte, ICarte {
         JOUEE, 
         DECK,
         CIMETIERE, 
-        BIGCARD, 
-        BAN
-    };
+        BIGCARD
+        };
 
     /// <summary>
     /// Etat courant de l'assistance. 
@@ -611,7 +610,7 @@ public class Assistance : Carte, ICarte {
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-        Ban = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
         if (IDCardGame == 0) {
             Destroy(gameObject);
@@ -692,10 +691,10 @@ public class Assistance : Carte, ICarte {
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-        Ban = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
         gameObject.tag = "Cimetiere";
-        Ban.SendMessage("CmdCarteDeposee", gameObject);
+        Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
         Sanctuaire.SendMessage("ReordonnerCarte");
         ChampBataille.SendMessage("CmdReordonnerCarte");
 
@@ -754,27 +753,6 @@ public class Assistance : Carte, ICarte {
 
     public override bool IsAssistance() {
         return true; 
-    }
-
-    /// <summary>
-    /// Changer le state d'une carte
-    /// </summary>
-    /// <param name="newState"></param>
-    public virtual void setState(string newState) {
-        switch (newState) {
-            case "MAIN":
-                assistanceState = State.MAIN;
-                break;
-            case "CIMETIERE":
-                assistanceState = State.CIMETIERE;
-                break;
-            case "BAN":
-                assistanceState = State.BAN;
-                break;
-            default:
-                Debug.LogError("Un probleme ici");
-                break;
-        }
     }
 
 }

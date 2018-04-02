@@ -69,6 +69,8 @@ public class Carte : NetworkBehaviourAntinomia {
     [HideInInspector]
     public GameObject Sanctuaire;
     [HideInInspector]
+    public GameObject Cimetiere;
+    [HideInInspector]
     public GameObject Ban; 
 
     [HideInInspector]

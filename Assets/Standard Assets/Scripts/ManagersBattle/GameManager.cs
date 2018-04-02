@@ -1137,7 +1137,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Montrer les cartes dans le cimetière
     /// </summary>
     /// <param name="allCartesCimetiere">Cartes présentes dans le cimetière</param>
-    void ShowCemetery(List<GameObject> allCartesCimetiere) {
+    public void ShowCemetery(List<GameObject> allCartesCimetiere) {
         /*
          * Montrer les cartes dans le cimetiere. 
          */
@@ -1173,13 +1173,25 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <seealso cref="ShowCemetery(List{GameObject})"/>
     /// </summary>
     /// <param name="allCartesCimetiere">Cartes présentes dans le cimetière</param>
-    void ShowBan(List<GameObject> allCartesBan) {
+    public void ShowBan(List<GameObject> allCartesBan, int nombreCartesFaceCachee = 0) {
         /*
          * Montrer les cartes dans le cimetiere. 
          */
 
         // On "renomme" juste la fonction car les fonctions ShowBan et ShowCemetery son les mêmes fonctions
-        ShowCemetery(allCartesBan); 
+        // Ici on montre les cartes face visible
+        ShowCemetery(allCartesBan);
+
+        GameObject Content = CartesCimetiere.transform.GetChild(0).GetChild(0).gameObject;
+
+        // Puis on ajoute les cartes face cachée. 
+        for (int i = 0; i < nombreCartesFaceCachee; ++i) {
+            // On instancie une nouvelle carte pour chaque carte du cimetière.
+            GameObject NouvelleCarte = Instantiate(CarteBaseCimetiere);
+            CarteBaseCimetiere.GetComponent<ImageCarteCimetiere>().setImageBan(); 
+            NouvelleCarte.transform.SetParent(Content.transform, false);
+            NouvelleCarte.SetActive(true);
+        }
     }
 
     /// <summary>

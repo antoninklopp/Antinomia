@@ -57,6 +57,13 @@ public class ImageCarteCimetiere : MonoBehaviour {
     }
 
     /// <summary>
+    /// Mettre une image pour une carte bannie
+    /// </summary>
+    public void setImageBan() {
+        GetComponent<Image>().sprite = Resources.Load("Ban/Ban") as Sprite; 
+    }
+
+    /// <summary>
     /// Clic sur la carte
     /// </summary>
 	public void OnMouseDown() {

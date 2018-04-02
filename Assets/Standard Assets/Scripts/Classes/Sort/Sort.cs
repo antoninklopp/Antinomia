@@ -105,11 +105,7 @@ public class Sort : Carte, ICarte {
         /// <summary>
         /// La carte est au cimetière.
         /// </summary>
-        CIMETIERE, 
-        /// <summary>
-        /// La carte est bannie
-        /// </summary>
-        BAN
+        CIMETIERE
     };
 
     /// <summary>
@@ -685,7 +681,7 @@ public class Sort : Carte, ICarte {
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-        Ban = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
         if (IDCardGame == 0) {
             Destroy(gameObject);
@@ -763,10 +759,10 @@ public class Sort : Carte, ICarte {
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-        Ban = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
         gameObject.tag = "Cimetiere";
-        Ban.SendMessage("CmdCarteDeposee", gameObject);
+        Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
         Sanctuaire.SendMessage("ReordonnerCarte");
         ChampBataille.SendMessage("CmdReordonnerCarte");
 
@@ -877,27 +873,6 @@ public class Sort : Carte, ICarte {
 
     public override bool IsSort() {
         return true; 
-    }
-
-    /// <summary>
-    /// Changer le state d'une carte
-    /// </summary>
-    /// <param name="newState"></param>
-    public virtual void setState(string newState) {
-        switch (newState) {
-            case "MAIN":
-                sortState = State.MAIN;
-                break;
-            case "CIMETIERE":
-                sortState = State.CIMETIERE;
-                break;
-            case "BAN":
-                sortState = State.BAN;
-                break;
-            default:
-                Debug.LogError("Un probleme ici");
-                break; 
-        }
     }
 
 }

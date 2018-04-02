@@ -27,7 +27,8 @@ public class ClickBan : MonoBehaviour {
             for (int i = 0; i < CartesCimetieresTransform.childCount; ++i) {
                 AllCartesBan.Add(CartesCimetieresTransform.GetChild(i).gameObject);
             }
-            GameObject.FindGameObjectWithTag("GameManager").SendMessage("ShowBan", AllCartesBan);
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ShowBan(AllCartesBan, 
+                transform.parent.Find("CartesBan").GetComponent<Ban>().NombreCartesBanniesFaceCachee);
         }
         else {
             GameObject.FindGameObjectWithTag("GameManager").SendMessage("HideBan");

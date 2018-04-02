@@ -259,7 +259,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// FACE VISIBLE. 
     /// </summary>
     /// <param name="ID"></param>
-    void BannirCarte(int ID) {
+    public void BannirCarte(int ID) {
         CmdBannirCarte(ID);
     }
 
@@ -285,7 +285,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     }
 
     /// <summary>
-    /// Detruire la carte sur le client. 
+    /// Bannir une carte sur le client. 
     /// </summary>
     /// <param name="ID">IDCardGame de la carte</param>
     [ClientRpc(channel = 0)]
@@ -293,8 +293,7 @@ public class Player : NetworkBehaviourAntinomia	 {
         // Si cette méthode a été appelée c'est pour être éxécutée sur une carte qui n'était pas du joueur local.
         if (!isLocalPlayer) {
             GameObject LaCarteSurLeServeur = FindCardWithID(ID);
-            AntinomiaLog(ID);
-            LaCarteSurLeServeur.SendMessage("BannirCarte");
+            LaCarteSurLeServeur.GetComponent<Carte>().BannirCarte(); 
         }
     }
 
