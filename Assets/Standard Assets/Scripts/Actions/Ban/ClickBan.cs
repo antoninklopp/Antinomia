@@ -22,12 +22,12 @@ public class ClickBan : MonoBehaviour {
             */
         if (!cardsCurrentlyShown) {
             // On récupère les cartes dans le cimetière
-            List<GameObject> allCartesCimetieres = new List<GameObject>();
+            List<GameObject> AllCartesBan = new List<GameObject>();
             Transform CartesCimetieresTransform = transform.parent.Find("CartesBan");
             for (int i = 0; i < CartesCimetieresTransform.childCount; ++i) {
-                allCartesCimetieres.Add(CartesCimetieresTransform.GetChild(i).gameObject);
+                AllCartesBan.Add(CartesCimetieresTransform.GetChild(i).gameObject);
             }
-            GameObject.FindGameObjectWithTag("GameManager").SendMessage("ShowBan", allCartesCimetieres);
+            GameObject.FindGameObjectWithTag("GameManager").SendMessage("ShowBan", AllCartesBan);
         }
         else {
             GameObject.FindGameObjectWithTag("GameManager").SendMessage("HideBan");

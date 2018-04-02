@@ -11,8 +11,20 @@ using UnityEngine.Networking;
 /// </summary>
 public class Ban : NetworkBehaviourAntinomia {
 
-    List<GameObject> AllCreaturesBan = new List<GameObject>();
+    /// <summary>
+    /// Liste de toutes les cartes Ban
+    /// </summary>
+    List<GameObject> AllCartesBan = new List<GameObject>();
+
+    /// <summary>
+    /// Prefab de la carte. 
+    /// </summary>
     public GameObject CartePrefab;
+
+    /// <summary>
+    /// Nombre de cartes bannies face cachée. 
+    /// </summary>
+    public int NombreCartesBanniesFaceCachee; 
 
     /// <summary>
     /// Reordonner les cartes du cimetiere. 
@@ -22,16 +34,14 @@ public class Ban : NetworkBehaviourAntinomia {
 		 * Réordonner les cartes, pour l'instant sans animation
 		 * TODO: Rajouter une animation.
 		 */
-        print("Reordonner Ban");
 
-        AllCreaturesBan = new List<GameObject>();
+        AllCartesBan = new List<GameObject>();
         foreach (Transform child in transform) {
-            AllCreaturesBan.Add(child.gameObject);
+            AllCartesBan.Add(child.gameObject);
         }
-        for (int i = 0; i < AllCreaturesBan.Count; i++) {
+        for (int i = 0; i < AllCartesBan.Count; i++) {
             // On met toutes les cartes au même endroit. 
-            AllCreaturesBan[i].transform.localPosition = Vector3.zero;
-
+            AllCartesBan[i].transform.localPosition = Vector3.zero;
         }
     }
 
@@ -56,8 +66,7 @@ public class Ban : NetworkBehaviourAntinomia {
     /// Deposer une carte dans le cimetiere
     /// </summary>
     /// <param name="NewCard">Objet carte déposé</param>
-	[Command(channel=0)]
-    void CmdCarteDeposee(GameObject NewCard) {
+    public void CmdCarteDeposee(GameObject NewCard) {
         /*
 		 * Depot d'une carte sur le board, pour l'instant aucune vérification n'est faite. 
 		 * TODO: Vérifier s'il est possible de poser la carte en question sur le board. 
@@ -69,13 +78,17 @@ public class Ban : NetworkBehaviourAntinomia {
         // On change le parent de la carte. 
         NewCard.transform.SetParent(transform);
         // Puis on réorganise l'affichage.
-        AllCreaturesBan.Add(NewCard);
+        AllCartesBan.Add(NewCard);
         CmdReordonnerCarte();
 
         // Et on change le statut de la carte de main à cimetière. 
         if (NewCard.GetComponent<Entite>() != null) {
-            NewCard.SendMessage("setState", "CIMETIERE");
+            NewCard.SendMessage("setState", "BAN");
             NewCard.SendMessage("setClicked", false);
         }
+    }
+
+    public void AjouterUneCarteBannieFaceCachee() {
+        NombreCartesBanniesFaceCachee++; 
     }
 }

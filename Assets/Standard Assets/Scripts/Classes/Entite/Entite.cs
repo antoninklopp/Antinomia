@@ -803,7 +803,7 @@ public class Entite : Carte, ICarte {
                                 else {
                                     // Detruire les x premières cartes du deck.
                                     GameObject.Find("GameManager").SendMessage("DisplayMessage", x.ToString() + "cartes de votre deck ont été détruites");
-                                    FindLocalPlayer().SendMessage("DetruireCartesDessusDeck", x);
+                                    FindLocalPlayer().GetComponent<Player>().DetruireCartesDessusDeck(x);
                                 }
                                 break;
                             default:
@@ -940,7 +940,7 @@ public class Entite : Carte, ICarte {
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+        Ban = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
         EntiteState = newCarteState;
         // il faut maintenant mettre à jour les position. 
@@ -976,7 +976,7 @@ public class Entite : Carte, ICarte {
                 // StartCoroutine(GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().ProposeToPauseGame());
                 break;
             case State.CIMETIERE:
-                Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
+                Ban.SendMessage("CmdCarteDeposee", gameObject);
                 Sanctuaire.SendMessage("ReordonnerCarte");
                 ChampBataille.SendMessage("CmdReordonnerCarte");
                 gameObject.tag = "Cimetiere";
@@ -1075,7 +1075,7 @@ public class Entite : Carte, ICarte {
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+        Ban = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
 
         if (IDCardGame == 0) {
             Debug.Log("On detruit un objet dont l'ID est 0");
@@ -1168,12 +1168,12 @@ public class Entite : Carte, ICarte {
             GetComponent<EntiteAssocieeAssistance>().EntiteDetruite(); 
         }
 
-        Cimetiere = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
-        AntinomiaLog(Cimetiere);
+        Ban = transform.parent.parent.parent.Find("Cimetiere").Find("CartesCimetiere").gameObject;
+        AntinomiaLog(Ban);
         AntinomiaLog("Carte detruite" + IDCardGame.ToString()); 
 
         setState("CIMETIERE");
-        Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
+        Ban.SendMessage("CmdCarteDeposee", gameObject);
         Sanctuaire.SendMessage("ReordonnerCarte");
         ChampBataille.SendMessage("CmdReordonnerCarte");
         Main.SendMessage("ReordonnerCarte");
@@ -1198,7 +1198,42 @@ public class Entite : Carte, ICarte {
         // GererEffetsMort(); 
     }
 
-    public void printCarte() {
+    public override void BannirCarte() {
+        if (GetComponent<EntiteAssocieeAssistance>() != null) {
+            // Si l'entité meurt et qu'elle est liée à une assistance. 
+            GetComponent<EntiteAssocieeAssistance>().EntiteDetruite();
+        }
+
+        Ban = transform.parent.parent.parent.Find("Ban").Find("CartesBan").gameObject;
+        AntinomiaLog(Ban);
+        AntinomiaLog("Carte detruite" + IDCardGame.ToString());
+
+        setState("CIMETIERE");
+        Ban.SendMessage("CmdCarteDeposee", gameObject);
+        Sanctuaire.SendMessage("ReordonnerCarte");
+        ChampBataille.SendMessage("CmdReordonnerCarte");
+        Main.SendMessage("ReordonnerCarte");
+
+        AntinomiaLog(transform.parent.parent.parent.gameObject);
+        if (transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer) {
+            /*
+			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
+			 */
+            CmdChangePosition(EntiteState, false);
+        }
+        else {
+            // Si on est pas sur le player local. 
+            Debug.Log("N'est pas le local Player");
+            GameObject LocalPlayer = FindLocalPlayer();
+            LocalPlayer.SendMessage("DetruireCarte", IDCardGame);
+        }
+
+        if ((EntiteAscendance == Ascendance.MALEFIQUE) || (EntiteAscendance == Ascendance.ASTRALE)) {
+            CmdChangeAscendanceTerrain("NEUTRE");
+        }
+    }
+
+    public void PrintCarte() {
         /* 
 		 * Afficher les infos de la carte dans le debugger. 
 		 */

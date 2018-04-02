@@ -69,7 +69,7 @@ public class Carte : NetworkBehaviourAntinomia {
     [HideInInspector]
     public GameObject Sanctuaire;
     [HideInInspector]
-    public GameObject Cimetiere; 
+    public GameObject Ban; 
 
     [HideInInspector]
     public bool isFromLocalPlayer = false;

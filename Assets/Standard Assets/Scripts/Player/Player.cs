@@ -221,14 +221,87 @@ public class Player : NetworkBehaviourAntinomia	 {
 	 * Trouver comment s'y retrouver avec toutes les instances des objets!
 	 */ 
 
+    /// <summary>
+    /// Bannir un certain nombre de cartes. 
+    /// </summary>
+    /// <param name="nombre"></param>
 	public void DetruireCartesDessusDeck(int nombre){
-		/*
+        /*
 		 * Lors d'un cout élémentaire pour une carte Terre, il faut détruire les x premières cartes du jeu.
-		 */ 
-		CardDeck.Cartes.RemoveRange (0, nombre); 
+		 */
+        CardDeck.Cartes.RemoveRange (0, nombre);
+        CmdBannirFaceCachee(nombre); 
 	}
 
-	public void PiocherNouvelleCarte(){
+    /// <summary>
+    /// Bannir des cartes face cachée
+    /// </summary>
+    /// <param name="nombre"></param>
+    [Command]
+    public void CmdBannirFaceCachee(int nombre) {
+        RpcBannirFaceCachee(nombre); 
+    }
+
+    /// <summary>
+    /// Fonction client
+    /// Bannir une carte face cachee. 
+    /// </summary>
+    /// <param name="nombre"></param>
+    [ClientRpc]
+    public void RpcBannirFaceCachee(int nombre) {
+        for (int i = 0; i < nombre; i++) {
+            transform.Find("Ban").Find("CartesBan").gameObject.GetComponent<Ban>().AjouterUneCarteBannieFaceCachee();
+        }
+    }
+    
+    /// <summary>
+    /// Bannir une carte. 
+    /// FACE VISIBLE. 
+    /// </summary>
+    /// <param name="ID"></param>
+    void BannirCarte(int ID) {
+        CmdBannirCarte(ID);
+    }
+
+    /// <summary>
+    /// Envoyer une carte au ban. 
+    /// Elle y sera donc face visible
+    /// </summary>
+    /// <param name="ID">ID de la carte à détruire</param>
+	[Command(channel = 0)]
+    void CmdBannirCarte(int ID) {
+        /*
+		 * Lorsqu'on veut détruire une carte qui n'est pas du joueur local, 
+		 * on ne peut pas envoyer une fonction command depuis cet object, 
+		 * car le joueur n'a pas d'autorité sur l'objet, 
+		 * comme ce n'est pas lui qui l'a spawn sur le network. 
+		 * 
+		 * il faut donc envoyer la carte au joueur local, 
+		 * qui peut lui detruire la carte sur le réseau en lui envoyant la commande
+		 * 
+		 */
+        Debug.Log("Execute sur le serveur");
+        RpcBannirCarte(ID);
+    }
+
+    /// <summary>
+    /// Detruire la carte sur le client. 
+    /// </summary>
+    /// <param name="ID">IDCardGame de la carte</param>
+    [ClientRpc(channel = 0)]
+    void RpcBannirCarte(int ID) {
+        // Si cette méthode a été appelée c'est pour être éxécutée sur une carte qui n'était pas du joueur local.
+        if (!isLocalPlayer) {
+            GameObject LaCarteSurLeServeur = FindCardWithID(ID);
+            AntinomiaLog(ID);
+            LaCarteSurLeServeur.SendMessage("BannirCarte");
+        }
+    }
+
+    /// <summary>
+    /// Piocher une nouvelle carte. 
+    /// </summary>
+    public void PiocherNouvelleCarte(){
 		if (!isLocalPlayer) {
 			return;
 		}
