@@ -24,7 +24,15 @@ public class Ban : NetworkBehaviourAntinomia {
     /// <summary>
     /// Nombre de cartes bannies face cachée. 
     /// </summary>
-    public int NombreCartesBanniesFaceCachee; 
+    public int NombreCartesBanniesFaceCachee;
+
+    public override void Start() {
+        base.Start(); 
+        // On rotate, pour que le texte soit dans le bon sens. 
+        if (transform.parent.parent.GetComponent<Player>().isLocalPlayer) {
+            transform.parent.Find("BanText").transform.Rotate(new Vector3(0, 180, 180)); 
+        }
+    }
 
     /// <summary>
     /// Reordonner les cartes du cimetiere. 

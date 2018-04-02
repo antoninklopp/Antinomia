@@ -10,7 +10,7 @@ using UnityEngine.Networking;
 /// <summary>
 /// Objet représentant le cimetiere d'un joueur. 
 /// </summary>
-public class Cimetiere : NetworkBehaviour {
+public class Cimetiere : NetworkBehaviourAntinomia {
 	/*
 	 * Toutes les cartes envoyées au cimetiere par un joueur. 
 	 */ 
@@ -38,6 +38,15 @@ public class Cimetiere : NetworkBehaviour {
 
 		}
 	}
+
+    public override void Start() {
+        base.Start();
+        // On rotate, pour que le texte soit dans le bon sens. 
+        if (transform.parent.parent.GetComponent<Player>().isLocalPlayer) {
+            Debug.Log("On passe ici"); 
+            transform.parent.Find("CimetiereText").transform.Rotate(new Vector3(0, 180, 180));
+        }
+    }
 
     /// <summary>
     /// Lors d'un clic sur le cimetiere. 

@@ -38,6 +38,7 @@ public class DisplayMessagePossibilities : MonoBehaviourAntinomia {
                 // On instantie les 6 messages. 
                 GameObject NewMessage = Instantiate(Resources.Load("Prefabs/MessagePrefab") as GameObject);
                 NewMessage.transform.SetParent(EnsembleMessage.transform, false);
+                Debug.Log("message" + i.ToString()); 
                 NewMessage.GetComponent<Message>().SetMessage(LanguageData.GetString("message" + i.ToString(), "message"));
                 NewMessage.GetComponent<Message>().code = i; 
             }

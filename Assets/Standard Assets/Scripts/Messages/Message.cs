@@ -1,20 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; 
+using UnityEngine.UI;
+using UnityEngine.EventSystems; 
 
 /// <summary>
 /// 6 possibilités de messages
 /// </summary>
-public class Message : MonoBehaviour {
+public class Message : MonoBehaviour, IPointerClickHandler {
 
     /// <summary>
     /// Chaque message a un code, moins lourd à envoyer par le réseau. 
     /// </summary>
+    [HideInInspector]
     public int code; 
 
-    public void OnMouseDown() {
-        transform.parent.gameObject.GetComponent<DisplayMessagePossibilities>().SendMessageToPlayer(code); 
+    //public void OnMouseDown() {
+        
+    //}
+
+    public void OnPointerClick(PointerEventData eventData) {
+        GameObject.Find("GameManager").GetComponent<DisplayMessagePossibilities>().SendMessageToPlayer(code);
     }
 
     /// <summary>
@@ -22,6 +28,6 @@ public class Message : MonoBehaviour {
     /// </summary>
     /// <param name="m"></param>
     public void SetMessage(string m) {
-        GetComponent<Text>().text = m; 
+        GetComponent<RectTransform>().Find("Text").gameObject.GetComponent<Text>().text = m; 
     }
 }
