@@ -351,6 +351,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\BehaviourAntinomia\ClickManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\BehaviourAntinomia\MonoBehaviourAntinomia.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\BehaviourAntinomia\NetworkBehaviourAntinomia.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\CheckConnection\CheckConnection.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ChoixDeck\GameManagerChoixDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ChoixDeck\ImageCarteChoixDeck.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ChoixGame\ChoixGameManager.cs" />
