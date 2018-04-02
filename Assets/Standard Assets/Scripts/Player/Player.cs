@@ -1431,4 +1431,22 @@ public class Player : NetworkBehaviourAntinomia	 {
         FindLocalPlayer().GetComponent<Player>().EffetPlayer = _EffetPlayer;
         FindNotLocalPlayer().GetComponent<Player>().EffetPlayer = _EffetPlayer;
     }
+
+    /// <summary>
+    /// Envoyer une message à l'autre joueur. 
+    /// </summary>
+    /// <param name="code"></param>
+    public void SendMessageToPlayer(int code) {
+        CmdSendMessageToPlayer(code);
+    }
+
+    [Command]
+    public void CmdSendMessageToPlayer(int code) {
+        RpcSendMessageToPlayer(code); 
+    }
+
+    [ClientRpc]
+    public void RpcSendMessageToPlayer(int code) {
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<DisplayMessagePossibilities>().ShowMessageSent(isLocalPlayer, code); 
+    }
 }

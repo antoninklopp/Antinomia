@@ -7,7 +7,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
-using AntinomiaException; 
+using AntinomiaException;
+using UnityEngine.EventSystems; 
 
 /// <summary>
 /// Hérite de la classe Carte. 
@@ -411,6 +412,12 @@ public class Entite : Carte, ICarte {
 		 * 
 		 * TODO: Implémenter également un drag and drop. 
 		 */
+
+        // Ce morceau de code sert à regarder si la souris n'est pas déjà par-dessus un élément de UI. 
+        // A verifier et à l'utiliser dans le cas où l'on en aurait besoin. 
+        //if (EventSystem.current.IsPointerOverGameObject()) {
+        //    return;
+        //}
 
         base.OnMouseDown(); 
 
