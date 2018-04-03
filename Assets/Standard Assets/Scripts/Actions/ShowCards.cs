@@ -52,12 +52,20 @@ public class ShowCards : MonoBehaviourAntinomia {
         for (int i = 0; i < _AllCardsGiven.Length; ++i) {
             // On crée d'abord toutes les cartes
             GameObject newCarte = Instantiate(CartePrefab);
-            newCarte.SetActive(true); 
-            // Ensuite on met leur position avec une demi carte entre chaque carte. 
+            newCarte.SetActive(true);
+            // Ensuite on met leur position avec une demi carte entre chaque carte.
+
+            string shortCode = _AllCardsGiven[i];
+            string Info = GetInfoCarte(shortCode); 
+
             newCarte.transform.SetParent(transform);
-            newCarte.GetComponent<CarteChooseShow>().shortCode = _AllCardsGiven[i];
-            newCarte.GetComponent<CarteChooseShow>().StringToDisplay = GetInfoCarte(_AllCardsGiven[i]); 
-            // newCarte.transform.localPosition = new Vector3 (-AllShortCodes.Count * widthPrefab * ecart / 2f + i * widthPrefab * ecart, 0f, 0f); 
+            newCarte.GetComponent<CarteChooseShow>().shortCode = shortCode;
+            newCarte.GetComponent<CarteChooseShow>().StringToDisplay = GetInfoCarte(shortCode);
+
+            // Pour bien montrer la carte au joueur, on y ajoute le script CardInfoChooseCard. 
+            newCarte.AddComponent<CardInfoShowCard>();
+            newCarte.GetComponent<CardInfoShowCard>().SetInfo(shortCode, GetInfoCarte(shortCode)); 
+
             AllCardsToShow.Add(newCarte);
         }
         for (int i = 0; i < AllCardsToShow.Count; ++i) {

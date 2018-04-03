@@ -525,7 +525,6 @@ public class Entite : Carte, ICarte {
             else if (!verrouillee) {
                 CheckCardOverlap();
                 // Il faut bien regarder que le carte ne soit pas verrouillée!
-                Debug.Log("On change la position"); 
                 ChangePosition(currentPhase);
                 clicked = false;
                 canGoBig = true;
@@ -538,7 +537,6 @@ public class Entite : Carte, ICarte {
 			 * Lors du premier clique: On sélectionne l'unité qui va attaquer, 
 			 * Lors du deuxième clique on sélectionne l'unité à attaquer. 
 			 */
-            Debug.Log("Ceci est une phase de combats");
             if (hasAttacked == 1) {
                 GameObject.Find("GameManager").SendMessage("DisplayMessage", "Cette carte ne peut pas/plus attaquer");
                 return;
@@ -693,9 +691,7 @@ public class Entite : Carte, ICarte {
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
         Sanctuaire = transform.parent.parent.parent.Find("Sanctuaire").Find("CartesSanctuaireJoueur").gameObject;
-
-        Debug.Log("POSITION");
-        Debug.Log(EntiteState);
+        
         float yMinChampBataille = ChampBataille.transform.position.y - ChampBataille.GetComponent<BoxCollider2D>().size.y / 2;
         float yMaxChampBataille = ChampBataille.transform.position.y + ChampBataille.GetComponent<BoxCollider2D>().size.y / 2;
 
@@ -736,7 +732,7 @@ public class Entite : Carte, ICarte {
                 break;
         }
         
-        CmdChangePosition(EntiteState, false);
+        ChangePosition(EntiteState, false);
     }
 
     /// <summary>
@@ -799,7 +795,7 @@ public class Entite : Carte, ICarte {
                                 else {
                                     gameObject.tag = "BoardSanctuaire";
                                     // Montrer x cartes à l'adversaire. 
-                                    GameObject.Find("GameManager").SendMessage("InvocationElementaireAir", x);
+                                    GameObject.Find("GameManager").GetComponent<GameManager>().InvocationElementaireAir(x);
                                 }
                                 break;
                             case Element.TERRE:
@@ -835,7 +831,7 @@ public class Entite : Carte, ICarte {
             Main.SendMessage("DeleteCard", gameObject);
             Sanctuaire.SendMessage("CmdCarteDeposee", gameObject);
             gameObject.tag = "BoardSanctuaire";
-            CmdChangePosition(State.SANCTUAIRE, defairePile);
+            ChangePosition(State.SANCTUAIRE, defairePile);
 
             // Il faut aussi vérifier si les autres cartes ont un effet à jouer
             // GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().CheckAllEffetsCartes(); 
@@ -846,6 +842,11 @@ public class Entite : Carte, ICarte {
         }
     }
 
+    /// <summary>
+    /// Déplacer une entité sur le champ de bataille. 
+    /// </summary>
+    /// <param name="currentPhase"></param>
+    /// <param name="defairePile"></param>
     public void MoveToChampBataille(Player.Phases currentPhase = Player.Phases.INITIATION, bool defairePile=false) {
         // Lorsqu'une carte est mise sur le board. 
         // Le state est changé par l'objet board, à changer ici? 
@@ -908,12 +909,25 @@ public class Entite : Carte, ICarte {
                 Main.SendMessage("DeleteCard", gameObject);
                 ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
                 gameObject.tag = "BoardSanctuaire";
-                CmdChangePosition(State.CHAMPBATAILLE, defairePile);
+                ChangePosition(State.CHAMPBATAILLE, defairePile);
             }
         } else {
             // TODO: Envoyer un message à l'utilisateur disant qu'il y a plus de 5 cartes sur le board. 
             GameObject.FindGameObjectWithTag("GameManager").SendMessage("DisplayMessage", "Deja 5 cartes sur le board");
         }
+    }
+
+    /// <summary>
+    /// Changer la position d'une carte. 
+    /// Fonction appelée avant l'envoi de l'information sur le réseau. 
+    /// </summary>
+    /// <param name="newCarteState"></param>
+    /// <param name="defairePile"></param>
+    void ChangePosition(State newCarteState, bool defairePile) {
+        if (EntiteState == newCarteState) {
+            return;
+        }
+        CmdChangePosition(newCarteState, defairePile); 
     }
 
     [Command(channel=0)]
@@ -1197,7 +1211,7 @@ public class Entite : Carte, ICarte {
             /*
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
 			 */
-            CmdChangePosition(EntiteState, false);
+            ChangePosition(EntiteState, false);
         } else {
             // Si on est pas sur le player local. 
             Debug.Log("N'est pas le local Player");
@@ -1230,7 +1244,7 @@ public class Entite : Carte, ICarte {
             /*
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
 			 */
-            CmdChangePosition(EntiteState, false);
+            ChangePosition(EntiteState, false);
         }
         else {
             // Si on est pas sur le player local. 
@@ -1611,7 +1625,7 @@ public class Entite : Carte, ICarte {
     /// </summary>
     public override void PlacerSanctuaire() {
         base.PlacerSanctuaire();
-        CmdChangePosition(State.SANCTUAIRE, true); 
+        ChangePosition(State.SANCTUAIRE, true); 
     }
 
     /// <summary>
@@ -1764,9 +1778,9 @@ public class Entite : Carte, ICarte {
     /// </summary>
     public void ChangerPosition() {
         if (entiteState == State.CHAMPBATAILLE) {
-            CmdChangePosition(State.SANCTUAIRE, true); 
+            ChangePosition(State.SANCTUAIRE, true); 
         } else if (entiteState == State.SANCTUAIRE) {
-            CmdChangePosition(State.CHAMPBATAILLE, true); 
+            ChangePosition(State.CHAMPBATAILLE, true); 
         } else {
             throw new UnusualBehaviourException("Cette carte devrait être dans le sanctuaire ou sur le champ de bataille"); 
         }
@@ -2231,7 +2245,7 @@ public class Entite : Carte, ICarte {
         if (hasAuthority) {
             // Si c'est notre carte on peut le faire directement
             // On veut que la carte fasses l'animation de début. 
-            CmdChangePosition(State.MAIN, true);
+            ChangePosition(State.MAIN, true);
         } else {
             // Sinon il faut appeler une methode du local Player
             FindLocalPlayer().GetComponent<Player>().CmdEnvoiMethodToServerCarteWithIntParameter(IDCardGame,

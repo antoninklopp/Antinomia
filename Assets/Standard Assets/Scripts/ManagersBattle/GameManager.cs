@@ -1095,7 +1095,7 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Invocation d'une carte élémentaire air. 
     /// </summary>
     /// <param name="cout"></param>
-	void InvocationElementaireAir(int cout){
+	public void InvocationElementaireAir(int cout){
 
 		// on trouve maintenant les cartes de la main du joueur. 
 		GameObject[] AllCardsHandAndDeck = GameObject.FindGameObjectsWithTag("Carte"); 
