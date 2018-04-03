@@ -1586,7 +1586,7 @@ public class Carte : NetworkBehaviourAntinomia {
     /// Coroutine pour gérer les effets lorsqu'une pile d'effets se defait. 
     /// </summary>
     /// <returns></returns>
-    public IEnumerator GererActionsCoroutine(List<Action> _actionsCarte, int numeroEffet, int effetListNumber, 
+    public virtual IEnumerator GererActionsCoroutine(List<Action> _actionsCarte, int numeroEffet, int effetListNumber, 
                                                 List<GameObject> Cibles=null) {
         // nombreEffets = _actionsCarte.Count;
         Debug.Log("On gère les actions");

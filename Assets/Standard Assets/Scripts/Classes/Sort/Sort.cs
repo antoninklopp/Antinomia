@@ -484,7 +484,7 @@ public class Sort : Carte, ICarte {
         // Le sort a été joué. 
         clicked = 0;
         transform.position = new Vector2(-10, -10);
-        Destroy(GetComponent<SpriteRenderer>()); 
+        Destroy(GetComponent<SpriteRenderer>());
     }
 
     /// <summary>
@@ -496,7 +496,7 @@ public class Sort : Carte, ICarte {
         yield return WaitForCardsChosen();
         GererActions(AllEffets[numeroEffet].AllActionsEffet, CibleDejaChoisie:true);
         // Detruire tout de suite ou attendre que ses effets disparaissent? 
-        DetruireCarte();
+        UpdateSortNewTurn(true); 
     }
 
     /// <summary>
@@ -579,6 +579,8 @@ public class Sort : Carte, ICarte {
     /// <param name="premiereFois">On appelera la fonction une première fois, juste pour voir
     /// si on peut détruire la carte tout de suite. </param>
     public void UpdateSortNewTurn(bool premiereFois=false) {
+
+        Debug.Log("On regarde les sorts à jouer"); 
 
         // Si peutEtreDetruit est à true à la fin, on détruit le sort
         bool peutEtreDetruit = true;
@@ -888,6 +890,22 @@ public class Sort : Carte, ICarte {
 
     public override bool IsSort() {
         return true; 
+    }
+
+    /// <summary>
+    /// <see cref="Carte.GererActionsCoroutine(List{Action}, int, int, List{GameObject})"/>
+    /// A la sortie d'une pile. 
+    /// </summary>
+    /// <param name="_actionsCarte"></param>
+    /// <param name="numeroEffet"></param>
+    /// <param name="effetListNumber"></param>
+    /// <param name="Cibles"></param>
+    /// <returns></returns>
+    public override IEnumerator GererActionsCoroutine(List<Action> _actionsCarte, int numeroEffet, int effetListNumber, List<GameObject> Cibles = null) {
+        yield return base.GererActionsCoroutine(_actionsCarte, numeroEffet, effetListNumber, Cibles);
+        transform.position = new Vector2(-10, -10);
+        Destroy(GetComponent<SpriteRenderer>());
+        UpdateSortNewTurn(true); 
     }
 
 }
