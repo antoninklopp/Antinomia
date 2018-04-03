@@ -94,7 +94,7 @@ public class Sanctuaire : MonoBehaviour {
 		ReordonnerCarte(); 
 
 		// Et on change le statut de la carte de main à board. 
-		NewCard.SendMessage("setState", "SANCTUAIRE"); 
+		// NewCard.SendMessage("setState", "SANCTUAIRE"); 
 		NewCard.SendMessage ("setClicked", false); 
 	}
 

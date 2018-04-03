@@ -360,9 +360,8 @@ public class GameManager : NetworkBehaviourAntinomia {
         }
 
         // Si d'autres effets sont en cours, on ne peut pas changer de phase. 
-        if (GameObject.Find("Pile") != null) {
+        if (!defairePile && GameObject.Find("Pile") != null) {
             DisplayMessage("Impossible de passer à une autre phase pour l'instant. ");
-            // NextPhase.SetActive(true); 
             return;
         }
 
@@ -370,7 +369,6 @@ public class GameManager : NetworkBehaviourAntinomia {
         if (!defairePile && Phase != Player.Phases.INITIATION) {
             Debug.Log("On demande un changement de phase"); 
             AjouterChangementDePhasePile();
-            // NextPhase.SetActive(false); 
         } else {
             GameObject PlayerObject = FindLocalPlayer();
 

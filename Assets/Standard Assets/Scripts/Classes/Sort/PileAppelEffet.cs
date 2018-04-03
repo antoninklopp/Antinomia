@@ -409,5 +409,20 @@ public class PileAppelEffet : NetworkBehaviourAntinomia {
 
         }
     }
+
+    /// <summary>
+    /// Renvoie le nombre d'effets présents dans la pile. 
+    /// A TESTER
+    /// </summary>
+    /// <returns></returns>
+    public int NombreEffetsPile() {
+        int nombre = 0;
+        foreach (GameObject g in pileEffets) {
+            if (g.GetComponent<EffetInPile>().numeroEffet != -4) {
+                nombre++; 
+            }
+        }
+        return nombre; 
+    }
     
 }

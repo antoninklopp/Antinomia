@@ -153,10 +153,9 @@ public class EventManager : MonoBehaviourAntinomia {
         Debug.Log(GameObject.FindGameObjectWithTag("Pile")); 
         // S'il y a des effets à jouer. 
         if (FindLocalPlayer().GetComponent<Player>().EffetPlayer == FindLocalPlayer().GetComponent<Player>().PlayerID
-                && GameObject.FindGameObjectWithTag("Pile") != null) {
+                && GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().NombreEffetsPile() != 0) {
             // On propose de défaire la pile.
             Debug.Log("On s'auto propose"); 
-            AntinomiaLog("On s'auto propose");
             yield return GameObject.Find("GameManager").GetComponent<GameManager>().ProposeToPauseGame(0, message: "Voulez réagir aux effets?");
             // Puis on remet l'effet à 0
             FindLocalPlayer().GetComponent<Player>().CmdOnEffetPlayer(0);

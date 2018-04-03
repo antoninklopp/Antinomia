@@ -260,8 +260,10 @@ public class Entite : Carte, ICarte {
         switch (newState) {
             case "MAIN":
                 EntiteState = State.MAIN;
+                GetComponent<ImageCardBattle>().setDosCarte(); 
                 break;
             case "BOARD":
+            case "CHAMPBATAILLE":
                 EntiteState = State.CHAMPBATAILLE;
                 // On remet la bonne image pour la carte, dans le cas où la carte était de dos.
                 GetComponent<ImageCardBattle>().setImage(shortCode);
@@ -339,6 +341,16 @@ public class Entite : Carte, ICarte {
 
         set {
             entiteState = value;
+            // On change aussi l'image de la carte. 
+            switch (entiteState) {
+                case State.MAIN:
+                    GetComponent<ImageCardBattle>().setDosCarte();
+                    break;
+                case State.CHAMPBATAILLE:
+                case State.SANCTUAIRE:
+                    GetComponent<ImageCardBattle>().setImage(shortCode);
+                    break;
+            }
         }
     }
 
@@ -923,7 +935,10 @@ public class Entite : Carte, ICarte {
     /// </summary>
     /// <param name="newCarteState"></param>
     /// <param name="defairePile"></param>
-    void ChangePosition(State newCarteState, bool defairePile) {
+    private void ChangePosition(State newCarteState, bool defairePile) {
+        Debug.Log("<color=purple>On passe ici</color>");
+        Debug.Log(newCarteState);
+        Debug.Log(EntiteState); 
         if (EntiteState == newCarteState) {
             return;
         }
@@ -1397,6 +1412,10 @@ public class Entite : Carte, ICarte {
         return GameObject.FindGameObjectsWithTag("BoardSanctuaire");
     }
 
+    /// <summary>
+    /// Checker s'il y a une carte astrale sur le terrain. 
+    /// </summary>
+    /// <returns></returns>
     bool cardAstraleOnChampBatailleOrSanctuaire() {
         /*
 		 * retourne true s'il y a une carte astrale sur le sanctuaire ou le champ de bataille

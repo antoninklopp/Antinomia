@@ -87,7 +87,7 @@ public class CartesBoard : NetworkBehaviourAntinomia {
 
         // Et on change le statut de la carte de main à board. 
         if (NewCard.GetComponent<CarteType>().thisCarteType == CarteType.Type.ENTITE) {
-            NewCard.SendMessage("setState", "BOARD");
+            // NewCard.SendMessage("setState", "BOARD");
             NewCard.SendMessage("setClicked", false);
         }
 	}
