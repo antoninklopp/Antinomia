@@ -299,17 +299,33 @@ public class Player : NetworkBehaviourAntinomia	 {
 
     /// <summary>
     /// Piocher une nouvelle carte. 
+    /// Fonction appelée pour la pioche d'une seule carte. 
     /// </summary>
     public void PiocherNouvelleCarte(){
 		if (!isLocalPlayer) {
 			return;
 		}
-
-		StartCoroutine (PiocherCarteRoutine ()); 
+        StartCoroutine(PiocherUneCarte());
 	}
 
     /// <summary>
+    /// Piocher une seule carte, lors de la phase de pioche. 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator PiocherUneCarte() {
+
+        // On crée une nouvelle liste de carte à vérifier. 
+        CartesPiochees = new ListCarteVerify();
+
+        yield return PiocherCarteRoutine();
+
+        // On check que les cartes soient OK. 
+        yield return Repioche(); 
+    }
+
+    /// <summary>
     /// Coroutine pour piocher les cartes.
+    /// Coroutine appelée directement pour la pioche multiple
     /// </summary>
     /// <returns></returns>
 	public IEnumerator PiocherCarteRoutine(){

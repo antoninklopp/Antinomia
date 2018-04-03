@@ -369,6 +369,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         if (!defairePile && Phase != Player.Phases.INITIATION) {
             Debug.Log("On demande un changement de phase"); 
             AjouterChangementDePhasePile();
+            // NextPhase.SetActive(false); 
         } else {
             GameObject PlayerObject = FindLocalPlayer();
 
@@ -461,7 +462,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 		GameObject[] Players = GameObject.FindGameObjectsWithTag ("Player"); 
 		for (int i = 0; i < Players.Length; ++i) {
 			if (Players [i].GetComponent<Player> ().PlayerID == Tour) {
-				Players [i].SendMessage ("PiocherNouvelleCarte");
+                Players[i].GetComponent<Player>().PiocherNouvelleCarte(); 
 				return; 
 			}
 		}

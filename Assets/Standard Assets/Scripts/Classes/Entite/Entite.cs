@@ -2281,8 +2281,8 @@ public class Entite : Carte, ICarte {
     }
 
     public override bool GererEffets(Player.Phases _currentPhase = Player.Phases.INITIATION, bool debut = false,
-    bool nouveauTour = false, GameObject Cible = null, int numeroListEffet = 0, int deposeCarte = 0, bool changementDomination = false,
-    bool jouerDirect = false, bool ProposerDefairePile=true) {
+        bool nouveauTour = false, GameObject Cible = null, int numeroListEffet = 0, int deposeCarte = 0, bool changementDomination = false,
+        bool jouerDirect = false, bool ProposerDefairePile=true) {
         switch (numeroListEffet) {
             // Effets normaux
             case 0:
