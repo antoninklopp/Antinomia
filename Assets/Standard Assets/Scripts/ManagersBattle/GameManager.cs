@@ -504,7 +504,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 			    // Après le calcul on passe directement à la phase suivante. 
 			    Debug.Log("PHASE d'INITIATION");
                 //GoToNextPhase(); 
-                updateAllSorts(); 
+                UpdateAllSorts(); 
 			    break;
 		    case Player.Phases.PIOCHE:
 			    PhaseToString ="Pioche";
@@ -1122,13 +1122,19 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Mettre à jour tous les sorts. 
     /// </summary>
-    void updateAllSorts() {
+    private void UpdateAllSorts() {
         /*
          * A chaque tour on update les sorts qui sont en cours. 
          */ 
         GameObject[] SortsJoues = GameObject.FindGameObjectsWithTag("SortJoue");
         for (int i = 0; i < SortsJoues.Length; ++i) {
-            SortsJoues[i].SendMessage("updateSortNewTurn"); 
+            try {
+                SortsJoues[i].GetComponent<Sort>().UpdateSortNewTurn();
+            } catch (MissingReferenceException e){
+                Debug.LogError("Erreur recupérée " + e);
+            } catch (NullReferenceException e) {
+                Debug.LogError("Erreur recupérée "+ e);
+            }
         }
     }
 

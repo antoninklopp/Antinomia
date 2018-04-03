@@ -1327,7 +1327,7 @@ public class Entite : Carte, ICarte {
     /// Fonction serveur
     /// </summary>
     /// <param name="montrer"></param>
-    [Command]
+    [Command(channel=0)]
     void CmdMontrerVerouillage(bool montrer) {
         RpcMontrerVerouillage(montrer); 
     }
@@ -1337,7 +1337,7 @@ public class Entite : Carte, ICarte {
     /// Fonction client. 
     /// </summary>
     /// <param name="montrer"></param>
-    [ClientRpc]
+    [ClientRpc(channel = 0)]
     void RpcMontrerVerouillage(bool montrer) {
         if (montrer) {
             GameObject Chaines = Instantiate(Resources.Load("Prefabs/Chaines") as GameObject);

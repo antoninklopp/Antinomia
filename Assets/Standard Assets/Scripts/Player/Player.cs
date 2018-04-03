@@ -237,7 +237,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Bannir des cartes face cachée
     /// </summary>
     /// <param name="nombre"></param>
-    [Command]
+    [Command(channel = 0)]
     public void CmdBannirFaceCachee(int nombre) {
         RpcBannirFaceCachee(nombre); 
     }
@@ -247,7 +247,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// Bannir une carte face cachee. 
     /// </summary>
     /// <param name="nombre"></param>
-    [ClientRpc]
+    [ClientRpc(channel = 0)]
     public void RpcBannirFaceCachee(int nombre) {
         for (int i = 0; i < nombre; i++) {
             transform.Find("Ban").Find("CartesBan").gameObject.GetComponent<Ban>().AjouterUneCarteBannieFaceCachee();
@@ -1456,7 +1456,11 @@ public class Player : NetworkBehaviourAntinomia	 {
         CmdSendMessageToPlayer(code);
     }
 
-    [Command]
+    /// <summary>
+    /// Envoyer un message à l'autre joueur
+    /// </summary>
+    /// <param name="code"></param>
+    [Command] // Inutile de mettre sur le channel 0, peu grave si l'information n'arrive pas. 
     public void CmdSendMessageToPlayer(int code) {
         RpcSendMessageToPlayer(code); 
     }

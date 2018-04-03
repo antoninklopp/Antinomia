@@ -494,7 +494,9 @@ public class Sort : Carte, ICarte {
     /// <returns></returns>
     private IEnumerator JouerSortPlusieursCartes(int numeroEffet) {
         yield return WaitForCardsChosen();
-        GererActions(AllEffets[numeroEffet].AllActionsEffet, CibleDejaChoisie:true); 
+        GererActions(AllEffets[numeroEffet].AllActionsEffet, CibleDejaChoisie:true);
+        // Detruire tout de suite ou attendre que ses effets disparaissent? 
+        DetruireCarte();
     }
 
     /// <summary>
@@ -525,6 +527,11 @@ public class Sort : Carte, ICarte {
 
     }
 
+    /// <summary>
+    /// Renvoie vrai si le sort a un effet global. 
+    /// </summary>
+    /// <param name="numeroEffet"></param>
+    /// <returns></returns>
     bool HasEffetGlobal(int numeroEffet) {
         foreach (Condition cond in AllEffets[numeroEffet].AllConditionsEffet) {
             if (cond.ConditionCondition == Condition.ConditionEnum.EFFET_GLOBAL) {
@@ -566,40 +573,42 @@ public class Sort : Carte, ICarte {
     /// Comme un sort peut durer plusieurs tours, 
     /// on updatera le sort à chaque tour afin de rendre par exemple un element d'origine à sa carte si celui-ci a été modifié. 
     /// A appeler à chaque début de tour.
+    /// 
+    /// Si le sort peut etre détruit, on le détruit
     /// </summary>
-    void UpdateSortNewTurn() {
-        /* 
-         */ 
-         if (AllEffets.Count == 0) {
-            // Si le sort n'effectue plus d'effets on le détruit. 
-            CmdDetruireCarte(); 
-         }
+    /// <param name="premiereFois">On appelera la fonction une première fois, juste pour voir
+    /// si on peut détruire la carte tout de suite. </param>
+    public void UpdateSortNewTurn(bool premiereFois=false) {
 
-         for (int i = 0; i < AllEffets.Count; ++i) {
-            if (AllEffets[i].AllActionsEffet[0].isEffetWithTimer()) {
-                if (AllEffets[i].AllActionsEffet[0].intAction == 1) {
-                    // Il faut donc remettre la carte dans un état normal. 
-                    switch (AllEffets[i].AllActionsEffet[0].ActionAction) {
-                        case Action.ActionEnum.NATURE_AIR:
-                        case Action.ActionEnum.NATURE_EAU:
-                        case Action.ActionEnum.NATURE_TERRE:
-                        case Action.ActionEnum.NATURE_FEU:
-                            CarteCiblee.SendMessage("resetCarteElement");
-                            break; 
+        // Si peutEtreDetruit est à true à la fin, on détruit le sort
+        bool peutEtreDetruit = true;
+
+        // Si duraitPlusUnTour est à true, c'est donc qu'il faut annuler les effets de la carte
+        // car ils ne sont que temporaires. 
+        bool duraitPlusUnTour = false; 
+
+        foreach (Effet e in AllEffets) {
+            foreach (Action a in e.AllActionsEffet) {
+                if (a.nombreDeTours > 0) {
+                    if (!premiereFois) {
+                        // Lors de la première fois, on enlève pas de tour 
+                        a.nombreDeTours--;
                     }
-                    // Cet effet du sort est fini
-                    AllEffets.RemoveAt(i);
-                } else {
-                    AllEffets[i].AllActionsEffet[0].intAction = AllEffets[i].AllActionsEffet[0].intAction - 1; 
+                    peutEtreDetruit = false;
+                    duraitPlusUnTour = true; 
                 }
-            } else {
-                AllEffets.RemoveAt(i); 
             }
-         }
+        }
+
+        if (duraitPlusUnTour) {
+            AnnulerEffets(AllEffets); 
+        }
+
+        if (peutEtreDetruit) {
+            DetruireCarte(); 
+        }
 
     }
-
-
 
     // *------- METHODES ANNEXES
 
@@ -734,6 +743,9 @@ public class Sort : Carte, ICarte {
         clicked = 0; 
     }
 
+    /// <summary>
+    /// Detruire le sort 
+    /// </summary>
     public override void DetruireCarte() {
         Debug.Log("On detruit le sort"); 
         CmdDetruireCarte(); 
@@ -754,6 +766,9 @@ public class Sort : Carte, ICarte {
     /// </summary>
     [ClientRpc(channel=0)]
     void RpcDetruireCarte() {
+
+        Debug.Log("On détruit le sort"); 
+
         clicked = 0; 
 
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
