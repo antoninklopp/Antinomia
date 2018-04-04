@@ -344,7 +344,13 @@ public class Entite : Carte, ICarte {
             // On change aussi l'image de la carte. 
             switch (entiteState) {
                 case State.MAIN:
-                    GetComponent<ImageCardBattle>().setDosCarte();
+                    if (isFromLocalPlayer) {
+                        // Si c'est une carte du joueur, on lui montre la carte dans la main. 
+                        GetComponent<ImageCardBattle>().setImage(shortCode);
+                    } else {
+                        // Sinon on montre la carte de dos. 
+                        GetComponent<ImageCardBattle>().setDosCarte();
+                    }
                     break;
                 case State.CHAMPBATAILLE:
                 case State.SANCTUAIRE:
@@ -479,7 +485,7 @@ public class Entite : Carte, ICarte {
             } else {
                 throw new UnusualBehaviourException("Comportement inattendu, doit être Assistance ou Sort"); 
             }
-            Debug.Log("Le sort a été joué.");
+            Debug.Log("Le sort / assistance a été joué.");
             return;
         }
 
@@ -862,7 +868,7 @@ public class Entite : Carte, ICarte {
     public void MoveToChampBataille(Player.Phases currentPhase = Player.Phases.INITIATION, bool defairePile=false) {
         // Lorsqu'une carte est mise sur le board. 
         // Le state est changé par l'objet board, à changer ici? 
-        if (ChampBataille.GetComponent<CartesBoard>().getNumberCardsChampBataille() < 5) {
+        if (ChampBataille.GetComponent<CartesBoard>().GetNumberCardsChampBataille() < 5) {
             // On ne peut invoquer des entités que lors des phases principales
             // Lorsqu'on défait la pile on ne s'occupe pas des phases parce qu'elles ont été traitées lors de la création
             // de "l'effet" dans la pile. 
@@ -1215,18 +1221,19 @@ public class Entite : Carte, ICarte {
         AntinomiaLog(Cimetiere);
         AntinomiaLog("Carte detruite" + IDCardGame.ToString()); 
 
-        setState("CIMETIERE");
-        Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
-        Sanctuaire.SendMessage("ReordonnerCarte");
-        ChampBataille.SendMessage("CmdReordonnerCarte");
-        Main.SendMessage("ReordonnerCarte");
+        // Revoir l'implémentation, ceci est fait dans ChangePosition(State, bool) normalement.
+        // setState("CIMETIERE");
+        //Cimetiere.SendMessage("CmdCarteDeposee", gameObject);
+        //Sanctuaire.SendMessage("ReordonnerCarte");
+        //ChampBataille.SendMessage("CmdReordonnerCarte");
+        //Main.SendMessage("ReordonnerCarte");
 
         AntinomiaLog(transform.parent.parent.parent.gameObject);
         if (transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer) {
             /*
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
 			 */
-            ChangePosition(EntiteState, false);
+            ChangePosition(State.CIMETIERE, false);
         } else {
             // Si on est pas sur le player local. 
             Debug.Log("N'est pas le local Player");
@@ -1259,7 +1266,7 @@ public class Entite : Carte, ICarte {
             /*
 			 * Si on est pas dans le cas d'un player local, on ne peut pas envoyer de command. 
 			 */
-            ChangePosition(EntiteState, false);
+            ChangePosition(State.BAN, false);
         }
         else {
             // Si on est pas sur le player local. 

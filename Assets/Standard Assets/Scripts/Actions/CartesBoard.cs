@@ -96,7 +96,7 @@ public class CartesBoard : NetworkBehaviourAntinomia {
     /// Récupérer le nombre de cartes sur le champ de bataille.
     /// </summary>
     /// <returns>Nombre de cartes sur le champ de bataille.</returns>
-	public int getNumberCardsChampBataille(){
+	public int GetNumberCardsChampBataille(){
 		/*
 		 * Récupérer le nombre de cartes actuellement présentes sur le board
 		 */ 
@@ -154,8 +154,8 @@ public class CartesBoard : NetworkBehaviourAntinomia {
                     }
                     break;
                 case CarteType.Type.ASSISTANCE:
-                    if (CartesChampBataille[i].GetComponent<Assistance>().assistanceState != Assistance.State.JOUEE
-                        && CartesChampBataille[i].GetComponent<Assistance>().assistanceState != Assistance.State.ASSOCIE_A_CARTE) {
+                    if (CartesChampBataille[i].GetComponent<Assistance>().AssistanceState != Assistance.State.JOUEE
+                        && CartesChampBataille[i].GetComponent<Assistance>().AssistanceState != Assistance.State.ASSOCIE_A_CARTE) {
                         return false; 
                     }
                     break;

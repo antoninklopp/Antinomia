@@ -33,7 +33,7 @@ public class Assistance : Carte, ICarte {
     /// <summary>
     /// Etat courant de l'assistance. 
     /// </summary>
-    public State assistanceState = State.DECK;
+    private State assistanceState = State.DECK;
 
     /// <summary>
     /// Carte à laquelle l'assistance est liée. (string)
@@ -63,7 +63,50 @@ public class Assistance : Carte, ICarte {
     /// <summary>
     /// Carte Ciblee par un effet de l'assistance.
     /// </summary>
-    public GameObject CarteCiblee; 
+    public GameObject CarteCiblee;
+
+    public State AssistanceState {
+        get {
+            return assistanceState;
+        }
+
+        set {
+            assistanceState = value;
+
+            // On change le sprite de la carte selon son état
+            switch (assistanceState) {
+                case State.ASSOCIE_A_CARTE:
+                case State.JOUEE:
+                    if (!GetComponent<SpriteRenderer>().enabled) {
+                        // On met à false le sprite renderer de la carte. 
+                        GetComponent<SpriteRenderer>().enabled = true;
+                        GetComponent<BoxCollider2D>().enabled = true;
+                        GetComponent<ImageCardBattle>().setImage(shortCode);
+                    }
+                    break;
+                case State.MAIN:
+                    if (!GetComponent<SpriteRenderer>().enabled && isFromLocalPlayer) {
+                        // On met à false le sprite renderer de la carte. 
+                        GetComponent<SpriteRenderer>().enabled = true;
+                        GetComponent<BoxCollider2D>().enabled = true;
+                        GetComponent<ImageCardBattle>().setImage(shortCode);
+                    } else if (!isFromLocalPlayer) {
+                        // Si la carte appartient à l'adversaire et est dans sa main, 
+                        // il ne faut pas pouvoir la voir. 
+                        GetComponent<ImageCardBattle>().setDosCarte();
+                    }
+                    break;
+                case State.CIMETIERE:
+                    if (GetComponent<SpriteRenderer>().enabled) {
+                        // On met à false le sprite renderer de la carte. 
+                        GetComponent<SpriteRenderer>().enabled = false;
+                        GetComponent<BoxCollider2D>().enabled = false; 
+                    }
+                    break; 
+
+            }
+        }
+    }
 
     /// <summary>
     /// Initialisation de la classe Assistance. 
@@ -105,7 +148,7 @@ public class Assistance : Carte, ICarte {
          */
         base.OnMouseDown();
 
-        if (!isFromLocalPlayer && assistanceState == State.MAIN) {
+        if (!isFromLocalPlayer && AssistanceState == State.MAIN) {
             return;
         }
 
@@ -126,7 +169,7 @@ public class Assistance : Carte, ICarte {
     /// </summary>
     public void OnMouseUp() {
 
-        if (!isFromLocalPlayer && assistanceState == State.MAIN) {
+        if (!isFromLocalPlayer && AssistanceState == State.MAIN) {
             return;
         }
 
@@ -179,7 +222,7 @@ public class Assistance : Carte, ICarte {
     /// </summary>
     /// <param name="drag">la carte est-elle drag? </param>
     public void CliqueSimpleCarte(bool drag = false) {
-        if (assistanceState == State.CIMETIERE) {
+        if (AssistanceState == State.CIMETIERE) {
             return;
         }
 
@@ -205,10 +248,10 @@ public class Assistance : Carte, ICarte {
         }
 
         if (clicked != 0 && ((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PREPARATION &&
-                    (assistanceState == State.JOUEE))
+                    (AssistanceState == State.JOUEE))
                     || ((GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE1 ||
                     GameObject.Find("GameManager").GetComponent<GameManager>().Phase == Player.Phases.PRINCIPALE2) &&
-                    (assistanceState == State.MAIN || assistanceState == State.JOUEE || assistanceState == State.ASSOCIE_A_CARTE)))) {
+                    (AssistanceState == State.MAIN || AssistanceState == State.JOUEE || AssistanceState == State.ASSOCIE_A_CARTE)))) {
             clicked = 1;
             positionBeforeDragging = new Vector3(transform.position.x,
                                                  transform.position.y,
@@ -231,7 +274,7 @@ public class Assistance : Carte, ICarte {
     public override void CreateBigCard(string messageToDisplay = "") {
         base.CreateBigCard("Assistance " + "\n" + 
             Name + "\n");
-        BigCard.GetComponent<Assistance>().assistanceState = State.BIGCARD;
+        BigCard.GetComponent<Assistance>().AssistanceState = State.BIGCARD;
     }
 
     /// <summary>
@@ -298,6 +341,10 @@ public class Assistance : Carte, ICarte {
     void JouerAssistance() {
         if (!dragging) {
             if (clicked == 1) {
+                if (!CheckIfDeposeAssistanceOK()) {
+                    AssistanceRetourMain(); 
+                    return; 
+                }
                 // On change le sprite de la carte en une cible par exemple pour pouvoir target une autre carte,
                 GetComponent<BoxCollider2D>().enabled = false;
                 // Target du sort. 
@@ -352,36 +399,59 @@ public class Assistance : Carte, ICarte {
          */
 
         // ApplyEffectOnCarte(CarteCibleeRayCast.transform.gameObject);
+
+        // On vérfie tout d'abord que la carte soit une entité sur le champ de bataille. 
+        // Seule une carte sur le champ de bataille peut etre sacrifiée pour invoquer une assistance
+
+        Debug.Log("On invoque une assistance ici");
+
+        if (!carteAffectee.GetComponent<Carte>().IsEntite()) {
+            AssistanceRetourMain();
+            DisplayMessage("Sacrifice => Entité");
+            return;
+        }
+
+        if (carteAffectee.GetComponent<Entite>().EntiteState != Entite.State.CHAMPBATAILLE) {
+            AssistanceRetourMain();
+            DisplayMessage("Sacrifice => Champ de Bataille.");
+            return;
+        }
+
+
         CarteCiblee = carteAffectee;
         gameObject.tag = "Assistance";
         // Un choix de sort n'est plus en cours. 
         GameObject.Find("GameManager").GetComponent<GameManager>().SortEnCours = null;
 
+        switch (AssistanceState) {
+            case State.MAIN:
+                MettreEffetDansLaPile(new List<GameObject>(), -2);
 
-        if (assistanceState == State.MAIN) {
-            MettreEffetDansLaPile(new List<GameObject>(), -2);
+                // Dans le cas où la carte est encore dans la main. 
+                // CmdPoserAssistance();
 
-            // Dans le cas où la carte est encore dans la main. 
-            // CmdPoserAssistance();
-            
-            Debug.Log("Detruire " + carteAffectee.GetComponent<Carte>().Name);
-            carteAffectee.SendMessage("DetruireCarte");
-        }
-        else if (assistanceState == State.JOUEE) {
-            if (carteLieeID == 0) {
-                LierAssistance(carteAffectee);
-            } else {
-                DisplayMessage("Impossible cette carte est déjà liée à une entité. "); 
-            }
-        }
-        else if (assistanceState == State.ASSOCIE_A_CARTE){
-            Debug.Log("Delier1"); 
-            if(carteLieeID == carteAffectee.GetComponent<Entite>().IDCardGame) {
-                DelierAssistance(carteAffectee);
-            }
-            else {
-                DisplayMessage("Cette assistance est déjà liée à une entité");
-            }
+                Debug.Log("Detruire " + carteAffectee.GetComponent<Carte>().Name);
+                carteAffectee.GetComponent<Entite>().DetruireCarte();
+                break;
+            case State.JOUEE:
+                if (carteLieeID == 0) {
+                    LierAssistance(carteAffectee);
+                } else {
+                    DisplayMessage("Impossible cette carte est déjà liée à une entité. ");
+                }
+                break;
+            case State.ASSOCIE_A_CARTE:
+                Debug.Log("Delier1");
+                if (carteLieeID == carteAffectee.GetComponent<Entite>().IDCardGame) {
+                    DelierAssistance(carteAffectee);
+                }
+                else {
+                    DisplayMessage("Cette assistance est déjà liée à une entité");
+                }
+                    break;
+            default:
+                Debug.LogError("Comportement inattendu lors de la dépose d'une assistance"); 
+                break; 
         }
         
 
@@ -389,6 +459,16 @@ public class Assistance : Carte, ICarte {
         GetComponent<BoxCollider2D>().enabled = true; 
 
         clicked = 0;
+    }
+
+    /// <summary>
+    ///  Si on a pas pu poser l'assistance, on la fait retourner dans la main. 
+    ///  Appeler lors d'un mouvement impossible du joueur
+    /// </summary>
+    private void AssistanceRetourMain() {
+        clicked = 0; 
+        Main.SendMessage("ReordonnerCarte");
+        AssistanceState = State.MAIN; 
     }
 
 
@@ -449,7 +529,7 @@ public class Assistance : Carte, ICarte {
     void RpcPoserAssistance() {
         // On pose l'assistance. 
         Debug.Log("On pose l'assistance");
-        assistanceState = State.JOUEE;
+        AssistanceState = State.JOUEE;
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
         Main = transform.parent.parent.parent.Find("MainJoueur").Find("CartesMainJoueur").gameObject;
@@ -478,7 +558,7 @@ public class Assistance : Carte, ICarte {
     /// <param name="carteAffectee">L'entité à laquelle cette assistance est déliée</param>
     [ClientRpc(channel=0)]
     void RpcDelierAssistance(GameObject carteAffectee) {
-        assistanceState = State.JOUEE;
+        AssistanceState = State.JOUEE;
         ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
 
         Destroy(carteAffectee.GetComponent<EntiteAssocieeAssistance>());
@@ -511,7 +591,7 @@ public class Assistance : Carte, ICarte {
     [ClientRpc(channel=0)]
     void RpcLierAssistance(GameObject carteAffectee) {
         
-        assistanceState = State.ASSOCIE_A_CARTE;
+        AssistanceState = State.ASSOCIE_A_CARTE;
         ChampBataille = transform.parent.parent.parent.Find("ChampBatailleJoueur").Find("CartesChampBatailleJoueur").gameObject;
         ChampBataille.SendMessage("CmdCarteDeposee", gameObject);
         Main.SendMessage("ReordonnerCarte");
@@ -565,7 +645,7 @@ public class Assistance : Carte, ICarte {
         // Ici il faut attendre les infos, et pas attendre un temps fini. 
         yield return new WaitForSeconds(0.1f);
 
-        if (assistanceState != State.MAIN) {
+        if (AssistanceState != State.MAIN) {
             Debug.Log("<color=purple> Probleme ici, la carte aurait avoir le State Main</color>");
             // yield break; 
         }
@@ -617,7 +697,7 @@ public class Assistance : Carte, ICarte {
             yield break; 
         }
 
-        if (isFromLocalPlayer && assistanceState == State.MAIN) {
+        if (isFromLocalPlayer && AssistanceState == State.MAIN) {
             // On informe que la carte a bien été piochée.
             if (!FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID)) {
                 CmdDestroyDirect(); 
@@ -646,7 +726,7 @@ public class Assistance : Carte, ICarte {
         shortCode = _shortCode;
         Puissance = _Puissance;
         AllEffetsString = _EffetString;
-        assistanceState = State.MAIN;
+        AssistanceState = State.MAIN;
         stringToEffetString(_EffetsToDisplay);
 
         stringToEffetList(_EffetString);
@@ -698,7 +778,7 @@ public class Assistance : Carte, ICarte {
         Sanctuaire.SendMessage("ReordonnerCarte");
         ChampBataille.SendMessage("CmdReordonnerCarte");
 
-        assistanceState = State.CIMETIERE; 
+        AssistanceState = State.CIMETIERE; 
     }
 
     /// <summary>
@@ -731,7 +811,7 @@ public class Assistance : Carte, ICarte {
     }
 
     public override bool isCarteInMain() {
-        if (assistanceState == State.MAIN) {
+        if (AssistanceState == State.MAIN) {
             return true; 
         } else {
             return false;
@@ -739,13 +819,13 @@ public class Assistance : Carte, ICarte {
     }
 
     public Assistance.State getState() {
-        return assistanceState; 
+        return AssistanceState; 
     }
 
     protected override void InformationsSurLaCarte() {
 
         isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
-        if (!isFromLocalPlayer && assistanceState == State.MAIN) {
+        if (!isFromLocalPlayer && AssistanceState == State.MAIN) {
             return; 
         }
         base.InformationsSurLaCarte();
@@ -753,6 +833,27 @@ public class Assistance : Carte, ICarte {
 
     public override bool IsAssistance() {
         return true; 
+    }
+
+    /// <summary>
+    /// On vérifie s'il est possible de déposer une assistance sur le board
+    /// </summary>
+    /// <returns></returns>
+    private bool CheckIfDeposeAssistanceOK() {
+        // Si il n'y a pas de cartes on ne peut pas déposer d'assistance. 
+        int nombreEntites = 0; 
+        foreach (GameObject g in 
+            FindLocalPlayer().GetComponent<Player>().GetChampBatailleJoueur().GetComponent<CartesBoard>().getCartesChampBataille()) {
+            // On a trouvé une entité, il y en a donc plus que zéro. 
+            // L'assistance peut donc être invoquée
+            // On sort de la boucle. 
+            if (g.GetComponent<Carte>().IsEntite()) {
+                nombreEntites += 1;
+                break; 
+            }
+        }
+
+        return (nombreEntites != 0); 
     }
 
 }

@@ -590,7 +590,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         for (int i = 0; i < AllAssistances.Length; ++i) {
             try {
                 if (AllAssistances[i].GetComponent<Assistance>() != null && AllAssistances[i].GetComponent<Assistance>().isFromLocalPlayer &&
-                    AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.JOUEE) {
+                    AllAssistances[i].GetComponent<Assistance>().AssistanceState == Assistance.State.JOUEE) {
                     AllAssistances[i].SendMessage("UpdateNewPhase", currentPhase);
                 }
             } catch (NullReferenceException e) {
@@ -1939,7 +1939,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         for (int i = 0; i < AllAssistances.Length; ++i) {
             try {
                 if (AllAssistances[i].GetComponent<Assistance>().isFromLocalPlayer &&
-                    AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.JOUEE) {
+                    AllAssistances[i].GetComponent<Assistance>().AssistanceState == Assistance.State.JOUEE) {
                     AllAssistances[i].GetComponent<Assistance>().GererEffetsPonctuel(Phase, changementDomination: changementDomination);
                 }
             }

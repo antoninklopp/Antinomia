@@ -1370,7 +1370,7 @@ public class Player : NetworkBehaviourAntinomia	 {
     /// <returns></returns>
     public int getNombreDeCartes() {
         int nombre = 0;
-        nombre += GetChampBatailleJoueur().GetComponent<CartesBoard>().getNumberCardsChampBataille();
+        nombre += GetChampBatailleJoueur().GetComponent<CartesBoard>().GetNumberCardsChampBataille();
         nombre += GetSanctuaireJoueur().GetComponent<Sanctuaire>().getNumberCardsSanctuaire(); 
         return nombre; 
     }

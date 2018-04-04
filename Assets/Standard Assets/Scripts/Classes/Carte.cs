@@ -1890,7 +1890,7 @@ public class Carte : NetworkBehaviourAntinomia {
                 continue; 
             }
             if (AllAssistances[i].GetComponent<Carte>().isFromLocalPlayer &&
-                (AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.ASSOCIE_A_CARTE)) {
+                (AllAssistances[i].GetComponent<Assistance>().AssistanceState == Assistance.State.ASSOCIE_A_CARTE)) {
                 CartesLocal.Add(AllAssistances[i]);
             }
         }
@@ -1920,7 +1920,7 @@ public class Carte : NetworkBehaviourAntinomia {
                 continue; 
             }
             if (!AllAssistances[i].GetComponent<Carte>().isFromLocalPlayer &&
-                (AllAssistances[i].GetComponent<Assistance>().assistanceState == Assistance.State.ASSOCIE_A_CARTE)) {
+                (AllAssistances[i].GetComponent<Assistance>().AssistanceState == Assistance.State.ASSOCIE_A_CARTE)) {
                 CartesLocal.Add(AllAssistances[i]);
             }
         }

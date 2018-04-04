@@ -153,6 +153,7 @@ public class EventManager : MonoBehaviourAntinomia {
         Debug.Log(GameObject.FindGameObjectWithTag("Pile")); 
         // S'il y a des effets à jouer. 
         if (FindLocalPlayer().GetComponent<Player>().EffetPlayer == FindLocalPlayer().GetComponent<Player>().PlayerID
+                && GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>() != null
                 && GameObject.FindGameObjectWithTag("Pile").GetComponent<PileAppelEffet>().NombreEffetsPile() != 0) {
             // On propose de défaire la pile.
             Debug.Log("On s'auto propose"); 

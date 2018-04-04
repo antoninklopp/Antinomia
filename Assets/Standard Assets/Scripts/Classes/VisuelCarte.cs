@@ -58,6 +58,14 @@ public class VisuelCarte : MonoBehaviour{
         // Mise en place du texte de la carte. 
         // A afficher en jeu? (si trop de texte). 
         TexteCarte.GetComponent<TextMesh>().text = GetComponent<Carte>().GetInfoCarte();
+
+
+        // On fait des vérifications dans l'éditeur. 
+#if (UNITY_EDITOR)
+        if (!CheckTailleCarte()) {
+            Debug.LogError("Probleme avec le format de la carte"); 
+        }
+#endif
     }
 
     /// <summary>
@@ -111,6 +119,17 @@ public class VisuelCarte : MonoBehaviour{
 
         Debug.LogError("On ne devrait pas arriver ici normalement. "); 
         return Color.white;
+    }
+
+
+    /// <summary>
+    /// A IMPLEMENTER.
+    /// 
+    /// Dans l'editor il faudra bien checker que toutes les cartes aient le bon format. 
+    /// </summary>
+    /// <returns></returns>
+    public bool CheckTailleCarte() {
+        return true; 
     }
 
 }
