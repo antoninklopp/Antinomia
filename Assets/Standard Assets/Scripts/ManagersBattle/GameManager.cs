@@ -1031,25 +1031,49 @@ public class GameManager : NetworkBehaviourAntinomia {
 		if (FindLocalPlayer ().GetComponent<Player> ().isServer) {
 			// Si le joueur local est le server. 
 			if (IDJoueur == 1) {
-				NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString ();
-                NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.
-                    GetComponent<Slider>().value = (float)AKA/AKARemanent;
+                ChangerAKAJoueurUI(AKA, true); 
             } else {
-				NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString ();
-                NomJoueur2.transform.Find("AKAJoueur2").Find("AKASliderJoueur2").gameObject.
-                    GetComponent<Slider>().value = (float)AKA / AKARemanent;
+                ChangerAKAJoueurUI(AKA, false);
             }
 		} else {
 			if (IDJoueur == 2) {
-				NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString ();
-                NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.
-                    GetComponent<Slider>().value = (float)AKA / AKARemanent;
+                ChangerAKAJoueurUI(AKA, true);
             } else {
-				NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA:" + AKA.ToString ();
-                NomJoueur2.transform.Find("AKAJoueur2").Find("AKASliderJoueur2").gameObject.
-                    GetComponent<Slider>().value = (float)AKA / AKARemanent;
+                ChangerAKAJoueurUI(AKA, false);
             }
 		}
+    }
+
+    /// <summary>
+    /// Changer l'AKA d'un des joueurs
+    /// </summary>
+    /// <param name="newAKA"></param>
+    private void ChangerAKAJoueurUI(int newAKA, bool local) {
+
+        // On change le Nomjoueur 1 si local est à true, 
+        // on change NomJoueur2 sinon. 
+        GameObject NomJoueur = local ? NomJoueur1 : NomJoueur2; 
+
+        // On change la version textuelle.
+        NomJoueur.transform.Find("AKAJoueur1").gameObject.GetComponent<Text>().text = "AKA:" + AKA.ToString() + 
+            "/" + AKARemanent.ToString();
+        // On change la version slider. 
+
+#if false
+        // On garde ce bout de code mort pour une bonne raison. 
+        // Si on a besoin d'améliorer les performances, on enlèvera les particules et on gardera cette version. 
+        NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.
+            GetComponent<Slider>().value = (float)AKA/AKARemanent;
+#endif
+
+        // On change le slider 1 si on est sur le joueur local, 
+        // sinon on change le slider 2. 
+        GameObject Slider = local ? GameObject.Find("AKASliderJoueur1") : GameObject.Find("AKASliderJoueur2"); 
+
+        // On change la version avec particules.
+        // Normalement ce slider doit se trouver sur un autre layer de camera. 
+        Slider.GetComponent<SliderAKA>().ChangeCurrentAKA(newAKA, AKARemanent);
+
     }
 
 
@@ -1062,13 +1086,10 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// </summary>
     void ChangeAKAJoueur(){
 		int currentAKA = GameObject.FindGameObjectsWithTag ("BoardSanctuaire").Length;
-        AKARemanent = currentAKA; 
-		NomJoueur1.transform.Find ("AKAJoueur1").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString(); 
-		NomJoueur2.transform.Find ("AKAJoueur2").gameObject.GetComponent<Text> ().text = "AKA : " + currentAKA.ToString();
+        AKARemanent = currentAKA;
 
-        // On change aussi les sliders d'AKA
-        NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.GetComponent<Slider>().value = 1;
-        NomJoueur2.transform.Find("AKAJoueur2").Find("AKASliderJoueur2").gameObject.GetComponent<Slider>().value = 1;
+        ChangerAKAJoueurUI(AKARemanent, true);
+        ChangerAKAJoueurUI(AKARemanent, true);
 
         FindLocalPlayer ().SendMessage ("setPlayerAKADebutTour", currentAKA); 
 	}

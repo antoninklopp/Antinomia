@@ -439,6 +439,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\InformationManager.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\InformerAdversaireChoixEffet.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\TutorialManager.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\ManagersBattle\UIElements\SliderAKA.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Messages\DisplayMessagePossibilities.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Messages\Message.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Player\AttackMyPlayer.cs" />
