@@ -23,17 +23,31 @@ public class SliderAKA : MonoBehaviour {
     /// <summary>
     /// Changer la valeur de l'AKA courant avec une animation. 
     /// </summary>
-    /// <param name="previousAKA"></param>
-    /// <param name="newAKA"></param>
-    /// <param name="maxAKA"></param>
-    public void ChangeCurrentAKA(int newAKA, int maxAKA) {
+    /// <param name="newTurn">Si nouveau tour, on montre la barre qui se charge de 0. </param>
+    public void ChangeCurrentAKA(int newAKA, int maxAKA, bool newTurn=false) {
+        if (maxAKA == 0) {
+            GetComponent<Slider>().value = 1;
+            return; 
+        }
+
         float previousValue = GetComponent<Slider>().value; // Est-ce la bonne manière de récupérer l'ancienne valeur? 
         float nextValue = (float)newAKA / maxAKA; 
-        StartCoroutine(ChangeCurrentAKARoutine(previousValue, nextValue)); 
+        StartCoroutine(ChangeCurrentAKARoutine(previousValue, nextValue, newTurn)); 
     }
 
-    private IEnumerator ChangeCurrentAKARoutine(float previousValue, float nextValue) {
-        EffetParticules.SetActive(true); 
+    private IEnumerator ChangeCurrentAKARoutine(float previousValue, float nextValue, bool newTurn=false) {
+        // Si c'est un nouveau tour et que la valeur de l'AKA est de 0, aucune utilité
+        // à montrer un effet de chargement. 
+        if (newTurn && nextValue == 0) {
+            yield break; 
+        }
+
+        // Sinon on recharge la barre en entier.
+        if (newTurn) {
+            previousValue = 0; 
+        }
+
+        EffetParticules.SetActive(true);
 
 
         // On fait durer l'animation 1 seconde. 

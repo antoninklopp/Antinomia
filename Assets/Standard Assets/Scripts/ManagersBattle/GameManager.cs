@@ -496,7 +496,7 @@ public class GameManager : NetworkBehaviourAntinomia {
         switch (Phase) {
 		    case Player.Phases.INITIATION:
 			    PhaseToString = "Initiation"; 
-			    ChangeAKAJoueur ();
+			    ChangeAKAJoueurDebutTour ();
                 // On reset le nombre de sorts lancés à chaque début de tour.    
                 sortLance = 0; 
 			    //CalculAKA (); 
@@ -1048,23 +1048,27 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// Changer l'AKA d'un des joueurs
     /// </summary>
     /// <param name="newAKA"></param>
-    private void ChangerAKAJoueurUI(int newAKA, bool local) {
-
+    private void ChangerAKAJoueurUI(int newAKA, bool local, bool newTurn=false) {
+        
         // On change le Nomjoueur 1 si local est à true, 
         // on change NomJoueur2 sinon. 
-        GameObject NomJoueur = local ? NomJoueur1 : NomJoueur2; 
+        GameObject NomJoueur = local ? NomJoueur1.transform.Find("AKAJoueur1").gameObject : NomJoueur2.transform.Find("AKAJoueur2").gameObject;
+
+        Debug.Log(NomJoueur);
+        Debug.Log(NomJoueur.GetComponent<Text>()); 
 
         // On change la version textuelle.
-        NomJoueur.transform.Find("AKAJoueur1").gameObject.GetComponent<Text>().text = "AKA:" + AKA.ToString() + 
+        NomJoueur.GetComponent<Text>().text = "AKA:" + newAKA.ToString() + 
             "/" + AKARemanent.ToString();
+        
         // On change la version slider. 
 
-#if false
+// #if false
         // On garde ce bout de code mort pour une bonne raison. 
         // Si on a besoin d'améliorer les performances, on enlèvera les particules et on gardera cette version. 
-        NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.
-            GetComponent<Slider>().value = (float)AKA/AKARemanent;
-#endif
+//        NomJoueur1.transform.Find("AKAJoueur1").Find("AKASliderJoueur1").gameObject.
+//            GetComponent<Slider>().value = (float)AKA/AKARemanent;
+//#endif
 
         // On change le slider 1 si on est sur le joueur local, 
         // sinon on change le slider 2. 
@@ -1072,24 +1076,25 @@ public class GameManager : NetworkBehaviourAntinomia {
 
         // On change la version avec particules.
         // Normalement ce slider doit se trouver sur un autre layer de camera. 
-        Slider.GetComponent<SliderAKA>().ChangeCurrentAKA(newAKA, AKARemanent);
+        Slider.GetComponent<SliderAKA>().ChangeCurrentAKA(newAKA, AKARemanent, newTurn);
 
     }
 
 
     /// <summary>
-    ///  Au début de chaque tour
+    /// Au début de chaque tour
     /// l'ID du joueur est 1 si le joueur est le serveur
     /// L'ID du joueur est 2 si le joueur n'est pas le serveur.
     ///
     /// On met l'AKA des deux joueurs à jour. 
     /// </summary>
-    void ChangeAKAJoueur(){
+    private void ChangeAKAJoueurDebutTour(){
 		int currentAKA = GameObject.FindGameObjectsWithTag ("BoardSanctuaire").Length;
         AKARemanent = currentAKA;
 
-        ChangerAKAJoueurUI(AKARemanent, true);
-        ChangerAKAJoueurUI(AKARemanent, true);
+        // On change les barres d'AKA du joueur local et du pas local. 
+        ChangerAKAJoueurUI(AKARemanent, true, true);
+        ChangerAKAJoueurUI(AKARemanent, false, true);
 
         FindLocalPlayer ().SendMessage ("setPlayerAKADebutTour", currentAKA); 
 	}
