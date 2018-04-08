@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿
+// Copyright (c) 2017-2018 Antonin KLOPP-TOSSER
+ 
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; 
@@ -39,7 +42,7 @@ public class SliderAKA : MonoBehaviour {
         // Si c'est un nouveau tour et que la valeur de l'AKA est de 0, aucune utilité
         // à montrer un effet de chargement. 
         if (newTurn && nextValue == 0) {
-            yield break; 
+            yield break;   
         }
 
         // Sinon on recharge la barre en entier.
@@ -51,7 +54,7 @@ public class SliderAKA : MonoBehaviour {
 
 
         // On fait durer l'animation 1 seconde. 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i <= 20; i++) {
             GetComponent<Slider>().value = previousValue * (1 - i/20f) + nextValue * (i/20f); 
             yield return new WaitForSeconds(0.05f); 
         }

@@ -257,7 +257,12 @@ public class GameManager : NetworkBehaviourAntinomia {
     /// <summary>
     /// Tous les boutons de changement de phase, au milieu de l'écran.
     /// </summary>
-    private GameObject AllButtonsPhase; 
+    private GameObject AllButtonsPhase;
+
+    /// <summary>
+    /// Un objet qui informe le joueur du nombre de cartes qui lui reste dans son deck. 
+    /// </summary>
+    private GameObject NombreCartesDeck;
 
     /// <summary>
     /// Initialisation du GameManager
@@ -312,6 +317,10 @@ public class GameManager : NetworkBehaviourAntinomia {
         GameManagerInformation = GameObject.Find("InformationManager");
         eventManager = GameObject.Find("EventManager");
         AllButtonsPhase = GameObject.Find("AllButtonsPhases");
+        NombreCartesDeck = GameObject.Find("NombreCartesDeck");
+        // On désactive cet objet avant d'avoir reçu une première informations
+        // sur le nombre de cartes dans le deck. 
+        NombreCartesDeck.SetActive(false); 
         StartCoroutine(SetUpPhaseButtons()); 
 	}
 
@@ -466,7 +475,7 @@ public class GameManager : NetworkBehaviourAntinomia {
 				return; 
 			}
 		}
-	}
+    }
 
     /// <summary>
     /// Appelé lors du changement de phase. 
@@ -2299,6 +2308,17 @@ public class GameManager : NetworkBehaviourAntinomia {
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Changer le nombre de cartes dans le deck. 
+    /// </summary>
+    /// <param name="nombre"></param>
+    public void ChangeNombreCartesDeckUI(int nombre) {
+        if (!NombreCartesDeck.activeInHierarchy) {
+            NombreCartesDeck.SetActive(true); 
+        }
+        NombreCartesDeck.GetComponent<Text>().text = nombre.ToString(); 
     }
 
 }

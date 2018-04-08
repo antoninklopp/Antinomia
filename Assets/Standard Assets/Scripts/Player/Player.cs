@@ -230,7 +230,10 @@ public class Player : NetworkBehaviourAntinomia	 {
 		 * Lors d'un cout élémentaire pour une carte Terre, il faut détruire les x premières cartes du jeu.
 		 */
         CardDeck.Cartes.RemoveRange (0, nombre);
-        CmdBannirFaceCachee(nombre); 
+        CmdBannirFaceCachee(nombre);
+
+        // Mettre à jour l'information du nombre de cartes
+        getGameManager().GetComponent<GameManager>().ChangeNombreCartesDeckUI(CardDeck.getNombreCartes()); 
 	}
 
     /// <summary>
@@ -320,7 +323,10 @@ public class Player : NetworkBehaviourAntinomia	 {
         yield return PiocherCarteRoutine();
 
         // On check que les cartes soient OK. 
-        yield return Repioche(); 
+        yield return Repioche();
+
+        // Mettre à jour l'information du nombre de cartes
+        getGameManager().GetComponent<GameManager>().ChangeNombreCartesDeckUI(CardDeck.getNombreCartes());
     }
 
     /// <summary>
@@ -358,7 +364,10 @@ public class Player : NetworkBehaviourAntinomia	 {
         while (!CartePiocheeOK) {
             yield return new WaitForSeconds(0.05f); 
         }
-	}
+
+        // Mettre à jour l'information du nombre de cartes
+        getGameManager().GetComponent<GameManager>().ChangeNombreCartesDeckUI(CardDeck.getNombreCartes());
+    }
 
     /// <summary>
     /// Piocher la carte une fois que l'oID est recuperé
