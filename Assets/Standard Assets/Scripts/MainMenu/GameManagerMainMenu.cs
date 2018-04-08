@@ -111,4 +111,8 @@ public class GameManagerMainMenu : MonoBehaviour {
     public void SceneTest() {
         SceneManager.LoadScene("TestCartes"); 
     }
+
+    public void SceneSettings() {
+        SceneManager.LoadScene("Settings"); 
+    }
 }

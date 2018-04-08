@@ -14,6 +14,8 @@ public class GameManagerSettings : MonoBehaviour {
 
     private GameObject CurrentLanguage;
 
+    private GameObject Sound; 
+
     /// <summary>
     /// On garde une variable pour retenir si le dropDownLanguage a déjà été set
     /// Comme ça, inutile de le refaire. 
@@ -26,7 +28,9 @@ public class GameManagerSettings : MonoBehaviour {
         LanguageDropDown = GameObject.Find("AllLanguages");
         LanguageDropDown.SetActive(false);
         CurrentLanguage = GameObject.Find("CurrentLanguage");
-        CurrentLanguage.transform.Find("Text").gameObject.GetComponent<Text>().text = PlayerPrefs.GetString("Language"); 
+        CurrentLanguage.transform.Find("Text").gameObject.GetComponent<Text>().text = PlayerPrefs.GetString("Language");
+        Sound = GameObject.Find("Sound");
+        DisplaySound();
 	}
 
     /// <summary>
@@ -72,5 +76,24 @@ public class GameManagerSettings : MonoBehaviour {
         CurrentLanguage.SetActive(true);
         LanguageDropDown.SetActive(false);
         CurrentLanguage.transform.Find("Text").gameObject.GetComponent<Text>().text = Language; 
+    }
+
+    /// <summary>
+    /// Clic sur le bouton de son pour le passer en OnOff. 
+    /// </summary>
+    public void ClickSound() {
+        string NewSetting = "Off";
+        if (PlayerPrefs.GetString("Sound").Equals("Off")) {
+            NewSetting = "On"; 
+        }
+        PlayerPrefs.SetString("Sound", NewSetting);
+        Sound.transform.Find("Text").gameObject.GetComponent<Text>().text = NewSetting; 
+    }
+
+    private void DisplaySound() {
+        if (!PlayerPrefs.HasKey("Sound")) {
+            PlayerPrefs.SetString("Sound", "On");
+        }
+        Sound.transform.Find("Text").gameObject.GetComponent<Text>().text = PlayerPrefs.GetString("Sound"); 
     }
 }
