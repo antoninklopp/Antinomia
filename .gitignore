@@ -267,7 +267,7 @@ __pycache__/
 /Assets/Lobby/Sprites
 /Assets/NoPlugins
 /Assets/Prefabs
-/Assets/Resources
+/Assets/Resources/TestCartes
 /Assets/Scenes
 /Assets/Standard Assets/CrossPlatformInput/Prefabs
 /Assets/Standard Assets/CrossPlatformInput/Sprites
@@ -293,3 +293,5 @@ Antinomia.apk
 *.mat
 *.jpg
 *.png
+*.prefab
+*.txt

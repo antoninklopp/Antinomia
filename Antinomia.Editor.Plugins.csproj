@@ -357,10 +357,12 @@
     <None Include="Assets\Resources\TestCartes\Uncertain trade.txt" />
     <None Include="Assets\Resources\TestCartes\glutton of the depth.txt" />
     <None Include="Assets\Resources\WaitForCardoID.txt" />
+    <None Include="Assets\Resources\XmlData\English\availableLanguages.xml" />
     <None Include="Assets\Resources\XmlData\English\comment.xml" />
     <None Include="Assets\Resources\XmlData\English\global.xml" />
     <None Include="Assets\Resources\XmlData\English\message.xml" />
     <None Include="Assets\Resources\XmlData\English\tutorial.xml" />
+    <None Include="Assets\Resources\XmlData\French\availableLanguages.xml" />
     <None Include="Assets\Resources\XmlData\French\comment.xml" />
     <None Include="Assets\Resources\XmlData\French\global.xml" />
     <None Include="Assets\Resources\XmlData\French\message.xml" />
