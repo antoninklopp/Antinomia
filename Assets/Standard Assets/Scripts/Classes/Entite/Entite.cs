@@ -571,7 +571,6 @@ public class Entite : Carte, ICarte {
                 else {
                     // GameObject.Find("GameManager").SendMessage("AttackMyPlayer", gameObject);
                     StartCoroutine(AttackDrag()); 
-
                 }
             }
             else {
@@ -594,10 +593,14 @@ public class Entite : Carte, ICarte {
         // dragging = false;
     }
 
+    /// <summary>
+    /// Debut d'une attaque avec la fleche pour pointer vers une carte ou vers le joueur adverse. 
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator AttackDrag() {
         gameObject.AddComponent<LineRendererAttack>();
         GetComponent<LineRendererAttack>().OnBeginDragAttack();
-        while (GetComponent<LineRendererAttack>().estEnCours()) {
+        while (GetComponent<LineRendererAttack>().EstEnCours()) {
             yield return new WaitForSeconds(0.1f); 
         }
         GameObject FinalTarget = GetComponent<LineRendererAttack>().GetFinalTarget();

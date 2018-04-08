@@ -385,6 +385,7 @@
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Effet.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\EffetInPile.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\EffetPlusInfo.cs" />
+    <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\LineRendererSort.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\PileAppelEffet.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\Sort.cs" />
     <Compile Include="Assets\Standard Assets\Scripts\Classes\Sort\SortDefinition.cs" />

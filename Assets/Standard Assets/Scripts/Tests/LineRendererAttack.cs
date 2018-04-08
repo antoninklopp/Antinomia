@@ -11,13 +11,17 @@ using UnityEngine;
 public class LineRendererAttack : MonoBehaviour {
 
     public LineRenderer lineRenderer;
+
     public GameObject LineRendererPrefab;
 
-    public GameObject InstantiatedLine;
+    /// <summary>
+    /// Ligne courante. 
+    /// </summary>
+    public GameObject CurrentInstantiatedLine;
 
-    bool enCours = true;
+    protected bool enCours = true;
 
-    GameObject FinalTarget;
+    protected GameObject FinalTarget;
 
     private Vector2 lastPosition; 
 
@@ -57,17 +61,17 @@ public class LineRendererAttack : MonoBehaviour {
     public void OnBeginDragAttack() {
         LineRendererPrefab = Resources.Load("Prefabs/AttackLine", typeof(GameObject)) as GameObject;
         Debug.Log("LineRendererPrefab"); 
-        InstantiatedLine = Instantiate(LineRendererPrefab);
-        InstantiatedLine.SetActive(true); 
-        lineRenderer = InstantiatedLine.transform.GetChild(0).gameObject.GetComponent<LineRenderer>();
-        InstantiatedLine.transform.position = transform.position;
+        CurrentInstantiatedLine = Instantiate(LineRendererPrefab);
+        CurrentInstantiatedLine.SetActive(true); 
+        lineRenderer = CurrentInstantiatedLine.transform.GetChild(0).gameObject.GetComponent<LineRenderer>();
+        CurrentInstantiatedLine.transform.position = transform.position;
         enCours = true; 
         // LineRendererSetup(); 
 
     }
 
-    private void OnMouseUp() {
-        if (InstantiatedLine != null) {
+    protected virtual void OnMouseUp() {
+        if (CurrentInstantiatedLine != null) {
             Vector3 MousePosition = Input.mousePosition;
             MousePosition.z = 15;
             Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(MousePosition);
@@ -75,21 +79,24 @@ public class LineRendererAttack : MonoBehaviour {
             lastPosition = new Vector2(mouseWorldPoint.x, mouseWorldPoint.y);
             FindGameObjectOverlap();
             enCours = false;
-            Debug.Log(InstantiatedLine);
+            Debug.Log(CurrentInstantiatedLine);
             // InstantiatedLine.SetActive(false);
             LineRendererPrefab.SetActive(false); 
             Debug.Log("On a détruit la ligne");
         }
     }
 
-    public bool estEnCours() {
+    public bool EstEnCours() {
         return enCours; 
     }
 
+    /// <summary>
+    /// Trouver la carte la plus proche 
+    /// </summary>
     public void FindGameObjectOverlap() {
         float distance = 0.5f; 
         while (true) {
-            GameObject[] allObjectsOverlap = InstantiatedLine.GetComponent<LineRendererObject>().FindAllColliders(distance, 
+            GameObject[] allObjectsOverlap = CurrentInstantiatedLine.GetComponent<LineRendererObject>().FindAllColliders(distance, 
                 lastPosition);
             for (int i = 0; i < allObjectsOverlap.Length; i++) {
                 Debug.Log("Objet Overlap" + allObjectsOverlap[i].name);
@@ -97,6 +104,7 @@ public class LineRendererAttack : MonoBehaviour {
                 Debug.Log("position de l'objet " + allObjectsOverlap[i].transform.position); 
             }
             if (distance < 0 || distance > 1) {
+                FinalTarget = null;
                 break; 
             }
             if (allObjectsOverlap.Length > 2) {

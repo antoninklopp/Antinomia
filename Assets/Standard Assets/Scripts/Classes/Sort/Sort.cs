@@ -33,15 +33,17 @@ public class Sort : Carte, ICarte {
 
     private Vector3 positionBeforeDragging;
 
-    public int Rang; 
+    public int Rang;
+
+    /// <summary>
+    /// Toutes les cibles d'un sort. 
+    /// </summary>
+    List<GameObject> AllFinalTarget; 
 
     /// <summary>
     /// Constructeur de la classe 
     /// </summary>
-    public Sort() {
-
-
-    }
+    public Sort() { }
 
     /// <summary>
     /// Création d'un sort. 
@@ -906,6 +908,28 @@ public class Sort : Carte, ICarte {
         transform.position = new Vector2(-10, -10);
         Destroy(GetComponent<SpriteRenderer>());
         UpdateSortNewTurn(true); 
+    }
+
+    /// <summary>
+    /// Pour le choix des cartes sur lesquelles le sort a effet. 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator SortDrag(int nombreCibles) {
+        gameObject.AddComponent<LineRendererSort>();
+        GetComponent<LineRendererSort>().OnBeginDragAttack();
+
+        while (GetComponent<LineRendererSort>().EnCoursGlobal) {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        AllFinalTarget = GetComponent<LineRendererSort>().GetAllFinalTarget();
+        
+        Destroy(GetComponent<LineRendererSort>());
+        GameObject[] Lines = GameObject.FindGameObjectsWithTag("Line");
+        //Deux lignes sont créées...
+        for (int i = 0; i < Lines.Length; i++) {
+            Destroy(Lines[i]);
+        }
     }
 
 }
