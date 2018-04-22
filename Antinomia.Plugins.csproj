@@ -13,14 +13,12 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectGenerator>VSTU</UnityProjectGenerator>
     <UnityProjectType>GamePlugins:3</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>2017.3.0f3</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -485,7 +483,7 @@
     <None Include="Assets\Resources\TestCartes\Astral harbinger.txt" />
     <None Include="Assets\Resources\TestCartes\Evil harbinger.txt" />
     <None Include="Assets\Resources\TestCartes\Gift of Akasha.txt" />
-    <None Include="Assets\Resources\TestCartes\Guerrier de l'avalanche.txt" />
+    <None Include="Assets\Resources\TestCartes\Guerrier de l&apos;avalanche.txt" />
     <None Include="Assets\Resources\TestCartes\Kid of the trad wind.txt" />
     <None Include="Assets\Resources\TestCartes\Magnanimity of Saakha.txt" />
     <None Include="Assets\Resources\TestCartes\Uncertain trade.txt" />
@@ -494,9 +492,7 @@
     <None Include="Assets\Resources\XmlData\English\availableLanguages.xml" />
     <None Include="Assets\Resources\XmlData\English\comment.xml" />
     <None Include="Assets\Resources\XmlData\English\global.xml" />
-    <None Include="Assets\Resources\XmlData\English\message.xml">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="Assets\Resources\XmlData\English\message.xml" />
     <None Include="Assets\Resources\XmlData\English\tutorial.xml" />
     <None Include="Assets\Resources\XmlData\French\availableLanguages.xml" />
     <None Include="Assets\Resources\XmlData\French\comment.xml" />

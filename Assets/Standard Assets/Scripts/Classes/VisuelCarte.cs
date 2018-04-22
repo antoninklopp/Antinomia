@@ -12,28 +12,59 @@ using System;
 public class VisuelCarte : MonoBehaviour{
 
     /// <summary>
+    /// Flag pour ne pas refaire toute l'operation, si ça a déjà été fait. 
+    /// </summary>
+    private bool VisuelOK = false;
+
+    /// <summary>
     /// Créer le visuel de la carte. 
     /// </summary>
     public void SetUpVisuel() {
+        if (VisuelOK) {
+            Debug.Log("Le visuel est déjà en place");
+            return;
+        }
+
+        StartCoroutine(SetUpVisuelRoutine());
+    }
+
+    private IEnumerator SetUpVisuelRoutine() {
+        
         // Récupération de tous les attributs à changer. 
         GameObject Nom;
         GameObject Puissance;
         GameObject TexteCarte;
         // Cout AKA ou rang pour les sorts. 
-        GameObject CoutAKA; 
+        GameObject CoutAKA;
+
+        GameObject FondCarte; 
+
+        while (GetComponent<Carte>().Name.Length <= 1) {
+            // On attend l'arrivée des informations
+            yield return new WaitForSeconds(0.1f); 
+        }
 
         // On vérifie que tous les objets existent bien.
         try {
             Nom = transform.Find("Name").gameObject;
             Puissance = transform.Find("Puissance").gameObject;
             TexteCarte = transform.Find("TextCarte").gameObject;
-            CoutAKA = transform.Find("CoutAKA").gameObject; 
+            CoutAKA = transform.Find("CoutAKA").gameObject;
+            FondCarte = transform.Find("FondCarte").gameObject; 
         } catch (NullReferenceException) {
-            Debug.LogError("Les objets enfants sont introuvables.\n Impossible de créer les attributs de carte"); 
-            return; 
+            Debug.LogError("Les objets enfants sont introuvables.\n Impossible de créer les attributs de carte");
+            Destroy(this);
+            yield break;
         }
 
-        Nom.GetComponent<TextMesh>().text = GetComponent<Carte>().Name;
+        // On réactive les composants dans le cas où ils auraient été désactivés
+        // Dans le cas d'un déplacement de l'adversaire par exemple
+        Nom.SetActive(true);
+        Puissance.SetActive(true);
+        TexteCarte.SetActive(true);
+        CoutAKA.SetActive(true);
+
+        Nom.GetComponent<TextMesh>().text = SetUpString(GetComponent<Carte>().Name, 25);
         
         // Mise en place de la puissance de la carte. (/niveau pour les sorts). 
         if (GetComponent<Carte>().IsEntite()) {
@@ -60,7 +91,7 @@ public class VisuelCarte : MonoBehaviour{
 
         // Mise en place du texte de la carte. 
         // A afficher en jeu? (si trop de texte). 
-        TexteCarte.GetComponent<TextMesh>().text = GetComponent<Carte>().GetInfoCarte();
+        TexteCarte.GetComponent<TextMesh>().text = SetUpString(GetComponent<Carte>().GetInfoCarte(), 25);
 
 
         // On fait des vérifications dans l'éditeur. 
@@ -69,6 +100,22 @@ public class VisuelCarte : MonoBehaviour{
             Debug.LogError("Probleme avec le format de la carte"); 
         }
 #endif
+
+        FondCarte.GetComponent<SpriteRenderer>().color = GetCouleurCarte(); 
+
+        VisuelOK = true;
+    }
+
+    /// <summary>
+    /// Si une carte est une carte de l'adversaire dans sa main, 
+    /// on ne veut pas que le joueur adverse ait toutes les informations sur la carte. 
+    /// </summary>
+    public void DisableVisuel() {
+        transform.Find("Name").gameObject.SetActive(false);
+        transform.Find("Puissance").gameObject.SetActive(false);
+        transform.Find("TextCarte").gameObject.SetActive(false);
+        transform.Find("CoutAKA").gameObject.SetActive(false);
+        VisuelOK = false; 
     }
 
     /// <summary>
@@ -78,9 +125,13 @@ public class VisuelCarte : MonoBehaviour{
     /// <param name="element"></param>
     /// <param name="ascendance"></param>
     /// <returns></returns>
-    public Color GetCouleurCarte(Entite.Element element, Entite.Ascendance ascendance, Entite.Nature nature) {
+    public Color GetCouleurCarte() {
         // Si c'est une entité. 
         if (GetComponent<Carte>().IsEntite()) {
+            Entite.Element element = GetComponent<Entite>().EntiteElement;
+            Entite.Ascendance ascendance = GetComponent<Entite>().EntiteAscendance;
+            Entite.Nature nature = GetComponent<Entite>().EntiteNature; 
+
             switch (element) {
                 case Entite.Element.AIR:
                     // On retourne une teinte verte
@@ -135,4 +186,17 @@ public class VisuelCarte : MonoBehaviour{
         return true; 
     }
 
+    /// <summary>
+    /// Formater le nom pour qu'il rentre dans toutes les cartes
+    /// </summary>
+    /// <param name="name"></param>
+    private string SetUpString(string name, int nombreCharacParLigne) {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        for (int i = 0; i < name.Length; i++) {
+            if (i % nombreCharacParLigne == 0)
+                sb.Append('\n');
+            sb.Append(name[i]);
+        }
+        return sb.ToString();
+    }
 }

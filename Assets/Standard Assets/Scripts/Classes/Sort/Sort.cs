@@ -113,8 +113,32 @@ public class Sort : Carte, ICarte {
     /// <summary>
     /// Etat courant de la carte. 
     /// </summary>
-    public State sortState = State.MAIN; 
-    
+    private State sortState = State.MAIN;
+
+    public State SortState {
+        get {
+            return sortState;
+        }
+
+        set {
+            sortState = value;
+            switch (sortState) {
+                case State.MAIN:
+                    if (isFromLocalPlayer) {
+                        // Si c'est une carte du joueur, on lui montre la carte dans la main. 
+                        GetComponent<ImageCardBattle>().setImage(shortCode);
+                        GetComponent<VisuelCarte>().SetUpVisuel();
+                    }
+                    else {
+                        // Sinon on montre la carte de dos. 
+                        GetComponent<ImageCardBattle>().setDosCarte();
+                        GetComponent<VisuelCarte>().DisableVisuel();
+                    }
+                    break;
+            }
+        }
+    }
+
     /// <summary>
     /// Appelé lors du spawn du sort. 
     /// </summary>
@@ -154,11 +178,11 @@ public class Sort : Carte, ICarte {
             return; 
         }
 
-        if (!isFromLocalPlayer && sortState == State.MAIN) {
+        if (!isFromLocalPlayer && SortState == State.MAIN) {
             return;
         }
 
-        if (sortState == State.CIMETIERE) {
+        if (SortState == State.CIMETIERE) {
             return;
         }
 
@@ -214,7 +238,7 @@ public class Sort : Carte, ICarte {
     public override void checkIfLocalPlayerOnMousEnter() {
 
         if (!isFromLocalPlayer) {
-            sortState = State.ADVERSAIRE;
+            SortState = State.ADVERSAIRE;
         }
     }
 
@@ -257,7 +281,7 @@ public class Sort : Carte, ICarte {
     /// </summary>
     public void OnMouseUp() {
 
-        if (!isFromLocalPlayer && sortState == State.MAIN) {
+        if (!isFromLocalPlayer && SortState == State.MAIN) {
             return;
         }
 
@@ -621,7 +645,7 @@ public class Sort : Carte, ICarte {
             Name + "\n" +
             "Niveau" + Niveau.ToString());
 
-        BigCard.GetComponent<Sort>().sortState = Sort.State.BIGCARD;
+        BigCard.GetComponent<Sort>().SortState = Sort.State.BIGCARD;
     }
 
     public override void DisplayInfoCarteGameManager(string shortCode = "", string messageToDisplay = "") {
@@ -701,7 +725,7 @@ public class Sort : Carte, ICarte {
             yield break; 
         }
 
-        if (isFromLocalPlayer && sortState == State.MAIN && oID != "") {
+        if (isFromLocalPlayer && SortState == State.MAIN && oID != "") {
             // On informe que la carte a bien été piochée.
             Debug.Log("oID de cette carte " + oID);
             Debug.Log("Nom " + Name); 
@@ -710,6 +734,8 @@ public class Sort : Carte, ICarte {
                 CmdDestroyDirect(); 
             }
         }
+
+        SortState = State.MAIN; 
     }
 
 
@@ -732,7 +758,7 @@ public class Sort : Carte, ICarte {
         oID = _oID;
         Name = _Name;
         shortCode = _shortCode;
-        sortState = State.MAIN;
+        SortState = State.MAIN;
         Niveau = _Niveau;
         CoutAKA = _coutAKA;
         AllEffetsString = _Effet;
@@ -785,7 +811,7 @@ public class Sort : Carte, ICarte {
         Sanctuaire.SendMessage("ReordonnerCarte");
         ChampBataille.SendMessage("CmdReordonnerCarte");
 
-        sortState = State.CIMETIERE; 
+        SortState = State.CIMETIERE; 
     }
 
     /// <summary>
@@ -827,7 +853,7 @@ public class Sort : Carte, ICarte {
     }
 
     public override bool isCarteInMain() {
-        if (sortState == State.MAIN) {
+        if (SortState == State.MAIN) {
             return true; 
         } else {
             return false; 
@@ -879,12 +905,12 @@ public class Sort : Carte, ICarte {
     }
 
     public State getState() {
-        return sortState;
+        return SortState;
     }
 
     protected override void InformationsSurLaCarte() {
         isFromLocalPlayer = transform.parent.parent.parent.gameObject.GetComponent<Player>().isLocalPlayer;
-        if (!isFromLocalPlayer && sortState == State.MAIN) {
+        if (!isFromLocalPlayer && SortState == State.MAIN) {
             return; 
         }
             base.InformationsSurLaCarte();
