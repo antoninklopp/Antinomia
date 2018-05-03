@@ -82,7 +82,6 @@ public class Assistance : Carte, ICarte {
                         GetComponent<SpriteRenderer>().enabled = true;
                         GetComponent<BoxCollider2D>().enabled = true;
                         GetComponent<ImageCardBattle>().setImage(shortCode);
-                        GetComponent<VisuelCarte>().DisableVisuel();
                     }
                     break;
                 case State.MAIN:
@@ -91,12 +90,10 @@ public class Assistance : Carte, ICarte {
                         GetComponent<SpriteRenderer>().enabled = true;
                         GetComponent<BoxCollider2D>().enabled = true;
                         GetComponent<ImageCardBattle>().setImage(shortCode);
-                        GetComponent<VisuelCarte>().SetUpVisuel();
                     } else if (!isFromLocalPlayer) {
                         // Si la carte appartient à l'adversaire et est dans sa main, 
                         // il ne faut pas pouvoir la voir. 
                         GetComponent<ImageCardBattle>().setDosCarte();
-                        GetComponent<VisuelCarte>().DisableVisuel();
                     }
                     break;
                 case State.CIMETIERE:
@@ -706,8 +703,6 @@ public class Assistance : Carte, ICarte {
                 CmdDestroyDirect(); 
             }
         }
-
-        assistanceState = State.MAIN; 
     }
 
     /// <summary>

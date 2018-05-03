@@ -344,22 +344,17 @@ public class Entite : Carte, ICarte {
             // On change aussi l'image de la carte. 
             switch (entiteState) {
                 case State.MAIN:
-                    Debug.Log("ici");
-                    Debug.Log(isFromLocalPlayer);
                     if (isFromLocalPlayer) {
                         // Si c'est une carte du joueur, on lui montre la carte dans la main. 
                         GetComponent<ImageCardBattle>().setImage(shortCode);
-                        GetComponent<VisuelCarte>().SetUpVisuel();
                     } else {
                         // Sinon on montre la carte de dos. 
                         GetComponent<ImageCardBattle>().setDosCarte();
-                        GetComponent<VisuelCarte>().DisableVisuel();
                     }
                     break;
                 case State.CHAMPBATAILLE:
                 case State.SANCTUAIRE:
                     GetComponent<ImageCardBattle>().setImage(shortCode);
-                    GetComponent<VisuelCarte>().SetUpVisuel(); 
                     break;
             }
         }
@@ -1141,7 +1136,7 @@ public class Entite : Carte, ICarte {
             yield break; 
         }
 
-        if (isFromLocalPlayer && EntiteState == State.MAIN) {
+        if (isFromLocalPlayer && entiteState == State.MAIN) {
             // On informe que la carte a bien été piochée.
             Debug.Log("oID de cette carte " + oID);
             if (!FindLocalPlayer().GetComponent<Player>().CartePiocheOK(oID)) {
@@ -1149,10 +1144,6 @@ public class Entite : Carte, ICarte {
                 CmdDestroyDirect(); 
             }
         }
-
-        Debug.Log("Fin du setup"); 
-
-        EntiteState = State.MAIN; 
     }
 
     [ClientRpc(channel=0)]
