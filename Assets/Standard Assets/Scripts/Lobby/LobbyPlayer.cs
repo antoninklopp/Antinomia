@@ -18,6 +18,7 @@ public class LobbyPlayer : NetworkLobbyPlayer {
     public bool online;
     // Doit être égal à 1 ou à 2. 
     public int peerID;
+    public Color color;
 
     public string matchMakingID;
 

@@ -262,8 +262,8 @@ __pycache__/
 /Antinomia_Data
 /Antinomia_Data
 /Assets/Animations/Cartes
-/Assets/GameSparks/Plugins
-/Assets/Lobby/Prefabs
+/Assets/GameSparks/
+/Assets/Lobby/
 /Assets/Lobby/Sprites
 /Assets/NoPlugins
 /Assets/Prefabs
@@ -295,3 +295,6 @@ Antinomia.apk
 *.png
 *.prefab
 *.txt
+*.exe
+*.dll
+

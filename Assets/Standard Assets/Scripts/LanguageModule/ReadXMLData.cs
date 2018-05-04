@@ -21,6 +21,7 @@ public class ReadXMLData {
 	//public Carte.Type carteType;
 	public Entite.Ascendance carteAscendance; 
 	public int _coutElementaire; 
+
 	// public Entite.EffetMalefique carteEffetMalefique; 
 	// public Entite.EffetAstral carteEffetAstral; 
 	public int puissance;
