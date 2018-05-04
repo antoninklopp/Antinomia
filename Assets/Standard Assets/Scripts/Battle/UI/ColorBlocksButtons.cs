@@ -43,7 +43,7 @@ public class ColorBlocksButtons {
     public static ColorBlock GetColorDisabledButton() {
         return new ColorBlock {
             normalColor = new Color(1, 1, 1, 0.5f),
-            // On indique au joueur qu'il ne peut pas cliquer sur bouton en mettant une couleur 
+            // On indique au joueur qu'il ne peut pas cliquer sur le bouton en mettant une couleur 
             // de highlight rouge
             highlightedColor = new Color(1, 0, 0, 0.5f),
             disabledColor = new Color(1, 1, 1, 0.5f),
@@ -59,7 +59,7 @@ public class ColorBlocksButtons {
     public static ColorBlock GetColorNoTurnNoPhase() {
         return new ColorBlock {
             normalColor = new Color(1, 1, 1, 0.2f),
-            // On indique au joueur qu'il ne peut pas cliquer sur bouton en mettant une couleur 
+            // On indique au joueur qu'il ne peut pas cliquer sur le bouton en mettant une couleur 
             // de highlight rouge
             highlightedColor = new Color(1, 0, 0, 0.5f),
             disabledColor = new Color(1, 1, 1, 0.2f),
