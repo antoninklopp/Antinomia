@@ -93,6 +93,10 @@ public class MonoBehaviourAntinomia : MonoBehaviour {
 		 * Trouver le joueur qui n'est pas local, pour lui faire envoyer les fonctions [Command(channel=0)]
 		 */
         GameObject[] Players = GameObject.FindGameObjectsWithTag("Player");
+        if (Players.Length < 2) {
+            // Si on le joueur adverse n'est pas encore sur le terrain. 
+            return null; 
+        }
         if (!Players[0].GetComponent<Player>().isLocalPlayer) {
             return Players[0];
         }

@@ -629,35 +629,6 @@ public class GetPlayerInfoGameSparks : MonoBehaviour {
         return _nature; 
     }
 
-	public Dictionary<Capacite, int> stringToCapacitesDictionnary(string stringCapacite){
-		/*
-		 * S'il y a plusieurs capacités, 
-		 * le string envoyé par la base de données devra être:
-		 * Capcite1, CapciteInt1, Capcite2, CapaciteInt2, etc...
-		 * 
-		 * Il suffit maintenant de découper et de renvoyer un dictionnaire. 
-         * 
-         * OBSOLETE, utiliser la classe capacite
-		 * 
-		 */ 
-		string[] AllCapcitesString = stringCapacite.Split (','); 
-		Dictionary<Capacite, int> AllCapacite = new Dictionary<Capacite, int> (); 
-		if (AllCapcitesString.Length % 2 != 0) {
-			// A chaque capacité, il doit y avoir un int associé. 
-			throw new Exception ("Les Capacités doivent être de la forme suivante : Capacite1, IntCapacite1, Capacite2, IntCapacite2 ... ");
-		} else {
-			// Sinon
-			for (int i = 0; i < AllCapcitesString.Length / 2; ++i) {
-				// On boucle sur toutes les capacités. 
-
-
-			}
-		}
-
-		return AllCapacite; 
-
-	}
-
     /// <summary>
     /// Detruire les composants inutilisés. 
     /// Le prefab a tous les composants attachés au départ pour pouvoir l'instancier sur le réseau avec tous les composants. 

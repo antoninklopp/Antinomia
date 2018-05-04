@@ -16,7 +16,6 @@ public class Sanctuaire : MonoBehaviour {
 	 * 
 	 */ 
 
-	List<Creature> AllCreatures = new List<Creature>(); 
 	List<GameObject> AllCreatureSanctuaire = new List<GameObject>();
 
 	public GameObject CartePrefab; 

@@ -20,7 +20,6 @@ public class CartesBoard : NetworkBehaviourAntinomia {
 	 * Abus de langage : Ici BOARD = CHAMP DE BATAILLE. 
 	 */
 
-	List<Creature> AllCreatures = new List<Creature>(); 
 	List<GameObject> AllCreaturesChampBataille = new List<GameObject>();
 
 	public GameObject CartePrefab; 
