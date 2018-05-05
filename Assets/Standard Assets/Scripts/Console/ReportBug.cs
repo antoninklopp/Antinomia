@@ -4,53 +4,58 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System; 
+using System;
 
-public class ReportBug {
+namespace Console {
 
-    private Queue<string> allBugs = new Queue<string>();
+    public class ReportBug {
 
-    /// <summary>
-    /// True si des bugs ont été report 
-    /// </summary>
-    private bool bugsReported = false; 
+        private Queue<string> allBugs = new Queue<string>();
 
-    public ReportBug() {
-        allBugs.Enqueue("BUG REPORT");
-    }
+        /// <summary>
+        /// True si des bugs ont été report 
+        /// </summary>
+        private bool bugsReported = false;
 
-    public ReportBug(string initializeString) : this() {
-        allBugs.Enqueue(initializeString);
-    }
-
-    /// <summary>
-    /// Report un nouveau bug. 
-    /// </summary>
-    /// <param name="bug"></param>
-    public void addBug (string bug) {
-        allBugs.Enqueue(bug);
-        bugsReported = true; 
-    }
-
-    /// <summary>
-    /// Recuperer tous les report de bugs. 
-    /// </summary>
-    /// <returns></returns>
-    public string getAllReport() {
-        string retour = "";
-        if (!bugsReported) {
-            return null;
+        public ReportBug() {
+            allBugs.Enqueue("BUG REPORT");
         }
-        int i = allBugs.Count; 
-        while (i > 0) {
-            i --; 
-            try {
-                retour += allBugs.Dequeue() + "\n";
-            } catch (InvalidOperationException e) {
-                Debug.LogWarning("Impossible de dequeue ici " + e.ToString()); 
+
+        public ReportBug(string initializeString) : this() {
+            allBugs.Enqueue(initializeString);
+        }
+
+        /// <summary>
+        /// Report un nouveau bug. 
+        /// </summary>
+        /// <param name="bug"></param>
+        public void addBug(string bug) {
+            allBugs.Enqueue(bug);
+            bugsReported = true;
+        }
+
+        /// <summary>
+        /// Recuperer tous les report de bugs. 
+        /// </summary>
+        /// <returns></returns>
+        public string getAllReport() {
+            string retour = "";
+            if (!bugsReported) {
+                return null;
             }
+            int i = allBugs.Count;
+            while (i > 0) {
+                i--;
+                try {
+                    retour += allBugs.Dequeue() + "\n";
+                }
+                catch (InvalidOperationException e) {
+                    Debug.LogWarning("Impossible de dequeue ici " + e.ToString());
+                }
+            }
+            retour += "heure " + DateTime.Now.ToString();
+            return retour;
         }
-        retour += "heure " + DateTime.Now.ToString(); 
-        return retour;
     }
+
 }

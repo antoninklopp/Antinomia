@@ -6,28 +6,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CardInfoChooseCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
+namespace Antinomia.Battle {
 
-    /// <summary>
-    /// ID de la carte associée au bouton
-    /// </summary>
-    public int IDCarte;
+    public class CardInfoChooseCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
-    /// <summary>
-    /// Lorsque le pointeur entre sur le bouton. 
-    /// </summary>
-    public void OnPointerEnter(PointerEventData eventData) {
-        GameObject Carte = NetworkBehaviourAntinomia.FindCardWithID(IDCarte); 
-        Carte.GetComponent<Carte>().HighlightSelectionEvent();
-        Carte.GetComponent<Carte>().DisplayInfoCarteGameManager(); 
+        /// <summary>
+        /// ID de la carte associée au bouton
+        /// </summary>
+        public int IDCarte;
+
+        /// <summary>
+        /// Lorsque le pointeur entre sur le bouton. 
+        /// </summary>
+        public void OnPointerEnter(PointerEventData eventData) {
+            GameObject Carte = NetworkBehaviourAntinomia.FindCardWithID(IDCarte);
+            Carte.GetComponent<Carte>().HighlightSelectionEvent();
+            Carte.GetComponent<Carte>().DisplayInfoCarteGameManager();
+        }
+
+        /// <summary>
+        /// Lorsque le pointeur sort du bouton. 
+        /// </summary>
+        /// <param name="eventData"></param>
+        public void OnPointerExit(PointerEventData eventData) {
+            NetworkBehaviourAntinomia.FindCardWithID(IDCarte).GetComponent<Carte>().StopHighlightSelectionEvent();
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().HideInfoCarte();
+        }
     }
 
-    /// <summary>
-    /// Lorsque le pointeur sort du bouton. 
-    /// </summary>
-    /// <param name="eventData"></param>
-    public void OnPointerExit(PointerEventData eventData) {
-        NetworkBehaviourAntinomia.FindCardWithID(IDCarte).GetComponent<Carte>().StopHighlightSelectionEvent();
-        GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().HideInfoCarte();
-    }
 }

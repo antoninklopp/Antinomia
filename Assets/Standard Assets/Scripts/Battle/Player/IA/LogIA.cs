@@ -5,15 +5,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LogIA : MonoBehaviour {
+namespace Antinomia.Battle {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public class LogIA : MonoBehaviour {
+
+        // Use this for initialization
+        void Start() {
+
+        }
+
+        // Update is called once per frame
+        void Update() {
+
+        }
+    }
+
 }

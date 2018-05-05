@@ -5,122 +5,128 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using AntinomiaException; 
+using AntinomiaException;
 
-public class ShowCards : MonoBehaviourAntinomia {
+namespace Antinomia.Battle {
 
-    private GameObject TextShowCards;
+    public class ShowCards : MonoBehaviourAntinomia {
 
-    public GameObject CartePrefab;
+        private GameObject TextShowCards;
 
-    private GameObject FinManuelle; 
+        public GameObject CartePrefab;
 
-	// Use this for initialization
-	public override void Start () {
-        TextShowCards = GameObject.Find("TextShowCards");
-        TextShowCards.SetActive(false);
-        FinManuelle = GameObject.Find("ArretManuelShowCards");
-        FinManuelle.SetActive(false); 
-	}
+        private GameObject FinManuelle;
 
-    /// <summary>
-    /// Montrer les cartes à l'autre joueur, sans personnalisation du message
-    /// </summary>
-    /// <param name="Cards"></param>
-    /// <param name="fermetureManuelle"></param>
-    /// <param name="playerEnvoi"></param>
-    public void ShowCardsToPlayer(string[] Cards, bool fermetureManuelle=false, int playerEnvoi=1) {
-        if (playerEnvoi == GameManager.FindLocalPlayerID()) {
-            ShowCardsToPlayer(Cards.Length.ToString() + " de vos cartes", Cards, fermetureManuelle);
-        } else {
-            ShowCardsToPlayer(Cards.Length.ToString() + " cartes de votre adversaire", Cards, fermetureManuelle);
+        // Use this for initialization
+        public override void Start() {
+            TextShowCards = GameObject.Find("TextShowCards");
+            TextShowCards.SetActive(false);
+            FinManuelle = GameObject.Find("ArretManuelShowCards");
+            FinManuelle.SetActive(false);
         }
-    }
 
-    /// <summary>
-    /// Montrer des cartes à un joueur
-    /// </summary>
-    /// <param name="message"></param>
-    /// <param name="Cards"></param>
-    public void ShowCardsToPlayer(string message, string[] _AllCardsGiven, bool fermetureManuelle=true) {
-        TextShowCards.SetActive(true);
-        TextShowCards.GetComponent<Text>().text = message;
-
-        List<GameObject> AllCardsToShow = new List<GameObject>(); 
-        List<int> AllIDCards = new List<int>();
-
-        for (int i = 0; i < _AllCardsGiven.Length; ++i) {
-            // On crée d'abord toutes les cartes
-            GameObject newCarte = Instantiate(CartePrefab);
-            newCarte.SetActive(true);
-            // Ensuite on met leur position avec une demi carte entre chaque carte.
-
-            string shortCode = _AllCardsGiven[i];
-            string Info = GetInfoCarte(shortCode); 
-
-            newCarte.transform.SetParent(transform);
-            newCarte.GetComponent<CarteChooseShow>().shortCode = shortCode;
-            newCarte.GetComponent<CarteChooseShow>().StringToDisplay = GetInfoCarte(shortCode);
-
-            // Pour bien montrer la carte au joueur, on y ajoute le script CardInfoChooseCard. 
-            newCarte.AddComponent<CardInfoShowCard>();
-            newCarte.GetComponent<CardInfoShowCard>().SetInfo(shortCode, GetInfoCarte(shortCode)); 
-
-            AllCardsToShow.Add(newCarte);
-        }
-        for (int i = 0; i < AllCardsToShow.Count; ++i) {
-            // On met l'image sur toutes les cartes. 
-            AllCardsToShow[i].SendMessage("setImage", _AllCardsGiven[i]);
-            if (AllCardsToShow[i].GetComponent<Button>() != null) {
-                AllCardsToShow[i].GetComponent<Button>().interactable = false;
+        /// <summary>
+        /// Montrer les cartes à l'autre joueur, sans personnalisation du message
+        /// </summary>
+        /// <param name="Cards"></param>
+        /// <param name="fermetureManuelle"></param>
+        /// <param name="playerEnvoi"></param>
+        public void ShowCardsToPlayer(string[] Cards, bool fermetureManuelle = false, int playerEnvoi = 1) {
+            if (playerEnvoi == GameManager.FindLocalPlayerID()) {
+                ShowCardsToPlayer(Cards.Length.ToString() + " de vos cartes", Cards, fermetureManuelle);
+            }
+            else {
+                ShowCardsToPlayer(Cards.Length.ToString() + " cartes de votre adversaire", Cards, fermetureManuelle);
             }
         }
 
-        if (FinManuelle) {
-            FinManuelle.SetActive(true); 
-        } else {
-            StartCoroutine(FinShowCards());
-        }
+        /// <summary>
+        /// Montrer des cartes à un joueur
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="Cards"></param>
+        public void ShowCardsToPlayer(string message, string[] _AllCardsGiven, bool fermetureManuelle = true) {
+            TextShowCards.SetActive(true);
+            TextShowCards.GetComponent<Text>().text = message;
 
-    }
+            List<GameObject> AllCardsToShow = new List<GameObject>();
+            List<int> AllIDCards = new List<int>();
 
-    /// <summary>
-    /// Retourne l'info d'une carte en fonction de son shortCode
-    /// </summary>
-    /// <param name="shortCode"></param>
-    /// <returns></returns>
-    public string GetInfoCarte(string shortCode) {
-        Carte[] AllCartesType = FindObjectsOfType(typeof(Carte)) as Carte[];
-        foreach (Carte c in AllCartesType) {
-            if (c.shortCode.Equals(shortCode)) {
-                return c.GetInfoCarte(); 
+            for (int i = 0; i < _AllCardsGiven.Length; ++i) {
+                // On crée d'abord toutes les cartes
+                GameObject newCarte = Instantiate(CartePrefab);
+                newCarte.SetActive(true);
+                // Ensuite on met leur position avec une demi carte entre chaque carte.
+
+                string shortCode = _AllCardsGiven[i];
+                string Info = GetInfoCarte(shortCode);
+
+                newCarte.transform.SetParent(transform);
+                newCarte.GetComponent<CarteChooseShow>().shortCode = shortCode;
+                newCarte.GetComponent<CarteChooseShow>().StringToDisplay = GetInfoCarte(shortCode);
+
+                // Pour bien montrer la carte au joueur, on y ajoute le script CardInfoChooseCard. 
+                newCarte.AddComponent<CardInfoShowCard>();
+                newCarte.GetComponent<CardInfoShowCard>().SetInfo(shortCode, GetInfoCarte(shortCode));
+
+                AllCardsToShow.Add(newCarte);
             }
-        }
-
-        throw new UnusualBehaviourException("Cette carte devrait être trouvée"); 
-    }
-
-    /// <summary>
-    /// Lorsqu'on a montré les cartes au joueur, on désactive tout. 
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator FinShowCards() {
-        yield return new WaitForSeconds(3f);
-        DesactivateShowCards(); 
-    }
-
-    /// <summary>
-    /// Tout desactiver
-    /// </summary>
-    public void DesactivateShowCards() {
-        foreach (Transform t in transform) {
-            if (t.gameObject.activeSelf) {
-                Destroy(t.gameObject);
+            for (int i = 0; i < AllCardsToShow.Count; ++i) {
+                // On met l'image sur toutes les cartes. 
+                AllCardsToShow[i].SendMessage("setImage", _AllCardsGiven[i]);
+                if (AllCardsToShow[i].GetComponent<Button>() != null) {
+                    AllCardsToShow[i].GetComponent<Button>().interactable = false;
+                }
             }
+
+            if (FinManuelle) {
+                FinManuelle.SetActive(true);
+            }
+            else {
+                StartCoroutine(FinShowCards());
+            }
+
         }
 
-        TextShowCards.SetActive(false);
-        gameObject.SetActive(false);
-        FinManuelle.SetActive(false); 
+        /// <summary>
+        /// Retourne l'info d'une carte en fonction de son shortCode
+        /// </summary>
+        /// <param name="shortCode"></param>
+        /// <returns></returns>
+        public string GetInfoCarte(string shortCode) {
+            Carte[] AllCartesType = FindObjectsOfType(typeof(Carte)) as Carte[];
+            foreach (Carte c in AllCartesType) {
+                if (c.shortCode.Equals(shortCode)) {
+                    return c.GetInfoCarte();
+                }
+            }
+
+            throw new UnusualBehaviourException("Cette carte devrait être trouvée");
+        }
+
+        /// <summary>
+        /// Lorsqu'on a montré les cartes au joueur, on désactive tout. 
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator FinShowCards() {
+            yield return new WaitForSeconds(3f);
+            DesactivateShowCards();
+        }
+
+        /// <summary>
+        /// Tout desactiver
+        /// </summary>
+        public void DesactivateShowCards() {
+            foreach (Transform t in transform) {
+                if (t.gameObject.activeSelf) {
+                    Destroy(t.gameObject);
+                }
+            }
+
+            TextShowCards.SetActive(false);
+            gameObject.SetActive(false);
+            FinManuelle.SetActive(false);
+        }
     }
+
 }

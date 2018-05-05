@@ -5,18 +5,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System; 
+using System;
 
+namespace Introduction {
 
-public class DontDestroyObjectIntro : MonoBehaviour {
+    public class DontDestroyObjectIntro : MonoBehaviour {
 
-    private void Awake() {
-        try {
-            DontDestroyOnLoad(transform.gameObject);
-            transform.Find("GameManager").gameObject.GetComponent<Canvas>().worldCamera = Camera.main;
-        } catch (NullReferenceException e) {
-            Debug.Log(e);
-            Destroy(gameObject); 
+        private void Awake() {
+            try {
+                DontDestroyOnLoad(transform.gameObject);
+                transform.Find("GameManager").gameObject.GetComponent<Canvas>().worldCamera = Camera.main;
+            }
+            catch (NullReferenceException e) {
+                Debug.Log(e);
+                Destroy(gameObject);
+            }
         }
     }
+
 }

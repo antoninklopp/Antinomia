@@ -5,17 +5,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TestShaders : MonoBehaviour {
+namespace Antinomia.Tests {
 
-    public Shader blackAndWhite; 
+    public class TestShaders : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-        GetComponent<SpriteRenderer>().material.shader = blackAndWhite;  
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+        public Shader blackAndWhite;
+
+        // Use this for initialization
+        void Start() {
+            GetComponent<SpriteRenderer>().material.shader = blackAndWhite;
+        }
+
+        // Update is called once per frame
+        void Update() {
+
+        }
+    }
+
 }

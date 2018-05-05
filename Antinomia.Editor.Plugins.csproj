@@ -13,14 +13,12 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectGenerator>VSTU</UnityProjectGenerator>
     <UnityProjectType>EditorPlugins:7</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.3.0f3</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -327,6 +325,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Antinomia.Plugins.csproj">
+      <Project>{19CA5E02-E462-8B74-AAD2-C40A5A11303C}</Project>
+      <Name>Antinomia.Plugins</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Assets\Standard Assets\Editor\CrossPlatformInput\CrossPlatformInputInitialize.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -347,7 +351,7 @@
     <None Include="Assets\Resources\TestCartes\Astral harbinger.txt" />
     <None Include="Assets\Resources\TestCartes\Evil harbinger.txt" />
     <None Include="Assets\Resources\TestCartes\Gift of Akasha.txt" />
-    <None Include="Assets\Resources\TestCartes\Guerrier de l'avalanche.txt" />
+    <None Include="Assets\Resources\TestCartes\Guerrier de l&apos;avalanche.txt" />
     <None Include="Assets\Resources\TestCartes\Kid of the trad wind.txt" />
     <None Include="Assets\Resources\TestCartes\Magnanimity of Saakha.txt" />
     <None Include="Assets\Resources\TestCartes\Uncertain trade.txt" />

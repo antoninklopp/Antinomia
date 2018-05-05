@@ -5,15 +5,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Interface d'une classe temporaire. 
-/// </summary>
-public interface ITemporaire {
+namespace Antinomia.Battle {
 
     /// <summary>
-    /// Voir si la carte est temporaire. 
+    /// Interface d'une classe temporaire. 
     /// </summary>
-    /// <returns>True si la carte est temporaire, false sinon. </returns>
-    bool EstTemporaire(); 
+    public interface ITemporaire {
+
+        /// <summary>
+        /// Voir si la carte est temporaire. 
+        /// </summary>
+        /// <returns>True si la carte est temporaire, false sinon. </returns>
+        bool EstTemporaire();
+
+    }
 
 }

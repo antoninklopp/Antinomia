@@ -5,6 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Antinomia.GameSparksScripts;
+using Antinomia.Battle;
 
 namespace AntinomiaException {
     public class UnusualBehaviourException : Exception {

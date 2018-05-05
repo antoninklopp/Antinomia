@@ -5,17 +5,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TestUI : MonoBehaviour {
+namespace Antinomia.Tests {
 
-	// Use this for initialization
-	void Start () {
-		foreach (RectTransform r in GetComponent<RectTransform>()) {
-            Debug.Log(r.gameObject.name); 
+    public class TestUI : MonoBehaviour {
+
+        // Use this for initialization
+        void Start() {
+            foreach (RectTransform r in GetComponent<RectTransform>()) {
+                Debug.Log(r.gameObject.name);
+            }
         }
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
+        // Update is called once per frame
+        void Update() {
+
+        }
+    }
+
 }

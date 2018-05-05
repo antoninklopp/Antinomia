@@ -5,21 +5,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Interface de la carte, méthode nécessaires à implémenter
-/// </summary>
-public interface ICarte {
+namespace Antinomia.Battle {
 
-    void OnMouseDown();
+    /// <summary>
+    /// Interface de la carte, méthode nécessaires à implémenter
+    /// </summary>
+    public interface ICarte {
 
-    void OnMouseUp();
+        void OnMouseDown();
 
-    void OnMouseOver();
+        void OnMouseUp();
 
-    void OnMouseDrag();
+        void OnMouseOver();
 
-    IEnumerator SetUpCard();
+        void OnMouseDrag();
 
-    void DetruireCarte();
+        IEnumerator SetUpCard();
+
+        void DetruireCarte();
+
+    }
 
 }

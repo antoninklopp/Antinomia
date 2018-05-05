@@ -5,9 +5,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SortDefinition : CarteDefinition {
+namespace Antinomia.Battle {
 
-    public override bool IsSort() {
-        return true; 
+    public class SortDefinition : CarteDefinition {
+
+        public override bool IsSort() {
+            return true;
+        }
     }
+
 }

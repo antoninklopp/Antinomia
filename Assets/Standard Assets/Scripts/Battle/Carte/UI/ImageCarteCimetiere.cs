@@ -4,69 +4,73 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; 
+using UnityEngine.UI;
 
-public class ImageCarteCimetiere : MonoBehaviour {
+namespace Antinomia.Battle {
 
-    private Sprite[] AllImages;
+    public class ImageCarteCimetiere : MonoBehaviour {
 
-    private string info;
+        private Sprite[] AllImages;
 
-    private int intCarte = 0;
+        private string info;
 
-    /// <summary>
-    /// True si la carte est choisie lors d'un choix quelconque. 
-    /// </summary>
-    private bool isTargeted = false;
+        private int intCarte = 0;
 
-    /// <summary>
-    /// Cible créée lors d'un choix. 
-    /// </summary>
-    private GameObject CroixCreated;
+        /// <summary>
+        /// True si la carte est choisie lors d'un choix quelconque. 
+        /// </summary>
+        private bool isTargeted = false;
 
-    public string Info {
-        get {
-            return info;
-        }
+        /// <summary>
+        /// Cible créée lors d'un choix. 
+        /// </summary>
+        private GameObject CroixCreated;
 
-        set {
-            info = value;
-        }
-    }
+        public string Info {
+            get {
+                return info;
+            }
 
-    // Use this for initialization
-    void Start() {
-        AllImages = Resources.LoadAll<Sprite>("Cartes");
-    }
-
-    /// <summary>
-    /// Afficher l'image de la carte
-    /// </summary>
-    /// <param name="name">shortCode de la carte</param>
-	public void setImage(string name) {
-        AllImages = Resources.LoadAll<Sprite>("Cartes");
-        for (int i = 0; i < AllImages.Length; ++i) {
-            if (name == AllImages[i].name) {
-                // On cherche la bonne image dans la liste. 
-                GetComponent<Image>().sprite = AllImages[i];
-                return;
+            set {
+                info = value;
             }
         }
-        GetComponent<Image>().sprite = AllImages[0];
-        Debug.LogWarning("La face de la carte n'a pas été trouvée" + name);
+
+        // Use this for initialization
+        void Start() {
+            AllImages = Resources.LoadAll<Sprite>("Cartes");
+        }
+
+        /// <summary>
+        /// Afficher l'image de la carte
+        /// </summary>
+        /// <param name="name">shortCode de la carte</param>
+        public void setImage(string name) {
+            AllImages = Resources.LoadAll<Sprite>("Cartes");
+            for (int i = 0; i < AllImages.Length; ++i) {
+                if (name == AllImages[i].name) {
+                    // On cherche la bonne image dans la liste. 
+                    GetComponent<Image>().sprite = AllImages[i];
+                    return;
+                }
+            }
+            GetComponent<Image>().sprite = AllImages[0];
+            Debug.LogWarning("La face de la carte n'a pas été trouvée" + name);
+        }
+
+        /// <summary>
+        /// Mettre une image pour une carte bannie
+        /// </summary>
+        public void setImageBan() {
+            GetComponent<Image>().sprite = Resources.Load("Ban/Ban") as Sprite;
+        }
+
+        /// <summary>
+        /// Clic sur la carte
+        /// </summary>
+        public void OnMouseDown() {
+            GameObject.Find("GameManager").GetComponent<GameManager>().ShowCarteInfo(" ", info);
+        }
     }
 
-    /// <summary>
-    /// Mettre une image pour une carte bannie
-    /// </summary>
-    public void setImageBan() {
-        GetComponent<Image>().sprite = Resources.Load("Ban/Ban") as Sprite; 
-    }
-
-    /// <summary>
-    /// Clic sur la carte
-    /// </summary>
-	public void OnMouseDown() {
-        GameObject.Find("GameManager").GetComponent<GameManager>().ShowCarteInfo(" ", info); 
-    }
 }

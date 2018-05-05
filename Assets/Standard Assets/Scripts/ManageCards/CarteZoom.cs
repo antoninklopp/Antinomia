@@ -4,30 +4,34 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; 
+using UnityEngine.UI;
 
-/// <summary>
-/// Zoom d'une carte
-/// INUTILISE EN CE MOMENT. 
-/// </summary>
-public class CarteZoom : MonoBehaviour {
+namespace Antinomia.ManageCards {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    /// <summary>
+    /// Zoom d'une carte
+    /// INUTILISE EN CE MOMENT. 
+    /// </summary>
+    public class CarteZoom : MonoBehaviour {
 
-	public void updateInfo(string carteName, string shortCode, string carteInfo){
-		/*
-		 * Updater les informations de la carte zoom. 
-		 * Lors d'un clic sur une carte spéciale. 
-		 */ 
-		transform.GetChild (0).gameObject.GetComponent<Text> ().text = carteInfo; 
-		GetComponent<ImageCard> ().setImage (shortCode);
-	}
+        // Use this for initialization
+        void Start() {
+
+        }
+
+        // Update is called once per frame
+        void Update() {
+
+        }
+
+        public void updateInfo(string carteName, string shortCode, string carteInfo) {
+            /*
+             * Updater les informations de la carte zoom. 
+             * Lors d'un clic sur une carte spéciale. 
+             */
+            transform.GetChild(0).gameObject.GetComponent<Text>().text = carteInfo;
+            GetComponent<ImageCard>().setImage(shortCode);
+        }
+    }
+
 }

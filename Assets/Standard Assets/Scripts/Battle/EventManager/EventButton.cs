@@ -4,27 +4,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems; 
+using UnityEngine.EventSystems;
 
-public class EventButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
+namespace Antinomia.Battle {
 
-    /// <summary>
-    /// ID de la carte associée au bouton
-    /// </summary>
-    public int IDCarte;
+    public class EventButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
-    /// <summary>
-    /// Lorsque le pointeur entre sur le bouton. 
-    /// </summary>
-    public void OnPointerEnter(PointerEventData eventData) {
-        NetworkBehaviourAntinomia.FindCardWithID(IDCarte).GetComponent<Carte>().HighlightSelectionEvent(); 
+        /// <summary>
+        /// ID de la carte associée au bouton
+        /// </summary>
+        public int IDCarte;
+
+        /// <summary>
+        /// Lorsque le pointeur entre sur le bouton. 
+        /// </summary>
+        public void OnPointerEnter(PointerEventData eventData) {
+            NetworkBehaviourAntinomia.FindCardWithID(IDCarte).GetComponent<Carte>().HighlightSelectionEvent();
+        }
+
+        /// <summary>
+        /// Lorsque le pointeur sort du bouton. 
+        /// </summary>
+        /// <param name="eventData"></param>
+        public void OnPointerExit(PointerEventData eventData) {
+            NetworkBehaviourAntinomia.FindCardWithID(IDCarte).GetComponent<Carte>().StopHighlightSelectionEvent();
+        }
     }
 
-    /// <summary>
-    /// Lorsque le pointeur sort du bouton. 
-    /// </summary>
-    /// <param name="eventData"></param>
-    public void OnPointerExit(PointerEventData eventData) {
-        NetworkBehaviourAntinomia.FindCardWithID(IDCarte).GetComponent<Carte>().StopHighlightSelectionEvent();
-    }
 }

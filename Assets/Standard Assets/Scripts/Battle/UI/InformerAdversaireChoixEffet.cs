@@ -5,35 +5,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InformerAdversaireChoixEffet : MonoBehaviour {
+namespace Antinomia.Battle {
 
-    public GameObject InformerAdversaireChoisitEffet;
+    public class InformerAdversaireChoixEffet : MonoBehaviour {
 
-    private GameObject CurrentChoixAdversaire; 
+        public GameObject InformerAdversaireChoisitEffet;
 
-    // Use this for initialization
-    void Start () {
-		
-	}
+        private GameObject CurrentChoixAdversaire;
 
-    /// <summary>
-    /// Informer le joueur courant que son adversaire choisit des effets. 
-    /// </summary>
-    public void AdversaireChoisitEffet() {
-        if (CurrentChoixAdversaire == null) {
-            CurrentChoixAdversaire = Instantiate(InformerAdversaireChoisitEffet);
-            // L'objet est un objet d'UI.
-            CurrentChoixAdversaire.transform.SetParent(GameObject.Find("GameManager").transform, false); 
-            CurrentChoixAdversaire.SetActive(true); 
+        // Use this for initialization
+        void Start() {
+
         }
+
+        /// <summary>
+        /// Informer le joueur courant que son adversaire choisit des effets. 
+        /// </summary>
+        public void AdversaireChoisitEffet() {
+            if (CurrentChoixAdversaire == null) {
+                CurrentChoixAdversaire = Instantiate(InformerAdversaireChoisitEffet);
+                // L'objet est un objet d'UI.
+                CurrentChoixAdversaire.transform.SetParent(GameObject.Find("GameManager").transform, false);
+                CurrentChoixAdversaire.SetActive(true);
+            }
+        }
+
+        /// <summary>
+        /// Detruire l'objet d'information à l'adversaire. 
+        /// </summary>
+        public void DetruireAdversaireChoisitEffet() {
+            Destroy(CurrentChoixAdversaire);
+            CurrentChoixAdversaire = null;
+        }
+
     }
 
-    /// <summary>
-    /// Detruire l'objet d'information à l'adversaire. 
-    /// </summary>
-    public void DetruireAdversaireChoisitEffet() {
-        Destroy(CurrentChoixAdversaire);
-        CurrentChoixAdversaire = null;
-    }
-	
 }

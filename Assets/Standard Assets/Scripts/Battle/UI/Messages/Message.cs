@@ -5,32 +5,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems; 
+using UnityEngine.EventSystems;
 
-/// <summary>
-/// 6 possibilités de messages
-/// </summary>
-public class Message : MonoBehaviour, IPointerClickHandler {
+namespace Antinomia.Battle {
 
     /// <summary>
-    /// Chaque message a un code, moins lourd à envoyer par le réseau. 
+    /// 6 possibilités de messages
     /// </summary>
-    [HideInInspector]
-    public int code; 
+    public class Message : MonoBehaviour, IPointerClickHandler {
 
-    //public void OnMouseDown() {
-        
-    //}
+        /// <summary>
+        /// Chaque message a un code, moins lourd à envoyer par le réseau. 
+        /// </summary>
+        [HideInInspector]
+        public int code;
 
-    public void OnPointerClick(PointerEventData eventData) {
-        GameObject.Find("GameManager").GetComponent<DisplayMessagePossibilities>().SendMessageToPlayer(code);
+        //public void OnMouseDown() {
+
+        //}
+
+        public void OnPointerClick(PointerEventData eventData) {
+            GameObject.Find("GameManager").GetComponent<DisplayMessagePossibilities>().SendMessageToPlayer(code);
+        }
+
+        /// <summary>
+        /// Aggicher le message sur le Text UI. 
+        /// </summary>
+        /// <param name="m"></param>
+        public void SetMessage(string m) {
+            GetComponent<RectTransform>().Find("Text").gameObject.GetComponent<Text>().text = m;
+        }
     }
 
-    /// <summary>
-    /// Aggicher le message sur le Text UI. 
-    /// </summary>
-    /// <param name="m"></param>
-    public void SetMessage(string m) {
-        GetComponent<RectTransform>().Find("Text").gameObject.GetComponent<Text>().text = m; 
-    }
 }
