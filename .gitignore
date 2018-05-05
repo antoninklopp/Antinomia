@@ -270,12 +270,14 @@ __pycache__/
 /Assets/Resources/TestCartes
 /Assets/Scenes
 /Assets/Standard Assets/CrossPlatformInput/Prefabs
-/Assets/Standard Assets/CrossPlatformInput/Sprites
+/Assets/Standard Assets/CrossPlatformInput/*
 /Assets/Standard Assets/Fonts
 /Library
 /ProjectSettings
 /Temp
 /Assets/Material
+/GlobalSuppressions.cs
+/Assets/Standard Assets/Editor/CrossPlatformInput
 
 #.apk
 Antinomia.apk
@@ -297,4 +299,6 @@ Antinomia.apk
 *.txt
 *.exe
 *.dll
-
+*.csproj
+*.txt
+*.json
