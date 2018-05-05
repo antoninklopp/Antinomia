@@ -1,2 +1,0 @@
-===============General Analysis (GA)===============
-C:\Users\anton\Documents\Jeux Unity\Antinomia\Assets\Lobby\Scripts\Lobby\LobbyManager.cs (278): error V3051: An excessive type cast. The object is already of the 'GameObject' type.
