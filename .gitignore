@@ -299,6 +299,5 @@ Antinomia.apk
 *.txt
 *.exe
 *.dll
-*.csproj
 *.txt
 *.json
