@@ -301,3 +301,14 @@ Antinomia.apk
 *.dll
 *.txt
 *.json
+/Assets/Art/Shader/TestShader1.shader
+/Assets/Art/Shader
+/Assets/Editor
+/Assembly-CSharp.csproj
+/Assembly-CSharp-firstpass.csproj
+/Assembly-CSharp-Editor.csproj
+/Assembly-CSharp-Editor-firstpass.csproj
+/Antinomia.Plugins.csproj
+/Antinomia.Editor.Plugins.csproj
+/Antinomia.Editor.csproj
+/Antinomia.csproj

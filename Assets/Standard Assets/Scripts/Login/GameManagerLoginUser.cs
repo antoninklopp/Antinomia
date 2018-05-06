@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Antinomia.GameSparksScripts;
 
-namespace DataBase {
+namespace Login {
 
     public class GameManagerLoginUser : MonoBehaviour {
 

@@ -7,6 +7,7 @@ using UnityEngine;
 using System; 
 using System.Runtime.Serialization.Formatters.Binary; 
 using System.IO;
+using Antinomia.GameSparksScripts; 
 
 namespace Antinomia.GameSparksScripts {
 
@@ -25,9 +26,10 @@ namespace Antinomia.GameSparksScripts {
             BinaryFormatter bf = new BinaryFormatter();
             FileStream file = File.Create(Application.persistentDataPath + "/logins.dat");
 
-            Logins _login = new Logins();
-            _login.login = user;
-            _login.password = password;
+            Logins _login = new Logins {
+                login = user,
+                password = password
+            };
 
             bf.Serialize(file, _login);
             file.Close();
@@ -53,11 +55,19 @@ namespace Antinomia.GameSparksScripts {
             if (File.Exists(Application.persistentDataPath + "/logins.dat")) {
                 BinaryFormatter bf = new BinaryFormatter();
                 FileStream file = File.Open(Application.persistentDataPath + "/logins.dat", FileMode.Open);
-                Logins _login = (Logins)bf.Deserialize(file);
-                file.Close();
+                try {
+                    Logins _login = (Logins)bf.Deserialize(file);
+                    file.Close();
 
-                userAndPassword.Add(_login.login);
-                userAndPassword.Add(_login.password);
+                    userAndPassword.Add(_login.login);
+                    userAndPassword.Add(_login.password);
+                } catch (TypeLoadException) {
+                    // On détruit le fichier car après le changement de projet, 
+                    // Le fichier a pu être corrompu.
+                    // Le joueur devra juste se reconnecter
+                    DisconnectPlayer();
+                    Application.Quit(); 
+                }
             }
             return userAndPassword;
         }
@@ -68,12 +78,6 @@ namespace Antinomia.GameSparksScripts {
              */
             File.Delete(Application.persistentDataPath + "/logins.dat");
         }
-    }
-
-    [Serializable]
-    class Logins {
-        public string login;
-        public string password;
     }
 
 }
